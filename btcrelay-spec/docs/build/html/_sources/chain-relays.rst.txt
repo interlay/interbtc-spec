@@ -1,4 +1,4 @@
-Chain Relays
+Overview of Chain Relays
 ==================
 
 
@@ -9,12 +9,12 @@ A chain relay is a program or smart contract deployed on a blockchain, which
 provides functionality for verifying the state of another blockchain. 
 
 
-Functionality
+Verification vs. Validation
 -----------------
 
-+ What is a chain relay?
-+ What do we need to verify?
-+ What can we verify?
+
+Necessary Assumptions
+-----------------
 
 Recommended Background Reading
 -----------------

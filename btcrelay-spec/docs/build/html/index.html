@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to PolkaBTC’s documentation! &mdash; PolkaBTC 0.0.1 documentation</title>
+  <title>Welcome to BTC-Parachain’s documentation! &mdash; BTC-Parachain 0.0.1 documentation</title>
   
 
   
@@ -49,7 +49,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> PolkaBTC
+            <a href="#" class="icon icon-home"> BTC-Parachain
           
 
           
@@ -82,7 +82,12 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="btcrelay/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chain-relays.html">Overview of Chain Relays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay.html">BTC-Parachain Design and Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-model.html">Storage Component: Data Model for Bitcoin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verification-methods.html">Verification Component: Process and Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Functions</a></li>
 </ul>
 
             
@@ -97,7 +102,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">PolkaBTC</a>
+          <a href="#">BTC-Parachain</a>
         
       </nav>
 
@@ -128,7 +133,7 @@
     
       <li><a href="#">Docs</a> &raquo;</li>
         
-      <li>Welcome to PolkaBTC’s documentation!</li>
+      <li>Welcome to BTC-Parachain’s documentation!</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -147,13 +152,71 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="welcome-to-polkabtc-s-documentation">
-<h1>Welcome to PolkaBTC’s documentation!<a class="headerlink" href="#welcome-to-polkabtc-s-documentation" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="welcome-to-btc-parachain-s-documentation">
+<h1>Welcome to BTC-Parachain’s documentation!<a class="headerlink" href="#welcome-to-btc-parachain-s-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="btcrelay/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chain-relays.html">Overview of Chain Relays</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chain-relays.html#what-are-chain-relays">What are Chain Relays?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chain-relays.html#verification-vs-validation">Verification vs. Validation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chain-relays.html#necessary-assumptions">Necessary Assumptions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chain-relays.html#recommended-background-reading">Recommended Background Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay.html">BTC-Parachain Design and Model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="btc-relay.html#system-model">System Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="btc-relay.html#network-model">Network Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="btc-relay.html#threat-model">Threat Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="btc-relay.html#architecture-storage-vs-verification">Architecture: Storage vs. Verification</a></li>
+<li class="toctree-l2"><a class="reference internal" href="btc-relay.html#cryptographic-primitives">Cryptographic Primitives</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data-model.html">Storage Component: Data Model for Bitcoin</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#block-headers">Block Headers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#transactions">Transactions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="data-model.html#inputs">Inputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="data-model.html#outputs">Outputs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="data-model.html#merkle-tree-paths">Merkle Tree Paths</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="data-model.html#data-format-considerations">Data Format Considerations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="verification-methods.html">Verification Component: Process and Methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="verification-methods.html#step-by-step-verification-process">Step-by-Step Verification Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="verification-methods.html#verification-functionality">Verification Functionality</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="verification-methods.html#correct-difficulty-target">Correct Difficulty Target</a></li>
+<li class="toctree-l3"><a class="reference internal" href="verification-methods.html#sufficient-proof-of-work">Sufficient Proof-of-Work</a></li>
+<li class="toctree-l3"><a class="reference internal" href="verification-methods.html#valid-chain">Valid Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="verification-methods.html#main-chain">Main Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="verification-methods.html#transaction-inclusion">Transaction Inclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="verification-methods.html#transaction-parsing">Transaction Parsing</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data-types.html">Data Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#main-functions">Main Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#setinitialparent">setInitialParent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#storeblockheader">storeBlockHeader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#verifytransaction">verifyTransaction</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="functions.html#helper-methods">Helper Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#dblsha">dblSha</a></li>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#nbitstotarget">nBitsToTarget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#checkcorrecttarget">checkCorrectTarget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#computenewtarget">computeNewTarget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#computemerkle">computeMerkle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#concatsha256hash">concatSha256Hash</a></li>
+<li class="toctree-l3"><a class="reference internal" href="functions.html#getters">Getters</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>

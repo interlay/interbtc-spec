@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction &mdash; BTC-Parachain 0.0.1 documentation</title>
+  <title>Functions &mdash; BTC-Parachain 0.0.1 documentation</title>
   
 
   
@@ -34,9 +34,7 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Overview" href="btcrelay/overview.html" />
-    <link rel="prev" title="Welcome to BTCParachain’s documentation!" href="index.html" /> 
+    <link rel="search" title="Search" href="search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -81,9 +79,12 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="btcrelay/overview.html">Overview</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chain-relays.html">Overview of Chain Relays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay.html">BTC-Parachain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-model.html">Storage Component: Data Model for Bitcoin</a></li>
+<li class="toctree-l1"><a class="reference internal" href="verification-methods.html">Verification Component: Process and Methods</a></li>
 </ul>
 
             
@@ -129,13 +130,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Introduction</li>
+      <li>Functions</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/introduction.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/functions.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -148,8 +149,44 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="introduction">
-<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="functions">
+<h1>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="main-functions">
+<h2>Main Functions<a class="headerlink" href="#main-functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="setinitialparent">
+<h3>setInitialParent<a class="headerlink" href="#setinitialparent" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="storeblockheader">
+<h3>storeBlockHeader<a class="headerlink" href="#storeblockheader" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="verifytransaction">
+<h3>verifyTransaction<a class="headerlink" href="#verifytransaction" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="helper-methods">
+<h2>Helper Methods<a class="headerlink" href="#helper-methods" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="dblsha">
+<h3>dblSha<a class="headerlink" href="#dblsha" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="nbitstotarget">
+<h3>nBitsToTarget<a class="headerlink" href="#nbitstotarget" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="checkcorrecttarget">
+<h3>checkCorrectTarget<a class="headerlink" href="#checkcorrecttarget" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="computenewtarget">
+<h3>computeNewTarget<a class="headerlink" href="#computenewtarget" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="computemerkle">
+<h3>computeMerkle<a class="headerlink" href="#computemerkle" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="concatsha256hash">
+<h3>concatSha256Hash<a class="headerlink" href="#concatsha256hash" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="getters">
+<h3>Getters<a class="headerlink" href="#getters" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
 </div>
 
 
@@ -157,15 +194,6 @@
            
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="btcrelay/overview.html" class="btn btn-neutral float-right" title="Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to BTCParachain’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
   
 
   <hr/>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction &mdash; BTC-Parachain 0.0.1 documentation</title>
+  <title>Verification Component: Process and Methods &mdash; BTC-Parachain 0.0.1 documentation</title>
   
 
   
@@ -35,8 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Overview" href="btcrelay/overview.html" />
-    <link rel="prev" title="Welcome to BTCParachain’s documentation!" href="index.html" /> 
+    <link rel="prev" title="Storage Component: Data Model for Bitcoin" href="data-model.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,8 +81,23 @@
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="btcrelay/overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chain-relays.html">Overview of Chain Relays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay.html">BTC-Parachain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-model.html">Storage Component: Data Model for Bitcoin</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Verification Component: Process and Methods</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#step-by-step-verification-process">Step-by-Step Verification Process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#verification-functionality">Verification Functionality</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#correct-difficulty-target">Correct Difficulty Target</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sufficient-proof-of-work">Sufficient Proof-of-Work</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#valid-chain">Valid Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#main-chain">Main Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transaction-inclusion">Transaction Inclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transaction-parsing">Transaction Parsing</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -129,13 +143,13 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Introduction</li>
+      <li>Verification Component: Process and Methods</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/introduction.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/verification-methods.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -148,8 +162,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="introduction">
-<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="verification-component-process-and-methods">
+<h1>Verification Component: Process and Methods<a class="headerlink" href="#verification-component-process-and-methods" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="step-by-step-verification-process">
+<h2>Step-by-Step Verification Process<a class="headerlink" href="#step-by-step-verification-process" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="verification-functionality">
+<h2>Verification Functionality<a class="headerlink" href="#verification-functionality" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="correct-difficulty-target">
+<h3>Correct Difficulty Target<a class="headerlink" href="#correct-difficulty-target" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="sufficient-proof-of-work">
+<h3>Sufficient Proof-of-Work<a class="headerlink" href="#sufficient-proof-of-work" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="valid-chain">
+<h3>Valid Chain<a class="headerlink" href="#valid-chain" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="main-chain">
+<h3>Main Chain<a class="headerlink" href="#main-chain" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="transaction-inclusion">
+<h3>Transaction Inclusion<a class="headerlink" href="#transaction-inclusion" title="Permalink to this headline">¶</a></h3>
+</div>
+</div>
+<div class="section" id="transaction-parsing">
+<h2>Transaction Parsing<a class="headerlink" href="#transaction-parsing" title="Permalink to this headline">¶</a></h2>
+</div>
 </div>
 
 
@@ -160,10 +198,8 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="btcrelay/overview.html" class="btn btn-neutral float-right" title="Overview" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-      
-        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to BTCParachain’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="data-model.html" class="btn btn-neutral float-left" title="Storage Component: Data Model for Bitcoin" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

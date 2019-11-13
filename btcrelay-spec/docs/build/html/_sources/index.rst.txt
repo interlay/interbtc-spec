@@ -1,15 +1,19 @@
 .. PolkaBTC documentation master file
 
-Welcome to PolkaBTC's documentation!
+Welcome to BTC-Parachain's documentation!
 ====================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
    
    introduction
-   btcrelay/overview
-   polkabtc/overview
+   chain-relays
+   btc-relay
+   data-model
+   verification-methods
+   data-types
+   functions
 
 
 Indices and tables

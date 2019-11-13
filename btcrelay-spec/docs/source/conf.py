@@ -19,7 +19,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'PolkaBTC'
+project = u'BTC-Parachain'
 copyright = u'2019, Interlay'
 author = u'Interlay'
 
