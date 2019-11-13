@@ -1,2 +1,0 @@
-# PolkaBTC Spec
-
