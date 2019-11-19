@@ -34,7 +34,8 @@
   <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Data Types" href="data-types.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -79,12 +80,36 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
 <li class="toctree-l1"><a class="reference internal" href="chain-relays.html">Overview of Chain Relays</a></li>
-<li class="toctree-l1"><a class="reference internal" href="btc-relay.html">BTC-Parachain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay.html">BTC-Parachain Design and Model</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data-model.html">Storage Component: Data Model for Bitcoin</a></li>
 <li class="toctree-l1"><a class="reference internal" href="verification-methods.html">Verification Component: Process and Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data-types.html">Data Types</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Functions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#main-functions">Main Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setinitialparent">setInitialParent</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#storeblockheader">storeBlockHeader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#verifytransaction">verifyTransaction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#use-cases">Use Cases</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#function">Function</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#helper-methods">Helper Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dblsha">dblSha</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nbitstotarget">nBitsToTarget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#checkcorrecttarget">checkCorrectTarget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#computenewtarget">computeNewTarget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#computemerkle">computeMerkle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#concatsha256hash">concatSha256Hash</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#getters">Getters</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 
             
@@ -161,6 +186,50 @@
 </div>
 <div class="section" id="verifytransaction">
 <h3>verifyTransaction<a class="headerlink" href="#verifytransaction" title="Permalink to this headline">¶</a></h3>
+<p>The <code class="docutils literal notranslate"><span class="pre">verifyTransaction</span></code> function is one of the core components of the chain relay:
+this function reports whether or not a given transaction is valid by considering a number of parameters.
+The core idea is that a user submits a transaction hash including the parameters to proof to another party that indeed the transaction happened on Bitcoin.
+Since the confirmation is based on the stored data in the chain relay, the other party can rely on the trustworthiness of such proof.
+Generally, a user has to follow this process to receive a successful transaction verification:</p>
+<ol class="arabic">
+<li><p>The user ensures that the Bitcoin block header, in which his transaction is included, is stored in the BTCRelay (see <a class="reference internal" href="#storeblockheader">storeBlockHeader</a>).</p></li>
+<li><p>The user ensures that there are at least the minimum number of confirmations available (typically 6).</p></li>
+<li><p>The user prepares the necessary information to call the function:</p>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>The <em>transaction hash</em> of the transaction he wants to verify.</p></li>
+<li><p>The **</p></li>
+</ol>
+</div></blockquote>
+</li>
+<li><p>dsa</p></li>
+</ol>
+<div class="section" id="use-cases">
+<h4>Use Cases<a class="headerlink" href="#use-cases" title="Permalink to this headline">¶</a></h4>
+<p><strong>Issue of Bitcoin-backed Assets</strong>: A CbA Requester transfers a number of Satoshis to the address of a Vault on the Bitcoin blockchain.
+The CbA REquester now needs to prove to the Polka-BTC bridge that this indeed happened.
+Further, we need to ensure that the transaction is <em>finalized</em> on the Bitcoin side, such that the transaction cannot be abandoned.
+The CbA Requester achieves this by following the following steps:</p>
+</div>
+<div class="section" id="function">
+<h4>Function<a class="headerlink" href="#function" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">verifyTransaction(txid,</span> <span class="pre">txBlockHeight,</span> <span class="pre">txIndex,</span> <span class="pre">merkleProof,</span> <span class="pre">confirmations)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">txid</span></code>: the hash of the transaction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">txBlockHeight</span></code>: block height at which transacton is supposedly included</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">txIndex</span></code>: index of transaction in the block’s tx merkle tree</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">merkleProof</span></code>: merkle tree path (concatenated LE sha256 hashes)</p></li>
+</ul>
+<p><em>Returns</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: if txid is at the claimed position in the block at the given blockheight</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: otherwise</p></li>
+</ul>
+<p><em>Events</em></p>
+<p><em>Errors</em></p>
+</div>
 </div>
 </div>
 <div class="section" id="helper-methods">
@@ -194,6 +263,13 @@
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="data-types.html" class="btn btn-neutral float-left" title="Data Types" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>
