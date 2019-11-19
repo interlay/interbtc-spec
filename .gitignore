@@ -1,3 +1,4 @@
 .vscode/*
+*/.vscode/*
 venv/*
 *.pyc
