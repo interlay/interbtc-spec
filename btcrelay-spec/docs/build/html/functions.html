@@ -88,26 +88,16 @@
 <li class="toctree-l1"><a class="reference internal" href="verification-methods.html">Verification Component: Process and Methods</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data-types.html">Data Types</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#main-functions">Main Functions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#setinitialparent">setInitialParent</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#storeblockheader">storeBlockHeader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#verifytransaction">verifyTransaction</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#use-cases">Use Cases</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#function">Function</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#setinitialparent">setInitialParent</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#storeblockheader">storeBlockHeader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#verifytransaction">verifyTransaction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#process">Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#conditions">Conditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#use-cases">Use Cases</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#function">Function</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#helper-methods">Helper Methods</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#dblsha">dblSha</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#nbitstotarget">nBitsToTarget</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#checkcorrecttarget">checkCorrectTarget</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#computenewtarget">computeNewTarget</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#computemerkle">computeMerkle</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#concatsha256hash">concatSha256Hash</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#getters">Getters</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#helper-methods">Helper Methods</a></li>
 </ul>
 </li>
 </ul>
@@ -176,85 +166,89 @@
             
   <div class="section" id="functions">
 <h1>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="main-functions">
-<h2>Main Functions<a class="headerlink" href="#main-functions" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="setinitialparent">
-<h3>setInitialParent<a class="headerlink" href="#setinitialparent" title="Permalink to this headline">¶</a></h3>
+<h2>setInitialParent<a class="headerlink" href="#setinitialparent" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="storeblockheader">
-<h3>storeBlockHeader<a class="headerlink" href="#storeblockheader" title="Permalink to this headline">¶</a></h3>
+<h2>storeBlockHeader<a class="headerlink" href="#storeblockheader" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="verifytransaction">
-<h3>verifyTransaction<a class="headerlink" href="#verifytransaction" title="Permalink to this headline">¶</a></h3>
+<h2>verifyTransaction<a class="headerlink" href="#verifytransaction" title="Permalink to this headline">¶</a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">verifyTransaction</span></code> function is one of the core components of the chain relay:
-this function reports whether or not a given transaction is valid by considering a number of parameters.
-The core idea is that a user submits a transaction hash including the parameters to proof to another party that indeed the transaction happened on Bitcoin.
-Since the confirmation is based on the stored data in the chain relay, the other party can rely on the trustworthiness of such proof.
-Generally, a user has to follow this process to receive a successful transaction verification:</p>
+this function returns whether a given transaction is valid by considering a number of parameters.
+The core idea is that a user submits a transaction hash including the parameters to proof to another party that  the transaction is included in the Bitcoin blockchain.
+Since the verification is based on the data in the chain relay, other parties can rely on the trustworthiness of such a proof.</p>
+<div class="section" id="process">
+<h3>Process<a class="headerlink" href="#process" title="Permalink to this headline">¶</a></h3>
+<p>Generally, a user has to follow four steps to successfully verify a transaction:</p>
 <ol class="arabic">
 <li><p>The user ensures that the Bitcoin block header, in which his transaction is included, is stored in the BTCRelay (see <a class="reference internal" href="#storeblockheader">storeBlockHeader</a>).</p></li>
-<li><p>The user ensures that there are at least the minimum number of confirmations available (typically 6).</p></li>
-<li><p>The user prepares the necessary information to call the function:</p>
+<li><p>The user ensures that the block has the minimum number of required confirmations (typically <code class="docutils literal notranslate"><span class="pre">6</span></code>).</p></li>
+<li><p>The user prepares the necessary input parameters from the Bitcoin blockchain to call the <code class="docutils literal notranslate"><span class="pre">verifyTransaction</span></code> function. The user can receive these parameters from the <a class="reference external" href="https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list">bitcoin-rpc client</a>.</p>
 <blockquote>
 <div><ol class="loweralpha simple">
-<li><p>The <em>transaction hash</em> of the transaction he wants to verify.</p></li>
-<li><p>The **</p></li>
+<li><p>The <em>transaction hash</em> is the transaction that should be verified. The user should note the transaction hash when sending a Bitcoin transaction he wants to verify.</p></li>
+<li><p>The <em>block height</em> refers to the block in which the transaction is included. The user receives the block height from the <a class="reference external" href="https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/rawtransactions/getrawtransaction/">getrawtransaction</a> <code class="docutils literal notranslate"><span class="pre">bitcoin-rpc</span></code> method by querying for his transaction hash and receiving the <code class="docutils literal notranslate"><span class="pre">blockindex</span></code>.</p></li>
+<li><p>The <em>transaction index</em> specifies the index of the transaction in the block. The user receives the index from the <code class="docutils literal notranslate"><span class="pre">bitcoin-rpc</span></code> method <a class="reference external" href="https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/getblock/">getblock</a> by geting the index from the <code class="docutils literal notranslate"><span class="pre">tx</span></code> array storing the all transaction hashes in that block.</p></li>
+<li><p>The <em>Merkle proof</em> encodes how to calculate the Merkle root from the transaction hash. The user receives the proof from the <code class="docutils literal notranslate"><span class="pre">bitcoin-rpc</span></code> method <a class="reference external" href="https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/gettxoutproof/">gettxoutproof</a>.</p></li>
 </ol>
 </div></blockquote>
 </li>
-<li><p>dsa</p></li>
+<li><p>The user submits the above parameters to the <code class="docutils literal notranslate"><span class="pre">verifyTransaction</span></code> function and receives one of two possible results.</p>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: the transaction is successfully verified.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: the transaction cannot be verified given the input parameters provided by the user.</p></li>
 </ol>
+</div></blockquote>
+</li>
+</ol>
+</div>
+<div class="section" id="conditions">
+<h3>Conditions<a class="headerlink" href="#conditions" title="Permalink to this headline">¶</a></h3>
+<p>A transaction is successfully verified if the following conditions are met.</p>
+<ol class="arabic simple">
+<li><p>The user submits a valid <em>transaction hash</em>. The transaction hash is 32 bytes long.</p></li>
+<li><p>The submitted <em>block height</em> is stored in BTCRelay.</p></li>
+<li><p>The block in which the transaction is included has enough confirmations (default <code class="docutils literal notranslate"><span class="pre">6</span></code>).</p></li>
+<li><p>The user submitted a valid <em>Merkle proof</em>. The Merkle proof needs to contain the <em>transaction hash</em> in its first 32 bytes. Further, the last hash in the Merkle proof must be the block header hash in which the transaction is included.</p></li>
+<li><p>The <em>Merkle proof</em> parses correctly. The <em>transaction hash</em> is combined with each hash in the Merkle proof until the resulting hash must equal the Merkle root. Details on this are included in the <a class="reference external" href="https://bitcoin.org/en/developer-reference#parsing-a-merkleblock-message">Bitcoin developer reference</a>.</p></li>
+</ol>
+</div>
 <div class="section" id="use-cases">
-<h4>Use Cases<a class="headerlink" href="#use-cases" title="Permalink to this headline">¶</a></h4>
-<p><strong>Issue of Bitcoin-backed Assets</strong>: A CbA Requester transfers a number of Satoshis to the address of a Vault on the Bitcoin blockchain.
-The CbA REquester now needs to prove to the Polka-BTC bridge that this indeed happened.
-Further, we need to ensure that the transaction is <em>finalized</em> on the Bitcoin side, such that the transaction cannot be abandoned.
-The CbA Requester achieves this by following the following steps:</p>
+<h3>Use Cases<a class="headerlink" href="#use-cases" title="Permalink to this headline">¶</a></h3>
+<p><strong>Issue of Bitcoin-backed Assets</strong>: Users can create Bitcoin-backed tokens on Polkadot by proving to the Polkadot blockchain that they have sent a number of Satoshis to a vault’s Bitcoin address. To realize this, a user acts as a so-called CbA Requester. First the CbA-Requester transfers the Satoshis to the Bitcoin address of a Vault on the Bitcoin blockchain. The CbA-Requester notes the transaction hash of this transaction. Next, the CbA-Requester proves to the Polka-BTC bridge that the vault has received his Satoshis. He achieves this by ensuring that the block header of his transaction is included in the BTCRelay and has enough confirmations. He then extracts the input parameters as described in step 3 of the <a class="reference internal" href="#process">Process</a> above. With these input parameters he calls the <code class="docutils literal notranslate"><span class="pre">verifyTransaction</span></code> to receive a successful transaction inclusion proof.</p>
 </div>
 <div class="section" id="function">
-<h4>Function<a class="headerlink" href="#function" title="Permalink to this headline">¶</a></h4>
+<h3>Function<a class="headerlink" href="#function" title="Permalink to this headline">¶</a></h3>
 <p><em>Function Signature</em></p>
-<p><code class="docutils literal notranslate"><span class="pre">verifyTransaction(txid,</span> <span class="pre">txBlockHeight,</span> <span class="pre">txIndex,</span> <span class="pre">merkleProof,</span> <span class="pre">confirmations)</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">verifyTransaction(txId,</span> <span class="pre">txBlockHeight,</span> <span class="pre">txIndex,</span> <span class="pre">merkleProof)</span></code></p>
 <p><em>Parameters</em></p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">txid</span></code>: the hash of the transaction.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">txBlockHeight</span></code>: block height at which transacton is supposedly included</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">txIndex</span></code>: index of transaction in the block’s tx merkle tree</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">merkleProof</span></code>: merkle tree path (concatenated LE sha256 hashes)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">txId</span></code>: the hash of the transaction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">txBlockHeight</span></code>: block height at which transacton is supposedly included.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">txIndex</span></code>: index of transaction in the block’s tx Merkle tree.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">merkleProof</span></code>: Merkle tree path (concatenated LE sha256 hashes).</p></li>
 </ul>
 <p><em>Returns</em></p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: if txid is at the claimed position in the block at the given blockheight</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: otherwise</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: if txId is at the claimed position in the block at the given txBlockHeight.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code>: otherwise.</p></li>
 </ul>
 <p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">VerifyTransaction(txId,</span> <span class="pre">blockHeight,</span> <span class="pre">result)</span></code>: issue an event for a given txId and a blockHeight and return the result of the verification (either <code class="docutils literal notranslate"><span class="pre">True</span></code> or <code class="docutils literal notranslate"><span class="pre">False</span></code>).</p></li>
+</ul>
 <p><em>Errors</em></p>
-</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INVALID_TXID</span> <span class="pre">=</span> <span class="pre">&quot;Invalid</span> <span class="pre">transaction</span> <span class="pre">identifier&quot;</span></code>: raise an exception when the transaction id (<code class="docutils literal notranslate"><span class="pre">txId</span></code>) is malformed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_CONFIRMATIONS</span> <span class="pre">=</span> <span class="pre">&quot;Transaction</span> <span class="pre">has</span> <span class="pre">less</span> <span class="pre">confirmations</span> <span class="pre">than</span> <span class="pre">requested&quot;</span></code>: raise an exception when the number of confirmations is less than required.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_MERKLE_PROOF</span> <span class="pre">=</span> <span class="pre">&quot;Invalid</span> <span class="pre">Merkle</span> <span class="pre">Proof</span> <span class="pre">structure&quot;</span></code>: raise an exception when the Merkle proof is malformed.</p></li>
+</ul>
 </div>
 </div>
 <div class="section" id="helper-methods">
 <h2>Helper Methods<a class="headerlink" href="#helper-methods" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="dblsha">
-<h3>dblSha<a class="headerlink" href="#dblsha" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="nbitstotarget">
-<h3>nBitsToTarget<a class="headerlink" href="#nbitstotarget" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="checkcorrecttarget">
-<h3>checkCorrectTarget<a class="headerlink" href="#checkcorrecttarget" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="computenewtarget">
-<h3>computeNewTarget<a class="headerlink" href="#computenewtarget" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="computemerkle">
-<h3>computeMerkle<a class="headerlink" href="#computemerkle" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="concatsha256hash">
-<h3>concatSha256Hash<a class="headerlink" href="#concatsha256hash" title="Permalink to this headline">¶</a></h3>
-</div>
-<div class="section" id="getters">
-<h3>Getters<a class="headerlink" href="#getters" title="Permalink to this headline">¶</a></h3>
-</div>
 </div>
 </div>
 
