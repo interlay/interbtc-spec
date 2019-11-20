@@ -1,2 +1,0 @@
-Verifying Bitcoin's State on a Parachain
-==================
