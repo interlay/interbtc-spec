@@ -18,8 +18,8 @@ this function returns whether a given transaction is valid by considering a numb
 The core idea is that a user submits a transaction hash including the parameters to proof to another party that  the transaction is included in the Bitcoin blockchain.
 Since the verification is based on the data in the chain relay, other parties can rely on the trustworthiness of such a proof.
 
-Process
-^^^^^^^
+Sequence
+~~~~~~~~
 
 Generally, a user has to follow four steps to successfully verify a transaction:
 
@@ -39,7 +39,7 @@ Generally, a user has to follow four steps to successfully verify a transaction:
     b. ``False``: the transaction cannot be verified given the input parameters provided by the user.
 
 Conditions
-^^^^^^^^^^
+~~~~~~~~~~
 
 A transaction is successfully verified if the following conditions are met.
 
@@ -52,12 +52,14 @@ A transaction is successfully verified if the following conditions are met.
 
 
 Use Cases
-^^^^^^^^^
+~~~~~~~~~
+
 **Issue of Bitcoin-backed Assets**: Users can create Bitcoin-backed tokens on Polkadot by proving to the Polkadot blockchain that they have sent a number of Satoshis to a vault's Bitcoin address. To realize this, a user acts as a so-called CbA Requester. First the CbA-Requester transfers the Satoshis to the Bitcoin address of a Vault on the Bitcoin blockchain. The CbA-Requester notes the transaction hash of this transaction. Next, the CbA-Requester proves to the Polka-BTC bridge that the vault has received his Satoshis. He achieves this by ensuring that the block header of his transaction is included in the BTCRelay and has enough confirmations. He then extracts the input parameters as described in step 3 of the `Process`_ above. With these input parameters he calls the ``verifyTransaction`` to receive a successful transaction inclusion proof.
 
 
 Implementation
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~
+
 *Function Signature*
 
 ``verifyTransaction(txId, txBlockHeight, txIndex, merkleProof)``
@@ -87,11 +89,16 @@ Implementation
 Helper Methods
 --------------
 
+There are several helper methods available that abstract Bitcoin internals away in the main function implementation.
+
 dblSha
 ~~~~~~
 
+
+
 nBitsToTarget
 ~~~~~~~~~~~~~
+
 
 checkCorrectTarget
 ~~~~~~~~~~~~~~~~~~
@@ -100,11 +107,14 @@ checkCorrectTarget
 computeNewTarget
 ~~~~~~~~~~~~~~~~
 
+
 computeMerkle
 ~~~~~~~~~~~~~
 
+
 concatSha256Hash
 ~~~~~~~~~~~~~~~~
+
 
 Getters
 ~~~~~~~

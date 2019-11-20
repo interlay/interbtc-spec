@@ -91,13 +91,22 @@
 <li class="toctree-l2"><a class="reference internal" href="#setinitialparent">setInitialParent</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#storeblockheader">storeBlockHeader</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#verifytransaction">verifyTransaction</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#process">Process</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sequence">Sequence</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#conditions">Conditions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#use-cases">Use Cases</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#helper-methods">Helper Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#helper-methods">Helper Methods</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#dblsha">dblSha</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nbitstotarget">nBitsToTarget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#checkcorrecttarget">checkCorrectTarget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#computenewtarget">computeNewTarget</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#computemerkle">computeMerkle</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#concatsha256hash">concatSha256Hash</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#getters">Getters</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -178,8 +187,8 @@
 this function returns whether a given transaction is valid by considering a number of parameters.
 The core idea is that a user submits a transaction hash including the parameters to proof to another party that  the transaction is included in the Bitcoin blockchain.
 Since the verification is based on the data in the chain relay, other parties can rely on the trustworthiness of such a proof.</p>
-<div class="section" id="process">
-<h3>Process<a class="headerlink" href="#process" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="sequence">
+<h3>Sequence<a class="headerlink" href="#sequence" title="Permalink to this headline">¶</a></h3>
 <p>Generally, a user has to follow four steps to successfully verify a transaction:</p>
 <ol class="arabic">
 <li><p>The user ensures that the Bitcoin block header, in which his transaction is included, is stored in the BTCRelay (see <a class="reference internal" href="#storeblockheader">storeBlockHeader</a>).</p></li>
@@ -217,7 +226,7 @@ Since the verification is based on the data in the chain relay, other parties ca
 </div>
 <div class="section" id="use-cases">
 <h3>Use Cases<a class="headerlink" href="#use-cases" title="Permalink to this headline">¶</a></h3>
-<p><strong>Issue of Bitcoin-backed Assets</strong>: Users can create Bitcoin-backed tokens on Polkadot by proving to the Polkadot blockchain that they have sent a number of Satoshis to a vault’s Bitcoin address. To realize this, a user acts as a so-called CbA Requester. First the CbA-Requester transfers the Satoshis to the Bitcoin address of a Vault on the Bitcoin blockchain. The CbA-Requester notes the transaction hash of this transaction. Next, the CbA-Requester proves to the Polka-BTC bridge that the vault has received his Satoshis. He achieves this by ensuring that the block header of his transaction is included in the BTCRelay and has enough confirmations. He then extracts the input parameters as described in step 3 of the <a class="reference internal" href="#process">Process</a> above. With these input parameters he calls the <code class="docutils literal notranslate"><span class="pre">verifyTransaction</span></code> to receive a successful transaction inclusion proof.</p>
+<p><strong>Issue of Bitcoin-backed Assets</strong>: Users can create Bitcoin-backed tokens on Polkadot by proving to the Polkadot blockchain that they have sent a number of Satoshis to a vault’s Bitcoin address. To realize this, a user acts as a so-called CbA Requester. First the CbA-Requester transfers the Satoshis to the Bitcoin address of a Vault on the Bitcoin blockchain. The CbA-Requester notes the transaction hash of this transaction. Next, the CbA-Requester proves to the Polka-BTC bridge that the vault has received his Satoshis. He achieves this by ensuring that the block header of his transaction is included in the BTCRelay and has enough confirmations. He then extracts the input parameters as described in step 3 of the <a href="#id1"><span class="problematic" id="id2">`Process`_</span></a> above. With these input parameters he calls the <code class="docutils literal notranslate"><span class="pre">verifyTransaction</span></code> to receive a successful transaction inclusion proof.</p>
 </div>
 <div class="section" id="implementation">
 <h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h3>
@@ -249,6 +258,28 @@ Since the verification is based on the data in the chain relay, other parties ca
 </div>
 <div class="section" id="helper-methods">
 <h2>Helper Methods<a class="headerlink" href="#helper-methods" title="Permalink to this headline">¶</a></h2>
+<p>There are several helper methods available that abstract Bitcoin internals away in the main function implementation.</p>
+<div class="section" id="dblsha">
+<h3>dblSha<a class="headerlink" href="#dblsha" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="nbitstotarget">
+<h3>nBitsToTarget<a class="headerlink" href="#nbitstotarget" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="checkcorrecttarget">
+<h3>checkCorrectTarget<a class="headerlink" href="#checkcorrecttarget" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="computenewtarget">
+<h3>computeNewTarget<a class="headerlink" href="#computenewtarget" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="computemerkle">
+<h3>computeMerkle<a class="headerlink" href="#computemerkle" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="concatsha256hash">
+<h3>concatSha256Hash<a class="headerlink" href="#concatsha256hash" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="getters">
+<h3>Getters<a class="headerlink" href="#getters" title="Permalink to this headline">¶</a></h3>
+</div>
 </div>
 </div>
 
