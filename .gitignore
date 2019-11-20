@@ -11,4 +11,4 @@ venv/*
 */docs/build/latex/*.log
 */docs/build/latex/*.out
 */docs/build/latex/*.toc
-*/docs/build/
+*/docs/build/*
