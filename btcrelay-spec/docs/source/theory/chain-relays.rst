@@ -1,4 +1,4 @@
-Overview of Chain Relays
+Introduction to BTC Relay
 ==================
 
 
@@ -9,12 +9,35 @@ A chain relay is a program or smart contract deployed on a blockchain, which
 provides functionality for verifying the state of another blockchain. 
 
 
-Verification vs. Validation
+Functionality
 -----------------
 
 
 Necessary Assumptions
 -----------------
+
+System Model
+~~~~~~~~~~~~~~
++ Parachain Validators
++ Collators (?)
+
+(Make sure we use same nomenclature as Polkadot)
+
+
+Network Model
+~~~~~~~~~~~~~~
++ Communication model assumptions.
++ Need to assume a sync. communication model
++ Define upper bounds on timeouts
+
+
+Threat Model
+~~~~~~~~~~~~~~
++ What can an attacked do?
+(maybe move this to a separate chapter, where we discuss security?)
+
+
+
 
 Recommended Background Reading
 -----------------
