@@ -4,21 +4,15 @@ Welcome to BTC-Parachain's documentation!
 ====================================
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
    :caption: Contents:
-   
+
    introduction
-   chain-relays
-   btc-relay
-   data-model
-   verification-methods
-   data-types
-   functions
+   theory/chain-relays
+   design/architecture
+   spec/data-types
+   spec/functions
+   spec/events
 
 
-Indices and tables
-==================
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`

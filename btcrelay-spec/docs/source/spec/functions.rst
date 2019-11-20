@@ -3,15 +3,11 @@ Functions
 ===========
 
 
-
-Main Functions
----------------
-
-setInitialParent
+initialize
 ~~~~~~~~~~~~~
 
 
-storeBlockHeader
+submitBlockHeader
 ~~~~~~~~~~~~~
 
 
@@ -20,27 +16,27 @@ verifyTransaction
 
 
 
-Helper Methods
---------------
+Helper Functions
+~~~~~~~~~~~~~
 
 dblSha
-~~~~~~~~~
+...............
 
 nBitsToTarget
-~~~~~~~~~
+...............
 
 checkCorrectTarget
-~~~~~~~~~
+...............
 
 
 computeNewTarget
-~~~~~~~~~
+...............
 
 computeMerkle
-~~~~~~~~~
+...............
 
 concatSha256Hash
-~~~~~~~~~
+...............
 
 Getters
-~~~~~~~~~
+...............
