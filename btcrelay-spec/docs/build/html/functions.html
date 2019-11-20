@@ -94,7 +94,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#process">Process</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#conditions">Conditions</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#use-cases">Use Cases</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#function">Function</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation">Implementation</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#helper-methods">Helper Methods</a></li>
@@ -219,8 +219,8 @@ Since the verification is based on the data in the chain relay, other parties ca
 <h3>Use Cases<a class="headerlink" href="#use-cases" title="Permalink to this headline">¶</a></h3>
 <p><strong>Issue of Bitcoin-backed Assets</strong>: Users can create Bitcoin-backed tokens on Polkadot by proving to the Polkadot blockchain that they have sent a number of Satoshis to a vault’s Bitcoin address. To realize this, a user acts as a so-called CbA Requester. First the CbA-Requester transfers the Satoshis to the Bitcoin address of a Vault on the Bitcoin blockchain. The CbA-Requester notes the transaction hash of this transaction. Next, the CbA-Requester proves to the Polka-BTC bridge that the vault has received his Satoshis. He achieves this by ensuring that the block header of his transaction is included in the BTCRelay and has enough confirmations. He then extracts the input parameters as described in step 3 of the <a class="reference internal" href="#process">Process</a> above. With these input parameters he calls the <code class="docutils literal notranslate"><span class="pre">verifyTransaction</span></code> to receive a successful transaction inclusion proof.</p>
 </div>
-<div class="section" id="function">
-<h3>Function<a class="headerlink" href="#function" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="implementation">
+<h3>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h3>
 <p><em>Function Signature</em></p>
 <p><code class="docutils literal notranslate"><span class="pre">verifyTransaction(txId,</span> <span class="pre">txBlockHeight,</span> <span class="pre">txIndex,</span> <span class="pre">merkleProof)</span></code></p>
 <p><em>Parameters</em></p>

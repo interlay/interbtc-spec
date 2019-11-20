@@ -56,8 +56,8 @@ Use Cases
 **Issue of Bitcoin-backed Assets**: Users can create Bitcoin-backed tokens on Polkadot by proving to the Polkadot blockchain that they have sent a number of Satoshis to a vault's Bitcoin address. To realize this, a user acts as a so-called CbA Requester. First the CbA-Requester transfers the Satoshis to the Bitcoin address of a Vault on the Bitcoin blockchain. The CbA-Requester notes the transaction hash of this transaction. Next, the CbA-Requester proves to the Polka-BTC bridge that the vault has received his Satoshis. He achieves this by ensuring that the block header of his transaction is included in the BTCRelay and has enough confirmations. He then extracts the input parameters as described in step 3 of the `Process`_ above. With these input parameters he calls the ``verifyTransaction`` to receive a successful transaction inclusion proof.
 
 
-Function
-^^^^^^^^
+Implementation
+^^^^^^^^^^^^^^
 *Function Signature*
 
 ``verifyTransaction(txId, txBlockHeight, txIndex, merkleProof)``
