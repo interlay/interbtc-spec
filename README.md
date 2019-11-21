@@ -22,7 +22,8 @@ You can contribute to this project. The following instructions will get you star
 
 ### Requirements
 
-run ``pip install -r requirements.txt``
+The project is built with [Sphinx](https://www.sphinx-doc.org/en/master/).
+Install the requirements with ``pip install -r requirements.txt``.
 
 
 ### Autobuild
