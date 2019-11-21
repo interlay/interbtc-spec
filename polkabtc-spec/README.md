@@ -1,10 +1,5 @@
 # PolkaBTC Spec
 
-## Requirements
-
-run ``pip install -r requirements.txt``
-
-
 ## Autobuild
 
 To have Sphinx automatically detect changes to .rst files and serve the latest changes in the browser, run `autobuild.sh`. 
