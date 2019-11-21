@@ -28,6 +28,7 @@ Install the requirements with ``pip install -r requirements.txt``.
 
 ### Autobuild
 
+Change into either the [btcrelay-spec](./btcrelay-spec/) or [polkabtc-spec](./polkabtc-spec) folder to work on either of the two specifications.
 To have Sphinx automatically detect changes to .rst files and serve the latest changes in the browser, run `autobuild.sh`. 
 
 Files will be served at http://127.0.0.1:8000/
