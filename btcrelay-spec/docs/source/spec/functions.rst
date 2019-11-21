@@ -9,6 +9,90 @@ setInitialParent
 storeBlockHeader
 ----------------
 
+The ``storeBlockHeade`` function parses, verifies and stores Bitcoin block headers.
+The maintainance of a sequence of Bitcoin block headers, representing the main chain (i.e., the longest chain known to the network), 
+serves as basis for all further queries to the chain relay (such as checking for transaction inclusion).
+Specifically, ``storeBlockHeader`` must be called and successfully executed for a block header at a given block height (``txBlockHeight``),
+before being referenced in ``verifyTransaction``.
+
+Sequence
+~~~~~~~~
+
+Generally, the following steps are executed to successfully store a new Bitcoin block header in the chain relay.
+
+
+1. The user determines if the to-be-submitted Bitcoin block header extends the longest (main) chain *tracked by the chain relay* or creates a new / extends an existing fork *tracked by the chain relay*.
+
+    + Note: the chain relay does not necessarily have the same view of the Bitcoin main chain as the user's local client. See `Relay Poisoning <#>`_ for details.
+
+2. If the block header is on an existing fork tracked by the chain relay, the user specifies the ``forkId`` accordingly.
+3. The user prepares the 80 bytes Bitcoin block header as inout parameter to ``storeBlockHeader``. 
+The user can retrieve this data from the `bitcoin-rpc client <https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list>`_ by calling the getblock `getBlock <https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/getblock/>`_ and settign verbosity to ``0`` (``getBlock <blockHash> 0``).
+4. The user submits the 80 bytes Bitcoin block header to the ``storeBlockHeader`` function and receives one of two possible results:
+
+    a. ``True``: the block header was successfully verified and stored.
+    b. ``False``: the block header cannot be verifier (see exception raised for reason).
+
+
+Conditions
+~~~~~~~~~~
+
+A block header is successfully verified and stored if the following conditions are met.
+
+1. The ``blockHeaderBytes`` are 80 bytes long.
+2. The block header is not yet stored in the chain relay (``blockHash`` is unique in chain relay storage).
+3. The block header references a block already stored in the chain relay via ``prevBlockHash``.
+4. The PoW hash (``blockHash``) matches the ``target`` specified in the block header
+5. The ``target`` specified in the block header is correct (as per Bitcoin's difficulty adustment mechanism, see `here <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_).
+6. TODO: fork handling
+
+Use Cases
+~~~~~~~~~
+
+**Verification of Transaction Inclusion**:
+To be able to verify that a transaction is included in the Bitcoin blockchain, the corresponding block at the specified ``txBlockHeight`` must be first submitted, verified and stored in the chain relay via ``storeBlockHeader``. 
+
+**Detection and Tracking of Forks**:
+Blockchain reorganizations or forks which occur on Bitcoin are detected and set up for tracking when a block header is submitted whose block height is lower than the currently tracked main chain height.
+
+Implementation
+~~~~~~~~~~~~~~
+
+*Function Signature*
+
+``storeBlockHeader(blockHeaderBytes, forkId)``
+
+*Parameters*
+
+* ``blockHeaderBytes``: raw Bitcoin block header bytes (80 bytes).
+* ``forkId``: if block header is on a fork, specifies which fork is being extended (or being newly created).
+
+
+*Returns*
+
+* ``True``: if the block header passes all checks and is successfully stored in the chain relay. 
+  + the block extends the longest known chain of block headers known to the chain relay
+  + the block creates a new or extends an existing fork of the currenlty known longest chain
+* ``False``: otherwise.
+
+*Events*
+
+* ``StoreHeader(blockHeight, blockHash)``: if the block header was stored successfully, emit an event with the current block height (``blockHeight``) and the (PoW) block hash (``blockHash``).
+* ``StoreForkHeader(blockHeight, blockHash)``: if the submitted block header is on a fork, emit an event with the fork's (now most significant) block height (``blockHeight``) and the (PoW) block hash (``blockHash``).
+*  ``ChainReorg(newChainTip, startHeight, forkId)``: if the submitted block header on a fork results in a reorganization (fork longer than current main chain), emit an event with the block hash of the new highest block (``newChainTip``), the start block height of the fork (``startHeight``) and the fork identifier (``forkId``).
+
+*Errors*
+
+* ``ERR_INVALID_FORK_ID`` = "Incorrect fork identifier.": raise an exception when a non-existent fork identifiert or ``0`` (blocked for special meaning) is passed. 
+* ``ERR_INVALID_HEADER_SIZE`` = "Invalid block header size": raise exception if the submitted block header is not exactly 80 bytes long.
+* ``ERR_DUPLICATE_BLOCK`` = "Block already stored": raise exception if the submitted block header is already stored in the chain relay (same PoW ``blockHash``). 
+* ``ERR_PREV_BLOCK`` = "Previous block hash not found": raise an exception if the submitted block does not reference an already stored block header as predecessor (via ``prevBlockHash``). 
+* ``ERR_LOW_DIFF`` = "PoW hash does not meet difficulty target of header": raise exception when the header's ``blockHash`` does not meet the ``target`` specified in the block header.
+* ``ERR_DIFF_TARGET_HEADER`` = "Incorrect difficulty target specified in block header": raise exception if the ``target`` specified in the block header is incorrect for its block height (difficulty re-target not executed).
+* ``ERR_NOT_MAIN_CHAIN`` = "Main chain submission indicated, but submitted block is on a fork": raise exception if the block header submission indicates that it is extending the current longest chain, but is actually on a (new) fork.
+* ``ERR_FORK_PREV_BLOCK`` = "Previous block hash does not match last block in fork submission": raise exception if the block header does not reference the heighest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
+* ``ERR_NOT_FORK`` = "Indicated fork submission, but block is in main chain":  raise exception if the block header creates a new or extends an existing fork, but is actually extending the current longest chain.
+
 
 verifyTransaction
 -----------------
