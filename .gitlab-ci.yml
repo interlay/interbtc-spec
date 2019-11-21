@@ -26,7 +26,7 @@ before_script:
 
 btcrelay:
   script:
-    - cd btcrelay-spec/doc ; make html
+    - cd btcrelay-spec/docs ; make html
     - mv build/html/ ../../public/btcrelay-spec/
   artifacts:
     paths:
@@ -36,7 +36,7 @@ btcrelay:
 
 polkabtc:
   script:
-    - cd polkabtc-spec/doc ; make html
+    - cd polkabtc-spec/docs ; make html
     - mv build/html/ ../../public/polkabtc-spec/
   artifacts:
     paths:
