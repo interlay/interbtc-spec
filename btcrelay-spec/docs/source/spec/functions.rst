@@ -9,55 +9,17 @@ setInitialParent
 storeBlockHeader
 ----------------
 
-The ``storeBlockHeade`` function parses, verifies and stores Bitcoin block headers.
-The maintainance of a sequence of Bitcoin block headers, representing the main chain (i.e., the longest chain known to the network), 
-serves as basis for all further queries to the chain relay (such as checking for transaction inclusion).
-Specifically, ``storeBlockHeader`` must be called and successfully executed for a block header at a given block height (``txBlockHeight``),
-before being referenced in ``verifyTransaction``.
-
-Sequence
-~~~~~~~~
-
-Generally, the following steps are executed to successfully store a new Bitcoin block header in the chain relay.
+The ``storeBlockHeader`` function parses, verifies and stores Bitcoin block
+headers. The maintainance of a sequence of Bitcoin block headers, representing
+the main chain (i.e., the longest chain known to the network), serves as basis
+for all further queries to the chain relay (such as checking for transaction
+inclusion). Specifically, ``storeBlockHeader`` must be called and successfully
+executed for a block header at a given block height (``txBlockHeight``), before
+being referenced in ``verifyTransaction``.
 
 
-1. The user determines if the to-be-submitted Bitcoin block header extends the longest (main) chain *tracked by the chain relay* or creates a new / extends an existing fork *tracked by the chain relay*.
-
-    + Note: the chain relay does not necessarily have the same view of the Bitcoin main chain as the user's local client. See `Relay Poisoning <#>`_ for details.
-
-2. If the block header is on an existing fork tracked by the chain relay, the user specifies the ``forkId`` accordingly.
-3. The user prepares the 80 bytes Bitcoin block header as inout parameter to ``storeBlockHeader``. 
-The user can retrieve this data from the `bitcoin-rpc client <https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list>`_ by calling the getblock `getBlock <https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/getblock/>`_ and settign verbosity to ``0`` (``getBlock <blockHash> 0``).
-4. The user submits the 80 bytes Bitcoin block header to the ``storeBlockHeader`` function and receives one of two possible results:
-
-    a. ``True``: the block header was successfully verified and stored.
-    b. ``False``: the block header cannot be verifier (see exception raised for reason).
-
-
-Conditions
-~~~~~~~~~~
-
-A block header is successfully verified and stored if the following conditions are met.
-
-1. The ``blockHeaderBytes`` are 80 bytes long.
-2. The block header is not yet stored in the chain relay (``blockHash`` is unique in chain relay storage).
-3. The block header references a block already stored in the chain relay via ``prevBlockHash``.
-4. The PoW hash (``blockHash``) matches the ``target`` specified in the block header
-5. The ``target`` specified in the block header is correct (as per Bitcoin's difficulty adustment mechanism, see `here <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_).
-6. TODO: fork handling
-
-Use Cases
-~~~~~~~~~
-
-**Verification of Transaction Inclusion**:
-To be able to verify that a transaction is included in the Bitcoin blockchain, the corresponding block at the specified ``txBlockHeight`` must be first submitted, verified and stored in the chain relay via ``storeBlockHeader``. 
-
-**Detection and Tracking of Forks**:
-Blockchain reorganizations or forks which occur on Bitcoin are detected and set up for tracking when a block header is submitted whose block height is lower than the currently tracked main chain height.
-
-Implementation
+Specification
 ~~~~~~~~~~~~~~
-
 *Function Signature*
 
 ``storeBlockHeader(blockHeaderBytes, forkId)``
@@ -93,6 +55,53 @@ Implementation
 * ``ERR_FORK_PREV_BLOCK`` = "Previous block hash does not match last block in fork submission": raise exception if the block header does not reference the heighest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
 * ``ERR_NOT_FORK`` = "Indicated fork submission, but block is in main chain":  raise exception if the block header creates a new or extends an existing fork, but is actually extending the current longest chain.
 
+
+User Story
+~~~~~~~~
+
+A user calls the ``storeBlockHeader`` function when submitting a new Bitcoin block header to the chain relay. 
+Thereby, the user performes the following steps:
+
+1. The user determines if the to-be-submitted Bitcoin block header extends the longest (main) chain *tracked by the chain relay* or creates a new / extends an existing fork *tracked by the chain relay*. (Note: the chain relay does not necessarily have the same view of the Bitcoin main chain as the user's local client. See `Relay Poisoning <#>`_ for details.).
+2. If the block header is on an existing *fork tracked by the chain relay*, the user looks up the ``forkId`` in the chain relay.
+3. The user calls the function passing an 80bytes block header (``blockHeaderBytes``) and, if necessary, a ``forkId``, and receives one of two possible results:
+
+    a. ``True``: the block header was successfully verified and stored.
+    b. ``False``: the block header cannot be verifier (see exception raised for reason).
+
+.. note:: The 80 bytes block header can be retrieved from the `bitcoin-rpc client <https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list>`_ by calling the `getBlock <https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/getblock/>`_ and settign verbosity to ``0`` (``getBlock <blockHash> 0``).
+
+Use Cases
+~~~~~~~~~
+
+**Verification of Transaction Inclusion**:
+To be able to verify that a transaction is included in the Bitcoin blockchain, the corresponding block at the specified ``txBlockHeight`` must be first submitted, verified and stored in the chain relay via ``storeBlockHeader``. 
+
+
+
+Function Sequence
+~~~~~~~~~~
+
+
+A block header is successfully verified and stored if the following conditions are met.
+
+1. The ``blockHeaderBytes`` are 80 bytes long.
+2. The block header is not yet stored in the chain relay (``blockHash`` is unique in chain relay storage).
+3. The block header references a block already stored in the chain relay via ``prevBlockHash``.
+4. The PoW hash (``blockHash``) matches the ``target`` specified in the block header
+5. The ``target`` specified in the block header is correct (as per Bitcoin's difficulty adustment mechanism, see `here <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_).
+6. TODO: fork handling
+
+
+
+
+
+storeForkBlockHeader
+----------------
+
+
+**Detection and Tracking of Forks**:
+Blockchain reorganizations or forks which occur on Bitcoin are detected and set up for tracking when a block header is submitted whose block height is lower than the currently tracked main chain height.
 
 verifyTransaction
 -----------------
