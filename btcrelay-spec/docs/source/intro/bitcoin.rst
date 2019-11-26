@@ -1,29 +1,31 @@
+Bitcoin
+===============================
+
+Quick overview of Bitcoin.
+
+Overview
+------------------------
+
+- Nakamoto consensus
+  - PoW using sha256
+- Longest chain rule
+- Difficulty is adjusted very 2016 blocks
+- UTXO model
+
+
 Data Model
-==========
+------------------------
 
-Minimum viable data model for BTC Relay. The data model includes only the bare minimum required to store inside the BTC Relay and does not store the same amount of information as e.g. a Bitcoin full-node.
-
+Refer to https://bitcoin.org/en/developer-reference 
 
 Block Headers
-~~~~~~~~~~~~~
-
-The block header reference stored in BTC Relay contains the following information.
-
-======================  =========  ============================================
-Parameter               Type       Description
-======================  =========  ============================================
-``blockHeight``         u256       Height of the current block header.
-``chainWork``           u256       Accumulated PoW at this height.
-``header``              bytes[80]  Block header hash.
-``lastDiffAdjustment``  u256       Difficulty adjustment for tracking of forks.
-======================  =========  ============================================
-
+~~~~~~~~~~~~~~~
 The `80 bytes block header hash <https://bitcoin.org/en/developer-reference#block-headers>`_ encodes the following information:
 
 =====  ======================  =========  ============================================
 Bytes  Parameter               Type       Description
 =====  ======================  =========  ============================================
-4      ``version``             i32        The block version to follow.
+4      ``version``             u32        The block version to follow.
 32     ``hashPrevBlock``       char[32]   The double sha256 hash of the previous block header.
 32     ``merkleRoot``          char[32]   The double sha256 hash of the Merkle root of all transaction hashes in this block.
 4      ``time``                u32        The block timestamp included by the miner.

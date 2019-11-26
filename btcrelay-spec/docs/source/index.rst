@@ -1,18 +1,30 @@
 .. PolkaBTC documentation master file
 
 Welcome to BTC-Parachain's documentation!
-====================================
+=========================================
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Introduction:
 
-   introduction
-   theory/chain-relays
-   design/architecture
-   spec/data-types
+   intro/at-a-glance
+   intro/chain-relays
+   intro/bitcoin
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Specification:
+
+   spec/architecture
+   spec/data-model
    spec/functions
-   spec/events
+   spec/helpers
 
+.. toctree::
+   :maxdepth: 2
+   :caption: All the rest:
 
-
+   other/glossary
+   other/license
+   
