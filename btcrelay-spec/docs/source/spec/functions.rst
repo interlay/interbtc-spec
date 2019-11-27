@@ -9,8 +9,8 @@ setInitialParent
 
 storeMainChainBlockHeader
 --------------------------
-
-This function calls the ``verifyBlockHeader`` proving the 80 bytes Bitcoin block header as input, and, if the latter returns ``True``, extracts from the block header and stores in the chain relay the hash, height and Merkle Tree root of the given block. 
+Method to submit block headers to the BTC-Relay, which extend the Bitcoin main chain (as tracked in ``_mainChain`` in the BTC-Relay). 
+This function calls the ``verifyBlockHeader`` proving the 80 bytes Bitcoin block header as input, and, if the latter returns ``True``, extracts from the block header and stores (i) the hash, height and Merkle Tree root of the given block header in ``_blockHeaders`` and (ii) the hash and block height in ``_mainChain``.
 
 
 Specification
@@ -42,12 +42,12 @@ Specification
 User Story
 ~~~~~~~~~~
 
-A user calls the ``storeMainChainBlockHeader`` function when submitting a new Bitcoin block header to the chain relay. 
+A user calls the ``storeMainChainBlockHeader`` function when submitting a new Bitcoin block header to the BTC-Relay. 
 Thereby, the user performes the following steps:
 
-1. The user checks that the to-be-submitted Bitcoin block header in part of the longest (main) chain *tracked by the chain relay*. 
+1. The user checks that the to-be-submitted Bitcoin block header in part of the longest (main) chain *tracked by the BTC-Relay*. 
 
-.. warning:: The chain relay does not necessarily have the same view of the Bitcoin blockchain as the user's local Bitcoin client. This can happen if (i) the chain relay is under attack (see `Relay Poisoning <TODO>`_), (ii) the chain relay is out of sync (see `Relay Freshness <TODO>`_), or, similarly, (iii) if the user's local Bitcoin client is under attack or out of sync. 
+.. warning:: The BTC-Relay does not necessarily have the same view of the Bitcoin blockchain as the user's local Bitcoin client. This can happen if (i) the BTC-Relay is under attack (see `Relay Poisoning <TODO>`_), (ii) the BTC-Relay is out of sync (see `Relay Freshness <TODO>`_), or, similarly, (iii) if the user's local Bitcoin client is under attack or out of sync. 
 
 2. The user calls the function passing an 80 byte block header (``blockHeaderBytes``) and receives one of two possible results:
 
@@ -59,16 +59,38 @@ Thereby, the user performes the following steps:
 
 Function sequence
 ~~~~~~~~~~~~~~~~~
-TODO
+
+The ``storeMainChainBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and follows the following sequence:
+
+1. Check that the submitted block header is extending the ``_mainChain`` of BTC-Relay. That is, ``hashPrevBlock`` (extract using ``extractHashPrevBlock(blockHeaderBytes)``) must be equal to ``_bestBlock``. 
+
+    a. Raise ``ERR_NOT_MAIN_CHAIN`` error if this check fails.
+
+2. Call ``verifyTransaction(blockHeaderBytes)``. 
+
+    a. If this call **does not return** ``True`` (i.e., fails or returns ``False``), then abort and return ``False``. 
+
+3. Store the ``height`` and ``merkleRoot`` of the block header in the ``blockHeaders`` map, using ``hashCurrentBlock`` as key.
+
+    + ``hashCurrentBlock`` is the double SHA256 hash over the 80 bytes block header and can be calculated by calling ``sha256d(blockHeaderBytes)``.
+    + ``merkleRoot`` is the root of the transaction Merkle Tree of the block header. Use ``extractMerkleRoot(blockHeaderBytes)`` to extract from block header. 
+    + ``height`` is the blockchain height of the submitted block header. Compute by incrementing the height of the block header referenced by ``hashPrevBlock`` (retrieve from ``_blockHeaders`` using ``hashPrevBlock`` as key).
+
+3. Emit a ``StoreMainChainBlockHeader`` event using ``height`` and ``hashCurrentBlock`` as input (``StoreMainChainHeader(height, hashCurrentBlock)``). 
+
+4. Return ``True``.
+ 
 
 .. figure:: ../figures/storeMainChainBlockHeader-sequence.png
     :alt: storeMainChainBlockHeader sequence diagram
 
-    Step-by-step process of storing a main chain block header.
+    Sequence diagram showing the function sequence of ``storeMainChainBlockHeader``.
 
 
 storeForkBlockHeader
 --------------------
+Method to submit block headers to the BTC-Relay, which extend an existing of create a new *fork* (as tracked in ``_forks`` in the BTC-Relay). 
+This function calls the ``verifyBlockHeader`` proving the 80 bytes Bitcoin block header as input, and, if the latter returns ``True``, extracts from the block header and stores (i) the hash, height and Merkle Tree root of the given block header in ``_blockHeaders`` and (ii) the hash of the block header as well as the starting block height of the fork and the current lenght (1 if a new fork) in ``forks``.
 
 Specification
 ~~~~~~~~~~~~~~
@@ -89,7 +111,7 @@ Specification
 
 *Events*
 
-* ``StoreForkHeader(blockHeight, blockHash)``: if the submitted block header is on a fork, emit an event with the fork's (now most significant) block height (``blockHeight``) and the (PoW) block hash (``blockHash``).
+* ``StoreForkHeader(forkId, blockHeight, blockHash)``: if the submitted block header is on a fork, emit an event with the fork's if (``forkId``), block height (``blockHeight``) and the (PoW) block hash (``blockHash``).
 *  ``ChainReorg(newChainTip, startHeight, forkId)``: if the submitted block header on a fork results in a reorganization (fork longer than current main chain), emit an event with the block hash of the new highest block (``newChainTip``), the start block height of the fork (``startHeight``) and the fork identifier (``forkId``).
 
 *Errors*
@@ -102,9 +124,20 @@ Specification
 User Story
 ~~~~~~~~~~~~
 
-2. If the block header is on an existing *fork tracked by the chain relay*, the user looks up the ``forkId`` in the chain relay.
+A user calls the ``storeForkBlockHeader`` function when submitting a new Bitcoin block header, which is not extending the tip of the ``_mainChain`` tracked in BTC-Relay. 
+Thereby, the user performes the following steps (see notes and warnings in ``storeMainChainBlockHeader``):
 
-Use Cases
+1. The user checks that the to-be-submitted Bitcoin block header in **not part** of the longest (main) chain *tracked by the BTC-Relay*. 
+
+2. If the block header is on an existing *fork tracked by the BTC-Relay*, the user looks up the ``forkId`` in ``_forks`` in the BTC-Relay. If it is a new fork, specify ``-1`` as ``forkId`` (or other pre-defined value) - BTC-Relay will then create a new entry in ``_forks`` and assign a new ``forkId`` when storing the block header.
+
+3. The user calls the function passing an 80 byte block header (``blockHeaderBytes``) and receives one of two possible results:
+
+    a. ``True``: the block header was successfully verified and stored as a fork.
+    b. ``False``: if verification fails (see exceptions raised for reason).
+
+
+.. Use Cases
 ~~~~~~~~~~~~
 **Detection and Tracking of Forks**:
 Blockchain reorganizations or forks which occur on Bitcoin are detected and set up for tracking when a block header is submitted whose block height is lower than the currently tracked main chain height.
@@ -112,7 +145,42 @@ Blockchain reorganizations or forks which occur on Bitcoin are detected and set 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-TODO
+The ``storeForkBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and a ``forkId`` and follows the following sequence:
+
+1.  Call ``verifyTransaction(blockHeaderBytes)``. 
+
+    a. If this call **does not return** ``True`` (i.e., fails or returns ``False``), then abort and return ``False``. 
+
+2. Check if ``forkId == -1``.
+
+    a. If ``forkId == -1``, generate a new ``forkId`` and create a new entry in ``_forks``, setting the ``heigh`` of the block header as the ``startHeight`` of the fork.
+    
+    b. Otherwise:
+
+        b.1 Check if a fork is tracked in ``_forks`` under the specified ``forkId``. If no fork can be found, raise an ``ERR_INVALID_FORK_ID`` exception and abort. 
+
+        b.2 Check that the ``hashPrevBlock`` of the submitted block header indeed references the last block submitted to the fork specified by ``forkId`` (use ``getLastForkHash(forkId)``). Raise ``ERR_FORK_PREV_BLOCK`` exception and abort if this check fails.
+
+
+3. Store the ``height`` and ``merkleRoot`` of the block header in the ``blockHeaders`` map, using ``hashCurrentBlock`` as key.
+
+4. Update ``_fork[forkId]`` entry, incrementing the fork ``length`` and inserting ``hashCurrentBlock`` into the list of block hashes contained in that fork (``forkBlockHashes``).  
+
+5. Emit a ``StoreForkBlockHeader`` event using ``height`` and ``hashCurrentBlock`` as input (``StoreMainChainHeader(height, hashCurrentBlock)``). 
+
+6. Check if the fork at ``forkId`` has become longer than the current ``_mainChain``. This is the case if the block height ``height`` of the submitted block header exceeds the ``_bestBlockHeight``. 
+
+    a. If ``height > _bestBlockHeight`` call ``chainReorg(forkId)`` and return the value returned form this call.
+    b. Otherwise return ``True``.
+
+
+
+4. Return ``True``.
+
+.. figure:: ../figures/storeForkBlockHeader-sequence.png
+    :alt: storeForkBlockHeader sequence diagram
+
+    Sequence diagram showing the function sequence of ``storeForkBlockHeader``.
 
 verifyBlockHeader
 ------------------
@@ -120,11 +188,11 @@ verifyBlockHeader
 The ``verifyBlockHeader`` function parses and verifies Bitcoin block
 headers. 
 
-.. Warning:: This function must called and return ``True`` **before**  a Bitcoin block header is stored in the chain relay (i.e., must be called by the ``storeMainChainBlockHeader`` and ``storeForkBlockHeader`` functions).
+.. Warning:: This function must called and return ``True`` **before**  a Bitcoin block header is stored in the BTC-Relay (i.e., must be called by the ``storeMainChainBlockHeader`` and ``storeForkBlockHeader`` functions).
 
 .. Note:: This function does not check whether the submitted block header extends the main chain or a fork. This check is performed in ``storeMainChainBlockHeader`` and ``storeForkBlockHeader`` respectively.
 
-Other operations, such as verification of transaction inclusion, can only be executed once a block header has been verified and conseauently stored in the chain relay. 
+Other operations, such as verification of transaction inclusion, can only be executed once a block header has been verified and conseauently stored in the BTC-Relay. 
 
 
 Specification
@@ -147,7 +215,7 @@ Specification
 
 * ``ERR_INVALID_FORK_ID`` = "Incorrect fork identifier.": raise an exception when a non-existent fork identifiert or ``0`` (blocked for special meaning) is passed. 
 * ``ERR_INVALID_HEADER_SIZE`` = "Invalid block header size": raise exception if the submitted block header is not exactly 80 bytes long.
-* ``ERR_DUPLICATE_BLOCK`` = "Block already stored": raise exception if the submitted block header is already stored in the chain relay (same PoW ``blockHash``). 
+* ``ERR_DUPLICATE_BLOCK`` = "Block already stored": raise exception if the submitted block header is already stored in the BTC-Relay (same PoW ``blockHash``). 
 * ``ERR_PREV_BLOCK`` = "Previous block hash not found": raise an exception if the submitted block does not reference an already stored block header as predecessor (via ``prevBlockHash``). 
 * ``ERR_LOW_DIFF`` = "PoW hash does not meet difficulty target of header": raise exception when the header's ``blockHash`` does not meet the ``target`` specified in the block header.
 * ``ERR_DIFF_TARGET_HEADER`` = "Incorrect difficulty target specified in block header": raise exception if the ``target`` specified in the block header is incorrect for its block height (difficulty re-target not executed).
@@ -155,43 +223,51 @@ Specification
 
 User Story
 ~~~~~~~~~~
-TODO
+This function is called from both ``storeMainChainBlockHeader`` and ``storeForkBlockHeader``, but (typically) not by the user directly.
+Optionally, a user can call this function and submit an 80 byte Bitcoin block header. 
 
 
-Use Cases
+The caller of this function receives as return value:
+    a. ``True``: the block header was successfully verified 
+    b. ``False`` (or an exceptin is raised): if verification fails
+
+.. Use Cases
 ~~~~~~~~~
-
 **Verification of Transaction Inclusion**:
-To be able to verify that a transaction is included in the Bitcoin blockchain, the corresponding block at the specified ``txBlockHeight`` must be first submitted, verified and stored in the chain relay via ``verifyBlockHeader``. 
+To be able to verify that a transaction is included in the Bitcoin blockchain, the corresponding block at the specified ``txBlockHeight`` must be first submitted, verified and stored in the BTC-Relay via ``verifyBlockHeader``. 
 
 
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
- TODO: rephrase
+The ``verifyBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and follows the following sequence:
 
-A block header is successfully verified and stored if the following conditions are met.
-
-1. The ``blockHeaderBytes`` are 80 bytes long.
-2. The block header is not yet stored in the chain relay (``blockHash`` is unique in chain relay storage).
-3. The block header references a block already stored in the chain relay via ``prevBlockHash``.
-4. The PoW hash (``blockHash``) matches the ``target`` specified in the block header
-5. The ``target`` specified in the block header is correct (as per Bitcoin's difficulty adustment mechanism, see `here <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_).
+1. Check that the ``blockHeaderBytes`` are 80 bytes long. Raise ``ERR_INVALID_HEADER_SIZE`` exception and abort otherwise.
+2. Check that the block header is not yet stored in the BTC-Relay (``blockHash`` is unique in ``blockHeaders``). Raise ``ERR_DUPLICATE_BLOCK`` exception and abort otherwise. 
+3. Check that the previous block referenced by the submitted block header (``hashPrevBlock``) exists in ``_blockHeaders``. Raise ``ERR_PREV_BLOCK`` exception adn abort otherwise. 
+4. Check that the Proof-of-Work hash (``blockHash``) is below the ``target`` specified in the block header. Raise ``ERR_LOW_DIFF`` exception and abort otherwise.
+5. Check that the ``target`` specified in the block header is correct by calling ``correctTarget(hashPrevBlock, height, target)`` (as per Bitcoin's difficulty adustment mechanism, see `here <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_). If this call returns ``False``, raise ``ERR_DIFF_TARGET_HEADER`` exception and abort. 
+6. Return ``True``
 
 .. figure:: ../figures/verifyBlockHeader-sequence.png
     :alt: verifyBlockHeader sequence diagram
 
-    Step-by-step process of verifying a block header.
+    Sequence diagram showing the function sequence of ``verifyBlockHeader``.
 
 
+
+chainReorg
+--------------------
+
+TODO
 
 verifyTransaction
 -----------------
 
-The ``verifyTransaction`` function is one of the core components of the chain relay:
+The ``verifyTransaction`` function is one of the core components of the BTC-Relay:
 this function returns whether a given transaction is valid by considering a number of parameters.
 The core idea is that a user submits a transaction hash including the parameters to proof to another party that  the transaction is included in the Bitcoin blockchain.
-Since the verification is based on the data in the chain relay, other parties can rely on the trustworthiness of such a proof.
+Since the verification is based on the data in the BTC-Relay, other parties can rely on the trustworthiness of such a proof.
 
 Specification
 ~~~~~~~~~~~~~
@@ -243,9 +319,8 @@ Generally, a user has to follow four steps to successfully verify a transaction:
     a. ``True``: the transaction is successfully verified.
     b. ``False``: the transaction cannot be verified given the input parameters provided by the user.
 
-Use Cases
+.. Use Cases
 ~~~~~~~~~
-
 **Issue of Bitcoin-backed Assets**: Users can create Bitcoin-backed tokens on Polkadot by proving to the Polkadot blockchain that they have sent a number of Satoshis to a vault's Bitcoin address. To realize this, a user acts as a so-called CbA Requester. First the CbA-Requester transfers the Satoshis to the Bitcoin address of a Vault on the Bitcoin blockchain. The CbA-Requester notes the transaction hash of this transaction. Next, the CbA-Requester proves to the Polka-BTC bridge that the vault has received his Satoshis. He achieves this by ensuring that the block header of his transaction is included in the BTCRelay and has enough confirmations. He then extracts the input parameters as described in step 3 of the `User Story`_ above. With these input parameters he calls the ``verifyTransaction`` to receive a successful transaction inclusion proof.
 
 

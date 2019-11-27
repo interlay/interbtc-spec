@@ -217,5 +217,23 @@ The ``computeMerkle`` function would go past step 1 as our proof is longer than 
 
 
 
-Getters
--------
+calculateDifficulty
+----------------------
+Given the ``target``, calculates the Proof-of-Work ``difficulty`` value, as defined in `https://en.bitcoin.it/wiki/Difficulty <https://en.bitcoin.it/wiki/Difficulty>`_ .
+
+*Function Signature*
+
+``calculateDifficulty(target)``
+
+*Parameters*
+
+* ``target``: target as specified in a Bitcoin block header.
+
+*Returns*
+
+* ``difficulty``: difficulty calculated from passed ``target``.
+
+Function Sequence
+~~~~~~~~~~~~~~~~~
+
+1. Return ``0xffff0000000000000000000000000000000000000000000000000000`` (max. possible target, also referred to as "difficulty 1") divided by ``target``.

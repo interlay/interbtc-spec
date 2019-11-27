@@ -20,6 +20,7 @@ Welcome to BTC-Parachain's documentation!
    spec/data-model
    spec/functions
    spec/helpers
+   spec/parser
 
 .. toctree::
    :maxdepth: 2

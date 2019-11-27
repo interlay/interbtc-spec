@@ -5,6 +5,14 @@ The BTC Parachain, as opposed to Bitcoin SPV clients, only stores a subset of in
 Specifically, only data that is absolutely necessary to perform correct verification of block headers and transaction inclusion is stored. 
 
 
+Variables
+~~~~~~~~~~~~~~~~~
+
+_bestBlock
+..............
+
+Current blockchain tip, i.e., most significant block in _mainChain. 
+
 
 Maps
 ~~~~~~~~~~~~~~~~~~~
@@ -43,5 +51,5 @@ Parameter               Type           Description
 ======================  =============  ============================================
 ``startHeight``         u256           Height of the block at which this fork starts (forkpoint).
 ``length``              u256           Length of the fork (in blocks).
-``blockHashes``         tbd.           Linked hash set of block hashes, which references ``BlockHeaders`` in ``_blockHeaders``, contained in this fork (maintains insertion order).
+``forkBlockHashes``     tbd.           Linked hash set of block hashes, which references ``BlockHeaders`` in ``_blockHeaders``, contained in this fork (maintains insertion order).
 ======================  =============  ============================================
