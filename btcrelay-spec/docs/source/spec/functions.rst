@@ -203,7 +203,7 @@ Specification
 *Parameters*
 
 * ``txId``: the hash of the transaction.
-* ``txBlockHeight``: block height at which transacton is supposedly included.
+* ``txBlockHeight``: block height at which transaction is supposedly included.
 * ``txIndex``: index of transaction in the block's tx Merkle tree.
 * ``merkleProof``: Merkle tree path (concatenated LE sha256 hashes).
 
@@ -258,7 +258,7 @@ The ``verifyTransaction`` function takes four inputs and follows the following s
 2. The submitted *block height* (``txBlockHeight``) is stored in BTCRelay and the block in which the transaction is included has enough confirmations. This check ensures that the submitted *block height* has at least the required amount of previous blocks (default ``6``). Raises ``ERR_CONFIRMATIONS`` if the condition is not met. 
 3. The user submitted a valid *Merkle proof*. The Merkle proof needs to contain the *transaction hash* in its first 32 bytes. Further, the last hash in the Merkle proof must be the block header hash in which the transaction is included. If this condition is not met, the function raises an ``ERR_MERKLE_PROOF`` error.
 4. The *Merkle proof* must be either 32 bytes long if the block contains only the coinbase transaction, or be above 64 bytes if the block contains more than one transaction. If this condition is not met, the function raises an ``ERR_MERKLE_PROOF`` error.
-5. Last, the function calls the `computeMerkle`_ helper function to calculate the Merkle root. The root is calculated by calculating each hash from the transaction hash (``txId``), its position in the tree (``txIndex``), and the accoridng hash in the ``merkleProof``.  The resulting hash must equal the Merkle root. Details on this are included in the `Bitcoin developer reference <https://bitcoin.org/en/developer-reference#parsing-a-merkleblock-message>`_. If ``computeMerkle`` returns the merkleRoot, the function returns ``True``, otherwise ``False``. On completion of the function the ``VerifyTransaction`` event is generated including the transaction hash (``txId``), the block height (``txBlockHeight``), and the result (either ``True`` or ``False``).
+5. Last, the function calls the `computeMerkle`_ helper function to calculate the Merkle root. If ``computeMerkle`` returns the merkleRoot, the function returns ``True``, otherwise ``False``. On completion of the function the ``VerifyTransaction`` event is generated including the transaction hash (``txId``), the block height (``txBlockHeight``), and the result (either ``True`` or ``False``).
 
 
 .. figure:: ../figures/verifyTransaction-sequence.png
