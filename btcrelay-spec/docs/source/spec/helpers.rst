@@ -119,10 +119,36 @@ Function Sequence
 
         i. If the new target difficulty matches ``target``, return ``True``.
         ii. Otherwise, return ``False``.
-        
+
 
 computeNewTarget
 ----------------
+
+Computes the new difficulty target based on the given parameters, `according to <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_.
+
+*Function Signature*
+
+``computeNewTarget(prevTime, startTime, prevTarget)``
+
+*Parameters*
+
+* ``prevTime``: timestamp of previous block.
+* ``startTime``: timestamp of last re-target.
+* ``prevTarget``: u256 PoW difficulty target of the previous block.
+
+*Returns*
+
+* ``newTarget``: u256 PoW difficulty target of the current block.
+
+Function Sequence
+~~~~~~~~~~~~~~~~~
+
+1. Compute the actual time span between ``prevTime`` and ``startTime``.
+2. Compare if the actual time span is smaller than the target interval divided by 4 (default target interval in Bitcoin is two weeks). If true, set the actual time span to the target interval divided by 4.
+3. Compare if the actual time span is greater than the target interval multiplied by 4. If true, set the actual time span to the target interval multiplied by 4.
+4. Calculate the ``newTarget`` by multiplying the actual time span with the ``prevTarget`` and dividing by the target time span (2 weeks for Bitcoin).
+5. If the ``newTarget`` is greater tha the maximum target in Bitcoin, set the ``newTarget`` to the maximum target (Bitcoin maximum target is :math:`2^{224}-1`).
+6. Return the ``newTarget``.
 
 
 computeMerkle
