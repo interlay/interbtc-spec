@@ -23,16 +23,103 @@ Function Sequence
 ~~~~~~~~~~~~~~~~~
 
 1. Hash ``data`` with sha256.
-2. Hash the result of step 1 with sha256 and return.
+2. Hash the result of step 1 with sha256.
+3. Return ``hash``.
+
+concatSha256d
+-------------
+
+*Function Signature*
+
+``concatSha256d(left, right)``
+
+*Parameters*
+
+* ``left``: 32 bytes of input data that are added first.
+* ``right``: 32 bytes of input data that are added second.
+
+*Returns*
+
+* ``hash``: the double sha256 hash encodes as a bytes from ``left`` and ``right``.
+
+Function Sequence
+~~~~~~~~~~~~~~~~~
+
+1. Concatenate ``left`` and ``right`` into a 64 bytes.
+2. Call the `sha256d`_ function to hash the concatenated bytes.
+3. Return ``hash``.
 
 
 nBitsToTarget
 -------------
 
+This function calculates the PoW difficulty target from a compressed nBits representation. See the `Bitcoin documentation <https://bitcoin.org/en/developer-reference#target-nbit>`_ for further details. The computation for the difficulty is as follows:
+
+.. math:: \text{target} = \text{significand} * \text{base}^{(\text{exponent} - 3)}
+
+.. NOTE: Adding labels is currently not workable with the Sphinx RTD theme, see: https://github.com/readthedocs/sphinx_rtd_theme/pull/383
+
+*Function Signature*
+
+``nBitsToTarget(nBits)``
+
+*Parameters*
+
+* ``nBits``: u256 compressed PoW target representation.
+
+
+*Returns*
+
+* ``target``: u256 PoW difficulty target computed from nBits.
+
+Function Sequence
+~~~~~~~~~~~~~~~~~
+
+1. Extract the *exponent* by shifting the ``nBits`` to the right by 24.
+2. Extract the *significand* by taking the first three bytes of ``nBits``.
+3. Calculate the ``target`` via the equation above and using 2 as the *base* (as we use uint256 types).
+4. Return ``target``.
 
 checkCorrectTarget
 ------------------
 
+Verifies the currently submitted block header has the correct difficulty target. 
+
+.. todo:: Add events to give reason for failures.
+
+*Function Signature*
+
+``checkCorrectTarget(hashPrevBlock, blockHeight, target)``
+
+*Parameters*
+
+* ``hashPrevBlock``: bytes[32] Previous block hash (necessary to retrieve previous target).
+* ``blockHeight``: u256 height of the current block submission.
+* ``target``: u256 PoW difficulty target computed from nBits.
+
+*Returns*
+
+* ``True``: if correct difficulty target is found.
+* ``False``: otherwise.
+
+Function Sequence
+~~~~~~~~~~~~~~~~~
+
+.. todo:: Verify why we need to check if previous block target is not 0.
+
+1. Retrieve the previous block header with the ``hashPrevBlock`` from storage and extract the target of the previous block.
+2. Check if the difficulty should be adjusted at this ``blockHeight``.
+
+    a. The difficulty should not be adjusted. Check if the ``target`` of the submitted block matches the target of the previous block and check that the target of the previous block is not ``0``.
+
+        i. If the target difficulties match, return ``True``.
+        ii. Otherwise, return ``False``.
+
+    b. The difficulty should be adjusted. Call the `computeNewTarget`_ function to get the correct target difficulty. Check that the new target difficulty matches ``target``.
+
+        i. If the new target difficulty matches ``target``, return ``True``.
+        ii. Otherwise, return ``False``.
+        
 
 computeNewTarget
 ----------------
@@ -102,29 +189,7 @@ The ``computeMerkle`` function would go past step 1 as our proof is longer than 
     An example of the ``computeMerkle`` function with a transaction from a block that contains two transactions in total.
 
 
-concatSha256d
-----------------
 
-
-*Function Signature*
-
-``concatSha256d(left, right)``
-
-*Parameters*
-
-* ``left``: 32 bytes of input data that are added first.
-* ``right``: 32 bytes of input data that are added second.
-
-*Returns*
-
-* ``hash``: the double sha256 hash encodes as a bytes from ``left`` and ``right``.
-
-Function Sequence
-~~~~~~~~~~~~~~~~~
-
-1. Concatenate ``left`` and ``right`` into a 64 bytes.
-2. Call the `sha256d`_ function to hash the concatenated bytes.
-3. Return the hash.
 
 Getters
 -------
