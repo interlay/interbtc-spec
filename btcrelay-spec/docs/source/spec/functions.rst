@@ -203,7 +203,7 @@ Specification
 *Parameters*
 
 * ``txId``: the hash of the transaction.
-* ``txBlockHeight``: block height at which transacton is supposedly included.
+* ``txBlockHeight``: block height at which transaction is supposedly included.
 * ``txIndex``: index of transaction in the block's tx Merkle tree.
 * ``merkleProof``: Merkle tree path (concatenated LE sha256 hashes).
 
