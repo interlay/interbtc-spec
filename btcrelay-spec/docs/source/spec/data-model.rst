@@ -4,37 +4,54 @@ Data Model
 The BTC Parachain, as opposed to Bitcoin SPV clients, only stores a subset of information contained in block headers and does not store transactions. 
 Specifically, only data that is absolutely necessary to perform correct verification of block headers and transaction inclusion is stored. 
 
+Constants
+~~~~~~~~~
+
+DIFFICULTY_ADJUSTMENT_INTERVAL
+..............................
+
+The interval in number of blocks in which Bitcoin adjusts its difficulty. Defaults to ``2016``.
+
+TARGET_TIMESPAN
+...............
+
+The average time span it takes to adjust the difficulty. Defaults to ``1209600`` seconds or two weeks.
+
+UNROUNDED_MAX_TARGET
+....................
+
+The maximum difficulty target. Defaults to ``2**224-1``.
 
 Variables
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~
 
 _bestBlock
-..............
+..........
 
 Current blockchain tip, i.e., most significant block in _mainChain. 
 
 
 Maps
-~~~~~~~~~~~~~~~~~~~
+~~~~
 
 _blockHeaders
 ..............
 Mapping of ``<blockHash,BlockHeader>``
 
 _mainChain
-..............
+..........
 Mapping of ``<blockHeight,blockHash>``
 
 
 _forks
-..............
+......
 Mapping of ``<forkId,Fork>``
 
 Structs
-~~~~~~~~~~~~~~~~~~~
+~~~~~~~
 
 BlockHeader
-..............
+...........
 
 ======================  =========  ============================================
 Parameter               Type       Description
@@ -44,7 +61,7 @@ Parameter               Type       Description
 ======================  =========  ============================================
 
 Fork
-..............
+....
 
 ======================  =============  ============================================
 Parameter               Type           Description
