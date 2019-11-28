@@ -28,8 +28,12 @@ Variables
 _bestBlock
 ..........
 
-Current blockchain tip, i.e., most significant block in _mainChain. 
+Byte 32 block hash identifying current blockchain tip, i.e., most significant block in _mainChain. 
 
+_bestBlockHeight
+..............
+
+Integer block height of _bestBlock in  _mainChain. 
 
 Maps
 ~~~~
