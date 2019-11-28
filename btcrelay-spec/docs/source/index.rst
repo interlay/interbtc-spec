@@ -21,6 +21,7 @@ Welcome to BTC-Parachain's documentation!
    spec/functions
    spec/helpers
    spec/parser
+   spec/events
 
 .. toctree::
    :maxdepth: 2
