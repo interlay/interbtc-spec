@@ -1,11 +1,13 @@
 Functions
 =========
 
+.. _setInitialParent:
+
 setInitialParent
 ----------------
 
 
-
+.. _storeMainChainBlockHeader:
 
 storeMainChainBlockHeader
 --------------------------
@@ -86,6 +88,7 @@ The ``storeMainChainBlockHeader`` function takes as input the 80 byte raw Bitcoi
 
     Sequence diagram showing the function sequence of ``storeMainChainBlockHeader``.
 
+.. _storeForkBlockHeader:
 
 storeForkBlockHeader
 --------------------
@@ -122,7 +125,7 @@ Specification
 
 
 User Story
-~~~~~~~~~~~~
+~~~~~~~~~~
 
 A user calls the ``storeForkBlockHeader`` function when submitting a new Bitcoin block header, which is not extending the tip of the ``_mainChain`` tracked in BTC-Relay. 
 Thereby, the user performes the following steps (see notes and warnings in ``storeMainChainBlockHeader``):
@@ -182,8 +185,11 @@ The ``storeForkBlockHeader`` function takes as input the 80 byte raw Bitcoin blo
 
     Sequence diagram showing the function sequence of ``storeForkBlockHeader``.
 
+
+.. _verifyBlockHeader:
+
 verifyBlockHeader
-------------------
+-----------------
 
 The ``verifyBlockHeader`` function parses and verifies Bitcoin block
 headers. 
@@ -255,11 +261,14 @@ The ``verifyBlockHeader`` function takes as input the 80 byte raw Bitcoin block 
     Sequence diagram showing the function sequence of ``verifyBlockHeader``.
 
 
+.. _chainReorg:
 
 chainReorg
 --------------------
 
 TODO
+
+.. _verifyTransaction:
 
 verifyTransaction
 -----------------
