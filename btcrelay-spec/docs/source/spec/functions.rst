@@ -299,7 +299,7 @@ Specification
 
 *Events*
 
-* ``VerifyTransaction(txId, blockHeight, result)``: issue an event for a given txId and a blockHeight and return the result of the verification (either ``True`` or ``False``).
+* ``VerifyTransaction(txId, txBlockHeight, result)``: issue an event for a given txId and a blockHeight and return the result of the verification (either ``True`` or ``False``).
 
 *Errors*
 
