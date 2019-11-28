@@ -1,11 +1,13 @@
 Functions
 =========
 
+.. _setInitialParent:
+
 setInitialParent
 ----------------
 
 
-
+.. _storeMainChainBlockHeader:
 
 storeMainChainBlockHeader
 --------------------------
@@ -86,6 +88,7 @@ The ``storeMainChainBlockHeader`` function takes as input the 80 byte raw Bitcoi
 
     Sequence diagram showing the function sequence of ``storeMainChainBlockHeader``.
 
+.. _storeForkBlockHeader:
 
 storeForkBlockHeader
 --------------------
@@ -111,7 +114,7 @@ Specification
 
 *Events*
 
-* ``StoreForkHeader(forkId, blockHeight, blockHash)``: if the submitted block header is on a fork, emit an event with the fork's if (``forkId``), block height (``blockHeight``) and the (PoW) block hash (``blockHash``).
+* ``StoreForkHeader(forkId, blockHeight, blockHash)``: if the submitted block header is on a fork, emit an event with the fork's id (``forkId``), block height (``blockHeight``) and the (PoW) block hash (``blockHash``).
 *  ``ChainReorg(newChainTip, startHeight, forkId)``: if the submitted block header on a fork results in a reorganization (fork longer than current main chain), emit an event with the block hash of the new highest block (``newChainTip``), the start block height of the fork (``startHeight``) and the fork identifier (``forkId``).
 
 *Errors*
@@ -122,7 +125,7 @@ Specification
 
 
 User Story
-~~~~~~~~~~~~
+~~~~~~~~~~
 
 A user calls the ``storeForkBlockHeader`` function when submitting a new Bitcoin block header, which is not extending the tip of the ``_mainChain`` tracked in BTC-Relay. 
 Thereby, the user performes the following steps (see notes and warnings in ``storeMainChainBlockHeader``):
@@ -182,8 +185,11 @@ The ``storeForkBlockHeader`` function takes as input the 80 byte raw Bitcoin blo
 
     Sequence diagram showing the function sequence of ``storeForkBlockHeader``.
 
+
+.. _verifyBlockHeader:
+
 verifyBlockHeader
-------------------
+-----------------
 
 The ``verifyBlockHeader`` function parses and verifies Bitcoin block
 headers. 
@@ -255,11 +261,14 @@ The ``verifyBlockHeader`` function takes as input the 80 byte raw Bitcoin block 
     Sequence diagram showing the function sequence of ``verifyBlockHeader``.
 
 
+.. _chainReorg:
 
 chainReorg
 --------------------
 
 TODO
+
+.. _verifyTransaction:
 
 verifyTransaction
 -----------------
@@ -290,7 +299,7 @@ Specification
 
 *Events*
 
-* ``VerifyTransaction(txId, blockHeight, result)``: issue an event for a given txId and a blockHeight and return the result of the verification (either ``True`` or ``False``).
+* ``VerifyTransaction(txId, txBlockHeight, result)``: issue an event for a given txId and a blockHeight and return the result of the verification (either ``True`` or ``False``).
 
 *Errors*
 
