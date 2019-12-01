@@ -37,7 +37,7 @@ Bytes  Parameter               Type       Description
 Transactions
 ~~~~~~~~~~~~
 
-A transaction is broadcasted in a serialized bute format (also called raw format). It consists of a variable size of bytes and has the following `format <https://bitcoin.org/en/developer-reference#raw-transaction-format>`_.
+A transaction is broadcasted in a serialized byte format (also called raw format). It consists of a variable size of bytes and has the following `format <https://bitcoin.org/en/developer-reference#raw-transaction-format>`_.
 
 =====  ======================  =========  ==================================
 Bytes  Parameter               Type       Description
@@ -54,9 +54,32 @@ var    ``tx_out``              txOut      Transaction outputs.
 Inputs
 ~~~~~~
 
+Bitcoin's UTXO model requires a new transaction to spend at least one existing and unspent transaction output as a transaction input. The ``txIn`` type consists of the following bytes. See the `reference <https://bitcoin.org/en/developer-reference#txin>`_ for further details.
+
+=====  ======================  =========  ==================================
+Bytes  Parameter               Type       Description
+=====  ======================  =========  ==================================
+36     ``previous_output``     outpoint   The output to be spent consisting of the transaction hash (32 bytes) and the output index (4 bytes).
+var    ``script bytes``        uint       Number of bytes in the signature script (max 10,000 bytes).
+var    ``signature script``    char[]     The script satisfying the output's script.
+4      ``sequence``            u32        Sequence number (default ``0xffffffff``).
+=====  ======================  =========  ==================================
+
+
 
 Outputs
 ~~~~~~~
+
+The transaction output has the following format according to the `reference <https://bitcoin.org/en/developer-reference#txout>`_.
+
+=====  ======================  =========  ==================================
+Bytes  Parameter               Type       Description
+=====  ======================  =========  ==================================
+8      ``value``               i64        Number of satoshis to be spend.   
+1+     ``pk_script bytes``     uint       Number of bytes in the script.
+var    ``pk_script``           char[]     Spending condition as script.
+=====  ======================  =========  ==================================
+
 
 
 Merkle Tree Paths
