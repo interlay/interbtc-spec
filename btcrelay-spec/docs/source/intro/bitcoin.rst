@@ -16,7 +16,7 @@ Overview
 Data Model
 ------------------------
 
-Refer to https://bitcoin.org/en/developer-reference 
+This specification includes selected Bitcoin data model references. For the full details, refer to https://bitcoin.org/en/developer-reference.
 
 Block Headers
 ~~~~~~~~~~~~~~~
@@ -37,6 +37,18 @@ Bytes  Parameter               Type       Description
 Transactions
 ~~~~~~~~~~~~
 
+A transaction is broadcasted in a serialized bute format (also called raw format). It consists of a variable size of bytes and has the following `format <https://bitcoin.org/en/developer-reference#raw-transaction-format>`_.
+
+=====  ======================  =========  ==================================
+Bytes  Parameter               Type       Description
+=====  ======================  =========  ==================================
+4      ``version``             i32        Transaction version number.
+var    ``tx_in count``         uint       Number of transaction inputs.
+var    ``tx_in``               txIn       Transaction inputs.
+var    ``tx_out count``        uint       The number of transaction outputs.
+var    ``tx_out``              txOut      Transaction outputs.
+4      ``lock_time``           u32        A Unix timestamp OR block number.
+=====  ======================  =========  ==================================
 
 
 Inputs
