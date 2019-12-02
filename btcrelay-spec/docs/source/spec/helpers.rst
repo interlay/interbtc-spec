@@ -3,6 +3,8 @@ Helper Methods
 
 There are several helper methods available that abstract Bitcoin internals away in the main function implementation.
 
+.. _sha256d:
+
 sha256d
 -------
 Bitcoin uses a double SHA256 hash to protect against `"length-extension" attacks <https://en.wikipedia.org/wiki/Length_extension_attack>`_. 
@@ -25,6 +27,9 @@ Function Sequence
 1. Hash ``data`` with sha256.
 2. Hash the result of step 1 with sha256.
 3. Return ``hash``.
+
+
+.. _concatSha256d: 
 
 concatSha256d
 -------------
@@ -49,6 +54,8 @@ Function Sequence
 2. Call the `sha256d`_ function to hash the concatenated bytes.
 3. Return ``hash``.
 
+
+.. _nBitsToTarget:
 
 nBitsToTarget
 -------------
@@ -79,6 +86,8 @@ Function Sequence
 2. Extract the *significand* by taking the first three bytes of ``nBits``.
 3. Calculate the ``target`` via the equation above and using 2 as the *base* (as we use uint256 types).
 4. Return ``target``.
+
+.. _checkCorrectTarget:
 
 checkCorrectTarget
 ------------------
@@ -121,6 +130,8 @@ Function Sequence
         ii. Otherwise, return ``False``.
 
 
+.. _computeNewTarget: 
+
 computeNewTarget
 ----------------
 
@@ -150,6 +161,9 @@ Function Sequence
 5. If the ``newTarget`` is greater tha the maximum target in Bitcoin, set the ``newTarget`` to the maximum target (Bitcoin maximum target is :math:`2^{224}-1`).
 6. Return the ``newTarget``.
 
+
+
+.. _computeMerkle:
 
 computeMerkle
 -------------
@@ -216,6 +230,7 @@ The ``computeMerkle`` function would go past step 1 as our proof is longer than 
 
 
 
+.. _calculateDifficulty:
 
 calculateDifficulty
 ----------------------
@@ -237,3 +252,91 @@ Function Sequence
 ~~~~~~~~~~~~~~~~~
 
 1. Return ``0xffff0000000000000000000000000000000000000000000000000000`` (max. possible target, also referred to as "difficulty 1") divided by ``target``.
+
+
+
+.. _chainReorg:
+
+chainReorg
+--------------------
+
+The ``chainReorg`` function is called from ``storeForkBlockHeader`` and handles blockchain reorganizations in BTC-Relay, i.e., when a fork overtakes the tracked main chain in terms of length (and accumulated PoW). 
+As a result, the ``_mainChain`` references to stored block headers (in ``_blockHeaders``) are updated to point to the blocks contained in the overtaking fork.
+
+
+Specification
+~~~~~~~~~~~~~~
+*Function Signature*
+
+``chainReorg(forkId)``
+
+*Parameters*
+
+* ``forkId``: identifier of the fork as stored in ``_forks``, which is to replace the ``_mainChain``. 
+
+
+*Returns*
+
+* ``True``: if the ``_mainChain`` is updated to point to the block headers contained in the fork specified by ``forkId``.
+* ``False`` (or throws exception): otherwise.
+
+
+Function Sequence
+~~~~~~~~~~~~~~~~~
+
+1. Retrieve fork data (``Fork``, see `Data Model <spec/data-model.html#fork>`_) for ``_fork[forkId]``
+2. Create new entry in ``_forks``, (generate a new identifier ``newForkId``), setting ``_forks[newForkId].startHeight = _forks[forkId].startHeight`` and ``_forks[newForkId].length = _forks[forkId].length - 1``.
+3. Replace the current ``_mainChain`` references to ``_blockHeaders`` (i.e., the ``blockHash`` at each ``blockHeight``) with the corresponding entry in ``forkHashes`` of the given fork. In this process, store the replaced ``_mainChain`` entries to a new fork. In detail: starting at ``_fork[forkId].startHeight``, loop over ``_fork[forkId].forkHashes`` (``forkHash``) and for each ``forkHash`` (loop counter ``counter = 0`` incremented each round):
+
+    a. Copy the  ``blockHash`` referenced in ``mainChain`` at the corresponding block height (``startHeight + counter``) to ``_forks[newForkId].forkHashes``. 
+    b. Overwrite the ``blockHash`` in ``_mainChain`` at the corresponding block height (``startHeight + counter``) with the given ``forkHash``. 
+
+4. Update ``_bestBlock`` and ``_bestBlockHeight`` to point to updated heighest block in ``_mainChain``.
+
+5. Delete ``_fork[forkId]``.
+
+.. note:: The last block hash in ``forkHashes`` will be added to ``_mainChain`` with a block height exceeding the current ``_bestBlockHeight``, since the fork that caused the reorganization is by definition 1 block longer than the ``_mainChain`` tracked in BTC-Relay. 
+
+
+.. figure:: ../figures/chainReorg.png
+    :alt: chainReorg overview
+
+    Overview of a the BTC-Relay state before (above) and after (below) ``chainReorg(forkId)``.
+
+
+.. warning:: **Do not instantly delete** the block headers that were removed from the ``_mainChain`` through the reorganization. If deletion is required, wait at least until sufficient confirmations have passed, as defined by the security parameter *k* (see `Security <spec/data-model.html#fork>`_). 
+
+
+.. _getForkIdByBlockHash:
+
+getForkIdByBlockHash
+--------------------
+
+Helper function allowing to query the list of tracked forks ``_forks`` for the identifier of a fork given it's last submitted ("heighest") block hash.
+
+Specification
+~~~~~~~~~~~~~~
+*Function Signature*
+
+``getForkIdByBlockHash(blockHash)``
+
+*Parameters*
+
+* ``blockHash``: block hash of the last submitted block to a fork.
+
+
+*Returns*
+
+* ``forkId``: if there exists a fork with ``blockHash`` as latest submitted block in ``forkHashes``
+* ``-1`` (or throws exception): otherwise.
+
+
+
+Function Sequence
+~~~~~~~~~~~~~~~~~
+
+1. Loop over all entries in ``_forks`` and check if ``forkHashes[forkHashes.length -1] == blockhash``
+    
+    a. If ``True``: return the corresponding ``forkId``.
+
+2. Return ``-1`` (``forkId`` not found).

@@ -21,7 +21,18 @@ Welcome to BTC-Parachain's documentation!
    spec/functions
    spec/helpers
    spec/parser
+   spec/failure-handling
    spec/events
+   spec/errors
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Security and Performance:
+
+   security_performance/security
+   security_performance/performance
+
 
 .. toctree::
    :maxdepth: 2

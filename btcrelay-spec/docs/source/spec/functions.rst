@@ -1,11 +1,67 @@
-Functions
-=========
+Storage and Verification Methods
+================================
 
-.. _setInitialParent:
+.. _initialize:
 
-setInitialParent
+initialize
 ----------------
+Initializes BTC-Relay with the first Bitcoin block to be tracked and Initializes all data structures (see `Data Model <spec/data-model.html#data-model>`_).
 
+.. note:: BTC-Relay **does not** have to be initialized with Bitcoin's genesis block! The first block to be tracked can be selected freely. 
+
+.. warning:: Caution when setting the first block in BTC-Relay: only succeeding blocks can be submitted and **predecessors will be rejected**!
+
+
+Specification
+~~~~~~~~~~~~~~
+
+*Function Signature*
+
+``initialize(blockHeaderBytes, blockHeight)``
+
+*Parameters*
+
+* ``blockHeaderBytes``: raw Bitcoin block header bytes (80 bytes).
+* ``blockHeight``: Bitcoin block height of the submitted block header 
+
+*Returns*
+
+* ``True``: if initalization is executed correctly (and for the first time only)
+* ``False`` (or throws exception): otherwise.
+
+*Events*
+
+* ``StoreMainChainHeader(blockHeight, blockHash)``: if the block header was stored successfully, emit an event with the stored block's height (``blockHeight``) and the (PoW) block hash (``blockHash``).
+
+*Errors*
+
+* ``ERR_ALREADY_INITIALIZED``: "Already initialized.": raise exception if this function is called when BTC-Relay is already initialized.
+
+
+User Story
+~~~~~~~~~~
+This function is only called once, when BTC-Relay is being deployed. 
+
+.. note:: Calls to ``initialize`` will likely be restricted through the governance mechanism of the BTC-Parachain. This is to be defined.  
+
+
+
+Function sequence
+~~~~~~~~~~~~~~~~~
+
+The ``initialize`` function takes as input the 80 byte raw Bitcoin block header and the corresponding Bitcoin block height follows the following sequence:
+
+1. Check if ``initialize`` is called for the first time. This can be done by checking if ``_bestBlock == None``. Raise ``ERR_ALREADY_INITIALIZED`` if BTC-Relay has already been initialized. 
+
+2. Parse ``blockHeaderBytes``, extracting the ``merkleRoot`` using ``extractMerkleRoot(blockHeaderBytes)``, and store the block header data in ``_blockHeaders``. 
+
+3. Compute the Bitcoin block hash (``hashCurrentBlock``) of the block header (use ``sha256d(blockHeaderBytes)``) and store it as an entry in ``_mainChain`` using the provided ``blockHeight`` as key. 
+
+4. Set ``_bestBlock = hashCurrentBlock`` and ``_bestBlockHeight = blockHeight``.
+
+5. Return ``True``. 
+
+.. warning:: Attention: the Bitcoin block header submitted to ``initialize`` must be in the Bitcoin main chain - this must be checked outside of the BTC-Parachain **before** making this function call! A wrong initialization will cause the entire BTC-Parachain to fail, since verification requires that all submitted blocks **must** (indirectly) point to the initialized block (i.e., have it as ancestor, just like the actual Bitcoin genesis block).
 
 .. _storeMainChainBlockHeader:
 
@@ -232,8 +288,8 @@ User Story
 This function is called from both ``storeMainChainBlockHeader`` and ``storeForkBlockHeader``, but (typically) not by the user directly.
 Optionally, a user can call this function and submit an 80 byte Bitcoin block header. 
 
-
 The caller of this function receives as return value:
+
     a. ``True``: the block header was successfully verified 
     b. ``False`` (or an exceptin is raised): if verification fails
 
@@ -260,13 +316,6 @@ The ``verifyBlockHeader`` function takes as input the 80 byte raw Bitcoin block 
 
     Sequence diagram showing the function sequence of ``verifyBlockHeader``.
 
-
-.. _chainReorg:
-
-chainReorg
---------------------
-
-TODO
 
 .. _verifyTransaction:
 
@@ -342,7 +391,7 @@ The ``verifyTransaction`` function takes four inputs and follows the following s
 2. The submitted *block height* (``txBlockHeight``) is stored in BTCRelay and the block in which the transaction is included has enough confirmations. This check ensures that the submitted *block height* has at least the required amount of previous blocks (default ``6``). Raises ``ERR_CONFIRMATIONS`` if the condition is not met. 
 3. The user submitted a valid *Merkle proof*. The Merkle proof needs to contain the *transaction hash* in its first 32 bytes. Further, the last hash in the Merkle proof must be the block header hash in which the transaction is included. If this condition is not met, the function raises an ``ERR_MERKLE_PROOF`` error.
 4. The *Merkle proof* must be either 32 bytes long if the block contains only the coinbase transaction, or be above 64 bytes if the block contains more than one transaction. If this condition is not met, the function raises an ``ERR_MERKLE_PROOF`` error.
-5. Last, the function calls the `computeMerkle`_ helper function to calculate the Merkle root. If ``computeMerkle`` returns the merkleRoot, the function returns ``True``, otherwise ``False``. On completion of the function the ``VerifyTransaction`` event is generated including the transaction hash (``txId``), the block height (``txBlockHeight``), and the result (either ``True`` or ``False``).
+5. Last, the function calls the ``computeMerkle``_ helper function to calculate the Merkle root. If ``computeMerkle`` returns the merkleRoot, the function returns ``True``, otherwise ``False``. On completion of the function the ``VerifyTransaction`` event is generated including the transaction hash (``txId``), the block height (``txBlockHeight``), and the result (either ``True`` or ``False``).
 
 
 .. figure:: ../figures/verifyTransaction-sequence.png
