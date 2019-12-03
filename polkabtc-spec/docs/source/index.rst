@@ -16,6 +16,7 @@ Welcome to PolkaBTC's documentation!
    :caption: Specification
 
    spec/architecture
+   spec/actors
    spec/data-model
    spec/protocols
    spec/issue
