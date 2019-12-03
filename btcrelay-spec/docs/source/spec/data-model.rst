@@ -28,7 +28,12 @@ Variables
 _bestBlock
 ..........
 
-Current blockchain tip, i.e., most significant block in _mainChain. 
+Byte 32 block hash identifying current blockchain tip, i.e., most significant block in _mainChain. 
+
+_bestBlockHeight
+..............
+
+Integer block height of _bestBlock in  _mainChain. 
 
 
 Maps
@@ -46,6 +51,8 @@ Mapping of ``<blockHeight,blockHash>``
 _forks
 ......
 Mapping of ``<forkId,Fork>``
+
+
 
 Structs
 ~~~~~~~
@@ -70,3 +77,49 @@ Parameter               Type           Description
 ``length``              u256           Length of the fork (in blocks).
 ``forkBlockHashes``     tbd.           Linked hash set of block hashes, which references ``BlockHeaders`` in ``_blockHeaders``, contained in this fork (maintains insertion order).
 ======================  =============  ============================================
+
+
+Failure Handling
+~~~~~~~~~~~~~~~~
+
+Data structures used to handle failures of the BTC-Relay. 
+See 
+
+_isHalted
+..........
+
+Boolean flag - if set to ``True`` indicates that the BTC-Relaty was halted by the governance mechanism. 
+ 
+
+_haltReasons
+.............
+
+Array of ``HaltReason`` structs, providing details on the reason for the halting of BTC-Relay.
+
+
+
+HaltReason
+...........
+
+Struct  providing information for an occured halting of BTC-Relay. Contains the following fields.
+
+======================  =============  ============================================
+Parameter               Type           Description
+======================  =============  ============================================
+``haltingCode``         HaltingCode    Error code specifying reason for halting.
+``block``               char[32]       Block hash of the block header in ``_blockHeaders`` which caused the halting.  
+``msg``                 String         [Optional] message providing more details on halting reason. 
+======================  =============  ============================================
+
+
+HaltingCode
+............
+
+Enum specifying possible reasons for halting.
+
+
+* ``NO_DATA: 0`` - it was not possible to fetch transactional data for this  block. Hence, validation is not possible.
+
+* ``INVALID : 1`` - this block is invalid. See ``msg`` for reason.
+
+* ``UNSPECIFIED: 2`` - unexpected error occured, potentially manual intervantion from governance mechanism. See  ``msg`` for reason.
