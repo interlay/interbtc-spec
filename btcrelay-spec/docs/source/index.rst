@@ -1,6 +1,6 @@
 .. PolkaBTC documentation master file
 
-Welcome to BTC-Parachain's documentation!
+Welcome to Poladkot BTC-Relay's documentation!
 =========================================
 
 .. toctree::

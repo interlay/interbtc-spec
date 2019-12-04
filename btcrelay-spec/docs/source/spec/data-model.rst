@@ -52,6 +52,7 @@ _forks
 ......
 Mapping of ``<forkId,Fork>``
 
+.. warning:: If pruning is implemented for ``_blockHeades`` and ``_mainChain`` as performance optimization, it is critical to make sure there are no ``_forks`` entries left which reference pruned blocks. Either delay pruning, or, if the fork is inactive (hash falled behind ``_mainChain`` at least *k* blocks), delete it as well. 
 
 
 Structs
@@ -83,22 +84,51 @@ Failure Handling
 ~~~~~~~~~~~~~~~~
 
 Data structures used to handle failures of the BTC-Relay. 
-See 
 
-_isHalted
+_status
 ..........
 
-Boolean flag - if set to ``True`` indicates that the BTC-Relaty was halted by the governance mechanism. 
+Integer/Enum (see Status below). Defines the curret state of BTC-Relay. 
  
 
-_haltReasons
+_statusLog
 .............
 
-Array of ``HaltReason`` structs, providing details on the reason for the halting of BTC-Relay.
+Array of ``StatusUpdate`` structs, providing a history of status changes of BTC-Relay.
+
+.. note:: If pruning is implemented for ``_blockHeades`` and ``_mainChain`` as performance optimization, ``_statusLog`` entries referencing pruned blocks should be deleted as well. 
 
 
+StatusCode
+...........
 
-HaltReason
+* ``RUNNING: 0`` - BTC-Relay fully operational
+
+* ``PARTIAL : 1`` - ``NO_DATA`` detected or manual intervention. Transaction verification disabled for latest blocks.
+
+.. todo:: Define threshold for transaction verification disabling in ``PARTIAL`` state. 
+
+* ``HALTED: 2`` - ``INVALID`` detected or manual intervention. Transaction verification fully suspended.
+
+* ``SHUTDOWN: 3`` - Manual intervantion (``UNEXPECTED``). BTC-Relay operation fully suspended.
+
+ErrorCode
+............
+
+Enum specifying reasons for erros leading to a status update.
+
+
+* ``NO_DATA: 0`` - it was not possible to fetch transactional data for this  block. Hence, validation is not possible.
+
+* ``INVALID : 1`` - this block is invalid. See ``msg`` for reason.
+
+* ``UNEXPECTED: 2`` - unexpected error occured, potentially manual intervantion from governance mechanism. See  ``msg`` for reason.
+
+
+.. todo:: Decide how to best log reasons for recovery. As error codes (rename then) or simply in the ``msg``?
+
+
+StatusUpdate
 ...........
 
 Struct  providing information for an occured halting of BTC-Relay. Contains the following fields.
@@ -106,20 +136,10 @@ Struct  providing information for an occured halting of BTC-Relay. Contains the 
 ======================  =============  ============================================
 Parameter               Type           Description
 ======================  =============  ============================================
-``haltingCode``         HaltingCode    Error code specifying reason for halting.
-``block``               char[32]       Block hash of the block header in ``_blockHeaders`` which caused the halting.  
+``satusCode``           Status         New status code.
+``block``               char[32]       Block hash of the block header in ``_blockHeaders`` which caused the status change.  
+``reason``              ErrorCode      Error code specifying the reason for the status change.          
 ``msg``                 String         [Optional] message providing more details on halting reason. 
 ======================  =============  ============================================
 
 
-HaltingCode
-............
-
-Enum specifying possible reasons for halting.
-
-
-* ``NO_DATA: 0`` - it was not possible to fetch transactional data for this  block. Hence, validation is not possible.
-
-* ``INVALID : 1`` - this block is invalid. See ``msg`` for reason.
-
-* ``UNSPECIFIED: 2`` - unexpected error occured, potentially manual intervantion from governance mechanism. See  ``msg`` for reason.
