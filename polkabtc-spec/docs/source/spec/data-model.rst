@@ -157,7 +157,7 @@ Commits
 
 CbA-Requesters create commits to issue PolkaBTC. This mapping provides access from a ``CommitId`` to the ``Commit``. Mapping from a unique hash CommitId to a Commit. ``<CommitId, Commit>``.
 
-*Substrate*: ``Commits map T::Hash => IssueRequest<T::AccountId, Balance>``
+*Substrate*: ``Commits map T::Hash => Commit<T::AccountId, Balance>``
 
 
 Commit
@@ -176,6 +176,22 @@ Parameter           Type        Description
 ``sender``          Account     CbA-Requester account receiving the refund of ``collateral``.
 ``btcPublicKey``    bytes[20]   Base58 encoded Bitcoin public key of the CbA-Requester.  
 ==================  ==========  =======================================================
+
+*Substrate*
+
+::
+  
+  #[derive(Encode, Decode, Default, Clone, PartialEq)]
+  #[cfg_attr(feature = "std", derive(Debug))]
+  pub struct Commit<AccountId, Balance, Moment> {
+        vault: AccountId,
+        opentime: Moment,
+        collateral: Balance,
+        amount: Balance,
+        receiver: AccountId,
+        sender: AccountId,
+        btcPublicKey: Bytes
+  }
 
 
 
