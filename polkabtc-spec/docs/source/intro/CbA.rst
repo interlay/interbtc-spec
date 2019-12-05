@@ -22,9 +22,33 @@ However, commit-reveal ACCS face numerous challenges:
 
 Commit-reveal ACCS have been around since 2012. The practical challenges explain their limited use in practice.
 
+Cryptocurrency-back Assets (CbA)
+--------------------------------
 
+The idea of CbAs is that an asset is locked on a *backing blockchain* and issued 1:1 on an *issuing blockchain*. CbA that minimize trust in a third-party are based on the `XCLAIM protocol <https://www.xclaim.io/>`_. The third parties in XCLAIM are called *vaults* and are required to lock collateral as an insurance against misbehaviour.
 
+XCLAIM introduces three protocols to achieve decentralized, transparent, consistent, atomic, and censorship resistant cross-blockchain swaps:
 
+- **Issue**: Create Bitcoin-backed tokens, so-called *PolkaBTC* on the BTC Parachain.
+- **Transfer**: Transfer PolkaBTC to others within the Polkadot ecosystem.
+- **Redeem**: Burn Bitcoin-backed tokens on the BTC Parachain and receive 1:1 of the amount of Bitcoin in return.
+
+The basic intuition of the protocol is as below:
+
+.. figure:: ../figures/xclaim-process.png
+    :alt: XCLAIM process
+
+    The issue, transfer/swap, and redeem protocols in XCLAIM.
+
+Design Principles
+-----------------
+
+XCLAIM guarantees that Bitcoin-backed tokens can be redeemed for the corresponding amount of Bitcoin, or the equivalent economic value in DOT. Thereby, XCLAIM overcomes the limitations of centralized approaches through three primary techniques: 
+
+- **Secure audit logs**: Logs are constructed to record actions of all users both on Bitcoin and the BTC Parachain.
+- **Transaction inclusion proofs**: Chain relays are used to prove correct behavior on Bitcoin to the BTC Parachain.
+- **Proof-or-Punishment**: Instead of relying on timely fraud proofs (reactive), XCLAIM requires correct behavior to be proven proactively. 
+- **Over-collateralization**: Non-trusted intermediaries, i.e. vaults, are bound by collateral, with mechanisms in place to mitigate exchange rate fluctuations.
 
 Recommended Background Reading
 ------------------------------
