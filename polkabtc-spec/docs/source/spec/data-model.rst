@@ -109,6 +109,10 @@ Vault
 
 Stores the information of a vault.
 
+.. todo:: Where are we storig the vaults BTC address? We need to verify that the user send the BTC to the correct address. Potentially there is a BTC address associated with a vault. When a CbA-Requester creates a ``Commit`` the BTC address of the vault is copied there and the user can prove that he sent the BTC there. This give sus the chance that a vault can update his BTC address, but we don't have to deal with that if it happens during ongoing issue requests. These BTC will still be received on the old address (in case of an update). Also the protocol remains non-interactive for the vault in this case.
+
+
+
 ==================  =========  ========================================================
 Parameter           Type       Description
 ==================  =========  ========================================================
@@ -139,6 +143,14 @@ Parameter           Type       Description
 Issue Protocol
 ~~~~~~~~~~~~~~
 
+
+.. todo:: We need to handle replay attacks. Idea: include a short unique hash, e.g. the ``CommitId`` and the ``RedeemId`` in the BTC transaction in the ``OP_RETURN`` field. That way, we can check if it is the correct transaction.
+
+.. todo:: The hash creation for ``CommitId`` and ``RedeemId`` must be unique. Proposal: use a combination of Substrate's ``random_seed()`` method together with a ``nonce`` and the ``AccountId`` of a CbA-Requester and CbA-Redeemer. 
+
+.. warning:: Substrate's built in module to generate random data needs 80 blocks to actually generate random data.
+
+
 Scalars
 -------
 
@@ -155,10 +167,12 @@ Maps
 Commits
 .......
 
-CbA-Requesters create commits to issue PolkaBTC. This mapping provides access from a ``CommitId`` to the ``Commit``. Mapping from a unique hash CommitId to a Commit. ``<CommitId, Commit>``.
+CbA-Requesters create commit requests to issue PolkaBTC. This mapping provides access from a unique hash ``CommitId`` to a ``Commit`` struct. ``<CommitId, Commit>``.
 
-*Substrate*: ``Commits map T::Hash => Commit<T::AccountId, Balance>``
+*Substrate*: ``Commits map T::Hash => Commit<T::AccountId, T::Balance>``
 
+Structs
+-------
 
 Commit
 ......
@@ -168,7 +182,7 @@ Stores the status and information about a single commit.
 ==================  ==========  =======================================================	
 Parameter           Type        Description                                            
 ==================  ==========  =======================================================
-``vault``           Account     The vault responsible for this issue request.
+``vault``           Account     The vault responsible for this commit request.
 ``opentime``        u256        Timestamp of opening the request.
 ``collateral``      DOT         Collateral provided by a user.
 ``amount``          PolkaBTC    Amount of PolkaBTC to be issued.
@@ -193,5 +207,57 @@ Parameter           Type        Description
         btcPublicKey: Bytes
   }
 
+Redeem Protocol
+~~~~~~~~~~~~~~~
 
+Scalars
+-------
 
+RedeemPeriod
+............
+
+The time difference in seconds between a redeem request is created and required completion time by a vault. The redeem period has an upper limit to enforce the vault to release the CbA-Redeemer's Bitcoin.
+
+*Substrate*: ``RedeemPeriod: Moment;``
+
+Maps
+----
+
+Redeems
+.......
+
+CbA-Redeemers create redeem requests to burn their PolkaBTC and receive BTC in return. This mapping provides access from a unique hash ``RedeemId`` to the ``Redeem`` struct. ``<RedeemId, Redeem>``.
+
+*Substrate*: ``Redeems map T::Hash => Redeem<T::AccountId, T::Balance, T::Moment>;``
+
+Structs
+-------
+
+Redeem
+......
+
+Stores the status and information about a single redeem request.
+
+==================  ==========  =======================================================	
+Parameter           Type        Description                                            
+==================  ==========  =======================================================
+``vault``           Account     The vault responsible for this redeem request.
+``opentime``        u256        Timestamp of opening the request.
+``amount``          PolkaBTC    Amount of PolkaBTC to be redeemed.
+``redeemer``        Account     CbA-Redeemer account.
+``btcPublicKey``    bytes[20]   Base58 encoded Bitcoin public key of the CbA-Redeemer.  
+==================  ==========  =======================================================
+
+*Substrate*
+
+::
+  
+  #[derive(Encode, Decode, Default, Clone, PartialEq)]
+  #[cfg_attr(feature = "std", derive(Debug))]
+  pub struct Redeem<AccountId, Balance, Moment> {
+        vault: AccountId,
+        opentime: Moment,
+        amount: Balance,
+        redeemer: AccountId,
+        btcPublicKey: Bytes
+  }
