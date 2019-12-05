@@ -261,3 +261,16 @@ Parameter           Type        Description
         redeemer: AccountId,
         btcPublicKey: Bytes
   }
+
+Replace Protocol
+~~~~~~~~~~~~~~~~
+
+Scalars
+-------
+
+ReplacePeriod
+.............
+
+The time difference in seconds between a replacement vault indicates that it will replace a vault and required completion time by that vault.
+
+*Substrate*: ``ReplacePeriod: Moment;``
