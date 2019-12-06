@@ -21,6 +21,10 @@ Bitcoin uses a double SHA256 hash to protect against `"length-extension" attacks
 
 * ``hash``: the double sha256 hash encodes as a bytes from ``data``.
 
+*Substrate*
+
+* ``fn sha256d(data: String) -> T::Hash {...}``
+  
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
@@ -46,6 +50,10 @@ concatSha256d
 *Returns*
 
 * ``hash``: the double sha256 hash encodes as a bytes from ``left`` and ``right``.
+
+*Substrate*
+
+* ``fn concatSha256d(left: T::Hash, right: T::Hash) -> Hash {...}``
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -79,6 +87,10 @@ This function calculates the PoW difficulty target from a compressed nBits repre
 
 * ``target``: u256 PoW difficulty target computed from nBits.
 
+*Substrate*
+
+* ``fn nBitsToTarget(nBits: U256) -> U256 {...}``
+
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
@@ -110,6 +122,10 @@ Verifies the currently submitted block header has the correct difficulty target.
 
 * ``True``: if correct difficulty target is found.
 * ``False``: otherwise.
+
+*Substrate*
+
+* ``fn checkCorrectTarget(hashPrevBlock: T::Hash, blockHeight: U256, target: U256) -> bool {...}``
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -151,6 +167,10 @@ Computes the new difficulty target based on the given parameters, `according to 
 
 * ``newTarget``: u256 PoW difficulty target of the current block.
 
+*Substrate*
+
+* ``fn computeNewTarget(prevTime: T::Moment, startTime: T::Moment, prevTarget: U256) -> U256 {...}``
+
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
@@ -187,6 +207,10 @@ The computeMerkle function calculates the root of the Merkle tree of transaction
 *Errors*
 
 * ``ERR_MERKLE_PROOF = "Invalid Merkle Proof structure"``: raise an exception when the Merkle proof is malformed.
+
+*Substrate*
+
+* ``fn computeMerkle(txId: T::Hash, txIndex: u64, merkleProof: String) -> Hash {...}``
 
 
 Function Sequence
@@ -233,7 +257,7 @@ The ``computeMerkle`` function would go past step 1 as our proof is longer than 
 .. _calculateDifficulty:
 
 calculateDifficulty
-----------------------
+-------------------
 Given the ``target``, calculates the Proof-of-Work ``difficulty`` value, as defined in `https://en.bitcoin.it/wiki/Difficulty <https://en.bitcoin.it/wiki/Difficulty>`_ .
 
 *Function Signature*
@@ -248,54 +272,62 @@ Given the ``target``, calculates the Proof-of-Work ``difficulty`` value, as defi
 
 * ``difficulty``: difficulty calculated from passed ``target``.
 
+*Substrate*
+
+* ``fn calculateDifficulty(target: U256) -> U256 {...}``
+
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
 1. Return ``0xffff0000000000000000000000000000000000000000000000000000`` (max. possible target, also referred to as "difficulty 1") divided by ``target``.
 
 
-
 .. _chainReorg:
 
 chainReorg
---------------------
+----------
 
 The ``chainReorg`` function is called from ``storeForkBlockHeader`` and handles blockchain reorganizations in BTC-Relay, i.e., when a fork overtakes the tracked main chain in terms of length (and accumulated PoW). 
-As a result, the ``_mainChain`` references to stored block headers (in ``_blockHeaders``) are updated to point to the blocks contained in the overtaking fork.
+As a result, the ``MainChain`` references to stored block headers (in ``_blockHeaders``) are updated to point to the blocks contained in the overtaking fork.
 
 
 Specification
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+
 *Function Signature*
 
 ``chainReorg(forkId)``
 
 *Parameters*
 
-* ``forkId``: identifier of the fork as stored in ``_forks``, which is to replace the ``_mainChain``. 
+* ``forkId``: identifier of the fork as stored in ``Forks``, which is to replace the ``MainChain``. 
 
 
 *Returns*
 
-* ``True``: if the ``_mainChain`` is updated to point to the block headers contained in the fork specified by ``forkId``.
+* ``True``: if the ``MainChain`` is updated to point to the block headers contained in the fork specified by ``forkId``.
 * ``False`` (or throws exception): otherwise.
+
+*Substrate*
+
+* ``fn chainReorg(forkId: U256) -> bool {...}``
 
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-1. Retrieve fork data (``Fork``, see `Data Model <spec/data-model.html#fork>`_) for ``_fork[forkId]``
-2. Create new entry in ``_forks``, (generate a new identifier ``newForkId``), setting ``_forks[newForkId].startHeight = _forks[forkId].startHeight`` and ``_forks[newForkId].length = _forks[forkId].length - 1``.
-3. Replace the current ``_mainChain`` references to ``_blockHeaders`` (i.e., the ``blockHash`` at each ``blockHeight``) with the corresponding entry in ``forkHashes`` of the given fork. In this process, store the replaced ``_mainChain`` entries to a new fork. In detail: starting at ``_fork[forkId].startHeight``, loop over ``_fork[forkId].forkHashes`` (``forkHash``) and for each ``forkHash`` (loop counter ``counter = 0`` incremented each round):
+1. Retrieve fork data (``Fork``, see `Data Model <spec/data-model.html#fork>`_) for ``Fork[forkId]``
+2. Create new entry in ``Forks``, (generate a new identifier ``newForkId``), setting ``Forks[newForkId].startHeight = Forks[forkId].startHeight`` and ``Forks[newForkId].length = Forks[forkId].length - 1``.
+3. Replace the current ``MainChain`` references to ``_blockHeaders`` (i.e., the ``blockHash`` at each ``blockHeight``) with the corresponding entry in ``forkHashes`` of the given fork. In this process, store the replaced ``MainChain`` entries to a new fork. In detail: starting at ``Fork[forkId].startHeight``, loop over ``Fork[forkId].forkHashes`` (``forkHash``) and for each ``forkHash`` (loop counter ``counter = 0`` incremented each round):
 
-    a. Copy the  ``blockHash`` referenced in ``mainChain`` at the corresponding block height (``startHeight + counter``) to ``_forks[newForkId].forkHashes``. 
-    b. Overwrite the ``blockHash`` in ``_mainChain`` at the corresponding block height (``startHeight + counter``) with the given ``forkHash``. 
+    a. Copy the  ``blockHash`` referenced in ``mainChain`` at the corresponding block height (``startHeight + counter``) to ``Forks[newForkId].forkHashes``. 
+    b. Overwrite the ``blockHash`` in ``MainChain`` at the corresponding block height (``startHeight + counter``) with the given ``forkHash``. 
 
-4. Update ``_bestBlock`` and ``_bestBlockHeight`` to point to updated heighest block in ``_mainChain``.
+4. Update ``BestBlock`` and ``BestBlockHeight`` to point to updated heighest block in ``MainChain``.
 
-5. Delete ``_fork[forkId]``.
+5. Delete ``Fork[forkId]``.
 
-.. note:: The last block hash in ``forkHashes`` will be added to ``_mainChain`` with a block height exceeding the current ``_bestBlockHeight``, since the fork that caused the reorganization is by definition 1 block longer than the ``_mainChain`` tracked in BTC-Relay. 
+.. note:: The last block hash in ``forkHashes`` will be added to ``MainChain`` with a block height exceeding the current ``BestBlockHeight``, since the fork that caused the reorganization is by definition 1 block longer than the ``MainChain`` tracked in BTC-Relay. 
 
 
 .. figure:: ../figures/chainReorg.png
@@ -304,7 +336,7 @@ Function Sequence
     Overview of a the BTC-Relay state before (above) and after (below) ``chainReorg(forkId)``.
 
 
-.. warning:: **Do not instantly delete** the block headers that were removed from the ``_mainChain`` through the reorganization. If deletion is required, wait at least until sufficient confirmations have passed, as defined by the security parameter *k* (see `Security <spec/data-model.html#fork>`_). 
+.. warning:: **Do not instantly delete** the block headers that were removed from the ``MainChain`` through the reorganization. If deletion is required, wait at least until sufficient confirmations have passed, as defined by the security parameter *k* (see `Security <spec/data-model.html#fork>`_). 
 
 
 .. _getForkIdByBlockHash:
@@ -312,7 +344,7 @@ Function Sequence
 getForkIdByBlockHash
 --------------------
 
-Helper function allowing to query the list of tracked forks ``_forks`` for the identifier of a fork given it's last submitted ("heighest") block hash.
+Helper function allowing to query the list of tracked forks ``Forks`` for the identifier of a fork given it's last submitted ("heighest") block hash.
 
 Specification
 ~~~~~~~~~~~~~~
@@ -330,13 +362,16 @@ Specification
 * ``forkId``: if there exists a fork with ``blockHash`` as latest submitted block in ``forkHashes``
 * ``-1`` (or throws exception): otherwise.
 
+*Substrate*
+
+* ``fn getForkIdByBlockHash(blockHash: T::Hash) -> U256 {...}``
 
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-1. Loop over all entries in ``_forks`` and check if ``forkHashes[forkHashes.length -1] == blockhash``
+1. Loop over all entries in ``Forks`` and check if ``forkHashes[forkHashes.length -1] == blockhash``
     
     a. If ``True``: return the corresponding ``forkId``.
 
-2. Return ``-1`` (``forkId`` not found).
+2. Return ``forkId`` not found otherwise.
