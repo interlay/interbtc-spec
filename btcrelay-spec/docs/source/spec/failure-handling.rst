@@ -69,6 +69,11 @@ Specification
 
 * ``StatusUpdate(newStatus, block, errorCode, msg)`` - emits an event indicating the status change, with ``newStatus`` being the new ``StatusCode``, ``block`` is the block hash of the block which caused the status change, ``errorCode`` the ``ErrorCode`` specifying the reason for the status change, and ``msg`` the detailed message provided by the function caller. 
 
+*Substrate*
+
+* ``fn statusUpdate(origin, update: StatusUpdate) -> Result {...}``
+
+
 User Story
 ~~~~~~~~~~
 This function is called by Staked Relayers and the Parachain's Governance Mechanism to indicate (possible) failures of BTC-Relay, or to recover from them. 
