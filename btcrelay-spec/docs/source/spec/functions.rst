@@ -4,7 +4,7 @@ Storage and Verification Methods
 .. _initialize:
 
 initialize
-----------------
+----------
 Initializes BTC-Relay with the first Bitcoin block to be tracked and Initializes all data structures (see `Data Model <spec/data-model.html#data-model>`_).
 
 .. note:: BTC-Relay **does not** have to be initialized with Bitcoin's genesis block! The first block to be tracked can be selected freely. 
@@ -26,7 +26,7 @@ Specification
 
 *Returns*
 
-* ``True``: if initalization is executed correctly (and for the first time only)
+* ``True``: if initialization is executed correctly (and for the first time only)
 * ``False`` (or throws exception): otherwise.
 
 *Events*
@@ -37,6 +37,9 @@ Specification
 
 * ``ERR_ALREADY_INITIALIZED``: "Already initialized.": raise exception if this function is called when BTC-Relay is already initialized.
 
+*Substrate*
+
+* ``fn initialize(origin, blockHeaderBytes: T::BTCBlockHeader, blockHeight: U256) -> Result {...}``
 
 User Story
 ~~~~~~~~~~
@@ -66,13 +69,13 @@ The ``initialize`` function takes as input the 80 byte raw Bitcoin block header 
 .. _storeMainChainBlockHeader:
 
 storeMainChainBlockHeader
---------------------------
+-------------------------
 Method to submit block headers to the BTC-Relay, which extend the Bitcoin main chain (as tracked in ``_mainChain`` in the BTC-Relay). 
 This function calls the ``verifyBlockHeader`` proving the 80 bytes Bitcoin block header as input, and, if the latter returns ``True``, extracts from the block header and stores (i) the hash, height and Merkle Tree root of the given block header in ``_blockHeaders`` and (ii) the hash and block height in ``_mainChain``.
 
 
 Specification
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 *Function Signature*
 
@@ -95,7 +98,9 @@ Specification
 
 * ``ERR_NOT_MAIN_CHAIN`` = "Main chain submission indicated, but submitted block is on a fork": raise exception if the block header submission indicates that it is extending the current longest chain, but is actually on a (new) fork.
 
+*Substrate*
 
+* ``fn storeMainChainBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader) -> Result {...}``
 
 User Story
 ~~~~~~~~~~
@@ -178,6 +183,9 @@ Specification
 * ``ERR_FORK_PREV_BLOCK`` = "Previous block hash does not match last block in fork submission": raise exception if the block header does not reference the heighest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
 * ``ERR_NOT_FORK`` = "Indicated fork submission, but block is in main chain":  raise exception if the block header creates a new or extends an existing fork, but is actually extending the current longest chain.
 
+*Substrate*
+
+* ``fn storeForkBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader, forkId: U256) -> Result {...}``
 
 
 User Story
@@ -282,6 +290,9 @@ Specification
 * ``ERR_LOW_DIFF`` = "PoW hash does not meet difficulty target of header": raise exception when the header's ``blockHash`` does not meet the ``target`` specified in the block header.
 * ``ERR_DIFF_TARGET_HEADER`` = "Incorrect difficulty target specified in block header": raise exception if the ``target`` specified in the block header is incorrect for its block height (difficulty re-target not executed).
 
+*Substrate*
+
+* ``fn verifyBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader) -> Result {...}``
 
 User Story
 ~~~~~~~~~~
@@ -355,6 +366,10 @@ Specification
 * ``ERR_INVALID_TXID = "Invalid transaction identifier"``: raise an exception when the transaction id (``txId``) is malformed.
 * ``ERR_CONFIRMATIONS = "Transaction has less confirmations than requested"``: raise an exception when the number of confirmations is less than required.
 * ``ERR_MERKLE_PROOF = "Invalid Merkle Proof structure"``: raise an exception when the Merkle proof is malformed.
+
+*Substrate*
+
+* ``fn verifyTransaction(origin, txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: T::Hash) -> Result {...}``
 
 
 User Story
