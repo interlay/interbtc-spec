@@ -6,7 +6,7 @@ The BTC-Relay provides additional methods for failure handling, e.g. in case an 
 
 
 Failure Modes Overview
--------------------------
+----------------------
 
 BTC-Relay can enter into different failure modes, depending on the occured error.
 See figure below. 
@@ -18,7 +18,7 @@ See figure below.
     State machine showing the operational and failure modes of BTC-Relay, and how to recover from or flag failures.
 
 Roles
-------
+-----
 
 Failure handling methods calls are **restricted**, i.e., can only be called by pre-determined roles.
 We differentiate between:
@@ -39,13 +39,14 @@ For an overview of the data structures used for failure handling, please see the
 .. _statusUpdate:
 
 statusUpdate
------------------
+------------
 
 The ``statusUpdate`` function updates the status of BTC-Relay, e.g. restricting operation or recovering from a failure. 
 
 
 Specification
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+
 *Function Signature*
 
 ``statusUpdate(update)``
@@ -74,7 +75,7 @@ This function is called by Staked Relayers and the Parachain's Governance Mechan
 
 See the BTC-Relay `State Machine </spec/failure-handling.html#id2>`_ for more details.
 
-.. Use Cases
+Use Cases
 ~~~~~~~~~
 **Verification of Transaction Inclusion**:
 To be able to verify that a transaction is included in the Bitcoin blockchain, the corresponding block at the specified ``txBlockHeight`` must be first submitted, verified and stored in the BTC-Relay via ``verifyBlockHeader``. 
