@@ -63,7 +63,7 @@ The BTC to DOT exchange rate. This exchange rate determines how much collateral 
 
 .. todo:: What granularity should we set here?
 
-*Substrate*: ``ExchangeRate: u256;``
+*Substrate*: ``ExchangeRate: U256;``
 
 SecureOperationLimit
 ....................
