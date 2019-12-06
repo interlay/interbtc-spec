@@ -369,7 +369,7 @@ Specification
 
 *Substrate*
 
-* ``fn verifyTransaction(origin, txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: T::Hash) -> Result {...}``
+* ``fn verifyTransaction(origin, txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: String) -> Result {...}``
 
 
 User Story
