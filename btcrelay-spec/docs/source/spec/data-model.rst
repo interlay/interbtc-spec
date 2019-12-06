@@ -26,7 +26,7 @@ UNROUNDED_MAX_TARGET
 
 The maximum difficulty target. Defaults to :math:`2^{224}-1`.
 
-*Substrate*: ``const UNROUNDED_MAX_TARGET: u256 = 26959946667150639794667015087019630673637144422540572481103610249215;``
+*Substrate*: ``const UNROUNDED_MAX_TARGET: U256 = 26959946667150639794667015087019630673637144422540572481103610249215;``
 
 Variables
 ~~~~~~~~~
@@ -43,7 +43,7 @@ BestBlockHeight
 
 Integer block height of BestBlock in MainChain. 
 
-*Substrate*: ``BestBlockHeight: u256;``
+*Substrate*: ``BestBlockHeight: U256;``
 
 Maps
 ~~~~
@@ -59,7 +59,7 @@ MainChain
 .........
 Mapping of ``<blockHeight,blockHash>``
 
-*Substrate*: ``MainChain: map u256 => T::Hash;``
+*Substrate*: ``MainChain: map U256 => T::Hash;``
 
 Forks
 .....
@@ -67,7 +67,7 @@ Mapping of ``<forkId,Fork>``
 
 .. warning:: If pruning is implemented for ``BlockHeaders`` and ``MainChain`` as performance optimization, it is critical to make sure there are no ``Forks`` entries left which reference pruned blocks. Either delay pruning, or, if the fork is inactive (hash falled behind ``MainChain`` at least *k* blocks), delete it as well. 
 
-*Substrate*: ``Forks: map u256 => Fork<Vec<T::Hash>>;``
+*Substrate*: ``Forks: map U256 => Fork<Vec<T::Hash>>;``
 
 Structs
 ~~~~~~~
@@ -89,7 +89,7 @@ Parameter               Type       Description
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
   pub struct BlockHeader<Hash> {
-        blockHeight: u256,
+        blockHeight: U256,
         merkleRoot: Hash 
   }
   
@@ -114,8 +114,8 @@ Parameter               Type           Description
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
   pub struct Fork<> {
-        startHeight: u256,
-        length: u256,
+        startHeight: U256,
+        length: U256,
         forkBlockHahes: Vec<Hash>
   }
 
