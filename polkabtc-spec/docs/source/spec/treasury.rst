@@ -193,10 +193,12 @@ Function Sequence
 Events
 ~~~~~~
 
-
+* ``Transfer(sender, receiver, amount)``: Issues an event when a transfer of funds was successful.
+* ``Mint(requester, amount)``: Issue an event when new PolkaBTC are minted.
+* ``Burn(redeemer, amount)``: Issue an event when the amount of PolkaBTC is successfully destroyed.
 
 Errors
 ~~~~~~
 
-
+* ``ERR_INSUFFICIENT_FUNDS``: ``The balance of this account is insufficient to complete the transaction``. 
 
