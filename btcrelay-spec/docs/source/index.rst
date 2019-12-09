@@ -8,15 +8,15 @@ Welcome to Poladkot BTC-Relay's documentation!
    :caption: Introduction:
 
    intro/at-a-glance
-   intro/chain-relays
    intro/bitcoin
+   intro/architecture
+
 
 
 .. toctree::
    :maxdepth: 2
    :caption: Specification:
 
-   spec/architecture
    spec/data-model
    spec/functions
    spec/helpers

@@ -1,4 +1,4 @@
-Helper Methods
+Utils
 ==============
 
 There are several helper methods available that abstract Bitcoin internals away in the main function implementation.

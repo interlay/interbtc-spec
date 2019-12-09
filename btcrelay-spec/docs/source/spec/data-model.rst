@@ -36,7 +36,7 @@ BestBlock
 
 Byte 32 block hash identifying current blockchain tip, i.e., most significant block in ``MainChain``. 
 
-*Substrate*: ``BestBlock: Hash;``
+*Substrate*: ``BestBlock: Hash256;``
 
 BestBlockHeight
 ...............
@@ -53,13 +53,13 @@ BlockHeaders
 
 Mapping of ``<blockHash,BlockHeader>``
 
-*Substrate*: ``BlockHeaders: map T::Hash => BlockHeader<T::Hash>;``
+*Substrate*: ``BlockHeaders: map T::Hash256 => BlockHeader<T::Hash256>;``
 
 MainChain
 .........
 Mapping of ``<blockHeight,blockHash>``
 
-*Substrate*: ``MainChain: map U256 => T::Hash;``
+*Substrate*: ``MainChain: map U256 => T::Hash256;``
 
 Forks
 .....
@@ -67,7 +67,7 @@ Mapping of ``<forkId,Fork>``
 
 .. warning:: If pruning is implemented for ``BlockHeaders`` and ``MainChain`` as performance optimization, it is critical to make sure there are no ``Forks`` entries left which reference pruned blocks. Either delay pruning, or, if the fork is inactive (hash falled behind ``MainChain`` at least *k* blocks), delete it as well. 
 
-*Substrate*: ``Forks: map U256 => Fork<Vec<T::Hash>>;``
+*Substrate*: ``Forks: map U256 => Fork<Vec<T::Hash256>>;``
 
 Structs
 ~~~~~~~
@@ -78,8 +78,8 @@ BlockHeader
 ======================  =========  ============================================
 Parameter               Type       Description
 ======================  =========  ============================================
-``blockHeight``         u256       Height of the current block header.
-``merkleRoot``          bytes[32]   Root of the Merkle tree storing referencing transactions included in the block.
+``blockHeight``         U256       Height of the current block header.
+``merkleRoot``          Hash256       Root of the Merkle tree storing referencing transactions included in the block.
 ======================  =========  ============================================
 
 *Substrate*: 
@@ -88,9 +88,9 @@ Parameter               Type       Description
 
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct BlockHeader<Hash> {
+  pub struct BlockHeader<Hash256> {
         blockHeight: U256,
-        merkleRoot: Hash 
+        merkleRoot: Hash256 
   }
   
 
@@ -102,9 +102,9 @@ Fork
 ======================  =============  ============================================
 Parameter               Type           Description
 ======================  =============  ============================================
-``startHeight``         u256           Height of the block at which this fork starts (forkpoint).
-``length``              u256           Length of the fork (in blocks).
-``forkBlockHashes``     tbd.           Linked hash set of block hashes, which references ``BlockHeaders`` in ``BlockHeaders``, contained in this fork (maintains insertion order).
+``startHeight``         U256           Height of the block at which this fork starts (forkpoint).
+``length``              U256           Length of the fork (in blocks).
+``forkBlockHashes``     Vec<Hash256>      Linked hash set of block hashes, which references ``BlockHeaders`` in ``BlockHeaders``, contained in this fork (maintains insertion order).
 ======================  =============  ============================================
 
 *Substrate*:
@@ -116,13 +116,13 @@ Parameter               Type           Description
   pub struct Fork<> {
         startHeight: U256,
         length: U256,
-        forkBlockHahes: Vec<Hash>
+        forkBlockHahes: Vec<Hash256>
   }
 
 
 
-Failure Handling
-~~~~~~~~~~~~~~~~
+BTC Relay Status (Failure Handling)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Data structures used to handle failures of the BTC-Relay. 
 
@@ -211,9 +211,9 @@ Parameter               Type           Description
 
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct StatusUpdate<Status, Hash, ErrorCode> {
+  pub struct StatusUpdate<Status, Hash256, ErrorCode> {
         statusCode: Status,
-        blockHash: Hash,
+        blockHash: Hash256,
         errorCode: ErrorCode,
         msg: String
   }

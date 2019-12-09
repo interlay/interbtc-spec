@@ -1,4 +1,4 @@
-Failure Handling Methods
+Failure Handling
 ========================
 
 The BTC-Relay provides additional methods for failure handling, e.g. in case an attack on the Parachain or Bitcoin itself is detected. 
@@ -90,5 +90,5 @@ To be able to verify that a transaction is included in the Bitcoin blockchain, t
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-1. Set ``_status``  to ``update.statusCode`` 
+1. Set ``Status``  to ``update.statusCode`` 
 2. Emit ``StatusUpdate(update.statusCode, update.block, update.reason, update.msg)`` event 

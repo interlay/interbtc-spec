@@ -1,130 +1,127 @@
-Exception Handling
+Error Codes
 ===================
 
 A summary of error codes raised in exceptions by BTC-Relay, and their meanings, are provided below.
 
 
-Error Codes
-------------
-
 ``ERR_ALREADY_INITIALIZED``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Message:** "Already initialized."
 
-**Function:** ``initialize``
+* **Message:** "Already initialized."
 
-**Cause**:  Exception raised in ``initialize`` if this function is called when BTC-Relay is already initialized.
+* **Function:** ``initialize``
+
+* **Cause**:  Exception raised in ``initialize`` if this function is called when BTC-Relay is already initialized.
 
 
 
 ``ERR_NOT_MAIN_CHAIN``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Message:** "Main chain submission indicated, but submitted block is on a fork"
 
-**Function:** ``storeMainChainBlockHeader``
+* **Message:** "Main chain submission indicated, but submitted block is on a fork"
 
-**Cause**:   Exception raised in ``storeMainChainBlockHeader`` if the block header submission indicates that it is extending the current longest chain, but is actually on a (new) fork.
+* **Function:** ``storeMainChainBlockHeader``
+
+* **Cause**:   Exception raised in ``storeMainChainBlockHeader`` if the block header submission indicates that it is extending the current longest chain, but is actually on a (new) fork.
 
 
 ``ERR_FORK_PREV_BLOCK``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-**Message:**  "Previous block hash does not match last block in fork submission"
 
-**Function:** ``storeForkBlockHeader``
+* **Message:**  "Previous block hash does not match last block in fork submission"
 
-**Cause**:   Exception raised in ``storeForkBlockHeader`` if the block header does not reference the heighest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
+* **Function:** ``storeForkBlockHeader``
+
+* **Cause**:   Exception raised in ``storeForkBlockHeader`` if the block header does not reference the heighest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
 
 ``ERR_NOT_FORK`` 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Message**: "Indicated fork submission, but block is in main chain"
 
-**Function**: ``storeForkBlockHeader`` 
+* **Message**: "Indicated fork submission, but block is in main chain"
 
-**Cause**:  Exception raised  in ``storeForkBlockHeader`` if the block header creates a new or extends an existing fork, but is actually extending the current longest chain.
+* **Function**: ``storeForkBlockHeader`` 
+
+* **Cause**:  Exception raised  in ``storeForkBlockHeader`` if the block header creates a new or extends an existing fork, but is actually extending the current longest chain.
 
 ``ERR_INVALID_FORK_ID``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-**Message**:  "Incorrect fork identifier."
 
-**Function**: ``storeForkBlockHeader``
+* **Message**:  "Incorrect fork identifier."
 
-**Cause**: Exception raised  in ``storeForkBlockHeader`` when a non-existent fork identifiert or ``0`` (blocked for special meaning) is passed. 
+* **Function**: ``storeForkBlockHeader``
+
+* **Cause**: Exception raised  in ``storeForkBlockHeader`` when a non-existent fork identifiert or ``0`` (blocked for special meaning) is passed. 
 
 ``ERR_INVALID_HEADER_SIZE``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Message**: "Invalid block header size": 
 
-**Function**: ``verifyBlockHeader``
+* **Message**: "Invalid block header size": 
 
-**Cause**: Exception raised in ``verifyBlockHeader`` if the submitted block header is not exactly 80 bytes long.
+* **Function**: ``verifyBlockHeader``
+
+* **Cause**: Exception raised in ``verifyBlockHeader`` if the submitted block header is not exactly 80 bytes long.
 
 
 ``ERR_DUPLICATE_BLOCK``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Message**: "Block already stored"
 
-**Function**: ``verifyBlockHeader``
+* **Message**: "Block already stored"
 
-**Cause**: Exception raised in ``verifyBlockHeader`` if the submitted block header is already stored in the BTC-Relay (same PoW ``blockHash``). 
+* **Function**: ``verifyBlockHeader``
+
+* **Cause**: Exception raised in ``verifyBlockHeader`` if the submitted block header is already stored in the BTC-Relay (same PoW ``blockHash``). 
 
 ``ERR_PREV_BLOCK``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Message**: "Previous block hash not found"
 
-**Function**: ``verifyBlockHeader``
+* **Message**: "Previous block hash not found"
 
-**Cause**: Exception raised in ``verifyBlockHeader``  if the submitted block does not reference an already stored block header as predecessor (via ``prevBlockHash``). 
+* **Function**: ``verifyBlockHeader``
+
+* **Cause**: Exception raised in ``verifyBlockHeader``  if the submitted block does not reference an already stored block header as predecessor (via ``prevBlockHash``). 
 
 
 ``ERR_LOW_DIFF``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Message**:"PoW hash does not meet difficulty target of header"
 
-**Function**: ``verifyBlockHeader``
+* **Message**:"PoW hash does not meet difficulty target of header"
 
-**Cause**: Exception raised in ``verifyBlockHeader``  when the header's ``blockHash`` does not meet the ``target`` specified in the block header.
+* **Function**: ``verifyBlockHeader``
+
+* **Cause**: Exception raised in ``verifyBlockHeader``  when the header's ``blockHash`` does not meet the ``target`` specified in the block header.
 
 
 ``ERR_DIFF_TARGET_HEADER``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Message**: "Incorrect difficulty target specified in block header"
 
-**Function**: ``verifyBlockHeader``
+* **Message**: "Incorrect difficulty target specified in block header"
 
-**Cause**: Exception raised in ``verifyBlockHeader`` if the ``target`` specified in the block header is incorrect for its block height (difficulty re-target not executed).
+* **Function**: ``verifyBlockHeader``
+
+* **Cause**: Exception raised in ``verifyBlockHeader`` if the ``target`` specified in the block header is incorrect for its block height (difficulty re-target not executed).
 
 
 ``ERR_INVALID_TXID``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Message**: "Invalid transaction identifier"
 
-**Function**: ``verifyTransaction``
+* **Message**: "Invalid transaction identifier"
 
-**Cause**: Exception raised in ``verifyTransaction`` when the transaction id (``txId``) is malformed.
+* **Function**: ``verifyTransaction``
+
+* **Cause**: Exception raised in ``verifyTransaction`` when the transaction id (``txId``) is malformed.
 
 ``ERR_CONFIRMATIONS``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Message**: "Transaction has less confirmations than requested"
+* **Message**: "Transaction has less confirmations than requested"
 
-**Function**: ``verifyTransaction``
+* **Function**: ``verifyTransaction``
 
-**Cause**: Exception raised in ``verifyTransaction`` when the number of confirmations is less than required.
+* **Cause**: Exception raised in ``verifyTransaction`` when the number of confirmations is less than required.
 
 ``ERR_MERKLE_PROOF``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-**Message**: "Invalid Merkle Proof structure"
 
-**Function**: ``verifyTransaction``
+* **Message**: "Invalid Merkle Proof structure"
 
-**Cause**: Exception raised in ``verifyTransaction`` when the Merkle proof is malformed.
+* **Function**: ``verifyTransaction``
+
+* **Cause**: Exception raised in ``verifyTransaction`` when the Merkle proof is malformed.

@@ -1,4 +1,4 @@
-Storage and Verification Methods
+Storage and Verification
 ================================
 
 .. _initialize:

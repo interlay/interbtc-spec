@@ -1,7 +1,7 @@
 Bitcoin
 ===============================
 
-This is a quick overview of Bitcoin in relation to the BTCRelay functions.
+This is a quick overview of Bitcoin, containing information necessary to understand the operation of BTC-Relay.
 
 Overview
 ------------------------
