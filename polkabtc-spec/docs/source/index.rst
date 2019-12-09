@@ -17,6 +17,7 @@ Welcome to PolkaBTC's documentation!
 
    spec/architecture
    spec/data-model
+   spec/treasury
    spec/protocols
    spec/issue
    spec/transfer
