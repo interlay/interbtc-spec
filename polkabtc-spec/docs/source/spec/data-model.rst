@@ -3,8 +3,8 @@ Data Model
 
 The data model covers the necessary information to handle the issue and redeem process as well as the management of tokens, i.e. accounts and balances.
 
-Global
-~~~~~~
+Treasury
+~~~~~~~~
 
 Constants
 ---------
@@ -21,6 +21,37 @@ TotalSupply
 The total supply of PolkaBTC.
 
 *Substrate*: ``TotalSupply: Balance;``
+
+Maps
+----
+
+Balances
+........
+
+Mapping from accounts to their balance. ``<Account, Balance>``.
+
+*Substrate*: ``Balances: map T::AccountId => Balance;``
+
+Oracle
+~~~~~~
+
+Scalars
+-------
+
+ExchangeRate
+............
+
+The BTC to DOT exchange rate. This exchange rate determines how much collateral is required to issue a specific amount of PolkaBTC.
+
+.. todo:: What granularity should we set here?
+
+*Substrate*: ``ExchangeRate: U256;``
+
+Vaults
+~~~~~~
+
+Scalars
+-------
 
 TotalCollateral
 ...............
@@ -56,14 +87,6 @@ The minimum collateral (DOT) a user needs to provide.
 
 *Substrate*: ``MinimumCollateralUser: Balance;``
 
-ExchangeRate
-............
-
-The BTC to DOT exchange rate. This exchange rate determines how much collateral is required to issue a specific amount of PolkaBTC.
-
-.. todo:: What granularity should we set here?
-
-*Substrate*: ``ExchangeRate: U256;``
 
 SecureOperationLimit
 ....................
@@ -83,16 +106,16 @@ Determines how much collateral rate is required for *buffered collateral*. Needs
 
 *Substrate*: ``BufferedOperationLimit: u16;``
 
+ReplacePeriod
+.............
+
+The time difference in seconds between a replacement vault indicates that it will replace a vault and required completion time by that vault.
+
+*Substrate*: ``ReplacePeriod: Moment;``
 
 Maps
 ----
 
-Balances
-........
-
-Mapping from accounts to their balance. ``<Account, Balance>``.
-
-*Substrate*: ``Balances: map T::AccountId => Balance;``
 
 Vaults
 ......
@@ -113,16 +136,16 @@ Stores the information of a vault.
 
 
 
-==================  =========  ========================================================
-Parameter           Type       Description
-==================  =========  ========================================================
-``vault``           Account    Account ID of the vault.
-``committedTokens`` PolkaBTC   Number of tokens committed and issued to CbA Requesters (DOT).
-``collateral``      DOT        Amount of backing collateral (DOT).
-``replacement``     Account    Account ID of replacement vault.
-``replace``         bool       True if vault wants to be replaced.
-``replaceTime``     u256       Time at which replacement needs to be completed.
-==================  =========  ========================================================
+===================  =========  ========================================================
+Parameter            Type       Description
+===================  =========  ========================================================
+``vault``            Account    Account ID of the vault.
+``committedTokens``  PolkaBTC   Number of tokens committed and issued to CbA Requesters (DOT).
+``collateral``       DOT        Amount of backing collateral (DOT).
+``replacement``      Account    Account ID of replacement vault.
+``replace``          bool       True if vault wants to be replaced.
+``replaceTime``      u256       Time at which replacement needs to be completed.
+===================  =========  ========================================================
 
 *Substrate*
 
@@ -262,15 +285,3 @@ Parameter           Type        Description
         btcPublicKey: Bytes
   }
 
-Replace Protocol
-~~~~~~~~~~~~~~~~
-
-Scalars
--------
-
-ReplacePeriod
-.............
-
-The time difference in seconds between a replacement vault indicates that it will replace a vault and required completion time by that vault.
-
-*Substrate*: ``ReplacePeriod: Moment;``
