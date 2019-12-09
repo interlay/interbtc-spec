@@ -16,16 +16,21 @@ Welcome to PolkaBTC's documentation!
    :caption: Specification
 
    spec/architecture
-   spec/actors
    spec/data-model
-   spec/protocols
+   spec/treasury
    spec/issue
-   spec/trade
-   spec/swap
+   spec/transfer
    spec/redeem
    spec/replace
    spec/helpers
    spec/events
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Security and Performance
+
+   security_performance/security
+   security_performance/performance
 
 .. toctree::
    :maxdepth: 2

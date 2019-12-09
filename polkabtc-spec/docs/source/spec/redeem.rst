@@ -1,3 +1,5 @@
+.. _redeem-protocol:
+
 Redeem
 ======
 
