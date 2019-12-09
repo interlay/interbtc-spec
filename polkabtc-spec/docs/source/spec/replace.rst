@@ -1,3 +1,5 @@
+.. _replace-protocol:
+
 Replace
 =======
 

@@ -187,12 +187,12 @@ The time difference in seconds between a commit request is created and required 
 Maps
 ----
 
-Commits
-.......
+IssueRequests
+.............
 
-CbA-Requesters create commit requests to issue PolkaBTC. This mapping provides access from a unique hash ``CommitId`` to a ``Commit`` struct. ``<CommitId, Commit>``.
+CbA-Requesters create issue requests to issue PolkaBTC. This mapping provides access from a unique hash ``IssueId`` to a ``Commit`` struct. ``<CommitId, Commit>``.
 
-*Substrate*: ``Commits map T::Hash => Commit<T::AccountId, T::Balance>``
+*Substrate*: ``IssueRequests map T::Hash => Commit<T::AccountId, T::Balance>``
 
 Structs
 -------
@@ -246,12 +246,12 @@ The time difference in seconds between a redeem request is created and required 
 Maps
 ----
 
-Redeems
-.......
+RedeemRequests
+..............
 
 CbA-Redeemers create redeem requests to burn their PolkaBTC and receive BTC in return. This mapping provides access from a unique hash ``RedeemId`` to the ``Redeem`` struct. ``<RedeemId, Redeem>``.
 
-*Substrate*: ``Redeems map T::Hash => Redeem<T::AccountId, T::Balance, T::Moment>;``
+*Substrate*: ``RedeemRequests map T::Hash => Redeem<T::AccountId, T::Balance, T::Moment>;``
 
 Structs
 -------
