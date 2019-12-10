@@ -138,11 +138,11 @@ Data Format Considerations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 + **Endianness**:
-  Bitcoin uses `little endian <https://en.wikipedia.org/wiki/Endianness>`_ to represent bytes. That means, the most significant byte is the last byte in a given byte representation.
+  Bitcoin uses `little endian <https://en.wikipedia.org/wiki/Endianness>`_ to represent bytes. That means, the most significant byte is the last byte in a given byte representation. This conversion needs to be accounted for when using Bitcoin data, extracted from the RPC API, as input to BTC-Relay.
 
-.. todo:: What exactly would we need here?
+.. .. todo:: What exactly would we need here?
 
-+ Specific Bitcoin data types and structs (e.g. Merkle Block)
+.. + Specific Bitcoin data types and structs (e.g. Merkle Block)
 
 Cryptographic Primitives
 ------------------------
@@ -151,4 +151,4 @@ Bitcoin's Cryptographic Primitives
 
 + **ECDSA secp256k1**: Bitcoin uses the `secp256k1 <https://en.bitcoin.it/wiki/Secp256k1>`_ parameters for its elliptic curve together with the `ECDSA <https://en.bitcoin.it/wiki/Elliptic_Curve_Digital_Signature_Algorithm>`_ algorithm for its public-key cryptography.
 + **SHA-256**: Bitcoin uses a double sha256 hash function for constructing the Merkle trees, the proof of work algorithm, and the creation of Bitcoin addresses. To prevent against `"length-extension" attacks <https://en.wikipedia.org/wiki/Length_extension_attack>`_, Bitcoin uses the double sha256.
-+ **RIPEMD-160**: Bitcoin uses a second hash function, `RIPEMD-160 <https://en.bitcoin.it/wiki/RIPEMD-160`_, to produce short hashes of length 160 bits. Due to possible interactions between `ECDSA and RIPEMD-160 <https://bitcoin.stackexchange.com/questions/9202/why-does-bitcoin-use-two-hash-functions-sha-256-and-ripemd-160-to-create-an-ad/9216#9216>`_, Bitcoin uses sha256 in between the two for key generation.
++ **RIPEMD-160**: Bitcoin uses a second hash function, `RIPEMD-160 <https://en.bitcoin.it/wiki/RIPEMD-160>`_, to produce short hashes of length 160 bits. Due to possible interactions between `ECDSA and RIPEMD-160 <https://bitcoin.stackexchange.com/questions/9202/why-does-bitcoin-use-two-hash-functions-sha-256-and-ripemd-160-to-create-an-ad/9216#9216>`_, Bitcoin uses sha256 in between the two for key generation.

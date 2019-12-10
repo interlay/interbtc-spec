@@ -34,7 +34,7 @@ The maximum difficulty target. Defaults to :math:`2^{224}-1`.
 
   const UNROUNDED_MAX_TARGET: U256 = 26959946667150639794667015087019630673637144422540572481103610249215;
 
-Variables
+Scalars
 ~~~~~~~~~
 
 BestBlock
@@ -45,6 +45,8 @@ Byte 32 block hash identifying current blockchain tip, i.e., most significant bl
 *Substrate* ::
 
   BestBlock: T::H256;
+
+.. ..note:: In Subtrate, ``T::H256`` defauls to the 32 byte long ``T::H256``. Bitcoin uses SHA256 for its block hashes, transaction identifiers and Merkle Trees. For simplicity, we use ``T::H256`` in the rest of this specification as type when storing/referring to SHA256 hashes.
 
 BestBlockHeight
 ...............
@@ -65,7 +67,7 @@ Mapping of ``<blockHash,BlockHeader>``
 
 *Substrate* ::
 
-  BlockHeaders: map T::Hash256 => BlockHeader<T::Hash256>;
+  BlockHeaders: map T::H256 => BlockHeader<T::H256>;
 
 MainChain
 .........
@@ -73,7 +75,7 @@ Mapping of ``<blockHeight,blockHash>``
 
 *Substrate* ::
 
-  MainChain: map U256 => T::Hash256;
+  MainChain: map U256 => T::H256;
 
 Forks
 .....
@@ -83,7 +85,7 @@ Mapping of ``<forkId,Fork>``
 
 *Substrate* ::
 
-  Forks: map U256 => Fork<Vec<T::Hash256>>;
+  Forks: map U256 => Fork<Vec<T::H256>>;
 
 Structs
 ~~~~~~~
@@ -95,7 +97,7 @@ BlockHeader
 Parameter               Type       Description
 ======================  =========  ============================================
 ``blockHeight``         U256       Height of the current block header.
-``merkleRoot``          Hash256       Root of the Merkle tree storing referencing transactions included in the block.
+``merkleRoot``          H256       Root of the Merkle tree storing referencing transactions included in the block.
 ======================  =========  ============================================
 
 *Substrate* 
@@ -104,23 +106,22 @@ Parameter               Type       Description
 
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct BlockHeader<Hash256> {
+  pub struct BlockHeader<H256> {
         blockHeight: U256,
-        merkleRoot: Hash256 
+        merkleRoot: H256 
   }
   
 
 Fork
 ....
 
-.. todo:: To store the block headers in the fork, can we just use an array of hashes?
 
 ======================  =============  ============================================
 Parameter               Type           Description
 ======================  =============  ============================================
 ``startHeight``         U256           Height of the block at which this fork starts (forkpoint).
 ``length``              U256           Length of the fork (in blocks).
-``forkBlockHashes``     Vec<Hash256>      Linked hash set of block hashes, which references ``BlockHeaders`` in ``BlockHeaders``, contained in this fork (maintains insertion order).
+``forkBlockHashes``     Vec<H256>      Linked hash set of block hashes, which references Bitcoin block headers stored in ``BlockHeaders``, contained in this fork (maintains insertion order).
 ======================  =============  ============================================
 
 *Substrate*
@@ -132,7 +133,7 @@ Parameter               Type           Description
   pub struct Fork<> {
         startHeight: U256,
         length: U256,
-        forkBlockHahes: Vec<Hash256>
+        forkBlockHahes: Vec<H256>
   }
 
 
@@ -166,7 +167,7 @@ StatusCode
 
 * ``PARTIAL : 1`` - ``NO_DATA`` detected or manual intervention. Transaction verification disabled for latest blocks.
 
-.. todo:: Define threshold for transaction verification disabling in ``PARTIAL`` state. 
+.. note:: The exact threshold (in terms of block height) for disabling the verification of transactions in the ``PARTIAL`` state must be defined upon deployment. A possible approach is to keep intact transaction inclusion verification for blocks with a height lower than the height of the first ``NO_DATA```block. 
 
 * ``HALTED: 2`` - ``INVALID`` detected or manual intervention. Transaction verification fully suspended.
 
@@ -196,8 +197,6 @@ Enum specifying reasons for error leading to a status update.
 * ``UNEXPECTED: 2`` - unexpected error occured, potentially manual intervantion from governance mechanism. See  ``msg`` for reason.
 
 
-.. todo:: Decide how to best log reasons for recovery. As error codes (rename then) or simply in the ``msg``?
-
 *Substrate*
 
 ::
@@ -218,9 +217,9 @@ Struct providing information for an occurred halting of BTC-Relay. Contains the 
 Parameter               Type           Description
 ======================  =============  ============================================
 ``satusCode``           Status         New status code.
-``blockHash``           bytes[32]      Block hash of the block header in ``_blockHeaders`` which caused the status change.  
+``blockHash``           H256           Block hash of the block header in ``_blockHeaders`` which caused the status change.  
 ``errorCode``           ErrorCode      Error code specifying the reason for the status change.          
-``msg``                 String         [Optional] message providing more details on halting reason. 
+``msg``                 String         [Optional] message providing more details on the change of status (error message or recovery). 
 ======================  =============  ============================================
 
 *Substrate* 
@@ -229,9 +228,9 @@ Parameter               Type           Description
 
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct StatusUpdate<Status, Hash256, ErrorCode> {
+  pub struct StatusUpdate<Status, H256, ErrorCode> {
         statusCode: Status,
-        blockHash: Hash256,
+        blockHash: H256,
         errorCode: ErrorCode,
         msg: String
   }

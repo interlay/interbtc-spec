@@ -5,7 +5,7 @@ Welcome to Poladkot BTC-Relay's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Introduction:
+   :caption: Introduction
 
    intro/at-a-glance
    intro/bitcoin
@@ -15,7 +15,7 @@ Welcome to Poladkot BTC-Relay's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Specification:
+   :caption: Specification
 
    spec/data-model
    spec/functions
@@ -28,7 +28,7 @@ Welcome to Poladkot BTC-Relay's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Security and Performance:
+   :caption: Security and Performance
 
    security_performance/security
    security_performance/performance
@@ -36,8 +36,7 @@ Welcome to Poladkot BTC-Relay's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: All the rest:
+   :caption: All the rest
 
-   other/glossary
    other/license
    
