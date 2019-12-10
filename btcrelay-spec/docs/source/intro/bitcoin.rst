@@ -11,23 +11,31 @@ Bitcoin uses the Nakamoto consensus rules to decide which blocks, and thereby wh
 Nakamoto consensus uses the longest-chain rule to determine which chain of blocks contains the most work, i.e. proof-of-work (PoW).
 The longest chain is considered to currently *valid* chain.
 
+Longest Chain and Difficulty Adjustment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 The longest chain can be extended by miners adding new blocks.
 Miners can attach a new block to the chain of blocks by finding a hash that satisfies a target difficulty.
 The target difficulty describes how many leading zeros a block hash has to have.
 When miners construct a new block, the block hash consists of the previous block header hash and the data contained in the current block.
 A miner then needs to add a nonce to the current block header hash to meet the difficulty criteria.
-Bitcoin uses a double `sha256 <https://en.wikipedia.org/wiki/SHA-2>`_ hashing algorithm for its block construction.
+Bitcoin uses a double `SHA256 <https://en.wikipedia.org/wiki/SHA-2>`_ hashing algorithm for its block construction.
 The core idea behind using a nonce to find a specific target difficulty is that a miner can do not better than randomly guessing the nonce.
 
 Bitcoin accounts for the increase of computation power.
 An increase of computation power means that miners can find new blocks in ever shorter time periods as their processing power to calculate the sha256 hash.
-As a consequence, Bitcoin adjust the target difficulty every 2016 blocks.
-That means, every 2016 blocks, it is increasingly difficult to find a new block.
+As a consequence, Bitcoin adjust the target difficulty every 2016 blocks, i.e. it is increasingly difficult to find a new block.
+
+Transactions
+~~~~~~~~~~~~
 
 Each blocks contains at least on transaction - the coinbase transaction.
 The `coinbase transaction <https://bitcoin.org/en/glossary/coinbase-transaction>`_ is included by the miner and transfers the reward for finding a block to the miner.
-Other transactions are also included by a miner.
+However, typically, a block contains more transactions as miner receive a transaction fee for including transactions.
 These are transactions broadcasted by users of the Bitcoin system.
+
+Unspent Transaction Output (UTXO)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Transactions in Bitcoin are included based on the `Unspent Transaction Output (UTXO) model <https://bitcoin.org/en/blockchain-guide#introduction>`_.
 Each new transaction needs to specify which transaction output it is going to spend.
