@@ -206,6 +206,7 @@ Thereby, the user performes the following steps (see notes and warnings in ``sto
 
 .. Use Cases
 ~~~~~~~~~~~~
+
 **Detection and Tracking of Forks**:
 Blockchain reorganizations or forks which occur on Bitcoin are detected and set up for tracking when a block header is submitted whose block height is lower than the currently tracked main chain height.
 
@@ -305,7 +306,8 @@ The caller of this function receives as return value:
     b. ``False`` (or an exceptin is raised): if verification fails
 
 .. Use Cases
-~~~~~~~~~
+~~~~~~~~~~~~
+
 **Verification of Transaction Inclusion**:
 To be able to verify that a transaction is included in the Bitcoin blockchain, the corresponding block at the specified ``txBlockHeight`` must be first submitted, verified and stored in the BTC-Relay via ``verifyBlockHeader``. 
 
@@ -393,7 +395,7 @@ Generally, a user has to follow four steps to successfully verify a transaction:
     b. ``False``: the transaction cannot be verified given the input parameters provided by the user.
 
 .. Use Cases
-~~~~~~~~~
+~~~~~~~~~~~~
 **Issue of Bitcoin-backed Assets**: Users can create Bitcoin-backed tokens on Polkadot by proving to the Polkadot blockchain that they have sent a number of Satoshis to a vault's Bitcoin address. To realize this, a user acts as a so-called CbA Requester. First the CbA-Requester transfers the Satoshis to the Bitcoin address of a Vault on the Bitcoin blockchain. The CbA-Requester notes the transaction hash of this transaction. Next, the CbA-Requester proves to the Polka-BTC bridge that the vault has received his Satoshis. He achieves this by ensuring that the block header of his transaction is included in the BTCRelay and has enough confirmations. He then extracts the input parameters as described in step 3 of the `User Story`_ above. With these input parameters he calls the ``verifyTransaction`` to receive a successful transaction inclusion proof.
 
 

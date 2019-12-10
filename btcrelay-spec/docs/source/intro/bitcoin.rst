@@ -1,10 +1,10 @@
 Bitcoin
-===============================
+=======
 
 This is a quick overview of Bitcoin, containing information necessary to understand the operation of BTC-Relay.
 
 Overview
-------------------------
+--------
 
 Bitcoin is an electronic peer-to-peer cash system introduced in the `Bitcoin whitepaper <https://bitcoin.org/bitcoin.pdf>`_.
 Bitcoin uses the Nakamoto consensus rules to decide which blocks, and thereby which transactions, to include in its ledger.
@@ -38,12 +38,12 @@ The spending transaction in turn an create one or more outputs.
 
 
 Data Model
-------------------------
+----------
 
 This specification includes selected Bitcoin data model references. For the full details, refer to https://bitcoin.org/en/developer-reference.
 
 Block Headers
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 The `80 bytes block header hash <https://bitcoin.org/en/developer-reference#block-headers>`_ encodes the following information:
 
 =====  ======================  =========  ============================================

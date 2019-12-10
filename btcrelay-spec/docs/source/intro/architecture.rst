@@ -1,5 +1,5 @@
 BTC-Relay Architecture
-====================
+======================
 
 BTC-Relay is a component of the BTC Parachain. Below, we provide an overview of it's components, as well as relevant actors - offering references to the full specification contained in the rest of this document. 
 
