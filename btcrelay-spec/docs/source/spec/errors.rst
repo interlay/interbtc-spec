@@ -109,7 +109,6 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 * **Cause**: Exception raised in ``verifyTransaction`` when the transaction id (``txId``) is malformed.
 
 ``ERR_CONFIRMATIONS``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 * **Message**: "Transaction has less confirmations than requested"
 

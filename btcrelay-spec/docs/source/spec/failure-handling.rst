@@ -71,7 +71,9 @@ Specification
 
 *Substrate*
 
-* ``fn statusUpdate(origin, update: StatusUpdate) -> Result {...}``
+::
+
+  fn statusUpdate(origin, update: StatusUpdate) -> Result {...}
 
 
 User Story

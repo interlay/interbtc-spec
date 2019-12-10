@@ -12,21 +12,27 @@ DIFFICULTY_ADJUSTMENT_INTERVAL
 
 The interval in number of blocks in which Bitcoin adjusts its difficulty. Defaults to ``2016``.
 
-*Substrate*: ``const DIFFICULTY_ADJUSTMENT_INTERVAL: u16 = 2016;``
+*Substrate* ::
+
+  const DIFFICULTY_ADJUSTMENT_INTERVAL: u16 = 2016;
 
 TARGET_TIMESPAN
 ...............
 
 The average time span it takes to adjust the difficulty. Defaults to ``1209600`` seconds or two weeks.
 
-*Substrate*: ``const TARGET_TIMESPAN: Moment = 1209600;``
+*Substrate* ::
+
+  const TARGET_TIMESPAN: Moment = 1209600;
 
 UNROUNDED_MAX_TARGET
 ....................
 
 The maximum difficulty target. Defaults to :math:`2^{224}-1`.
 
-*Substrate*: ``const UNROUNDED_MAX_TARGET: U256 = 26959946667150639794667015087019630673637144422540572481103610249215;``
+*Substrate* ::
+
+  const UNROUNDED_MAX_TARGET: U256 = 26959946667150639794667015087019630673637144422540572481103610249215;
 
 Variables
 ~~~~~~~~~
@@ -36,14 +42,18 @@ BestBlock
 
 Byte 32 block hash identifying current blockchain tip, i.e., most significant block in ``MainChain``. 
 
-*Substrate*: ``BestBlock: Hash256;``
+*Substrate* ::
+
+  BestBlock: T::H256;
 
 BestBlockHeight
 ...............
 
 Integer block height of BestBlock in MainChain. 
 
-*Substrate*: ``BestBlockHeight: U256;``
+*Substrate* ::
+
+  BestBlockHeight: U256;
 
 Maps
 ~~~~
@@ -53,13 +63,17 @@ BlockHeaders
 
 Mapping of ``<blockHash,BlockHeader>``
 
-*Substrate*: ``BlockHeaders: map T::Hash256 => BlockHeader<T::Hash256>;``
+*Substrate* ::
+
+  BlockHeaders: map T::Hash256 => BlockHeader<T::Hash256>;
 
 MainChain
 .........
 Mapping of ``<blockHeight,blockHash>``
 
-*Substrate*: ``MainChain: map U256 => T::Hash256;``
+*Substrate* ::
+
+  MainChain: map U256 => T::Hash256;
 
 Forks
 .....
@@ -67,7 +81,9 @@ Mapping of ``<forkId,Fork>``
 
 .. warning:: If pruning is implemented for ``BlockHeaders`` and ``MainChain`` as performance optimization, it is critical to make sure there are no ``Forks`` entries left which reference pruned blocks. Either delay pruning, or, if the fork is inactive (hash falled behind ``MainChain`` at least *k* blocks), delete it as well. 
 
-*Substrate*: ``Forks: map U256 => Fork<Vec<T::Hash256>>;``
+*Substrate* ::
+
+  Forks: map U256 => Fork<Vec<T::Hash256>>;
 
 Structs
 ~~~~~~~
@@ -82,7 +98,7 @@ Parameter               Type       Description
 ``merkleRoot``          Hash256       Root of the Merkle tree storing referencing transactions included in the block.
 ======================  =========  ============================================
 
-*Substrate*: 
+*Substrate* 
 
 ::
 
@@ -107,7 +123,7 @@ Parameter               Type           Description
 ``forkBlockHashes``     Vec<Hash256>      Linked hash set of block hashes, which references ``BlockHeaders`` in ``BlockHeaders``, contained in this fork (maintains insertion order).
 ======================  =============  ============================================
 
-*Substrate*:
+*Substrate*
 
 ::
 
@@ -139,7 +155,9 @@ Array of ``StatusUpdate`` structs, providing a history of status changes of BTC-
 .. note:: If pruning is implemented for ``BlockHeaders`` and ``MainChain`` as performance optimization, ``StatusLog`` entries referencing pruned blocks should be deleted as well. 
 
 
-*Substrate*: ``StatusLog: Vec<StatusUpdate>;``
+*Substrate* ::
+
+  StatusLog: Vec<StatusUpdate>;
 
 StatusCode
 ..........
@@ -154,7 +172,7 @@ StatusCode
 
 * ``SHUTDOWN: 3`` - Manual intervantion (``UNEXPECTED``). BTC-Relay operation fully suspended.
 
-*Substrate*: 
+*Substrate* 
 
 ::
 
@@ -180,7 +198,7 @@ Enum specifying reasons for error leading to a status update.
 
 .. todo:: Decide how to best log reasons for recovery. As error codes (rename then) or simply in the ``msg``?
 
-*Substrate*:
+*Substrate*
 
 ::
   
@@ -205,7 +223,7 @@ Parameter               Type           Description
 ``msg``                 String         [Optional] message providing more details on halting reason. 
 ======================  =============  ============================================
 
-*Substrate*: 
+*Substrate* 
 
 ::
 
