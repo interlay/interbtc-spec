@@ -39,7 +39,7 @@ Specification
 
 *Substrate*
 
-* ``fn initialize(origin, blockHeaderBytes: T::BTCBlockHeader, blockHeight: U256) -> Result {...}``
+``fn initialize(origin, blockHeaderBytes: T::BTCBlockHeader, blockHeight: U256) -> Result {...}``
 
 User Story
 ~~~~~~~~~~
@@ -100,7 +100,7 @@ Specification
 
 *Substrate*
 
-* ``fn storeMainChainBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader) -> Result {...}``
+``fn storeMainChainBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader) -> Result {...}``
 
 User Story
 ~~~~~~~~~~
@@ -185,7 +185,7 @@ Specification
 
 *Substrate*
 
-* ``fn storeForkBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader, forkId: U256) -> Result {...}``
+``fn storeForkBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader, forkId: U256) -> Result {...}``
 
 
 User Story
@@ -293,7 +293,7 @@ Specification
 
 *Substrate*
 
-* ``fn verifyBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader) -> Result {...}``
+``fn verifyBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader) -> Result {...}``
 
 User Story
 ~~~~~~~~~~
@@ -371,7 +371,7 @@ Specification
 
 *Substrate*
 
-* ``fn verifyTransaction(origin, txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: String) -> Result {...}``
+``fn verifyTransaction(origin, txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: String) -> Result {...}``
 
 
 User Story
