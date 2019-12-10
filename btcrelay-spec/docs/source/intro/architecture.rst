@@ -1,5 +1,5 @@
 BTC-Relay Architecture
-====================
+======================
 
 BTC-Relay is a component of the BTC Parachain. Below, we provide an overview of it's components, as well as relevant actors - offering references to the full specification contained in the rest of this document. 
 
@@ -19,7 +19,7 @@ BTC-Relay differentiates between the following actors:
 
 * **Users** - Polkadot users which interact with the BTC Parachain, as well as other Parachains / modules which make calls to the verification functions of BTC-Relay.
 
-* **Staked Relayers** - staked relayers lock up collateral in the BTC Parachain and are resposible for running Bitcoin `full nodes <https://bitcoin.org/en/full-node>`_ and verify that blocks submitted to BTC Relay are valid (and hence that transactional data for these blocks is available). Staked relayers can halt BTC-Relay in case a failure is detected. See `Failure Handling </spec/failure-handling.html#failure-handling>`_ for more details. 
+* **Staked Relayers** - staked relayers lock up collateral in the BTC Parachain and are responsible for running Bitcoin `full nodes <https://bitcoin.org/en/full-node>`_ and verify that blocks submitted to BTC Relay are valid (and hence that transactional data for these blocks is available). Staked relayers can halt BTC-Relay in case a failure is detected. See `Failure Handling </spec/failure-handling.html#failure-handling>`_ for more details. 
 
 .. note:: While any user can submit block headers to BTC-Relay, this role can be assigned to staked relayers, given these participants already run Bitcoin full nodes and check validity of stored blocks.
 
@@ -53,7 +53,7 @@ In more details, the verification component performs the operations of a `Bitcoi
 
 * *Main Chain Detection / Fork Handling* - when given two conflicting Bitcoin chains, determine the *main chain*, i.e. the chain with the most accumulated PoW (longest chain in Bitcoin, though under consideration of the difficulty adjustment mechanism). 
 
-* *Transaction Inclusion Verification* - given a transaction, a reference to a block header, the transactions's index in that block and a Merkle Tree path, determine whether the transaction is indeed included in the specified block header (which in turn must be already verified and stored in the Bitcoin main chain tracked by BTC-Relay). 
+* *Transaction Inclusion Verification* - given a transaction, a reference to a block header, the transaction's index in that block and a Merkle Tree path, determine whether the transaction is indeed included in the specified block header (which in turn must be already verified and stored in the Bitcoin main chain tracked by BTC-Relay). 
  
 
 

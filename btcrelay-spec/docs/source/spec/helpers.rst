@@ -23,7 +23,9 @@ Bitcoin uses a double SHA256 hash to protect against `"length-extension" attacks
 
 *Substrate*
 
-* ``fn sha256d(data: String) -> T::Hash {...}``
+::
+
+  fn sha256d(data: String) -> T::Hash {...}
   
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -53,7 +55,9 @@ concatSha256d
 
 *Substrate*
 
-* ``fn concatSha256d(left: T::Hash, right: T::Hash) -> Hash {...}``
+::
+
+  fn concatSha256d(left: T::Hash, right: T::Hash) -> T::Hash {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -89,7 +93,9 @@ This function calculates the PoW difficulty target from a compressed nBits repre
 
 *Substrate*
 
-* ``fn nBitsToTarget(nBits: U256) -> U256 {...}``
+::
+
+  fn nBitsToTarget(nBits: U256) -> U256 {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -125,7 +131,9 @@ Verifies the currently submitted block header has the correct difficulty target.
 
 *Substrate*
 
-* ``fn checkCorrectTarget(hashPrevBlock: T::Hash, blockHeight: U256, target: U256) -> bool {...}``
+::
+
+  fn checkCorrectTarget(hashPrevBlock: T::Hash, blockHeight: U256, target: U256) -> bool {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -169,7 +177,9 @@ Computes the new difficulty target based on the given parameters, `according to 
 
 *Substrate*
 
-* ``fn computeNewTarget(prevTime: T::Moment, startTime: T::Moment, prevTarget: U256) -> U256 {...}``
+::
+
+  fn computeNewTarget(prevTime: T::Moment, startTime: T::Moment, prevTarget: U256) -> U256 {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -210,7 +220,9 @@ The computeMerkle function calculates the root of the Merkle tree of transaction
 
 *Substrate*
 
-* ``fn computeMerkle(txId: T::Hash, txIndex: u64, merkleProof: String) -> Hash {...}``
+::
+
+  fn computeMerkle(txId: T::Hash, txIndex: u64, merkleProof: String) -> Hash {...}
 
 
 Function Sequence
@@ -274,7 +286,9 @@ Given the ``target``, calculates the Proof-of-Work ``difficulty`` value, as defi
 
 *Substrate*
 
-* ``fn calculateDifficulty(target: U256) -> U256 {...}``
+::
+
+  fn calculateDifficulty(target: U256) -> U256 {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -310,7 +324,9 @@ Specification
 
 *Substrate*
 
-* ``fn chainReorg(forkId: U256) -> bool {...}``
+::
+
+  fn chainReorg(forkId: U256) -> bool {...}
 
 
 Function Sequence
@@ -364,7 +380,9 @@ Specification
 
 *Substrate*
 
-* ``fn getForkIdByBlockHash(blockHash: T::Hash) -> U256 {...}``
+::
+
+  fn getForkIdByBlockHash(blockHash: T::Hash) -> U256 {...}
 
 
 Function Sequence

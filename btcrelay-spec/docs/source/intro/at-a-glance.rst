@@ -1,14 +1,14 @@
 BTC-Relay at a Glance
-=========================
+=====================
 
 
 Overview
----------
-BTC-Relay is the key component of the BTC-Parachain on Polkadot. It's main task is to allow the Parachain to verify the state of Bitcoin and react to transactions / events. 
+--------
+BTC-Relay is the key component of the BTC-Parachain on Polkadot. It's main task is to allow the Parachain to verify the state of Bitcoin and react to transactions and events. 
 Specifically, BTC-Relay acts as a `Bitcoin SPV/light client <https://bitcoin.org/en/operating-modes-guide#simplified-payment-verification-spv>`_ on Polkadot, storing only Bitcoin block headers and allowing users to verify transaction inclusion proofs. 
 Further, it is able to handle forks and follows the chain with the most accumulated Proof-of-Work.
 
-The correct operation of BTC-Relay is crucial: should BTC-Relay cease to operate, the bridge between Poladot and Bitcoin is interrupted.
+The correct operation of BTC-Relay is crucial: should BTC-Relay cease to operate, the bridge between Polkadot and Bitcoin is interrupted.
 
 
 .. figure:: ../figures/polkaBTC-btcrelay.png
@@ -18,11 +18,11 @@ The correct operation of BTC-Relay is crucial: should BTC-Relay cease to operate
 
 
 How to Use this Document
---------------
+------------------------
 This document provides a specification for BTC-Relay in the form of a `Polkadot Parachain <https://wiki.polkadot.network/docs/en/learn-parachains>`_ acting as a `Bridge <https://wiki.polkadot.network/docs/en/learn-bridges>`_ to Bitcoin, to be implemented on `Substrate <https://substrate.dev/>`_.
 
 
-Before implementing or using BTC-Relay on Polkadot, make youself familiar with this specification and read up on any content you are unfamiliar with by following the provided links (e.g. to academic papers and the `Bitcoin developer reference <https://bitcoin.org/en/developer-reference>`_).
+Before implementing or using BTC-Relay on Polkadot, make yourself familiar with this specification and read up on any content you are unfamiliar with by following the provided links (e.g. to academic papers and the `Bitcoin developer reference <https://bitcoin.org/en/developer-reference>`_).
 
 
 Recommended Background Reading

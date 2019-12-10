@@ -27,7 +27,9 @@ Extracts the ``hashPrevBlock`` (reference to previous block) from a Bitcoin bloc
 
 *Substrate*
 
-* ``fn extractHashPrevBlock(blockHeaderBytes: T::BTCBlockHeader) -> T::Hash {...}``
+::
+
+  fn extractHashPrevBlock(blockHeaderBytes: T::BTCBlockHeader) -> T::Hash {...}
 
 
 Function Sequence
@@ -56,7 +58,9 @@ Extracts the ``merkleRoot`` from a Bitcoin block header.
 
 *Substrate*
 
-* ``fn extractMerkleRoot(blockHeaderBytes: T::BTCBlockHeader) -> T::Hash {...}``
+::
+
+  fn extractMerkleRoot(blockHeaderBytes: T::BTCBlockHeader) -> T::Hash {...}
 
 
 Function Sequence
@@ -85,7 +89,9 @@ Extracts the ``nBits`` from a Bitcoin block header. This field is necessary to c
 
 *Substrate*
 
-* ``fn extractNBits(blockHeaderBytes: T::BTCBlockHeader) -> T::Bytes {...}``
+::
+
+  fn extractNBits(blockHeaderBytes: T::BTCBlockHeader) -> T::Bytes {...}
 
 Function Sequence
 .................

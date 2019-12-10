@@ -19,6 +19,9 @@ If the block header was stored successfully, emit an event with the stored block
 
 * :ref:`storeMainChainBlockHeader`
 
+*Substrate* ::
+
+  StoreMainChainHeader(U256, Hash);
 
 StoreForkHeader
 ---------------
@@ -39,6 +42,10 @@ If the submitted block header is on a fork, emit an event with the fork’s id, 
 
 * :ref:`storeForkBlockHeader`
 
+*Substrate* ::
+
+  StoreForkHeader(U256, U256, Hash);
+
 ChainReorg
 ----------
 
@@ -58,6 +65,10 @@ If the submitted block header on a fork results in a reorganization (fork longer
 
 * :ref:`storeForkBlockHeader`
 
+*Substrate* ::
+
+  ChainReorg(Hash, U256, U256);
+
 VerifyTransaction
 -----------------
 
@@ -76,3 +87,7 @@ Issue an event for a given transaction id and a block height and return the resu
 *Functions*
 
 * :ref:`verifyTransaction`
+
+*Substrate* ::
+
+  VerifyTransaction(Hash, U256, bool);
