@@ -43,7 +43,7 @@ Verification
 
 The Verification component offers functionality to verify Bitcoin block headers and transaction inclusion proofs. See   `Storage and Verification </spec/functions.html#storage-and-verification>`_ for the function specification.
 
-In more details, the verification component performs the operations of a `Bitcoin SPV client <https://bitcoin.org/en/operating-modes-guide#simplified-payment-verification-spv>`. See `this paper (Appendix D) <https://eprint.iacr.org/2018/643.pdf>`_ for a more detailed and formal discussion of the necessary functionality. 
+In more details, the verification component performs the operations of a `Bitcoin SPV client <https://bitcoin.org/en/operating-modes-guide#simplified-payment-verification-spv>`_. See `this paper (Appendix D) <https://eprint.iacr.org/2018/643.pdf>`_ for a more detailed and formal discussion of the necessary functionality. 
 
 * *Difficulty Adjustment* - check and keep track of Bitcoin's difficulty adjustment mechanism, so as to be able to determine when the PoW difficulty target needs recomputed.
 
