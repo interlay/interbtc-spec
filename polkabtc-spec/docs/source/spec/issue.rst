@@ -68,8 +68,58 @@ Parameter           Type        Description
         sender: AccountId,
         btcPublicKey: Bytes
   }
+
 Functions
 ~~~~~~~~~
+
+lockCollateral
+--------------
+
+The Vault locks an amount of collateral as a security against stealing the Bitcoin locked with it. The Vault can take on issue requests depending on the collateral it provides and under consideration of the ``SecureOperationLimit``.
+The maximum amount of PolkaBTC a Vault is able to support during the issue process is based on the following equation:
+:math:`\text{max(PolkaBTC)} = \text{collateral} * \text{ExchangeRate} / \text{SecureOperationLimit}`.
+
+.. note:: As an example, assume we use ``DOT`` as collateral, we issue ``PolkaBTC`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureOperationLimit`` is 200%, i.e. a Vault has to provide two-times the amount of collateral to back an issue request. Now let's say the Vault deposits 400 ``DOT`` as collateral. Then this Vault can back at most 2.5 PolkaBTC as: :math:`400 * (1/80) / 2 = 2.5`.
+
+The details of the collateral limits are motivated in the `security specification <security>`_.
+
+Specification
+.............
+
+*Function Signature*
+
+``lockCollateral(vault, collateral)``
+
+*Parameters*
+
+* ``vault``: The account of the vault locking collateral.
+* ``collateral``: The backing currency used for the collateral.
+
+*Returns*
+
+* ``True``: If the locking has completed successfully.
+* ``False``: Otherwise.
+
+*Events*
+
+* ``LockCollateral(vault, collateral, totalCollateral)``: issue an event stating how much new and total collateral a vault has locked.
+
+*Errors*
+
+* ``ERR_INSUFFICIENT_FUNDS``: If a vault has insufficient funds to complete the transaction.
+* ``ERR_MIN_AMOUNT``: The amount of to-be-locked collateral needs to be above a minimum amount.
+  
+*Substrate* ::
+
+  fn lockCollateral(origin, amount: Balance) -> Result {...}
+
+User Story
+..........
+
+
+
+Function Sequence
+.................
 
 
 Events

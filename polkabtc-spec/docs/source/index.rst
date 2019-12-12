@@ -18,10 +18,10 @@ Welcome to PolkaBTC's documentation!
    spec/architecture
    spec/data-model
    spec/treasury
+   spec/oracle
+   spec/vaultregistry
    spec/issue
-   spec/transfer
    spec/redeem
-   spec/replace
    spec/helpers
    spec/events
 
