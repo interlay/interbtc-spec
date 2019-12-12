@@ -97,8 +97,9 @@ mint
 
 In the BTC Parachain new PolkaBTC can be created by leveraging the :ref:`Issue Protocol <issue-protocol>`.
 However. to separate concerns and access to data, the Issue module has to call the ``mint`` function to complete the issue process in the PolkaBTC component.
-Importantly, this function can *only* be called from the Issue module.
-Further, the function increases the ``totalSupply`` of PolkaBTC.
+The function increases the ``totalSupply`` of PolkaBTC.
+
+.. warning:: This function can *only* be called from the Issue module.
 
 Specification
 .............
@@ -141,7 +142,9 @@ Function Sequence
 burn
 ----
 
-During the :ref:`Redeem protocol <redeem-protocol>`, so-called Redeemers first lock and then destroy or burn their PolkaBTC to receive BTC. This function reflects this in their balance. Note that this function is only internally callable by the Redeem module.
+During the :ref:`Redeem protocol <redeem-protocol>`, so-called Redeemers first lock and then destroy or burn their PolkaBTC to receive BTC. This function reflects this in their balance. 
+
+.. warning:: This function is only internally callable by the Redeem module.
 
 Specification
 .............
@@ -188,6 +191,50 @@ Function Sequence
 3. Subtract the Redeemer's balance by ``amount``. 
 4. Issue ``Burn(redeemer, amount)`` event.
 5. Return ``True``.
+
+lock
+----
+
+During the redeem process, Redeemers need to be able to lock PolkaBTC.
+
+.. warning:: Can only be called by the Redeem module.
+
+Specification
+.............
+
+*Function Signature*
+
+``lock(redeemer, amount)``
+
+*Parameters*
+
+* ``redeemer``: The Redeemer wishing to lock a certain amount of PolkaBTC.
+* ``amount``: The amount of PolkaBTC that should be locked.
+
+*Returns*
+
+* ``True``: If the Redeemer has enough funds to lock and they are locked.
+* ``False``: Otherwise.
+
+*Events*
+
+* ``Lock(redeemer, amount, totalAmount)``: newly locked and totally locked amount of PolkaBTC by a redeemer.
+
+*Errors*
+
+* ``ERR_INSUFFICIENT_FUNDS``: Redeemer has not enough PolkaBTC to lock coins.
+
+*Substrate* ::
+
+  fn lock(origin, ) -> Result {...}
+
+User Story
+..........
+
+
+Function Sequence
+.................
+
 
 
 Events
