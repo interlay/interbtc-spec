@@ -3,6 +3,18 @@
 Issue
 =====
 
+Overview
+~~~~~~~~
+
+Step-by-step
+------------
+
+1. Precondition: a Vault has locked collateral as described in the `Vault registry <vault-registry>`_.
+2. A Requester executes the ``commit`` function to open an issue request on the BTC Parachain. The issue request includes the amount of PolkaBTC the Requester wants to have, which Vault(s) the Requester uses, and a small collateral to prevent `griefing <griefing>`_.
+3. A Requester sends the equivalent amount of BTC that he wants to issue as PolkaBTC to the Vault on the Bitcoin blockchain with the ``lockBTC`` function. The Requester extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain.
+4. The Requester executes the ``issue`` function on the BTC Parachain. The issue function requires a reference to the previous issue request and the transaction inclusion proof of the ``lockBTC`` transaction. If the function completes successfully, the Requester receives the requested amount of PolkaBTC into his account.
+5. Optional: If the Requester is not able to complete the issue request within the predetermined time frame (``CommitPeriod``), anyone is able to call the ``abort`` function to cancel the issue request.
+
 Data Model
 ~~~~~~~~~~
 
@@ -72,50 +84,42 @@ Parameter           Type        Description
 Functions
 ~~~~~~~~~
 
-lockCollateral
---------------
+commit
+------
 
-The Vault locks an amount of collateral as a security against stealing the Bitcoin locked with it. The Vault can take on issue requests depending on the collateral it provides and under consideration of the ``SecureOperationLimit``.
-The maximum amount of PolkaBTC a Vault is able to support during the issue process is based on the following equation:
-:math:`\text{max(PolkaBTC)} = \text{collateral} * \text{ExchangeRate} / \text{SecureOperationLimit}`.
-
-.. note:: As an example, assume we use ``DOT`` as collateral, we issue ``PolkaBTC`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureOperationLimit`` is 200%, i.e. a Vault has to provide two-times the amount of collateral to back an issue request. Now let's say the Vault deposits 400 ``DOT`` as collateral. Then this Vault can back at most 2.5 PolkaBTC as: :math:`400 * (1/80) / 2 = 2.5`.
-
-The details of the collateral limits are motivated in the `security specification <security>`_.
+A Requester places a small amount of collateral to commit to an issue request.
 
 Specification
 .............
 
 *Function Signature*
 
-``lockCollateral(vault, collateral)``
+``commit(requester, amount, vaults)``
 
 *Parameters*
 
-* ``vault``: The account of the vault locking collateral.
-* ``collateral``: The backing currency used for the collateral.
+* ``requester``: The Requester account.
+* ``amount``: The amount of PolkaBTC to be issued.
+* ``vaults``: The Vault(s) involved in this issue request.
 
 *Returns*
 
-* ``True``: If the locking has completed successfully.
-* ``False``: Otherwise.
+* ``IssueRequestId``: A unique hash identifying the issue request. 
 
 *Events*
 
-* ``LockCollateral(vault, collateral, totalCollateral)``: issue an event stating how much new and total collateral a vault has locked.
+* ``Commit(requester, amount, vaults)``:
 
 *Errors*
 
-* ``ERR_INSUFFICIENT_FUNDS``: If a vault has insufficient funds to complete the transaction.
-* ``ERR_MIN_AMOUNT``: The amount of to-be-locked collateral needs to be above a minimum amount.
-  
+* ````:
+
 *Substrate* ::
 
-  fn lockCollateral(origin, amount: Balance) -> Result {...}
+  fn commit(origin, amount: U256, vaults: Vec<AccountId>) -> Result {...}
 
 User Story
 ..........
-
 
 
 Function Sequence

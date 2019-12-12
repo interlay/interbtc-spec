@@ -1,4 +1,4 @@
-.. _vault-registry::
+.. _vault-registry:
 
 Vault Registry
 ==============
