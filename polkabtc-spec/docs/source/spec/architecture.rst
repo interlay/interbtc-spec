@@ -24,7 +24,7 @@ The specification clearly separates these modules to ensure that each module can
 .. figure:: ../figures/PolkaBTC-Architecture.png
     :alt: architecture diagram
 
-    PolkaBTC consists of five modules. The Oracle module stores the exchange rates based on the input f centralized and decentralized exchanges. The Treasury module maintains the ownership of PolkaBTC, the VaultRegistry module stores information about the current Vaults in the system, and the Issue and Redeem module cotain data and funciton related to their respective sub protocols.
+    PolkaBTC consists of five modules. The Oracle module stores the exchange rates based on the input of centralized and decentralized exchanges. The Treasury module maintains the ownership of PolkaBTC, the VaultRegistry module stores information about the current Vaults in the system, and the Issue and Redeem module expose funcitons and maintain data related to the respective sub protocols.
 
 Treasury
 --------
@@ -38,10 +38,22 @@ Oracle
 The Oracle module maintains the ``ExchangeRate`` value between the asset that is used to collateralize Vaults (DOT) and the to-be-issued asset (BTC).
 In the proof-of-concept the Oracle is operated by a trusted third party to feed the current exchange rates into the system.
 
+.. todo:: Check with Web3 on how they plan to implement this. Probably, governance mechanism will provide this service, or intervene in case of failures.
+
 VaultRegistry
 -------------
 
-The VaultRegistry module manages the Vaults in the system. It stores how much collateral each Vault provided and how much of that collateral is allocated to PolkaBTC. Further, this module implements the :ref:`Replace protocol <replace-protocol>`.
+The VaultRegistry module manages the Vaults in the system, exposing functionality for:
+
+* Handling the collateral provided by Vaults, determining the collateralization rates and handling exchange rate fluctuations and undercollateralized Vaults. 
+
+* Vault replacement via the :ref:`Replace protocol <replace-protocol>`.
+
+* Penalizing misbehaving Vaults and reimbursing financially damaged users.
+
+.. todo:: Agree on components and where collateral will be handled. 
+
+It stores how much collateral each Vault provided and how much of that collateral is allocated to PolkaBTC. Further, this module implements the :ref:`Replace protocol <replace-protocol>`.
 
 Issue
 -----
