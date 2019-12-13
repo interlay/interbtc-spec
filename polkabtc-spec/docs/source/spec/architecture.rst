@@ -1,7 +1,7 @@
 Architecture
 ============
 
-The PolkaBTC implementation consists of five different actors, five modules, and is integrated with the BTCRelay module in the same BTC Parachain.
+The PolkaBTC implementation consists of five different actors, seven modules, and is integrated with the BTC-Relay module and the Parachain Governance mechanism.
 
 Actors
 ~~~~~~
@@ -17,14 +17,14 @@ There are five actors in the system.
 Modules
 ~~~~~~~
 
-The five modules in PolkaBTC interact with each other, but all have distinct logical functionalities. The figure below shows them.
+The seven modules in PolkaBTC interact with each other, but all have distinct logical functionalities. The figure below shows them.
 
 The specification clearly separates these modules to ensure that each module can be implemented, tested, and verified in isolation. The specification follows the principle of abstracting the internal implementation away and providing a clear interface. This should allow optimisation and improvements of a module with minimal impact on other modules.
 
 .. figure:: ../figures/PolkaBTC-Architecture.png
     :alt: architecture diagram
 
-    PolkaBTC consists of five modules. The Oracle module stores the exchange rates based on the input of centralized and decentralized exchanges. The Treasury module maintains the ownership of PolkaBTC, the VaultRegistry module stores information about the current Vaults in the system, and the Issue and Redeem module expose funcitons and maintain data related to the respective sub protocols.
+    High level overview of the BTC-Parachain. PolkaBTC consists of seven modules. The Oracle module stores the exchange rates based on the input of centralized and decentralized exchanges. The Treasury module maintains the ownership of PolkaBTC, the VaultRegistry module stores information about the current Vaults in the system, and the Issue, Redeem and Replace modules expose funcitons and maintain data related to the respective sub protocols. The StabilizedCollateral modules handles Vault collateralization, stabilization against exchange rate fluctuations and automatic liquidation. BTC-Relay tracks the Bitcoin main chain and verifies transaction inclusion. The Parachain Governance maintains correct operation of the BTC-Parachain and intervenes / halts operation if necessary. 
 
 Treasury
 --------
@@ -66,3 +66,9 @@ Redeem
 Last, the Redeem module includes specific data required to redeem PolkaBTC back on the Bitcoin blockchain. It includes the methods necessary for the :ref:`Redeem protocol <redeem-protocol>`.
 
 
+
+
+.. figure:: ../figures/polkaBTC-detailed-architecture.png
+    :alt: detailed architecture diagram
+
+    Detailed architecture of the BTC Parachain, showing all actors, components ans their interactions.
