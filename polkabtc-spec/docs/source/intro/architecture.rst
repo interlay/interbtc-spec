@@ -42,7 +42,8 @@ ExchangeRateOracle
 The Oracle module maintains the ``ExchangeRate`` value between the asset that is used to collateralize Vaults (DOT) and the to-be-issued asset (BTC).
 In the proof-of-concept the Oracle is operated by a trusted third party to feed the current exchange rates into the system.
 
-.. todo:: Check with Web3 on how they plan to implement this. Probably, governance mechanism will provide this service, or intervene in case of failures.
+.. note:: The exchange rate oracle implementation is not part of this specification. PolkaBTC simply expects a continuous input of exchange rate data and assumes the oracle operates correctly.
+.. .. todo:: Check with Web3 on how they plan to implement this. Probably, governance mechanism will provide this service, or intervene in case of failures.
 
 
 Treasury

@@ -18,12 +18,15 @@ Welcome to PolkaBTC's documentation!
 
    spec/data-model
    spec/treasury
-   spec/oracle
    spec/vaultregistry
    spec/issue
    spec/redeem
    spec/helpers
+   spec/oracle
+   spec/stabilized-collateral
+   spec/failureHandling
    spec/events
+   spec/errors
 
 .. toctree::
    :maxdepth: 2
