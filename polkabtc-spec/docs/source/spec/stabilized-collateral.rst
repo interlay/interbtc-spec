@@ -1,2 +1,0 @@
-Stabilized Collateral
-=====================
