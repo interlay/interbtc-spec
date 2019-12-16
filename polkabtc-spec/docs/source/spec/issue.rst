@@ -31,9 +31,20 @@ Scalars
 CommitPeriod
 ............
 
-The time difference in seconds between a commit request is created and required completion time by a CbA-Requester. The commit period has an upper limit to prevent grieving of vault collateral.
+The time difference in number of blocks between a issue request is created and required completion time by a Requester. The commit period has an upper limit to prevent griefing of vault collateral.
 
-*Substrate*: ``CommitPeriod: Moment;``
+*Substrate* ::
+
+  CommitPeriod: T::BlockNumber;
+
+Nonce
+.....
+
+A counter that increases with every use.
+
+*Substrate* ::
+
+  Nonce: U256;
 
 Maps
 ----
@@ -41,28 +52,29 @@ Maps
 IssueRequests
 .............
 
-CbA-Requesters create issue requests to issue PolkaBTC. This mapping provides access from a unique hash ``IssueId`` to a ``Commit`` struct. ``<CommitId, Commit>``.
+Requesters create issue requests to issue PolkaBTC. This mapping provides access from a unique hash ``IssueId`` to a ``Issue`` struct. ``<IssueId, Issue>``.
 
-*Substrate*: ``IssueRequests map T::Hash => Commit<T::AccountId, T::Balance>``
+*Substrate* :: 
+  IssueRequests map T::Hash => Issue<T::AccountId, T::BlockNumber, T::Balance>``
+
 
 Structs
 -------
 
-Commit
-......
+Issue
+.....
 
 Stores the status and information about a single commit.
 
 ==================  ==========  =======================================================	
 Parameter           Type        Description                                            
 ==================  ==========  =======================================================
-``vault``           Account     The vault responsible for this commit request.
-``opentime``        u256        Timestamp of opening the request.
+``vault``           Account     The BTC Parachain address of the Vault responsible for this commit request.
+``opentime``        u256        Block height of opening the request.
 ``collateral``      DOT         Collateral provided by a user.
 ``amount``          PolkaBTC    Amount of PolkaBTC to be issued.
-``receiver``        Account     CbA-Requester account receiving PolkaBTC upon successful issuing.
-``sender``          Account     CbA-Requester account receiving the refund of ``collateral``.
-``btcPublicKey``    bytes[20]   Base58 encoded Bitcoin public key of the CbA-Requester.  
+``requester``        Account     Requester account receiving PolkaBTC upon successful issuing.
+``btcPublicKey``    bytes[20]   Base58 encoded Bitcoin public key of the Vault.  
 ==================  ==========  =======================================================
 
 *Substrate*
@@ -71,13 +83,12 @@ Parameter           Type        Description
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct Commit<AccountId, Balance, Moment> {
+  pub struct Commit<AccountId, BlockNumber, Balance> {
         vault: AccountId,
-        opentime: Moment,
+        opentime: BlockNumber,
         collateral: Balance,
         amount: Balance,
-        receiver: AccountId,
-        sender: AccountId,
+        requester: AccountId,
         btcPublicKey: Bytes
   }
 
@@ -121,17 +132,13 @@ Specification
 
   fn commit(origin, amount: U256, vaults: Vec<AccountId>) -> Result {...}
 
-User Story
-..........
-
-.. todo:: Add
-
-
 
 Function Sequence
 .................
 
 .. todo:: Discuss if a user actualy needs to select a vault. We could alternatively just consider all vaults as a pool. The user just issues without selecting a dedicated vault and we consider the pool of vault collateral when deciding whether or not the issue request can be fullfilled. There is anyway not necessarily a connection between issue and redeem.
+
+.. todo:: Figure out how to safely use the nonce.
 
 
 1. A Requester prepares the input parameters to the function.
@@ -149,11 +156,15 @@ Function Sequence
 
 4. Generate a ``CommitId`` by hashing a random seed, a nonce, and the address of the Requester.
 
-5. Store a new ``Commit`` struct in the ``IssueRequests`` mapping. The ``CommitId`` refers to the ``Commit``. Fill the ``vault`` with the requested ``vault``, the ``opentime`` with the current block number, the ``collateral`` with the collateral provided by the Requester, ``amount`` with the ``amount`` provided as input, ``requester`` the requester account, and ``btcPublicKey`` the address from which the Requester will send the Bitcoin transaction to a vault.
+5. Increase the nonce.
 
-6. Issue the ``Commit`` event with the ``requester`` account, ``amount``, ``vault``, and ``CommitId``.
+6. Store a new ``Issue`` struct in the ``IssueRequests`` mapping. The ``IssueId`` refers to the ``Issue``. Fill the ``vault`` with the requested ``vault``, the ``opentime`` with the current block number, the ``collateral`` with the collateral provided by the Requester, ``amount`` with the ``amount`` provided as input, ``requester`` the requester account, and ``btcPublicKey`` the Bitcoin address of the Vault.
 
-7. Return the ``CommitId``. The Requester stores this for future reference and the next steps, locally.
+7. Call the VaultRegistry ``occupy`` function with the amount of ``collateral`` that should be reserved for the issue request for a specific ``vault`` identified by its address.
+
+8. Issue the ``Commit`` event with the ``requester`` account, ``amount``, ``vault``, and ``CommitId``.
+
+9. Return the ``CommitId``. The Requester stores this for future reference and the next steps, locally.
 
 lock
 ----
@@ -165,14 +176,14 @@ Specification
 
 *Function Signature*
 
-``lock(requester, amount, vault, commitId)``
+``lock(requester, amount, vault, issueId)``
 
 *Parameters*
 
 * ``requester``: The Requester's BTC Parachain account.
 * ``amount``: The amount of PolkaBTC to be issued.
 * ``vaults``: The BTC Parachain address of the Vault(s) involved in this issue request.
-* ``commitId``: the unique hash created during the ``commit`` function,
+* ``issueId``: the unique hash created during the ``commit`` function,
 
 *Returns*
 
@@ -184,14 +195,20 @@ Specification
 
   OP_RETURN
 
-User Story
-..........
-
 
 Function Sequence
 .................
 
-1. The user 
+1. The Requester prepares a Bitcoin transaction with the following details:
+
+   a. The input(s) must be spendable from the Requester.
+   b. One output needs to fulfil the following conditions:
+
+        1. The output is spendable by the ``btcPublicKey`` of the Vault selected in the ``commit`` function.
+        2. The output includes the ``amount`` requested in the ``commit`` function in the ``value`` field. This means the number of requested PolkaBTC must be the same amount of transferred BTC (expressed as satoshis).
+        3. The output must include a ``OP_RETURN`` with the ``issueId`` received in the ``commit`` function.
+
+2. The Requester sends the transaction prepared in step 1 to the Bitcoin network and locally stores the ``txId``, i.e. the unique hash of the transaction.
 
 issue
 -----
@@ -203,16 +220,16 @@ Specification
 
 *Function Signature*
 
-``issue(requester, commitId, txId, txBlockHeight, txIndex, merkleProof, rawTx)``
+``issue(requester, issueId, txId, txBlockHeight, txIndex, merkleProof, rawTx)``
 
 *Parameters*
 
 * ``requester``: the account of the Requester.
-* ``commitId``: the unique hash created during the ``commit`` function,
+* ``issueId``: the unique hash created during the ``commit`` function,
 * ``txId``: the hash of the transaction.
 * ``txBlockHeight``: block height at which transaction is supposedly included.
 * ``txIndex``: index of transaction in the block’s tx Merkle tree.
-* ``terkleProof``: Merkle tree path (concatenated LE sha256 hashes).
+* ``MerkleProof``: Merkle tree path (concatenated LE sha256 hashes).
 * ``rawTx``: raw transaction including the transaction inputs and outputs.
 
 
@@ -226,23 +243,43 @@ Specification
 
 *Errors*
 
-* ``ERR_COMMIT_ID``:
+* ``ERR_COMMIT_ID_NOT_FOUND``: Throws if the ``issueId`` cannot be found.
+* ``ERR_FUNCTION_NOT_VERIFIED``: Throws a generic error if the transaction could not be verified.
 
 *Substrate* ::
 
   fn issue(origin, ) -> Result {...}
 
-User Story
-..........
-
 
 Function Sequence
 .................
 
-1. The user prepares the inputs and calls the ``issue`` function.
+.. todo:: Insert link to BTC Relay to get Bitcoin data.
+
+.. todo:: What happends if the Vault goes into buffered collateral/liquidation at this point?
+
+
+1. The Requester prepares the inputs and calls the ``issue`` function.
+    
+    a. ``requester``: The BTC Parachain address of the requester.
+    b. ``issueId``: The unique hash received in the ``commit`` function.
+    c. ``txId``: the hash of the Bitcoin transaction to the Vault. With the ``txId`` the Requester can get the remainder of the Bitcoin transaction data including ``txBlockHeight``, ``txIndex``, ``MerkleProof``, and ``rawTx``. See BTC Relay documentation for details.
+
+2. Checks if the ``issueId`` exists. Throws ``ERR_COMMIT_ID_NOT_FOUND`` if not found. Else, continues.
+3. Calls the ``verifyTransaction`` function of the BTC Relay with the provided ``txId``, ``txBlockHeight``, ``txIndex``, and ``MerkleProof``. If the function does not return ``True``, the function has either thrown a specific error or the transaction could not be verified. If the function returns ``False``, throw the general ``ERR_TRANSACTION_NOT_VERIFIED`` error. If returns ``True``, continues.
+4. Calls the ``parseTransaction`` function of the BTC Relay with the ``txId``, ``rawTx``, the ``amount`` and the ``issueId``. The ``parseTransaction`` function checks that the ``rawTx`` hashes to the ``txId``, includes the correct ``amount``, and hash the ``issueId`` in its ``OP_RETURN``. If the function returns ``False``, throw ``ERR_TRANSACTION_NOT_VERIFIED``. More detailed errors are thrown in the BTC Relay. Else, continues.
+5. Check if the function has thrown an error.
+
+    a. If the function has thrown an error, execute ``free`` in the VaultRegistry to release the locked collateral for this issue request for the vault. Return ``False``.
+    b. Else, continue.
+
+6. Call the ``mint`` function in the Treasury with the ``amount`` and the Requester's address as the ``receiver``.
+7. Issue an ``Issue`` event with the Requester's address, the amount, and the Vault's address.
+8. Return ``True``.
 
 Events
 ~~~~~~
+
 
 
 Errors
