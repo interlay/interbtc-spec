@@ -23,7 +23,6 @@ Welcome to PolkaBTC's documentation!
    spec/redeem
    spec/helpers
    spec/oracle
-   spec/stabilized-collateral
    spec/failureHandling
    spec/events
    spec/errors

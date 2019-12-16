@@ -59,19 +59,12 @@ The VaultRegistry module manages the Vaults in the system, exposing functionalit
 
 * Managing the list of active Vaults in the system and the necessary data (e.g. BTC addresses) to execute the Issue, Redeem and Replace protocols.
 
-* Handling the collateral provided by Vaults, penalizing misbehaving Vaults and reimbursing financially damaged users.
-
-StabilizedCollateral
--------------
-
-The StabilizedCollateral module handles the collateralization rates of Vaults and reacts to exchange rate fluctuations.
+This module also handles the collateralization rates of Vaults and reacts to exchange rate fluctuations.
 Specifically, it 
 
 * stores how much collateral each Vault provided and how much of that collateral is allocated to PolkaBTC.
 * tracks the collateralization rate of each Vault and triggeres measures in case the rate declines, e.g. due to exchange rate fluctations.
 * triggeres automatic liquidation if a Vault falls below the minimum collateralization rate.
-
-
 
 Issue
 -----
