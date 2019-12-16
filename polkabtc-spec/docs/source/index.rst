@@ -10,12 +10,12 @@ Welcome to PolkaBTC's documentation!
    intro/at-a-glance
    intro/CbA
    intro/polkadot
-
+   intro/architecture
+   
 .. toctree::
    :maxdepth: 2
    :caption: Specification
 
-   spec/architecture
    spec/data-model
    spec/treasury
    spec/oracle
