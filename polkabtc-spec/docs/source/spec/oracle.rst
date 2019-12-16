@@ -13,6 +13,9 @@ The implementation of the oracle **is not part of this specification**. PolkaBTC
 Data Model
 ~~~~~~~~~~
 
+Scalars
+--------
+
 ExchangeRate
 ............
 
@@ -31,7 +34,7 @@ Functions
 ~~~~~~~~~
 
 setExchangeRate
-................
+----------------
 
 Set the latest (aggregate) BTC/DOT exchange rate. This function invokes a check of Vault collateral rates in the `StabilizedCollateral </spec/stabilized-collateral.html#stabilized-collateral>`_ component.
 
@@ -40,10 +43,11 @@ Specification
 
 *Function Signature*
 
-``setExchangeRate(rate)``
+``setExchangeRate(oracle, rate)``
 
 *Parameters*
 
+* ``oracle``: the oracle account calling this function. Must be pre-authorized and tracked in this component!
 * ``rate``: the ``U256`` BTC/DOT exchange rate
 
 
@@ -64,7 +68,7 @@ This function can be only called by a/the pre-defined oracle.
 
 
 getExchangeRate
-................
+----------------
 
 Returns the latest (aggregate) BTC/DOT exchange rate, as received from the external data sources.
 
@@ -93,9 +97,17 @@ User Story
  
 This function can be called by any participant to retrieve the BTC/DOT exchange rate as tracked by the BTC-Parachain.
 
-Errors
-~~~~~~
+
+Events
+~~~~~~~~~~~~
+
+This component emits no events.
+
+Error Codes
+~~~~~~~~~~~~
 
 ``ERR_MISSING_EXCHANGE_RATE``: the last exchange rate information exceeded the maximum delay acceptable by the oracle. 
+
+``ERR_INVALID_ORACLE_SOURCE``: the caller of the function was not the authorized oracle. 
 
 .. todo:: Halt PolkaBTC if the exchange rate oracle fails: liveness failure if no more data is incoming, as well as safety failure if the Governance Mechanism flags incorrect exchange rates.

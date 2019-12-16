@@ -28,6 +28,17 @@ Data Model
 Scalars
 -------
 
+MinimumCollateralUser
+.....................
+
+The minimum collateral (DOT) a user needs to provide as griefing protection. 
+
+.. note:: Serves to disincentivize griefing attacks against vaults, where users create issue requests, temporarily locking a Vault's collateral, but never execute the issue process.
+
+*Substrate*: ``MinimumCollateralUser: Balance;``
+
+
+
 CommitPeriod
 ............
 
