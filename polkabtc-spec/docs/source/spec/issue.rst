@@ -18,11 +18,11 @@ Step-by-step
 Data Model
 ~~~~~~~~~~
 
-.. todo:: We need to handle replay attacks. Idea: include a short unique hash, e.g. the ``CommitId`` and the ``RedeemId`` in the BTC transaction in the ``OP_RETURN`` field. That way, we can check if it is the correct transaction.
+.. .. todo:: We need to handle replay attacks. Idea: include a short unique hash, e.g. the ``issueId`` and the ``RedeemId`` in the BTC transaction in the ``OP_RETURN`` field. That way, we can check if it is the correct transaction.
 
-.. todo:: The hash creation for ``CommitId`` and ``RedeemId`` must be unique. Proposal: use a combination of Substrate's ``random_seed()`` method together with a ``nonce`` and the ``AccountId`` of a CbA-Requester and CbA-Redeemer. 
+.. .. todo:: The hash creation for ``issueId`` and ``RedeemId`` must be unique. Proposal: use a combination of Substrate's ``random_seed()`` method together with a ``nonce`` and the ``AccountId`` of a CbA-Requester and CbA-Redeemer. 
 
-.. warning:: Substrate's built in module to generate random data needs 80 blocks to actually generate random data.
+.. .. warning:: Substrate's built in module to generate random data needs 80 blocks to actually generate random data.
 
 
 Scalars
@@ -54,8 +54,9 @@ IssueRequests
 
 Requesters create issue requests to issue PolkaBTC. This mapping provides access from a unique hash ``IssueId`` to a ``Issue`` struct. ``<IssueId, Issue>``.
 
-*Substrate* :: 
-  IssueRequests map T::Hash => Issue<T::AccountId, T::BlockNumber, T::Balance>``
+*Substrate* ::
+
+  IssueRequests map T::Hash => Issue<T::AccountId, T::BlockNumber, T::Balance>
 
 
 Structs
@@ -115,11 +116,11 @@ Specification
 
 *Returns*
 
-* ``issueRequestId``: A unique hash identifying the issue request. 
+* ``issueId``: A unique hash identifying the issue request. 
 
 *Events*
 
-* ``Commit(requester, amount, vaults, CommitId)``:
+* ``Commit(requester, amount, vaults, issueId)``:
 
 *Errors*
 
@@ -136,7 +137,6 @@ Specification
 Function Sequence
 .................
 
-.. todo:: Discuss if a user actualy needs to select a vault. We could alternatively just consider all vaults as a pool. The user just issues without selecting a dedicated vault and we consider the pool of vault collateral when deciding whether or not the issue request can be fullfilled. There is anyway not necessarily a connection between issue and redeem.
 
 .. todo:: Figure out how to safely use the nonce.
 
@@ -154,7 +154,7 @@ Function Sequence
     a. Query the VaultRegistry and check the ``status`` of the vault. If the vault status is in Buffered Collateral, throw ``ERR_VAULT_BUFFERED_COLLATERAL_STATE``. If the vault status is Liquidation, throw ``ERR_VAULT_LIQUIDATION_STATE``. Else, continue.
     b. Query the VaultRegistry and check the ``committedTokens`` and ``collateral``. Calculate how much free ``collateral`` is available by multiplying the collateral with the ``ExchangeRate`` (from the Oracle) and subtract the ``committedTokens``. If not enough collateral is free, throw ``ERR_EXCEEDING_VAULT_LIMIT``. Else, continue.
 
-4. Generate a ``CommitId`` by hashing a random seed, a nonce, and the address of the Requester.
+4. Generate a ``issueId`` by hashing a random seed, a nonce, and the address of the Requester.
 
 5. Increase the nonce.
 
@@ -162,9 +162,9 @@ Function Sequence
 
 7. Call the VaultRegistry ``occupy`` function with the amount of ``collateral`` that should be reserved for the issue request for a specific ``vault`` identified by its address.
 
-8. Issue the ``Commit`` event with the ``requester`` account, ``amount``, ``vault``, and ``CommitId``.
+8. Issue the ``Commit`` event with the ``requester`` account, ``amount``, ``vault``, and ``issueId``.
 
-9. Return the ``CommitId``. The Requester stores this for future reference and the next steps, locally.
+9. Return the ``issueId``. The Requester stores this for future reference and the next steps, locally.
 
 lock
 ----
@@ -202,11 +202,10 @@ Function Sequence
 1. The Requester prepares a Bitcoin transaction with the following details:
 
    a. The input(s) must be spendable from the Requester.
-   b. One output needs to fulfil the following conditions:
+   b. The transaction has at least two outputs with the following conditions:
 
-        1. The output is spendable by the ``btcPublicKey`` of the Vault selected in the ``commit`` function.
-        2. The output includes the ``amount`` requested in the ``commit`` function in the ``value`` field. This means the number of requested PolkaBTC must be the same amount of transferred BTC (expressed as satoshis).
-        3. The output must include a ``OP_RETURN`` with the ``issueId`` received in the ``commit`` function.
+        1. One output is spendable by the ``btcPublicKey`` of the Vault selected in the ``commit`` function. The output includes the ``amount`` requested in the ``commit`` function in the ``value`` field. This means the number of requested PolkaBTC must be the same amount of transferred BTC (expressed as satoshis).
+        2. One output must include a ``OP_RETURN`` with the ``issueId`` received in the ``commit`` function. This output will not be spendable and therefore the ``value`` field should be ``0``.
 
 2. The Requester sends the transaction prepared in step 1 to the Bitcoin network and locally stores the ``txId``, i.e. the unique hash of the transaction.
 
@@ -248,7 +247,7 @@ Specification
 
 *Substrate* ::
 
-  fn issue(origin, ) -> Result {...}
+  fn issue(origin, issueId: T::Hash, txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: Bytes, rawTx: Bytes) -> Result {...}
 
 
 Function Sequence
