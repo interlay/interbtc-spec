@@ -1,4 +1,4 @@
-.. _vault-registry:
+.. _Vault-registry:
 
 Vault Registry
 ==============
@@ -12,58 +12,64 @@ Scalars
 TotalCollateral
 ...............
 
-The total collateral provided in DOT by vaults.
+The total collateral provided in DOT by Vaults.
 
 *Substrate*: ``TotalCollateral: Balance;``
 
 TotalCommittedCollateral
 ........................
 
-The total collateral committed to CbA requests and PolkaBTC.
+The total collateral used for backing issued PolkaBTC tokens, i.e., this collateral cannot be freely withdrawn by Vaults or used for new issue requests. 
 
-.. note:: The difference of ``TotalCollateral`` and ``TotalCommittedCollateral`` quantifies how much free collateral is available. This free collateral can be used by CbA-Requesters to issue new PolkaBTC.
+.. note:: The difference of ``TotalCollateral`` and ``TotalCommittedCollateral`` quantifies how much free collateral is available. This free collateral can be used by users to issue new PolkaBTC, or can be wirthdrawn by the Vaults who contribute it.
 
 *Substrate*: ``TotalCommittedCollateral: Balance;``
 
 MinimumCollateralVault
 ......................
 
-The minimum collateral (DOT) a vault needs to provide to participate in the issue process.
+The minimum collateral (DOT) a Vault needs to provide to participate in the issue process. 
 
 .. note:: This is a protection against spamming the protocol with very small collateral amounts.
 
 *Substrate*: ``MinimumCollateralVault: Balance;``
 
-SecureOperationLimit
+SecureCollateralRate
 ....................
 
-Determines how much collateral rate is required for *secure operation*. Needs to be strictly greater than ``100`` and ``BufferedOperationLimit``.
+Determines the over-collareralization rate for DOT collateral locked by Vaults, necessary for issuing PolkaBTC. 
+Must to be strictly greater than ``100`` and ``LiquidationCollateralRate``.
 
-The Vault can take on issue requests depending on the collateral it provides and under consideration of the ``SecureOperationLimit``.
+The Vault can take on issue requests depending on the collateral it provides and under consideration of the ``SecureCollateralRate``.
 The maximum amount of PolkaBTC a Vault is able to support during the issue process is based on the following equation:
-:math:`\text{max(PolkaBTC)} = \text{collateral} * \text{ExchangeRate} / \text{SecureOperationLimit}`.
+:math:`\text{max(PolkaBTC)} = \text{collateral} * \text{ExchangeRate} / \text{SecureCollateralRate}`.
 
-.. note:: As an example, assume we use ``DOT`` as collateral, we issue ``PolkaBTC`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureOperationLimit`` is 200%, i.e. a Vault has to provide two-times the amount of collateral to back an issue request. Now let's say the Vault deposits 400 ``DOT`` as collateral. Then this Vault can back at most 2.5 PolkaBTC as: :math:`400 * (1/80) / 2 = 2.5`.
+.. note:: As an example, assume we use ``DOT`` as collateral, we issue ``PolkaBTC`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureCollateralRate`` is 200%, i.e. a Vault has to provide two-times the amount of collateral to back an issue request. Now let's say the Vault deposits 400 ``DOT`` as collateral. Then this Vault can back at most 2.5 PolkaBTC as: :math:`400 * (1/80) / 2 = 2.5`.
 
 .. todo:: Insert link to security model.
 
-*Substrate*: ``SecureOperationLimit: u16;``
+*Substrate*: ``SecureCollateralRate: u16;``
 
-BufferedOperationLimit
+AuctionCollateralRate
 ......................
 
-Determines how much collateral rate is required for *buffered collateral*. Needs to be strictly greater than ``100``.
+Determines the rate for the collateral rate of Vaults, at which the BTC backed by the Vault are opened up for auction to other Vaults. 
+That is, if the Vault does not increase its collateral rate, it can be forced to execute the Replace protocol with another Vault, which bids sufficient DOT collateral to cover the issued PolkaBTC tokens.
 
 .. todo:: Insert link to security model.
 
-*Substrate*: ``BufferedOperationLimit: u16;``
+*Substrate*: ``AuctionCollateralRate: u16;``
 
-ReplacePeriod
-.............
 
-The time difference in seconds between a replacement vault indicates that it will replace a vault and required completion time by that vault.
+LiquidationCollateralRate
+......................
 
-*Substrate*: ``ReplacePeriod: Moment;``
+Determines the lower bound for the collateral rate in PolkaBTC. Must be strictly greater than ``100``. If a Vault's collateral rate drops below this, automatic liquidation (forced Redeem) is triggered. 
+
+.. todo:: Insert link to security model.
+
+*Substrate*: ``LiquidationCollateralRate: u16;``
+
 
 Maps
 ----
@@ -72,9 +78,20 @@ Maps
 Vaults
 ......
 
-Mapping from accounts of vaults to their struct. ``<Account, Vault>``.
+Mapping from accounts of Vaults to their struct. ``<Account, Vault>``.
 
 *Substrate*: ``Vaults map T::AccountId => Vault<T::AccountId, T::Balance, T::Moment>``
+
+
+RegisterRequests (Optional)
+.............................
+
+Mapping from registerIDs of RegisterRequest to their structs. ``<U256, RegisterRequest>``.
+
+*Substrate*: ``RegisterRequests map T::U256 => Vault<T::AccountId, T::Moment>``
+
+
+
 
 Structs
 -------
@@ -82,21 +99,45 @@ Structs
 Vault
 .....
 
-Stores the information of a vault.
-
-.. todo:: Where are we storig the vaults BTC address? We need to verify that the user send the BTC to the correct address. Potentially there is a BTC address associated with a vault. When a CbA-Requester creates a ``Commit`` the BTC address of the vault is copied there and the user can prove that he sent the BTC there. This give sus the chance that a vault can update his BTC address, but we don't have to deal with that if it happens during ongoing issue requests. These BTC will still be received on the old address (in case of an update). Also the protocol remains non-interactive for the vault in this case.
-
+Stores the information of a Vault.
 
 
 ===================  =========  ========================================================
 Parameter            Type       Description
 ===================  =========  ========================================================
-``vault``            Account    Account ID of the vault.
-``committedTokens``  PolkaBTC   Number of tokens committed and issued to CbA Requesters (DOT).
-``collateral``       DOT        Amount of backing collateral (DOT).
-``replacement``      Account    Account ID of replacement vault.
-``replace``          bool       True if vault wants to be replaced.
-``replaceTime``      u256       Time at which replacement needs to be completed.
+``committedTokens``  PolkaBTC   Number of PolkaBTC tokens issued by this Vault, or locked by users' issue requests.
+``collateral``       DOT        Total amount of collateral provided by this Vault (note: "free" collateral is calculated on the fly and updated each time new exchange rate data is received).
+``btcAddress``       bytes[20]  Bitcoin address of this Vault, to be used for issuing of PolkaBTC tokens.
+===================  =========  ========================================================
+
+.. note:: This specification currently assumes for simplicity that a Vault will reuse the same BTC address, even after multiple redeem requests. **[Future Extension]**: For better security, Vaults may desire to generate new BTC addresses each time they execute a redeem request. This can be handled by pre-generating multiple BTC addresses and storing these in a list for each Vault. Caution is necessary for users which execute issue requests with "old" Vault addresses - these BTC must be moved to the latest address by Vaults. 
+
+
+*Substrate*
+
+::
+  
+  #[derive(Encode, Decode, Default, Clone, PartialEq)]
+  #[cfg_attr(feature = "std", derive(Debug))]
+  pub struct Vault<AccountId, Balance> {
+        vault: AccountId,
+        committedTokens: Balance,
+        collateral: Balance,
+        btcAddress: [u8; 20]
+  }
+
+
+RegisterRequest (Optional)
+...........................
+
+Optional struct storing data used in the (optional) validity check of the BTC address provided by a Vault upon registration.
+
+===================  =========  ========================================================
+Parameter            Type       Description
+===================  =========  ========================================================
+``nonce``   u256       Random nonce used to link a Bitcoin transaction inclusion proof to this registration request (included in OP_RETURN). 
+``vault``            Account    Acconnt identifier of the registered Vault
+``timeout``          Moment     Optional maximum delay before the Vault must submit a valid tranasction inclusion proof.
 ===================  =========  ========================================================
 
 *Substrate*
@@ -105,28 +146,23 @@ Parameter            Type       Description
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct Vault<AccountId, Balance, Moment> {
+  pub struct Vault<AccountId, Moment> {
+        registrationID: U256,
         vault: AccountId,
-        committedTokens: Balance,
-        collateral: Balance,
-        replacement: AccountId,
-        replace: bool,
-        replacePeriod: Moment
+        timeout: Moment
   }
-
-
 
 Functions
 ~~~~~~~~~
 
 
-requestRegistration
+registerVault
 --------------------
 
-Intiates the registration procedure for a new Vault. 
-The new Vault provides its BTC address and it's DOT collateral, creating a ``RegistrationRequest``, and receives in return a ``registerID``, which it must include in the OP_RETURN field of a transaction signed by the public key corresponding to the provided BTC address. The proof is checked by the BTC-Relay component, and if successful, the Vault is registered. 
+Intiates the registration procedure for a new Vault. The Vault provides its BTC address and locks up DOT collateral, which is to be used to the issuing process. 
 
-.. note:: Do we require collateral to prevent griefing here as well?
+**[Optional]: check valid BTC address**: The new Vault provides its BTC address and it's DOT collateral, creating a ``RegistrationRequest``, and receives in return a ``registerID``, which it must include in the OP_RETURN field of a transaction signed by the public key corresponding to the provided BTC address. The proof is checked by the BTC-Relay component, and if successful, the Vault is registered. 
+Note: Collateral can be required to prevent griefing / spamming.
 
 
 Specification
@@ -148,7 +184,7 @@ Specification
 
 *Events*
 
-* ``RegisterVault(vault, collateral)``: emit an event stating that a new Vault (``vault``) was registered and provide information on the Vaults's collateral (``collateral``). 
+* ``RegisterVault(Vault, collateral)``: emit an event stating that a new Vault (``vault``) was registered and provide information on the Vaults's collateral (``collateral``). 
 
 *Errors*
 
@@ -161,29 +197,40 @@ Specification
 User Story
 ..........
 
-A BTC-Parachain participant registers as a Vault. 
+A BTC-Parachain participant registers as a Vault, locking up collateral in DOT (must be greater that ``MinimumCollateralVault``) and providing a BTC address to which BTC are to be sent during the issue process. 
 
-.. todo:: How can we determine that the Vault provided a valid BTC address? Create a BTC transaction with some OP_RETURN value, and submit a TX proof?
+**Optionally**, the new Vault may be required to provide proof that the specified BTC address is indeed valid by creating a new transaction with an OP_RETURN output, including in the latter some nonce defined by the Parachain.
 
 Function Sequence
 .................
-TODO
 
-registerVault
---------------
+The ``registerVault`` function takes as input a Parachain AccountID, a Bitcoin address and DOT collateral, and registers a new Vault in the system.
 
-Registers a new Vault and locks the provided DOT collateral. 
+1) Check that ``collateral > MinimumCollateralVault`` holds, i.e., the Vault provided sufficient collateral (above the spam protection threshold).
+
+  a. Raise ``ERR_MIN_AMOUNT`` error if this check fails.
+
+2) Store the provided data as a new ``Vault``.
+
+3) **[Optional]**: generate a ``registrationID`` which the vault must be include in the OP_RETURN of a new BTC transaction spending BTC from the specified ``btcAddress``. This can be stored in a ``RegisterRequest`` struct, alongside the AccoundID (``vault``) and a timelimit in seconds.
+
+proveValidBTCAddress (Optional)
+---------------------
+
+A vault optionally may be required to prove that the BTC address is provided during registration is indeed valid, by providing a transaction inclusion proof, showing BTC can be spent from the address.
 
 Specification
 .............
 
 *Function Signature*
 
-``registerVault(vault, collateral)``
+``proveValidBTCAddress(registrationID, txid, txBlockHeight, txIndex, merkleProof)``
+
+STOPPED HERE
 
 *Parameters*
 
-* ``vault``: The account of the Vault to be registered.
+* ``Vault``: The account of the Vault to be registered.
 * ``collateral``: to-be-locked collateral in DOT.
 
 *Returns*
@@ -193,7 +240,7 @@ Specification
 
 *Events*
 
-* ``RegisterVault(vault, collateral)``: emit an event stating that a new Vault (``vault``) was registered and provide information on the Vaults's collateral (``collateral``). 
+* ``RegisterVault(vault, collateral)``: emit an event stating that a new Vault (``Vault``) was registered and provide information on the Vaults's collateral (``collateral``). 
 
 *Errors*
 
@@ -227,11 +274,11 @@ Specification
 
 *Function Signature*
 
-``lockCollateral(vault, collateral)``
+``lockCollateral(Vault, collateral)``
 
 *Parameters*
 
-* ``vault``: The account of the vault locking collateral.
+* ``Vault``: The account of the Vault locking collateral.
 * ``collateral``: to-be-locked collateral in DOT.
 
 *Returns*
@@ -241,11 +288,11 @@ Specification
 
 *Events*
 
-* ``LockCollateral(vault, newCollateral, totalCollateral, freeCollateral)``: emit an event stating how much new (``newCollateral``), total collateral (``totalCollateral``) and freely available collateral (``freeCollateral``) the Vault calling this function has locked.
+* ``LockCollateral(Vault, newCollateral, totalCollateral, freeCollateral)``: emit an event stating how much new (``newCollateral``), total collateral (``totalCollateral``) and freely available collateral (``freeCollateral``) the Vault calling this function has locked.
 
 *Errors*
 
-* ``ERR_INSUFFICIENT_FUNDS``: If a vault has insufficient funds to complete the transaction.
+* ``ERR_INSUFFICIENT_FUNDS``: If a Vault has insufficient funds to complete the transaction.
 * ``ERR_MIN_AMOUNT``: The amount of to-be-locked collateral needs to be above a minimum amount.
   
 *Substrate* ::
@@ -273,11 +320,11 @@ Specification
 
 *Function Signature*
 
-``withdrawCollateral(vault, collateral)``
+``withdrawCollateral(Vault, collateral)``
 
 *Parameters*
 
-* ``vault``: The account of the vault withdrawing collateral.
+* ``Vault``: The account of the Vault withdrawing collateral.
 * ``collateral``: To-be-withdrawn free collateral in DOT.
 
 *Returns*
@@ -287,7 +334,7 @@ Specification
 
 *Events*
 
-* ``WithdrawCollateral(vault, collateral, totalCollateral)``: emit an event stating how much collateral was withdrawn by the Vault and total collateral a Vault has left.
+* ``WithdrawCollateral(Vault, collateral, totalCollateral)``: emit an event stating how much collateral was withdrawn by the Vault and total collateral a Vault has left.
 
 *Errors*
 * ``ERR_INSUFFICIENT_FREE_COLLATERAL``: The Vault is trying to withdraw more collateral than is currently free. 
