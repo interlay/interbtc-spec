@@ -21,9 +21,10 @@ Welcome to PolkaBTC's documentation!
    spec/vaultregistry
    spec/issue
    spec/redeem
-   spec/helpers
+   spec/replace
    spec/oracle
    spec/failureHandling
+   spec/helpers
    spec/events
    spec/errors
 
@@ -40,13 +41,3 @@ Welcome to PolkaBTC's documentation!
    
    other/glossary
    other/license
-
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
