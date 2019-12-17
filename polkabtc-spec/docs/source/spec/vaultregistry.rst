@@ -309,20 +309,26 @@ Specification
 
 *Errors*
 
-* ``ERR_INSUFFICIENT_FUNDS``: If a Vault has insufficient funds to complete the transaction.
-* ``ERR_MIN_AMOUNT``: The amount of to-be-locked collateral needs to be above a minimum amount.
-  
+* ``ERR_UNKOWN_VAULT``: The specified Vault does not exist. 
+
 *Substrate* ::
 
   fn lockCollateral(origin, amount: Balance) -> Result {...}
 
 User Story
 ..........
-TODO
+
+An existing Vault calls ``lockCollateral`` to increase its DOT collateral in the system.
+
 
 Function Sequence
 .................
-TODO
+
+1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccoundId (``vault``).
+
+  a) Raise ``ERR_UNKOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
+
+2) Increase the ``collateral`` of the ``Vault``. 
 
 
 withdrawCollateral
@@ -337,12 +343,12 @@ Specification
 
 *Function Signature*
 
-``withdrawCollateral(Vault, collateral)``
+``withdrawCollateral(vault, withdrawAmount)``
 
 *Parameters*
 
-* ``Vault``: The account of the Vault withdrawing collateral.
-* ``collateral``: To-be-withdrawn free collateral in DOT.
+* ``vault``: The account of the Vault withdrawing collateral.
+* ``withdrawAmount``: To-be-withdrawn collateral in DOT.
 
 *Returns*
 
@@ -351,11 +357,14 @@ Specification
 
 *Events*
 
-* ``WithdrawCollateral(Vault, collateral, totalCollateral)``: emit an event stating how much collateral was withdrawn by the Vault and total collateral a Vault has left.
+* ``WithdrawCollateral(Vault, withdrawAmount, totalCollateral)``: emit an event stating how much collateral was withdrawn by the Vault and total collateral a Vault has left.
 
 *Errors*
+
+* ``ERR_UNKOWN_VAULT``: The specified Vault does not exist. 
 * ``ERR_INSUFFICIENT_FREE_COLLATERAL``: The Vault is trying to withdraw more collateral than is currently free. 
 * ``ERR_MIN_AMOUNT``: The amount of locked collateral (free + used) needs to be above ``MinimumCollateralVault``.
+* ``ERR_UNAUTHRORIZED``: The caller of the withdrawal is not the specified Vault, and hence not authorized to withdraw funds.
   
 *Substrate* ::
 
@@ -364,12 +373,30 @@ Specification
 User Story
 ..........
 
+A Vault calls ``withdrawCollateral`` to withdraw some of its ``free`` collateral, i.e., not used to back issued PolkaBTC tokens. 
 
 Function Sequence
 .................
 
-+ Check that Vault has sufficient free collateral (committedTokens * 
-+ Check that the sum of remaining free + used collateral is > than ``MinimumCollateralVault``. If below, throw exception and tell Vault it must close its account if it wishes to withdraw (or request a Replace if some of the collateral is already used for issued PolkaBTC)
+1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccoundId (``vault``).
+
+  a) Raise ``ERR_UNKOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
+
+2) Check that the caller of this function is indeed the specified ``Vault`` (AccoundId ``vault``). 
+
+  a) Raise ``ERR_UNAUTHRORIZED`` error is the caller of this function is not the Vault specified for withdrawal.
+
+3) Check that ``Vault`` has sufficient free collateral: ``withdrawAmount <= (Vault.collateral - Vault.committedTokens * SecureCollateralRate)``
+
+  a) Raise ``ERR_INSUFFICIENT_FREE_COLLATERAL`` error if this check fails.
+
+4) Check that the remaining **total** (``free` + used) collateral is greated than ``MinimumCollateralVault`` (``Vault.collateral - withdrawAmount >= MinimumCollateralVault``)
+
+  a) Raise ``ERR_MIN_AMOUNT`` if this check fails. The Vault must close its account if it wishes to withdraw collateral below the ``MinimumCollateralVault`` threshold, or request a Replace if some of the collateral is already used for issued PolkaBTC.
+
+5) Release the requested ``withdrawAmount`` of DOT collateral to the specified Vault's account (``vault`` AccountId) and deduct the collateral tracked for the Vault in ``Vaults``: ``Vault.collateral - withdrawAmount``, 
+
+6) Emit ``WithdrawCollateral`` event and return ``True``.
 
 
 Events
