@@ -96,6 +96,8 @@ Parameter           Type        Description
 Functions
 ~~~~~~~~~
 
+.. _fun_commit:
+
 commit
 ------
 
@@ -209,6 +211,9 @@ Function Sequence
 
 2. The Requester sends the transaction prepared in step 1 to the Bitcoin network and locally stores the ``txId``, i.e. the unique hash of the transaction.
 
+
+.. _fun_issue:
+
 issue
 -----
 
@@ -234,7 +239,8 @@ Specification
 
 *Returns*
 
-* ``True``:
+* ``True``: if the transaction can be successfully verified and the function has been called within the time limit.
+* ``False``: Otherwise.
 
 *Events*
 
@@ -243,7 +249,8 @@ Specification
 *Errors*
 
 * ``ERR_COMMIT_ID_NOT_FOUND``: Throws if the ``issueId`` cannot be found.
-* ``ERR_FUNCTION_NOT_VERIFIED``: Throws a generic error if the transaction could not be verified.
+* ``ERR_COMMIT_PERIOD_EXPIRED``: Throws if the time limit as defined by the ``CommitPeriod`` is not met.
+* ``ERR_TRANSACTION_NOT_VERIFIED``: Throws a generic error if the transaction could not be verified.
 
 *Substrate* ::
 
@@ -265,23 +272,70 @@ Function Sequence
     c. ``txId``: the hash of the Bitcoin transaction to the Vault. With the ``txId`` the Requester can get the remainder of the Bitcoin transaction data including ``txBlockHeight``, ``txIndex``, ``MerkleProof``, and ``rawTx``. See BTC Relay documentation for details.
 
 2. Checks if the ``issueId`` exists. Throws ``ERR_COMMIT_ID_NOT_FOUND`` if not found. Else, continues.
-3. Calls the ``verifyTransaction`` function of the BTC Relay with the provided ``txId``, ``txBlockHeight``, ``txIndex``, and ``MerkleProof``. If the function does not return ``True``, the function has either thrown a specific error or the transaction could not be verified. If the function returns ``False``, throw the general ``ERR_TRANSACTION_NOT_VERIFIED`` error. If returns ``True``, continues.
-4. Calls the ``parseTransaction`` function of the BTC Relay with the ``txId``, ``rawTx``, the ``amount`` and the ``issueId``. The ``parseTransaction`` function checks that the ``rawTx`` hashes to the ``txId``, includes the correct ``amount``, and hash the ``issueId`` in its ``OP_RETURN``. If the function returns ``False``, throw ``ERR_TRANSACTION_NOT_VERIFIED``. More detailed errors are thrown in the BTC Relay. Else, continues.
-5. Check if the function has thrown an error.
+3. Checks if the current block height minus the ``CommitPeriod`` is smaller than the ``opentime`` specified in the ``Issue`` struct. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``. Else, continues.
+4. Calls the ``verifyTransaction`` function of the BTC Relay with the provided ``txId``, ``txBlockHeight``, ``txIndex``, and ``MerkleProof``. If the function does not return ``True``, the function has either thrown a specific error or the transaction could not be verified. If the function returns ``False``, throw the general ``ERR_TRANSACTION_NOT_VERIFIED`` error. If returns ``True``, continues.
+5. Calls the ``parseTransaction`` function of the BTC Relay with the ``txId``, ``rawTx``, the ``amount`` and the ``issueId``. The ``parseTransaction`` function checks that the ``rawTx`` hashes to the ``txId``, includes the correct ``amount``, and hash the ``issueId`` in its ``OP_RETURN``. If the function returns ``False``, throw ``ERR_TRANSACTION_NOT_VERIFIED``. More detailed errors are thrown in the BTC Relay. Else, continues.
+6. Check if the function has thrown an error.
 
     a. If the function has thrown an error, execute ``free`` in the VaultRegistry to release the locked collateral for this issue request for the vault. Return ``False``.
     b. Else, continue.
 
-6. Call the ``mint`` function in the Treasury with the ``amount`` and the Requester's address as the ``receiver``.
-7. Issue an ``Issue`` event with the Requester's address, the amount, and the Vault's address.
-8. Return ``True``.
+7. Call the ``mint`` function in the Treasury with the ``amount`` and the Requester's address as the ``receiver``.
+8. Issue an ``Issue`` event with the Requester's address, the amount, and the Vault's address.
+9. Return ``True``.
 
 Events
 ~~~~~~
 
+Commit
+------
+
+Emit a ``Commit`` event if a user successfully open a issue request.
+
+*Event Signature*
+
+``Commit(requester, amount, vaults, issueId)``:
+
+*Parameters*
 
 
-Errors
-~~~~~~
+* ``requester``: The Requester's BTC Parachain account.
+* ``amount``: The amount of PolkaBTC to be issued.
+* ``vaults``: The BTC Parachain address of the Vault(s) involved in this issue request.
+* ``issueId``: A unique hash identifying the issue request. 
+
+*Functions*
+
+* :ref:`fun_commit`
+
+*Substrate* ::
+
+  Commit(AccountId, U256, Vec<AccountId>, Hash);
+
+Issue
+-----
+
+*Event Signature*
+
+``Issue(requester, ammount, vault)``:
+
+*Parameters*
+
+* ``requester``: The Requester's BTC Parachain account.
+* ``amount``: The amount of PolkaBTC to be issued.
+* ``vaults``: The BTC Parachain address of the Vault(s) involved in this issue request.
+
+*Functions*
+
+* :ref:`fun_issue`
+
+*Substrate* ::
+
+  Issue(AccountId, U256, Vec<AccountId>);
+
+Error Codes
+~~~~~~~~~~~
+
+
 
 
