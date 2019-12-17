@@ -224,42 +224,59 @@ Specification
 
 *Function Signature*
 
-``proveValidBTCAddress(registrationID, txid, txBlockHeight, txIndex, merkleProof)``
-
-STOPPED HERE
+``proveValidBTCAddress(registrationID, txid, txBlockHeight, txIndex, merkleProof, transactionBytes)``
 
 *Parameters*
 
-* ``Vault``: The account of the Vault to be registered.
-* ``collateral``: to-be-locked collateral in DOT.
+* ``registrationID``: identifier of the RegisterRequest
+* ``txid``: Hash identifier of the to-be-verified transaction
+* ``txBlockHeight``: Block height at which transaction is supposedly included.
+* ``txIndex``:  Index of transaction in the block’s tx Merkle tree.
+* ``merkleProof``: Merkle tree path (concatenated LE sha256 hashes).
+* ``transactionBytes``: Raw Bitcoin transaction 
 
 *Returns*
 
-* ``True``: If the Vault was successfully registered and collateral was locked (given that sufficient was provided).
+* ``True``: If the transaction with ``txid`` was indeed included in Bitcoin (call to ``verifyTransaction`` in BTC-Relay) and cointains an OP_RETURN output containing the ``nonce`` in the RegisterRequest.
 * ``False``: Otherwise.
 
 *Events*
 
-* ``RegisterVault(vault, collateral)``: emit an event stating that a new Vault (``Vault``) was registered and provide information on the Vaults's collateral (``collateral``). 
+* ``PrroveValidBTCAddress(vault, btcAddress)``: emit an event stating that a Vault (``vault``) submitted a proof that its BTC address is valid.
 
 *Errors*
 
-* ``ERR_MIN_AMOUNT``: The provided collateral was insufficient - it must be above ``MinimumCollateralVault``.
-  
+* ``ERR_INVALID_BTC_ADDRESS``: The provided collateral was insufficient - it must be above ``MinimumCollateralVault``.
+* see ``verifyTransaction`` in BTC-Relay.  
+
 *Substrate* ::
 
-  fn registerVault(origin, amount: Balance) -> Result {...}
+  fn proveValidBTCAddress(registrationID: U256, txid: H256, txBlockHeight: U256, txIndex: U256, merkleProof: String, transactionBytes: String) -> Result {...}
 
 User Story
 ..........
 
-A BTC-Parachain participant registers as a Vault. 
+A Vault submits a transaction inclusion proof, showing that its BTC address can indeed be spent from, i.e., is valid.
 
-.. todo:: How can we determine that the Vault provided a valid BTC address? Create a BTC transaction with some OP_RETURN value, and submit a TX proof?
+This function can optionally be called after ``registerVault``.
+
+
+See ``verifyTransaction`` in BTC-Relay for details on handling Bitcoin transaction inclusion proofs.
 
 Function Sequence
 .................
-TODO
+
+1) Retrieve the ``RegisterRequest`` with the given ``registerID`` from ``RegisterRequests``.
+
+  a) Throw ``ERR_INVALID_REGISTER_ID`` error if no active RegisterRequest ``registerID`` can be found in ``RegisterRequests``.
+
+2) Call ``verifyTransaction(txid, txBlockHeight, txIndex, merkleProof)``.
+
+3) If ``verifyTransaction`` returns ``True``, exctract the (second?) output from the ``transactionBytes`` (use Parser functionality in BTC-Relay), extract the OP_RETURN value and check if it matches the ``nonce`` of the ``RegisterRequest``.
+
+ a) Throw ``ERR_INCORRECT_NONCE`` if the transaction cannot be parsed or the value of the OP_RETURN field does not match the ``nonce`` of the ``RegisterRequest``.
+
+ 4) Emit a ``PrroveValidBTCAddress``, remove the ``RegisterRequest`` with the ``registerID`` from ``RegisterRequests`` and return ``True``.
 
 
 
