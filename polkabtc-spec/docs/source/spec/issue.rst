@@ -28,6 +28,17 @@ Data Model
 Scalars
 -------
 
+MinimumCollateral
+.................
+
+The minimum collateral (DOT) a user needs to provide.
+
+.. note:: Prevent grieving attacks against vaults.
+
+*Substrate* ::
+
+    MinimumCollateralUser: Balance;
+
 CommitPeriod
 ............
 
@@ -128,8 +139,7 @@ Specification
 
 * ``ERR_INSUFFICIENT_COLLATERAL``: The user did not provide enough collateral.
 * ``ERR_EXCEEDING_VAULT_LIMIT``: The selected vault has not provided collateral to issue the requested ``amount``.
-* ``ERR_VAULT_BUFFERED_COLLATERAL_STATE``: The selected vault is below the buffered collateral rate and cannot be used to issue new PolkaBTC.
-* ``ERR_VAULT_LIQUIDATION_STATE``: The selected vault is going to be liquidated.
+* ``ERR_VAULT_COLLATERAL_RATIO``: The selected vault is below the collateral safety ratio.
 
 *Substrate* ::
 
@@ -150,10 +160,10 @@ Function Sequence
     c. ``vault``: A Requester picks a vault with enough collateral to open an issue request
 
 2. The Requester calls the ``commit`` function and provides his own address, the amount, and the vault he wants to use. Further, he provides a small collateral to prevent griefing.
-3. Checks if the Requester provided enough collateral. If not, throws ``ERR_INSUFFICIENT_COLLATERAL``.
+3. Checks if the Requester provided enough collateral by checking if the collateral is equal or greater than ``MinimumCollateral``. If not, throws ``ERR_INSUFFICIENT_COLLATERAL``.
 4. Checks if the selected vault has locked enough collateral to cover the ``amount`` of PolkaBTC to be issued.
 
-    a. Query the VaultRegistry and check the ``status`` of the vault. If the vault status is in Buffered Collateral, throw ``ERR_VAULT_BUFFERED_COLLATERAL_STATE``. If the vault status is Liquidation, throw ``ERR_VAULT_LIQUIDATION_STATE``. Else, continue.
+    a. Query the VaultRegistry and check the ``status`` of the vault. If the vault's collateral state is below the safety limit, throw ``ERR_VAULT_COLLATERAL_RATIO``. Else, continue.
     b. Query the VaultRegistry and check the ``committedTokens`` and ``collateral``. Calculate how much free ``collateral`` is available by multiplying the collateral with the ``ExchangeRate`` (from the Oracle) and subtract the ``committedTokens``. If not enough collateral is free, throw ``ERR_EXCEEDING_VAULT_LIMIT``. Else, continue.
 
 4. Generate a ``issueId`` by hashing a random seed, a nonce, and the address of the Requester.
@@ -248,7 +258,7 @@ Specification
 
 *Errors*
 
-* ``ERR_COMMIT_ID_NOT_FOUND``: Throws if the ``issueId`` cannot be found.
+* ``ERR_ISSUE_ID_NOT_FOUND``: Throws if the ``issueId`` cannot be found.
 * ``ERR_COMMIT_PERIOD_EXPIRED``: Throws if the time limit as defined by the ``CommitPeriod`` is not met.
 * ``ERR_TRANSACTION_NOT_VERIFIED``: Throws a generic error if the transaction could not be verified.
 
@@ -271,7 +281,7 @@ Function Sequence
     b. ``issueId``: The unique hash received in the ``commit`` function.
     c. ``txId``: the hash of the Bitcoin transaction to the Vault. With the ``txId`` the Requester can get the remainder of the Bitcoin transaction data including ``txBlockHeight``, ``txIndex``, ``MerkleProof``, and ``rawTx``. See BTC Relay documentation for details.
 
-2. Checks if the ``issueId`` exists. Throws ``ERR_COMMIT_ID_NOT_FOUND`` if not found. Else, continues.
+2. Checks if the ``issueId`` exists. Throws ``ERR_ISSUE_ID_NOT_FOUND`` if not found. Else, continues.
 3. Checks if the current block height minus the ``CommitPeriod`` is smaller than the ``opentime`` specified in the ``Issue`` struct. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``. Else, continues.
 4. Calls the ``verifyTransaction`` function of the BTC Relay with the provided ``txId``, ``txBlockHeight``, ``txIndex``, and ``MerkleProof``. If the function does not return ``True``, the function has either thrown a specific error or the transaction could not be verified. If the function returns ``False``, throw the general ``ERR_TRANSACTION_NOT_VERIFIED`` error. If returns ``True``, continues.
 5. Calls the ``parseTransaction`` function of the BTC Relay with the ``txId``, ``rawTx``, the ``amount`` and the ``issueId``. The ``parseTransaction`` function checks that the ``rawTx`` hashes to the ``txId``, includes the correct ``amount``, and hash the ``issueId`` in its ``OP_RETURN``. If the function returns ``False``, throw ``ERR_TRANSACTION_NOT_VERIFIED``. More detailed errors are thrown in the BTC Relay. Else, continues.
@@ -335,6 +345,50 @@ Issue
 
 Error Codes
 ~~~~~~~~~~~
+
+``ERR_INSUFFICIENT_COLLATERAL``
+
+* **Message**: "Provided collateral below limit."
+* **Function**: :ref:`fun_commit`
+* **Cause**: User provided collateral below the ``MinimumCollateral``.
+
+
+
+``ERR_EXCEEDING_VAULT_LIMIT``
+
+* **Message**: "Issue request exceeds vault collateral limit."
+* **Function**: :ref:`fun_commit`
+* **Cause**: The collateral provided by the vault combined with the exchange rate forms an upper limit on how much PolkaBTC can be issued. The requested amount exceeds this limit.
+
+
+
+
+``ERR_VAULT_COLLATERAL_RATIO``
+
+* **Message**: "The vault collateral rate is below the safety limit ."
+* **Function**: :ref:`fun_commit`
+* **Cause**: The vault's collateral needs to be greater than the already issued PolkaBTC under consideration of the safety limit. If the vault's collateral ratio falls below the safety rate, this vault cannot issue new tokens.
+
+``ERR_ISSUE_ID_NOT_FOUND``
+
+* **Message**: "Requested issue id not found."
+* **Function**: :ref:`fun_issue`
+* **Cause**: Issue id not found in the ``IssueRequests`` mapping.
+
+``ERR_COMMIT_PERIOD_EXPIRED``
+
+* **Message**: "Time to issue PolkaBTC expired."
+* **Function**: :ref:`fun_issue`
+* **Cause**: The user did not complete the issue request within the block time limit defined by the ``CommitPeriod``.
+
+``ERR_TRANSACTION_NOT_VERIFIED``
+
+* **Message**: "Transaction could not be verified. More information in the stack trace."
+* **Function**: :ref:`fun_issue` 
+* **Cause**: The Bitcoin transaction could not be verified in the BTC Relay module.
+
+
+
 
 
 
