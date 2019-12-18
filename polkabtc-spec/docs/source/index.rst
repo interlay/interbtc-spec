@@ -10,20 +10,23 @@ Welcome to PolkaBTC's documentation!
    intro/at-a-glance
    intro/CbA
    intro/polkadot
-
+   intro/architecture
+   
 .. toctree::
    :maxdepth: 2
    :caption: Specification
 
-   spec/architecture
    spec/data-model
    spec/treasury
-   spec/oracle
    spec/vaultregistry
    spec/issue
    spec/redeem
+   spec/replace
+   spec/oracle
+   spec/failureHandling
    spec/helpers
    spec/events
+   spec/errors
 
 .. toctree::
    :maxdepth: 2
@@ -38,13 +41,3 @@ Welcome to PolkaBTC's documentation!
    
    other/glossary
    other/license
-
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
