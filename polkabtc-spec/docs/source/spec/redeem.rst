@@ -25,15 +25,20 @@ Specification
 
 *Function Signature*
 
-``lock(redeemer, amount, btcPublicKey, vaults)``
+``lock(redeemer, collateral, amount, btcPublicKey, vaults)``
 
 *Parameters*
 
-* ``redeemer``: 
+* ``redeemer``: address of the user triggering the redeem.
+* ``collateral``: a small collateral to prevent griefing.
+* ``amount``: the amount of PolkaBTC to destroy and BTC to receive.
+* ``btcPublicKey``: the address to receive BTC.
+* ``vault``: the vault selected for the redeem request.
 
 *Returns*
 
-* ``True``:
+* ``True``: 
+* ``False``: Otherwise.
 
 *Events*
 

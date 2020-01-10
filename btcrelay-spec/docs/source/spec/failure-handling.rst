@@ -1,3 +1,5 @@
+.. _failure-handling:
+
 Failure Handling
 ========================
 

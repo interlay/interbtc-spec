@@ -1,3 +1,5 @@
+.. _storage-verification:
+
 Storage and Verification
 ================================
 

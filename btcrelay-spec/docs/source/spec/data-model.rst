@@ -1,7 +1,9 @@
+.. _data-model:
+
 Data Model
 ============
 
-The BTC Parachain, as opposed to Bitcoin SPV clients, only stores a subset of information contained in block headers and does not store transactions. 
+The BTC Relay, as opposed to Bitcoin SPV clients, only stores a subset of information contained in block headers and does not store transactions. 
 Specifically, only data that is absolutely necessary to perform correct verification of block headers and transaction inclusion is stored. 
 
 Constants
@@ -116,13 +118,13 @@ Fork
 ....
 
 
-======================  =============  ============================================
+======================  =============  ===========================================================
 Parameter               Type           Description
-======================  =============  ============================================
+======================  =============  ===========================================================
 ``startHeight``         U256           Height of the block at which this fork starts (forkpoint).
 ``length``              U256           Length of the fork (in blocks).
 ``forkBlockHashes``     Vec<H256>      Linked hash set of block hashes, which references Bitcoin block headers stored in ``BlockHeaders``, contained in this fork (maintains insertion order).
-======================  =============  ============================================
+======================  =============  ===========================================================
 
 *Substrate*
 
