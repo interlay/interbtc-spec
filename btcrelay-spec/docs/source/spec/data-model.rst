@@ -6,13 +6,21 @@ Data Model
 The BTC Relay, as opposed to Bitcoin SPV clients, only stores a subset of information contained in block headers and does not store transactions. 
 Specifically, only data that is absolutely necessary to perform correct verification of block headers and transaction inclusion is stored. 
 
+Types
+~~~~~
+
+BTCBlockHeader
+..............
+
+An 80 bytes long Bitcoin blockchain header.
+
 Constants
 ~~~~~~~~~
 
 DIFFICULTY_ADJUSTMENT_INTERVAL
 ..............................
 
-The interval in number of blocks in which Bitcoin adjusts its difficulty. Defaults to ``2016``.
+The interval in number of blocks at which Bitcoin adjusts its difficulty. Defaults to ``2016``.
 
 *Substrate* ::
 
