@@ -29,7 +29,7 @@ The interval in number of blocks at which Bitcoin adjusts its difficulty. Defaul
 TARGET_TIMESPAN
 ...............
 
-The average time span it takes to adjust the difficulty. Defaults to ``1209600`` seconds or two weeks.
+Expected duration of the different adjustment interval in seconds. Defaults to ``1209600`` seconds or two weeks.
 
 *Substrate* ::
 
@@ -38,7 +38,7 @@ The average time span it takes to adjust the difficulty. Defaults to ``1209600``
 UNROUNDED_MAX_TARGET
 ....................
 
-The maximum difficulty target. Defaults to :math:`2^{224}-1`.
+The maximum difficulty target. Defaults to :math:`2^{224}-1`. For more information, see the `Bitcoin Wiki <https://en.bitcoin.it/wiki/Target>`_.
 
 *Substrate* ::
 
@@ -50,7 +50,7 @@ Scalars
 BestBlock
 .........
 
-Byte 32 block hash identifying current blockchain tip, i.e., most significant block in ``MainChain``. 
+Byte 32 block hash identifying the current blockchain tip, i.e., the most significant block in ``MainChain``. 
 
 *Substrate* ::
 
@@ -61,7 +61,7 @@ Byte 32 block hash identifying current blockchain tip, i.e., most significant bl
 BestBlockHeight
 ...............
 
-Integer block height of BestBlock in MainChain. 
+Integer block height of ``BestBlock`` in ``MainChain``. 
 
 *Substrate* ::
 
@@ -73,7 +73,7 @@ Maps
 BlockHeaders
 ............
 
-Mapping of ``<blockHash,BlockHeader>``
+Mapping of ``<blockHash,BlockHeader>``, storing all verified Bitcoin block headers (fork and main chain) submitted to BTC Relay.
 
 *Substrate* ::
 
@@ -81,7 +81,7 @@ Mapping of ``<blockHash,BlockHeader>``
 
 MainChain
 .........
-Mapping of ``<blockHeight,blockHash>``
+Mapping of ``<blockHeight,blockHash>``. Tracks the current Bitcoin main chain (refers to stored block headers in ``BlockHeaders``).
 
 *Substrate* ::
 
@@ -89,9 +89,9 @@ Mapping of ``<blockHeight,blockHash>``
 
 Forks
 .....
-Mapping of ``<forkId,Fork>``
 
-.. warning:: If pruning is implemented for ``BlockHeaders`` and ``MainChain`` as performance optimization, it is critical to make sure there are no ``Forks`` entries left which reference pruned blocks. Either delay pruning, or, if the fork is inactive (hash falled behind ``MainChain`` at least *k* blocks), delete it as well. 
+Mapping of ``<forkId,Fork>``.
+
 
 *Substrate* ::
 
@@ -103,11 +103,13 @@ Structs
 BlockHeader
 ...........
 
+.. tabularcolumns:: |l|l|L|
+
 ======================  =========  ============================================
 Parameter               Type       Description
 ======================  =========  ============================================
 ``blockHeight``         U256       Height of the current block header.
-``merkleRoot``          H256       Root of the Merkle tree storing referencing transactions included in the block.
+``merkleRoot``          H256       Root of the Merkle tree referencing transactions included in the block.
 ======================  =========  ============================================
 
 *Substrate* 
@@ -125,6 +127,8 @@ Parameter               Type       Description
 Fork
 ....
 
+
+.. tabularcolumns:: |l|l|L|
 
 ======================  =============  ===========================================================
 Parameter               Type           Description
@@ -156,7 +160,7 @@ Data structures used to handle failures of the BTC-Relay.
 Status
 ......
 
-Integer/Enum (see StatusCode below). Defines the curret state of BTC-Relay. 
+Integer/Enum (see ``StatusCode`` below). Defines the current state of BTC-Relay. 
 
 StatusLog
 .........
@@ -204,7 +208,7 @@ Enum specifying reasons for error leading to a status update.
 
 * ``INVALID : 1`` - this block is invalid. See ``msg`` for reason.
 
-* ``UNEXPECTED: 2`` - unexpected error occured, potentially manual intervantion from governance mechanism. See  ``msg`` for reason.
+* ``UNEXPECTED: 2`` - unexpected error occurred, potentially manual intervention from governance mechanism. See  ``msg`` for reason.
 
 
 *Substrate*
@@ -221,7 +225,9 @@ Enum specifying reasons for error leading to a status update.
 StatusUpdate
 ............
 
-Struct providing information for an occurred halting of BTC-Relay. Contains the following fields.
+Struct providing information for an occurred halting of BTC-Relay. 
+
+.. tabularcolumns:: |l|l|L|
 
 ======================  =============  ============================================
 Parameter               Type           Description

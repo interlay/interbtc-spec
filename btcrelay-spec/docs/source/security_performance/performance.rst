@@ -41,6 +41,8 @@ The pruning depth can be set to e.g. 10 000 blocks. There is no need to store mo
 More detailed analysis of the spending behaviour in Bitcoin, i.e., UTXOs of which age are spent most frequently and at which "depth" the spending behavior declines, can be considered to optimize the cost reduction. 
 
 
+.. warning:: If pruning is implemented for ``BlockHeaders`` and ``MainChain`` as performance optimization, it is critical to make sure there are no ``Forks`` entries left which reference pruned blocks. Either delay pruning, or, if the fork is inactive (hash falled behind ``MainChain`` at least *k* blocks), delete it as well. 
+
 Batch Submissions
 ~~~~~~~~~~~~~~~~~~
 
