@@ -335,7 +335,7 @@ Specification
 
 ::
 
-  fn verifyTransaction(origin, txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: u64) -> Result {...}
+  fn verifyTransaction(origin, txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: U256) -> Result {...}
 
 
 Function Sequence
@@ -346,15 +346,15 @@ The ``verifyTransaction`` function follows the function sequence below:
 
 1. Check that ``txId`` is 32 bytes long. Raise ``ERR_INVALID_FORK_ID`` error if this check fails. 
 
-2. Check that the current ``BestBlockHeight`` exceeds ``blockHeight`` by the specified number of ``confirmation``. Raise ``ERR_CONFIRMATIONS`` if this check fails. 
+2. Check that the current ``BestBlockHeight`` exceeds ``txBlockHeight`` by the specified number of ``confirmation``. Raise ``ERR_CONFIRMATIONS`` if this check fails. 
 
-3. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``MainChain`` at the passed ``blockHeight``.    
+4. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``MainChain`` at the passed ``txBlockHeight``.    
 
-3. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Raise ``ERR_MERKLE_PROOF`` error if one of these checks fails.
+5. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Raise ``ERR_MERKLE_PROOF`` error if one of these checks fails.
 
-4. Call :ref:`computeMerkle` passing ``txId``, ``txIndex`` and ``merkleProof`` as parameters. 
+6. Call :ref:`computeMerkle` passing ``txId``, ``txIndex`` and ``merkleProof`` as parameters. 
 
-  a. If this call returns the ``merkleRoot``, emit a ``VerifyTransaction(txId, blockHeight, confirmations)`` event and return ``True``.
+  a. If this call returns the ``merkleRoot``, emit a ``VerifyTransaction(txId, txBlockHeight, confirmations)`` event and return ``True``.
   
   b. Otherwise return ``False``. 
 
