@@ -22,7 +22,7 @@ Step-by-Step
 
 5. If Vault1 releases the BTC to Vault2 correctly and submits the proof on time, Vault1's DOT collateral is released - Vault2 has now fully replaced Vault1.
 
-6. **Optional**: Vault1 can be required to provide some additional DOT collateral as griefing protection, to prevent Vault1 from holding Vault2's DOT collateral locked in the BTC-Parachain without ever finalizing the redeem protocol (transfer of BTC). 
+6. **Optional**: Vault1 can be required to provide some additional DOT collateral as griefing protection, to prevent Vault1 from holding Vault2's DOT collateral locked in the BTC Parachain without ever finalizing the redeem protocol (transfer of BTC). 
 
 
 Scalars
@@ -81,7 +81,7 @@ Stores the status and information about a single replace request.
 ==================  ==========  =======================================================	
 Parameter           Type        Description                                            
 ==================  ==========  =======================================================
-``oldVault``        Account     BTC-Parachain account of the Vault that is to be replaced.
+``oldVault``        Account     BTC Parachain account of the Vault that is to be replaced.
 ``opentime``        u256        Block height of opening the request.
 ``amount``          PolkaBTC    Amount of BTC / PolkaBTC to be replaced.
 ``newVault``        Account     Account of the new Vault, which accepts the replace request.
@@ -127,7 +127,7 @@ Specification
 
 *Parameters*
 
-* ``vault``: The Vault to be replaced (BTC-Parachain account)
+* ``vault``: The Vault to be replaced (BTC Parachain account)
 * ``btcAmount``: The amount of BTC / PolkaBTC to be replaced.
 * ``timeout``: time in blocks after which this request expires.
 

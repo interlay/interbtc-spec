@@ -1,0 +1,318 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Functions: Parser &mdash; Polkadot BTC-Relay 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Events" href="events.html" />
+    <link rel="prev" title="Functions: Utils" href="helpers.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Polkadot BTC-Relay
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/at-a-glance.html">BTC-Relay at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/architecture.html">BTC-Relay Architecture</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Specification</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Functions: Parser</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Block Header</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#extracthashprevblock">extractHashPrevBlock</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#function-sequence">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#extractmerkleroot">extractMerkleRoot</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#extractnbits">extractNBits</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id4">Function Sequence</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/performance.html">Performance and Costs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Polkadot BTC-Relay</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Functions: Parser</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/spec/parser.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="functions-parser">
+<span id="parser"></span><h1>Functions: Parser<a class="headerlink" href="#functions-parser" title="Permalink to this headline">¶</a></h1>
+<p>List of functions used to extract data from Bitcoin block headers and transactions.
+See the Bitcoin Developer Reference for details on the <a class="reference external" href="https://bitcoin.org/en/developer-reference#block-chain">block header</a> and <a class="reference external" href="https://bitcoin.org/en/developer-reference#transactions">transaction</a> format.</p>
+<div class="section" id="id1">
+<h2>Block Header<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="extracthashprevblock">
+<h3>extractHashPrevBlock<a class="headerlink" href="#extracthashprevblock" title="Permalink to this headline">¶</a></h3>
+<p>Extracts the <code class="docutils literal notranslate"><span class="pre">hashPrevBlock</span></code> (reference to previous block) from a Bitcoin block header.</p>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">extractHashPrevBlock(blockHeaderBytes)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">blockHeaderBytes</span></code>: 80 byte raw Bitcoin block header.</p></li>
+</ul>
+<p><em>Returns</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">hashPrevBlock</span></code>: the 32 byte block hash reference to the previous block.</p></li>
+</ul>
+<p><em>Substrate</em></p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">extractHashPrevBlock</span><span class="p">(</span><span class="n">blockHeaderBytes</span>: <span class="nc">T</span>::<span class="n">BTCBlockHeader</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">T</span>::<span class="n">Hash</span><span class="w"> </span><span class="p">{...}</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="section" id="function-sequence">
+<h4>Function Sequence<a class="headerlink" href="#function-sequence" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Return <code class="docutils literal notranslate"><span class="pre">blockHeaderBytes[4:32]</span></code> (<code class="docutils literal notranslate"><span class="pre">hashPrevBlock</span></code> starts an position 4 of the 80 byte block header).</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="extractmerkleroot">
+<span id="id2"></span><h3>extractMerkleRoot<a class="headerlink" href="#extractmerkleroot" title="Permalink to this headline">¶</a></h3>
+<p>Extracts the <code class="docutils literal notranslate"><span class="pre">merkleRoot</span></code> from a Bitcoin block header.</p>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">extractMerkleRoot(blockHeaderBytes)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">blockHeaderBytes</span></code>: 80 byte raw Bitcoin block header</p></li>
+</ul>
+<p><em>Returns</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">merkleRoot</span></code>: the 32 byte Merkle tree root of the block header</p></li>
+</ul>
+<p><em>Substrate</em></p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">extractMerkleRoot</span><span class="p">(</span><span class="n">blockHeaderBytes</span>: <span class="nc">T</span>::<span class="n">BTCBlockHeader</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">T</span>::<span class="n">Hash</span><span class="w"> </span><span class="p">{...}</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="section" id="id3">
+<h4>Function Sequence<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Return <code class="docutils literal notranslate"><span class="pre">blockHeaderBytes[36:32]</span></code> (<code class="docutils literal notranslate"><span class="pre">merkleRoot</span></code> starts an position 36 of the 80 byte block header).</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="extractnbits">
+<h3>extractNBits<a class="headerlink" href="#extractnbits" title="Permalink to this headline">¶</a></h3>
+<p>Extracts the <code class="docutils literal notranslate"><span class="pre">nBits</span></code> from a Bitcoin block header. This field is necessary to compute that <code class="docutils literal notranslate"><span class="pre">target</span></code> in <code class="docutils literal notranslate"><span class="pre">nBitsToTarget</span></code>.</p>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">extractNBits(blockHeaderBytes)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">blockHeaderBytes</span></code>: 80 byte raw Bitcoin block header</p></li>
+</ul>
+<p><em>Returns</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">nBits</span></code>: the 4 byte nBits field of the block header</p></li>
+</ul>
+<p><em>Substrate</em></p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">fn</span> <span class="nf">extractNBits</span><span class="p">(</span><span class="n">blockHeaderBytes</span>: <span class="nc">T</span>::<span class="n">BTCBlockHeader</span><span class="p">)</span><span class="w"> </span>-&gt; <span class="nc">T</span>::<span class="n">Bytes</span><span class="w"> </span><span class="p">{...}</span><span class="w"></span>
+</pre></div>
+</div>
+<div class="section" id="id4">
+<h4>Function Sequence<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Return <code class="docutils literal notranslate"><span class="pre">blockHeaderBytes[72:4]</span></code> (<code class="docutils literal notranslate"><span class="pre">nBits</span></code> starts an position 72 of the 80 byte block header).</p></li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="events.html" class="btn btn-neutral float-right" title="Events" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="helpers.html" class="btn btn-neutral float-left" title="Functions: Utils" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Interlay
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

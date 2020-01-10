@@ -1,0 +1,419 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Data Model &mdash; Polkadot BTC-Relay 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Functions: Storage and Verification" href="functions.html" />
+    <link rel="prev" title="BTC-Relay Architecture" href="../intro/architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Polkadot BTC-Relay
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/at-a-glance.html">BTC-Relay at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/architecture.html">BTC-Relay Architecture</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Specification</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#types">Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#btcblockheader">BTCBlockHeader</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#constants">Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#difficulty-adjustment-interval">DIFFICULTY_ADJUSTMENT_INTERVAL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#target-timespan">TARGET_TIMESPAN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unrounded-max-target">UNROUNDED_MAX_TARGET</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#scalars">Scalars</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#bestblock">BestBlock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bestblockheight">BestBlockHeight</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#maps">Maps</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#blockheaders">BlockHeaders</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mainchain">MainChain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#forks">Forks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#structs">Structs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#blockheader">BlockHeader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fork">Fork</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/performance.html">Performance and Costs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Polkadot BTC-Relay</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Data Model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/spec/data-model.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="data-model">
+<span id="id1"></span><h1>Data Model<a class="headerlink" href="#data-model" title="Permalink to this headline">¶</a></h1>
+<p>The BTC-Relay, as opposed to Bitcoin SPV clients, only stores a subset of information contained in block headers and does not store transactions.
+Specifically, only data that is absolutely necessary to perform correct verification of block headers and transaction inclusion is stored.</p>
+<div class="section" id="types">
+<h2>Types<a class="headerlink" href="#types" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="btcblockheader">
+<h3>BTCBlockHeader<a class="headerlink" href="#btcblockheader" title="Permalink to this headline">¶</a></h3>
+<p>An 80 bytes long Bitcoin blockchain header.</p>
+<ul>
+<li><p>Substrate*</p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">pub</span><span class="w"> </span><span class="k">type</span> <span class="nc">BTCBlockHeader</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="kt">u8</span><span class="p">;</span><span class="w"> </span><span class="mi">80</span><span class="p">];</span><span class="w"></span>
+</pre></div>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="constants">
+<h2>Constants<a class="headerlink" href="#constants" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="difficulty-adjustment-interval">
+<h3>DIFFICULTY_ADJUSTMENT_INTERVAL<a class="headerlink" href="#difficulty-adjustment-interval" title="Permalink to this headline">¶</a></h3>
+<p>The interval in number of blocks at which Bitcoin adjusts its difficulty. Defaults to <code class="docutils literal notranslate"><span class="pre">2016</span></code>.</p>
+<p><em>Substrate</em></p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">DIFFICULTY_ADJUSTMENT_INTERVAL</span>: <span class="kt">u16</span> <span class="o">=</span><span class="w"> </span><span class="mi">2016</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="target-timespan">
+<h3>TARGET_TIMESPAN<a class="headerlink" href="#target-timespan" title="Permalink to this headline">¶</a></h3>
+<p>Expected duration of the different adjustment interval in seconds. Defaults to <code class="docutils literal notranslate"><span class="pre">1209600</span></code> seconds or two weeks.</p>
+<p><em>Substrate</em></p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">TARGET_TIMESPAN</span>: <span class="nc">Moment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1209600</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="unrounded-max-target">
+<h3>UNROUNDED_MAX_TARGET<a class="headerlink" href="#unrounded-max-target" title="Permalink to this headline">¶</a></h3>
+<p>The maximum difficulty target. Defaults to <span class="math notranslate nohighlight">\(2^{224}-1\)</span>. For more information, see the <a class="reference external" href="https://en.bitcoin.it/wiki/Target">Bitcoin Wiki</a>.</p>
+<p><em>Substrate</em></p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="k">const</span><span class="w"> </span><span class="n">UNROUNDED_MAX_TARGET</span>: <span class="nc">U256</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">26959946667150639794667015087019630673637144422540572481103610249215</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="scalars">
+<h2>Scalars<a class="headerlink" href="#scalars" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="bestblock">
+<h3>BestBlock<a class="headerlink" href="#bestblock" title="Permalink to this headline">¶</a></h3>
+<p>Byte 32 block hash identifying the current blockchain tip, i.e., the most significant block in <code class="docutils literal notranslate"><span class="pre">MainChain</span></code>.</p>
+<p><em>Substrate</em></p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="n">BestBlock</span>: <span class="nc">T</span>::<span class="n">H256</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="bestblockheight">
+<h3>BestBlockHeight<a class="headerlink" href="#bestblockheight" title="Permalink to this headline">¶</a></h3>
+<p>Integer block height of <code class="docutils literal notranslate"><span class="pre">BestBlock</span></code> in <code class="docutils literal notranslate"><span class="pre">MainChain</span></code>.</p>
+<p><em>Substrate</em></p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="n">BestBlockHeight</span>: <span class="nc">U256</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="maps">
+<h2>Maps<a class="headerlink" href="#maps" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="blockheaders">
+<h3>BlockHeaders<a class="headerlink" href="#blockheaders" title="Permalink to this headline">¶</a></h3>
+<p>Mapping of <code class="docutils literal notranslate"><span class="pre">&lt;blockHash,BlockHeader&gt;</span></code>, storing all verified Bitcoin block headers (fork and main chain) submitted to BTC-Relay.</p>
+<p><em>Substrate</em></p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="n">BlockHeaders</span>: <span class="nc">map</span><span class="w"> </span><span class="n">T</span>::<span class="n">H256</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">BlockHeader</span><span class="o">&lt;</span><span class="n">T</span>::<span class="n">H256</span><span class="o">&gt;</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="mainchain">
+<h3>MainChain<a class="headerlink" href="#mainchain" title="Permalink to this headline">¶</a></h3>
+<p>Mapping of <code class="docutils literal notranslate"><span class="pre">&lt;blockHeight,blockHash&gt;</span></code>. Tracks the current Bitcoin main chain (refers to stored block headers in <code class="docutils literal notranslate"><span class="pre">BlockHeaders</span></code>).</p>
+<p><em>Substrate</em></p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="n">MainChain</span>: <span class="nc">map</span><span class="w"> </span><span class="n">U256</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">T</span>::<span class="n">H256</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="forks">
+<h3>Forks<a class="headerlink" href="#forks" title="Permalink to this headline">¶</a></h3>
+<p>Mapping of <code class="docutils literal notranslate"><span class="pre">&lt;forkId,Fork&gt;</span></code>.</p>
+<p><em>Substrate</em></p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="n">Forks</span>: <span class="nc">map</span><span class="w"> </span><span class="n">U256</span><span class="w"> </span><span class="o">=&gt;</span><span class="w"> </span><span class="n">Fork</span><span class="o">&lt;</span><span class="nb">Vec</span><span class="o">&lt;</span><span class="n">T</span>::<span class="n">H256</span><span class="o">&gt;&gt;</span><span class="p">;</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="structs">
+<h2>Structs<a class="headerlink" href="#structs" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="blockheader">
+<h3>BlockHeader<a class="headerlink" href="#blockheader" title="Permalink to this headline">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 9%" />
+<col style="width: 70%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">blockHeight</span></code></p></td>
+<td><p>U256</p></td>
+<td><p>Height of the current block header.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">merkleRoot</span></code></p></td>
+<td><p>H256</p></td>
+<td><p>Root of the Merkle tree referencing transactions included in the block.</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>Substrate</em></p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="cp">#[derive(Encode, Decode, Default, Clone, PartialEq)]</span><span class="w"></span>
+<span class="cp">#[cfg_attr(feature = </span><span class="s">&quot;std&quot;</span><span class="cp">, derive(Debug))]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">BlockHeader</span><span class="o">&lt;</span><span class="n">H256</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="n">blockHeight</span>: <span class="nc">U256</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="n">merkleRoot</span>: <span class="nc">H256</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fork">
+<h3>Fork<a class="headerlink" href="#fork" title="Permalink to this headline">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 7%" />
+<col style="width: 81%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">startHeight</span></code></p></td>
+<td><p>U256</p></td>
+<td><p>Height of the block at which this fork starts (forkpoint).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">length</span></code></p></td>
+<td><p>U256</p></td>
+<td><p>Length of the fork (in blocks).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">forkBlockHashes</span></code></p></td>
+<td><p>Vec&lt;H256&gt;</p></td>
+<td><p>Linked hash set of block hashes, which references Bitcoin block headers stored in <code class="docutils literal notranslate"><span class="pre">BlockHeaders</span></code>, contained in this fork (maintains insertion order).</p></td>
+</tr>
+</tbody>
+</table>
+<p><em>Substrate</em></p>
+<div class="highlight-rust notranslate"><div class="highlight"><pre><span></span><span class="cp">#[derive(Encode, Decode, Default, Clone, PartialEq)]</span><span class="w"></span>
+<span class="cp">#[cfg_attr(feature = </span><span class="s">&quot;std&quot;</span><span class="cp">, derive(Debug))]</span><span class="w"></span>
+<span class="k">pub</span><span class="w"> </span><span class="k">struct</span> <span class="nc">Fork</span><span class="o">&lt;&gt;</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="n">startHeight</span>: <span class="nc">U256</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="n">length</span>: <span class="nc">U256</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="n">forkBlockHahes</span>: <span class="nb">Vec</span><span class="o">&lt;</span><span class="n">H256</span><span class="o">&gt;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="functions.html" class="btn btn-neutral float-right" title="Functions: Storage and Verification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../intro/architecture.html" class="btn btn-neutral float-left" title="BTC-Relay Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Interlay
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

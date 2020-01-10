@@ -1,0 +1,257 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>BTC-Relay at a Glance &mdash; Polkadot BTC-Relay 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Bitcoin Data Model" href="bitcoin.html" />
+    <link rel="prev" title="Welcome to Poladkot BTC-Relay’s documentation!" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Polkadot BTC-Relay
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">BTC-Relay at a Glance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-to-use-this-document">How to Use this Document</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#recommended-background-reading">Recommended Background Reading</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="architecture.html">BTC-Relay Architecture</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/performance.html">Performance and Costs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Polkadot BTC-Relay</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>BTC-Relay at a Glance</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/intro/at-a-glance.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="btc-relay-at-a-glance">
+<h1>BTC-Relay at a Glance<a class="headerlink" href="#btc-relay-at-a-glance" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>BTC-Relay is the key component of the BTC Parachain on Polkadot. It’s main task is to allow the Parachain to verify the state of Bitcoin and react to transactions and events.
+Specifically, BTC-Relay acts as a <a class="reference external" href="https://bitcoin.org/en/operating-modes-guide#simplified-payment-verification-spv">Bitcoin SPV/light client</a> on Polkadot, storing only Bitcoin block headers and allowing users to verify transaction inclusion proofs.
+Further, it is able to handle forks and follows the chain with the most accumulated Proof-of-Work.</p>
+<p>The correct operation of BTC-Relay is crucial: should BTC-Relay cease to operate, the bridge between Polkadot and Bitcoin is interrupted.</p>
+<div class="figure align-default" id="id4">
+<img alt="Overview of BTC-Relay as a component of the BTC Parachain" src="../_images/polkaBTC-btcrelay.png" />
+<p class="caption"><span class="caption-text">BTC-Relay is the key component of the BTC Parachain: it is necessary to verify and keep track of the state of Bitcoin.</span><a class="headerlink" href="#id4" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="how-to-use-this-document">
+<h2>How to Use this Document<a class="headerlink" href="#how-to-use-this-document" title="Permalink to this headline">¶</a></h2>
+<p>This document provides a specification for BTC-Relay in the form of a <a class="reference external" href="https://wiki.polkadot.network/docs/en/learn-parachains">Polkadot Parachain</a> acting as a <a class="reference external" href="https://wiki.polkadot.network/docs/en/learn-bridges">Bridge</a> to Bitcoin, to be implemented on <a class="reference external" href="https://substrate.dev/">Substrate</a>.</p>
+<p>Before implementing or using BTC-Relay on Polkadot, make yourself familiar with this specification and read up on any content you are unfamiliar with by following the provided links (e.g. to academic papers and the <a class="reference external" href="https://bitcoin.org/en/developer-reference">Bitcoin developer reference</a>).</p>
+<div class="section" id="recommended-background-reading">
+<h3>Recommended Background Reading<a class="headerlink" href="#recommended-background-reading" title="Permalink to this headline">¶</a></h3>
+<p>We also recommend readers, unfamiliar with the problem of cross-chain communication, to study the following papers - in addition to acquiring a base understanding for the operation and security model of distributed ledgers.</p>
+<ul class="simple">
+<li><p><strong>XCLAIM: Trustless, Interoperable, Cryptocurrency-backed Assets</strong>. <em>IEEE Security and Privacy (S&amp;P).</em> Zamyatin, A., Harz, D., Lind, J., Panayiotou, P., Gervais, A., &amp; Knottenbelt, W. (2019). <a class="reference external" href="https://eprint.iacr.org/2018/643.pdf">[PDF]</a></p></li>
+<li><p><strong>SoK: Communication Across Distributed Ledgers</strong>. <em>Cryptology ePrint Archiv, Report 2019/1128</em>. Zamyatin A, Al-Bassam M, Zindros D, Kokoris-Kogias E, Moreno-Sanchez P, Kiayias A, Knottenbelt WJ. (2019) <a class="reference external" href="https://eprint.iacr.org/2019/1128.pdf">[PDF]</a></p></li>
+<li><p><strong>Proof-of-Work Sidechains</strong>. <em>Workshop on Trusted Smart Contracts, Financial Cryptography</em> Kiayias, A., &amp; Zindros, D. (2018) <a class="reference external" href="https://eprint.iacr.org/2018/1048.pdf">[PDF]</a></p></li>
+<li><p><strong>Enabling Blockchain Innovations with Pegged Sidechains</strong>. <em>Back, A., Corallo, M., Dashjr, L., Friedenbach, M., Maxwell, G., Miller, A., Poelstra A., Timon J.,  &amp; Wuille, P</em>. (2019) <a class="reference external" href="https://blockstream.com/sidechains.pdf">[PDF]</a></p></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="bitcoin.html" class="btn btn-neutral float-right" title="Bitcoin Data Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral float-left" title="Welcome to Poladkot BTC-Relay’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Interlay
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

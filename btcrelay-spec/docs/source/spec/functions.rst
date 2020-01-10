@@ -1,13 +1,13 @@
 .. _storage-verification:
 
-Storage and Verification
-================================
+Functions: Storage and Verification
+====================================
 
 .. _initialize:
 
 initialize
 ----------
-Initializes BTC-Relay with the first Bitcoin block to be tracked and Initializes all data structures (see `Data Model <spec/data-model.html#data-model>`_).
+Initializes BTC-Relay with the first Bitcoin block to be tracked and initializes all data structures (see :ref:`data-model`).
 
 .. note:: BTC-Relay **does not** have to be initialized with Bitcoin's genesis block! The first block to be tracked can be selected freely. 
 
@@ -33,11 +33,11 @@ Specification
 
 *Events*
 
-* ``StoreMainChainHeader(blockHeight, blockHash)``: if the block header was stored successfully, emit an event with the stored block's height (``blockHeight``) and the (PoW) block hash (``blockHash``).
+* ``Initialized(blockHeight, blockHash)``: if the first block header was stored successfully, emit an event with the stored block's height (``blockHeight``) and the (PoW) block hash (``blockHash``).
 
 *Errors*
 
-* ``ERR_ALREADY_INITIALIZED``: "Already initialized.": raise exception if this function is called when BTC-Relay is already initialized.
+* ``ERR_ALREADY_INITIALIZED`` = "Already initialized.": raise exception if this function is called after BTC-Relay has already been initialized.
 
 *Substrate*
 
@@ -45,37 +45,40 @@ Specification
 
   fn initialize(origin, blockHeaderBytes: T::BTCBlockHeader, blockHeight: U256) -> Result {...}
 
-User Story
-~~~~~~~~~~
-This function is only called once, when BTC-Relay is being deployed. 
+Preconditions
+~~~~~~~~~~~~~
 
-.. note:: Calls to ``initialize`` will likely be restricted through the governance mechanism of the BTC-Parachain. This is to be defined.  
+* This is the first time this function is called, i.e., when BTC-Relay is being deployed. 
+
+.. note:: Calls to ``initialize`` will likely be restricted through the governance mechanism of the BTC Parachain. This is to be defined.  
 
 
 
 Function sequence
 ~~~~~~~~~~~~~~~~~
 
-The ``initialize`` function takes as input the 80 byte raw Bitcoin block header and the corresponding Bitcoin block height follows the following sequence:
+The ``initialize`` function takes as input an 80 byte raw Bitcoin block header and the corresponding Bitcoin block height, and follows the sequence below:
 
-1. Check if ``initialize`` is called for the first time. This can be done by checking if ``BestBlock == None``. Raise ``ERR_ALREADY_INITIALIZED`` if BTC-Relay has already been initialized. 
+1. Check if ``initialize`` is called for the first time. This can be done by checking if ``BestBlock == None``. 
 
-2. Parse ``blockHeaderBytes``, extracting the ``merkleRoot`` using ``extractMerkleRoot(blockHeaderBytes)``, and store the block header data in ``BlockHeaders``. 
+   a. Raise ``ERR_ALREADY_INITIALIZED`` if BTC-Relay has already been initialized. 
 
-3. Compute the Bitcoin block hash (``hashCurrentBlock``) of the block header (use ``sha256d(blockHeaderBytes)``) and store it as an entry in ``MainChain`` using the provided ``blockHeight`` as key. 
+2. Parse ``blockHeaderBytes``, extracting the ``merkleRoot`` using :ref:`extractMerkleRoot`, compute the Bitcoin block hash (``hashCurrentBlock``) of the block header (use :ref:`sha256d`), and store the block header data in ``BlockHeaders``. 
+
+3. Store ``hashCurrentBlock`` in ``MainChain`` using the given ``blockHeight`` as key. 
 
 4. Set ``BestBlock = hashCurrentBlock`` and ``BestBlockHeight = blockHeight``.
 
 5. Return ``True``. 
 
-.. warning:: Attention: the Bitcoin block header submitted to ``initialize`` must be in the Bitcoin main chain - this must be checked outside of the BTC-Parachain **before** making this function call! A wrong initialization will cause the entire BTC-Parachain to fail, since verification requires that all submitted blocks **must** (indirectly) point to the initialized block (i.e., have it as ancestor, just like the actual Bitcoin genesis block).
+.. warning:: Attention: the Bitcoin block header submitted to ``initialize`` must be in the Bitcoin main chain - this must be checked outside of the BTC Parachain **before** making this function call! A wrong initialization will cause the entire BTC Parachain to fail, since verification requires that all submitted blocks **must** (indirectly) point to the initialized block (i.e., have it as ancestor, just like the actual Bitcoin genesis block).
 
 .. _storeMainChainBlockHeader:
 
 storeMainChainBlockHeader
 -------------------------
-Method to submit block headers to the BTC-Relay, which extend the Bitcoin main chain (as tracked in ``MainChain`` in the BTC-Relay). 
-This function calls the ``verifyBlockHeader`` proving the 80 bytes Bitcoin block header as input, and, if the latter returns ``True``, extracts from the block header and stores (i) the hash, height and Merkle Tree root of the given block header in ``BlockHeaders`` and (ii) the hash and block height in ``MainChain``.
+Method to submit block headers to the BTC-Relay, which extend the Bitcoin main chain (as tracked in ``MainChain`` in BTC-Relay). 
+This function calls  :ref:`verifyBlockHeader` proving the 80 bytes Bitcoin block header as input, and, if the latter returns ``True``, extracts from the block header and stores (i) the hash, height and Merkle tree root of the given block header in ``BlockHeaders`` and (ii) the hash and block height in ``MainChain``.
 
 
 Specification
@@ -108,41 +111,33 @@ Specification
 
   fn storeMainChainBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader) -> Result {...}
 
-User Story
-~~~~~~~~~~
+Preconditions
+~~~~~~~~~~~~~
 
-A user calls the ``storeMainChainBlockHeader`` function when submitting a new Bitcoin block header to the BTC-Relay. 
-Thereby, the user performes the following steps:
+* The to-be-submitted Bitcoin block header must extend ``MainChain`` as *tracked by the BTC-Relay*. 
 
-1. The user checks that the to-be-submitted Bitcoin block header in part of the longest (main) chain *tracked by the BTC-Relay*. 
+.. warning:: The BTC-Relay does not necessarily have the same view of the Bitcoin blockchain as the user's local Bitcoin client. This can happen if (i) the BTC-Relay is under attack, (ii) the BTC-Relay is out of sync, or, similarly, (iii) if the user's local Bitcoin client is under attack or out of sync (see :ref:`security`). 
 
-.. warning:: The BTC-Relay does not necessarily have the same view of the Bitcoin blockchain as the user's local Bitcoin client. This can happen if (i) the BTC-Relay is under attack (see `Relay Poisoning <TODO>`_), (ii) the BTC-Relay is out of sync (see `Relay Freshness <TODO>`_), or, similarly, (iii) if the user's local Bitcoin client is under attack or out of sync. 
-
-2. The user calls the function passing an 80 byte block header (``blockHeaderBytes``) and receives one of two possible results:
-
-    a. ``True``: the block header was successfully verified and stored.
-    b. ``False``: if verification fails (see exceptions raised for reason).
-
-.. note:: The 80 bytes block header can be retrieved from the `bitcoin-rpc client <https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list>`_ by calling the `getBlock <https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/getblock/>`_ and settign verbosity to ``0`` (``getBlock <blockHash> 0``).
+.. note:: The 80 bytes block header can be retrieved from the `bitcoin-rpc client <https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list>`_ by calling the `getBlock <https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/getblock/>`_ and setting verbosity to ``0`` (``getBlock <blockHash> 0``).
 
 
 Function sequence
 ~~~~~~~~~~~~~~~~~
 
-The ``storeMainChainBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and follows the following sequence:
+The ``storeMainChainBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and follows the sequence below:
 
-1. Check that the submitted block header is extending the ``MainChain`` of BTC-Relay. That is, ``hashPrevBlock`` (extract using ``extractHashPrevBlock(blockHeaderBytes)``) must be equal to ``BestBlock``. 
+1. Check that the submitted block header is extending the ``MainChain`` of BTC-Relay. That is, ``hashPrevBlock`` (extract using :ref:`extractHashPrevBlock`) must be equal to ``BestBlock``. 
 
     a. Raise ``ERR_NOT_MAIN_CHAIN`` error if this check fails.
 
-2. Call ``verifyTransaction(blockHeaderBytes)``. 
+2. Call :ref:`verifyTransaction` passing ``blockHeaderBytes)`` as function parameter. 
 
     a. If this call **does not return** ``True`` (i.e., fails or returns ``False``), then abort and return ``False``. 
 
-3. Store the ``height`` and ``merkleRoot`` of the block header in the ``blockHeaders`` map, using ``hashCurrentBlock`` as key.
+3. Store the ``height`` and ``merkleRoot`` of the block header in the ``BlockHeaders`` map, using ``hashCurrentBlock`` as key.
 
-    + ``hashCurrentBlock`` is the double SHA256 hash over the 80 bytes block header and can be calculated by calling ``sha256d(blockHeaderBytes)``.
-    + ``merkleRoot`` is the root of the transaction Merkle Tree of the block header. Use ``extractMerkleRoot(blockHeaderBytes)`` to extract from block header. 
+    + ``hashCurrentBlock`` is the double SHA256 hash over the 80 bytes block header and can be calculated via :ref:`sha256d`.
+    + ``merkleRoot`` is the root of the transaction Merkle tree of the block header. Use :ref:`extractMerkleRoot` to extract from block header. 
     + ``height`` is the blockchain height of the submitted block header. Compute by incrementing the height of the block header referenced by ``hashPrevBlock`` (retrieve from ``BlockHeaders`` using ``hashPrevBlock`` as key).
 
 3. Emit a ``StoreMainChainBlockHeader`` event using ``height`` and ``hashCurrentBlock`` as input (``StoreMainChainHeader(height, hashCurrentBlock)``). 
@@ -160,7 +155,7 @@ The ``storeMainChainBlockHeader`` function takes as input the 80 byte raw Bitcoi
 storeForkBlockHeader
 --------------------
 Method to submit block headers to the BTC-Relay, which extend an existing of create a new *fork* (as tracked in ``Forks`` in the BTC-Relay). 
-This function calls the ``verifyBlockHeader`` proving the 80 bytes Bitcoin block header as input, and, if the latter returns ``True``, extracts from the block header and stores (i) the hash, height and Merkle Tree root of the given block header in ``BlockHeaders`` and (ii) the hash of the block header as well as the starting block height of the fork and the current lenght (1 if a new fork) in ``forks``.
+This function calls the ``verifyBlockHeader`` proving the 80 bytes Bitcoin block header as input, and, if the latter returns ``True``, extracts from the block header and stores (i) the hash, height and Merkle tree root of the given block header in ``BlockHeaders`` and (ii) the hash of the block header as well as the starting block height of the fork and the current lenght (1 if a new fork) in ``forks``.
 
 Specification
 ~~~~~~~~~~~~~~

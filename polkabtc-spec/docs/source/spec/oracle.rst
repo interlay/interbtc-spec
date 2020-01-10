@@ -95,7 +95,7 @@ Specification
 User Story
 ..........
  
-This function can be called by any participant to retrieve the BTC/DOT exchange rate as tracked by the BTC-Parachain.
+This function can be called by any participant to retrieve the BTC/DOT exchange rate as tracked by the BTC Parachain.
 
 
 Events

@@ -8,18 +8,18 @@ Actors
 
 There are four main participant roles in the system. A detailed overview of all components and actors, as well as interactions between them, is provided in the `Figure </intro/architecture.html#id5>`_ below.
 
-- **Vaults**: Collateralized intermediaries on backing blockchain (Bitcoin), which provide collareral in DOT on the BTC-Parachain and receive and hold BTC from users who wish to create PolkaBTC tokens. When a user destroys PolkaBTC tokens, a Vault releases the corresponding amount of BTC to the user's BTC address. Vaults interact with the following components: *VaultRegistry*, *Redeem*, *Replace*
-- **Users**: Users interacting with the BTC-Parachain in order to create, use (trade/transfer/...), and redeem Bitcoin-backed PolkaBTC tokens. Since the different protocol phases can be executed by different users, we íntroduce the following *sub-roles*:
+- **Vaults**: Collateralized intermediaries on backing blockchain (Bitcoin), which provide collareral in DOT on the BTC Parachain and receive and hold BTC from users who wish to create PolkaBTC tokens. When a user destroys PolkaBTC tokens, a Vault releases the corresponding amount of BTC to the user's BTC address. Vaults interact with the following components: *VaultRegistry*, *Redeem*, *Replace*
+- **Users**: Users interacting with the BTC Parachain in order to create, use (trade/transfer/...), and redeem Bitcoin-backed PolkaBTC tokens. Since the different protocol phases can be executed by different users, we íntroduce the following *sub-roles*:
 
-  - **Requester**: A user that locks BTC with a Vault on Bitcoin and issues PolkaBTC on the BTC-Parachain. Interacts with the *Issue* component.
-  - **Sender**: A user that sends PolkaBTC to a Receiver on the BTC-Parachain. Interacts with the *Treasury* component. 
-  - **Receiver**: A user that receives PolkaBTC on the BTC-Parachain. Interacts with the *Treasury* component. 
-  - **Redeemer**: A user that destroys PolkaBTC on the BTC-Parachain to receive the corresponding amount of BTC on the Bitcoin blockchain from a Vault. Interacts with the *Redeem* component. 
-- **Staked Relayers**:  Collateralized intermediaries which run Bitcoin full nodes and (i) monitor validity and availability of transactional data for Bitcoin blocks submitted to BTC-Relay, (ii) monitor that Vaults do not move locked BTC on Bitcoin without prior authorization by the BTC-Parachain (i.e., through one of the Issue, Redeem or Replace protocols). In case either of the above errors was detected, staked relayers report this to the BTC-Parachain. Interact with the *BTC-Relay*, *StakedRelayers*, and *VaultRegistry* components. 
+  - **Requester**: A user that locks BTC with a Vault on Bitcoin and issues PolkaBTC on the BTC Parachain. Interacts with the *Issue* component.
+  - **Sender**: A user that sends PolkaBTC to a Receiver on the BTC Parachain. Interacts with the *Treasury* component. 
+  - **Receiver**: A user that receives PolkaBTC on the BTC Parachain. Interacts with the *Treasury* component. 
+  - **Redeemer**: A user that destroys PolkaBTC on the BTC Parachain to receive the corresponding amount of BTC on the Bitcoin blockchain from a Vault. Interacts with the *Redeem* component. 
+- **Staked Relayers**:  Collateralized intermediaries which run Bitcoin full nodes and (i) monitor validity and availability of transactional data for Bitcoin blocks submitted to BTC-Relay, (ii) monitor that Vaults do not move locked BTC on Bitcoin without prior authorization by the BTC Parachain (i.e., through one of the Issue, Redeem or Replace protocols). In case either of the above errors was detected, staked relayers report this to the BTC Parachain. Interact with the *BTC-Relay*, *StakedRelayers*, and *VaultRegistry* components. 
 
 .. todo:: The exact composition of staked relayers (static vs dynamic committee) and the internal agreement mechanism needs to be defined. Do staked relayers run a BFT protocol to create a threshold signature when reporting an error / updating the state of BTC-Relay? Who can join this committee?
 
-- **Governance Mechanism**: The Parachain Governance Mechanism monitors the correct operation of the BTC-Parachain, as well as the correct behaviour of staked relayers (and other participants if necessary). Interacts with the *RelayerCollateral* component when staked relayers misbehave and can manually interfere with the operation and parameterization of all components of the BTC-Parachain.
+- **Governance Mechanism**: The Parachain Governance Mechanism monitors the correct operation of the BTC Parachain, as well as the correct behaviour of staked relayers (and other participants if necessary). Interacts with the *RelayerCollateral* component when staked relayers misbehave and can manually interfere with the operation and parameterization of all components of the BTC Parachain.
 
 .. note:: The exact composition of the Governance Mechanism is to be defined by Polkadot.  
 
@@ -33,7 +33,7 @@ The specification clearly separates these modules to ensure that each module can
 .. figure:: ../figures/PolkaBTC-Architecture.png
     :alt: architecture diagram
 
-    High level overview of the BTC-Parachain. PolkaBTC consists of seven modules. The Oracle module stores the exchange rates based on the input of centralized and decentralized exchanges. The Treasury module maintains the ownership of PolkaBTC, the VaultRegistry module stores information about the current Vaults in the system, and the Issue, Redeem and Replace modules expose funcitons and maintain data related to the respective sub protocols. The StabilizedCollateral modules handles Vault collateralization, stabilization against exchange rate fluctuations and automatic liquidation. BTC-Relay tracks the Bitcoin main chain and verifies transaction inclusion. The Parachain Governance maintains correct operation of the BTC-Parachain and intervenes / halts operation if necessary. 
+    High level overview of the BTC Parachain. PolkaBTC consists of seven modules. The Oracle module stores the exchange rates based on the input of centralized and decentralized exchanges. The Treasury module maintains the ownership of PolkaBTC, the VaultRegistry module stores information about the current Vaults in the system, and the Issue, Redeem and Replace modules expose funcitons and maintain data related to the respective sub protocols. The StabilizedCollateral modules handles Vault collateralization, stabilization against exchange rate fluctuations and automatic liquidation. BTC-Relay tracks the Bitcoin main chain and verifies transaction inclusion. The Parachain Governance maintains correct operation of the BTC Parachain and intervenes / halts operation if necessary. 
 
 
 ExchangeRateOracle

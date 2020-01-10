@@ -1,7 +1,7 @@
 .. _parser:
 
-Parser
-==============
+Functions: Parser
+==================
 
 
 List of functions used to extract data from Bitcoin block headers and transactions.
@@ -9,6 +9,8 @@ See the Bitcoin Developer Reference for details on the `block header <https://bi
 
 Block Header 
 ------------
+
+:: _extractHashPrevBlock_ 
 
 extractHashPrevBlock
 ~~~~~~~~~~~~~~~~~~~~
@@ -40,6 +42,7 @@ Function Sequence
 1. Return ``blockHeaderBytes[4:32]`` (``hashPrevBlock`` starts an position 4 of the 80 byte block header).
 
 
+.. _extractMerkleRoot:
 
 extractMerkleRoot
 ~~~~~~~~~~~~~~~~~
@@ -56,7 +59,7 @@ Extracts the ``merkleRoot`` from a Bitcoin block header.
 
 *Returns*
 
-* ``merkleRoot``: the 32 byte Merkle Tree root of the block header
+* ``merkleRoot``: the 32 byte Merkle tree root of the block header
 
 *Substrate*
 
@@ -71,6 +74,7 @@ Function Sequence
 1. Return ``blockHeaderBytes[36:32]`` (``merkleRoot`` starts an position 36 of the 80 byte block header).
 
 
+.. _extractNBits:
 
 extractNBits
 ~~~~~~~~~~~~

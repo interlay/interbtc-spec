@@ -197,7 +197,7 @@ Specification
 User Story
 ..........
 
-A BTC-Parachain participant registers as a Vault, locking up collateral in DOT (must be greater that ``MinimumCollateralVault``) and providing a BTC address to which BTC are to be sent during the issue process. 
+A BTC Parachain participant registers as a Vault, locking up collateral in DOT (must be greater that ``MinimumCollateralVault``) and providing a BTC address to which BTC are to be sent during the issue process. 
 
 **Optionally**, the new Vault may be required to provide proof that the specified BTC address is indeed valid by creating a new transaction with an OP_RETURN output, including in the latter some nonce defined by the Parachain.
 

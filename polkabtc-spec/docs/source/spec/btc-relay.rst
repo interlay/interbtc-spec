@@ -1,5 +1,5 @@
 
-BTC Relay
+BTC-Relay
 ==========
 
 

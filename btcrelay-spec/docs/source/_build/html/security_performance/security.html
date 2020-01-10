@@ -1,0 +1,292 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Security Analysis &mdash; Polkadot BTC-Relay 0.0.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Performance and Costs" href="performance.html" />
+    <link rel="prev" title="Error Codes" href="../spec/errors.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Polkadot BTC-Relay
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/at-a-glance.html">BTC-Relay at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/architecture.html">BTC-Relay Architecture</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Security Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#security-parameter-k">Security Parameter <em>k</em></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#liveness-failures">Liveness Failures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#safety-failures">Safety Failures</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#attack-on-bitcoin">51% Attack on Bitcoin</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#relay-poisoning">Relay Poisoning</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#replay-attacks">Replay Attacks</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#hard-and-soft-forks">Hard and Soft forks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance and Costs</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Polkadot BTC-Relay</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Security Analysis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/security_performance/security.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="security-analysis">
+<h1>Security Analysis<a class="headerlink" href="#security-analysis" title="Permalink to this headline">¶</a></h1>
+<p>This section provides an overview of security considerations related to BTC-Relay.
+We refer the reader to <a class="reference external" href="https://eprint.iacr.org/2018/643.pdf">this paper (Section 7)</a> for more details.</p>
+<div class="section" id="security-parameter-k">
+<h2>Security Parameter <em>k</em><a class="headerlink" href="#security-parameter-k" title="Permalink to this headline">¶</a></h2>
+<p>Blockchains using Nakamoto consensus as underlying agreement protocol (i.e., leveraging PoW as for random leader election in a dynamically changing set of consensus participants) exhibit so called <em>stabilizing consensus</em>.
+Specifically, finality of transactions included in the blockchain converges with a <em>security parameter k</em>, measured in confirmations (i.e., blocks mined on top of a block containing the observed transaction).
+That is, the probability of a transaction being reverted in a blockchain reorganization decreases exponentially in <em>k</em>.
+We refer the reader to <a class="reference external" href="https://eprint.iacr.org/2018/400.pdf">this paper</a> for more details on Nakamoto consensus.</p>
+<p>In Bitcoin, this security parameter is often set to <em>k = 6</em>, i.e., transactions are considered “final” after 6 blocks have been mined on top.
+However, there is no mathamatical reasoning behind this, nor exists a proof that 6 confirmations are sufficient.</p>
+<p>In fact, <a class="reference external" href="https://www.cs.huji.ac.il/~yoni_sompo/pubs/16/security_model.pdf">research</a> has shown that when estimating the necessary confirmations before accepting a transaction, the <em>transaction value</em> itself must also be considerd: the higher the value, the more confirmations are necessary to maintain the same level of security.
+However, <a class="reference external" href="https://medium.com/&#64;dionyziz/summa-proofs-are-not-composable-57b87825f428">recent analysis</a> suggests that it is insufficient to consider the value of a single transaction - instead, to estimate the necessary <em>k</em> one must study the value of the entire block.
+The existence of bribing attacks, which can even be executed cross-chain, makes the situation worse: in theory, it is <a class="reference external" href="https://www.alexeizamyatin.me/files/Pay-to-Win_slides.pdf">impossible to estimate k reliably</a>, as there can always be a large transaction that is being attacked by a reorg in an older block.</p>
+<p><strong>What does this mean for BTC-Relay?</strong></p>
+<p>BTC-Relay does not specify a recommended value for <em>k</em>. This task lies with the applications which interact with the relay. BTC-Relay itself only <em>mirrors</em> the state of Bitcoin to Polkadot, including all forks and failures which may occur.</p>
+</div>
+<div class="section" id="liveness-failures">
+<h2>Liveness Failures<a class="headerlink" href="#liveness-failures" title="Permalink to this headline">¶</a></h2>
+<p>The correct operation of BTC-Relay relies on receiving a steady stream of Bitcoin block headers as input.
+A high delay between block generation in Bitcoin and submission to BTC-Relay yields the system susceptible to attacks: an adversary can attempt to <em>poison</em> the relay by submitting a fork, even if the fork was not submitted to Bitcoin itself (see “Relay Poisoning” below).</p>
+<p>While by design, any user can submit Bitcoin block headers to BTC-Relay, it is recommended to introduce an explicit set of participants for this task.
+These can be <em>staked relayers</em>, which already run Bitcoin full nodes for validation purposes, or <em>Vaults</em> which are used for the creation of Bitcoin-backed assets in the PolkaBTC component.</p>
+</div>
+<div class="section" id="safety-failures">
+<h2>Safety Failures<a class="headerlink" href="#safety-failures" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="attack-on-bitcoin">
+<h3>51% Attack on Bitcoin<a class="headerlink" href="#attack-on-bitcoin" title="Permalink to this headline">¶</a></h3>
+<p>One of the major questions that arises in cross-chain communication is: what to do if one of the interlined chains fails?</p>
+<p>In the case of BTC-Relay, a major chain reorganization in Bitcoin would be accepted, if the new chain exceeds the tracked <code class="docutils literal notranslate"><span class="pre">MainChain</span></code> in BTC-Relay.
+If the length of the fork exceeds the security parameter <em>k</em> relied upon by applications using BTC-Relay, this can have sever impacts, beyond that of users loosing BTC.</p>
+<p>However, as BTC-Relay acts only as mirror of the Bitcoin blockchain, the only possible mitigation of a 51% attack on Bitcoin <strong>halting BTC-Relay</strong> via manual intervention of <em>staked relayers</em> or the <em>governance mechanism</em>.
+See <a class="reference external" href="/spec/failure-handling.html">Failure Handling</a> for more details on BTC-Relay failure modes and recovery procedures.</p>
+<p>A major challenge thereby is to ensure the potential financial loss of <em>staked relayers</em> and/or participants of the <em>governance mechanism</em> exceeds the potential gains from colluding the an adversary on Bitcoin.</p>
+</div>
+<div class="section" id="relay-poisoning">
+<h3>Relay Poisoning<a class="headerlink" href="#relay-poisoning" title="Permalink to this headline">¶</a></h3>
+<p>BTC-Relay poisoning is a more subtle way of interfering with correct operation of the system: an adversary submits a Bitcoin fork to BTC-Relay, but does not broadcast it to the actual Bitcoin network.
+If Liveness of BTC-Relay is breached, e.g. <em>staked relayers</em> are unavailable, BTC-Relay can be tricked into accepting an alternate <code class="docutils literal notranslate"><span class="pre">MainChain</span></code> than actually maintained in Bitcoin.</p>
+<p>However, as long as a single honest participant is online and capable of submitting Bitcoin block headers from the Bitcoin main chain to BTC-Relay withing <em>k</em> blocks, poisoning attacks can be mitigated.</p>
+</div>
+<div class="section" id="replay-attacks">
+<h3>Replay Attacks<a class="headerlink" href="#replay-attacks" title="Permalink to this headline">¶</a></h3>
+<p>Since BTC-Relay does not store Bitcoin transactions, nor can be aware of all possible applications using <code class="docutils literal notranslate"><span class="pre">verifyTransaction</span></code>, duplicate submission of transaction inclusion proofs <strong>cannot be easily detected</strong> by BTC-Relay.</p>
+<p>As such, it lies in the responsibility of each application interacting with BTC-Relay to introduce necessary replay protection mechanisms (e.g. nonces stored as OP_RETURN) and to check the latter using the <a class="reference external" href="/spec/parser.html">Parser</a> component of BTC-Relay.</p>
+</div>
+</div>
+<div class="section" id="hard-and-soft-forks">
+<h2>Hard and Soft forks<a class="headerlink" href="#hard-and-soft-forks" title="Permalink to this headline">¶</a></h2>
+<p>Permanent chain splits or hard forks occur where consensus rules are “loosened” or new conflicting rules are introduced.
+As a result, multiple instances of the same blockchain are created, e.g. as in the case of Bitcoin and Bitcoin Cash.</p>
+<p>BTC-Relay by default will follow the old consensus rules, and must be updated accordingly if it is to follow the new system.</p>
+<p>Thereby, is it for the <em>governance mechanism</em> to determine (i) if an update will be executed and (ii) if two parallel blockchains result from the hard fork, whether an additional new instance of BTC-Relay is to be deployed (and how).</p>
+<p>Note: to differentiate between the two resulting chains after a hard fork, replay protection is necessary for secure operation.
+While typically accounted for by the developers of the verified blockchain, the absence of replay protection can lead to undesirable behavior.
+Specifically, payments made on one fork may be accepted as valid on the other as well - and propagated to BTC-Relay.
+To this end, <em>if a fork lacks replay protection</em>, <strong>halting of the relay</strong> may be necessary recommended, until the matter is resolved.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="performance.html" class="btn btn-neutral float-right" title="Performance and Costs" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../spec/errors.html" class="btn btn-neutral float-left" title="Error Codes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2019, Interlay
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

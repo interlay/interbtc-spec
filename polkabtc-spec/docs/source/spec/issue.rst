@@ -270,7 +270,7 @@ Specification
 Function Sequence
 .................
 
-.. todo:: Insert link to BTC Relay to get Bitcoin data.
+.. todo:: Insert link to BTC-Relay to get Bitcoin data.
 
 .. todo:: What happends if the Vault goes into buffered collateral/liquidation at this point?
 
@@ -279,12 +279,12 @@ Function Sequence
     
     a. ``requester``: The BTC Parachain address of the requester.
     b. ``issueId``: The unique hash received in the ``commit`` function.
-    c. ``txId``: the hash of the Bitcoin transaction to the Vault. With the ``txId`` the Requester can get the remainder of the Bitcoin transaction data including ``txBlockHeight``, ``txIndex``, ``MerkleProof``, and ``rawTx``. See BTC Relay documentation for details.
+    c. ``txId``: the hash of the Bitcoin transaction to the Vault. With the ``txId`` the Requester can get the remainder of the Bitcoin transaction data including ``txBlockHeight``, ``txIndex``, ``MerkleProof``, and ``rawTx``. See BTC-Relay documentation for details.
 
 2. Checks if the ``issueId`` exists. Throws ``ERR_ISSUE_ID_NOT_FOUND`` if not found. Else, continues.
 3. Checks if the current block height minus the ``CommitPeriod`` is smaller than the ``opentime`` specified in the ``Issue`` struct. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``. Else, continues.
-4. Calls the ``verifyTransaction`` function of the BTC Relay with the provided ``txId``, ``txBlockHeight``, ``txIndex``, and ``MerkleProof``. If the function does not return ``True``, the function has either thrown a specific error or the transaction could not be verified. If the function returns ``False``, throw the general ``ERR_TRANSACTION_NOT_VERIFIED`` error. If returns ``True``, continues.
-5. Calls the ``parseTransaction`` function of the BTC Relay with the ``txId``, ``rawTx``, the ``amount`` and the ``issueId``. The ``parseTransaction`` function checks that the ``rawTx`` hashes to the ``txId``, includes the correct ``amount``, and hash the ``issueId`` in its ``OP_RETURN``. If the function returns ``False``, throw ``ERR_TRANSACTION_NOT_VERIFIED``. More detailed errors are thrown in the BTC Relay. Else, continues.
+4. Calls the ``verifyTransaction`` function of the BTC-Relay with the provided ``txId``, ``txBlockHeight``, ``txIndex``, and ``MerkleProof``. If the function does not return ``True``, the function has either thrown a specific error or the transaction could not be verified. If the function returns ``False``, throw the general ``ERR_TRANSACTION_NOT_VERIFIED`` error. If returns ``True``, continues.
+5. Calls the ``parseTransaction`` function of the BTC-Relay with the ``txId``, ``rawTx``, the ``amount`` and the ``issueId``. The ``parseTransaction`` function checks that the ``rawTx`` hashes to the ``txId``, includes the correct ``amount``, and hash the ``issueId`` in its ``OP_RETURN``. If the function returns ``False``, throw ``ERR_TRANSACTION_NOT_VERIFIED``. More detailed errors are thrown in the BTC-Relay. Else, continues.
 6. Check if the function has thrown an error.
 
     a. If the function has thrown an error, execute ``free`` in the VaultRegistry to release the locked collateral for this issue request for the vault. Return ``False``.
@@ -385,7 +385,7 @@ Error Codes
 
 * **Message**: "Transaction could not be verified. More information in the stack trace."
 * **Function**: :ref:`fun_issue` 
-* **Cause**: The Bitcoin transaction could not be verified in the BTC Relay module.
+* **Cause**: The Bitcoin transaction could not be verified in the BTC-Relay module.
 
 
 
