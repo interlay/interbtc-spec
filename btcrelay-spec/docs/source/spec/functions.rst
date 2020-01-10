@@ -175,9 +175,9 @@ Specification
 
 *Errors*
 
-* ``ERR_INVALID_FORK_ID`` = "Incorrect fork identifier"``: raise an exception when a non-existent fork identifier or ``0`` (blocked for special meaning) is passed. 
+* ``ERR_INVALID_FORK_ID`` = "Incorrect fork identifier"``: raise an exception when a non-existent is passed. 
 * ``ERR_FORK_PREV_BLOCK`` = "Previous block hash does not match last block in fork submission`"`: raise exception if the block header does not reference the highest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
-* ``ERR_NOT_FORK`` = "Indicated fork submission, but block is in main chain"``:  raise exception if the submitted block header is actually extending the current longest chain tracked by BTC-Relay (``MainChain``).
+* ``ERR_NOT_FORK`` = "Indicated fork submission, but block is in main chain"``:  raise exception if the submitted block header is actually extending the current longest chain tracked by BTC-Relay (``MainChain``) instead of a fork.
 
 *Substrate*
 

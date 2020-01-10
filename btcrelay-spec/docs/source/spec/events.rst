@@ -58,7 +58,7 @@ If the submitted block header is on a fork, emit an event with the fork’s id, 
 
 *Parameters*
 
-* ``forkId``: a unique id for the fork.
+* ``forkId``: unique identifier of the tracked fork.
 * ``blockHeight``: height of the current block submission.
 * ``blockHash``: hash of the current block submission.
 
@@ -96,17 +96,17 @@ If the submitted block header on a fork results in a reorganization (fork longer
 VerifyTransaction
 -----------------
 
-Issue an event for a given transaction id and a block height and return the result of the transaction verification.
+If the verification of the transaction inclusion proof was successful, emit an event for the given transaction identifier (``txId``), block height (``txBlockHeight``), and the specified number of ``confirmations``.
 
 *Event Signature*
 
-``VerifyTransaction(txId, blockHeight, result)``
+``VerifyTransaction(txId, blockHeight, confirmations)``
 
 *Parameters*
 
 * ``txId``: the hash of the transaction.
 * ``txBlockHeight``: height of block of the transaction.
-* ``result``: result of the verification as true or false.
+* ``confirmations``: number of confirmations requested for the transaction verification.
 
 *Functions*
 
@@ -114,4 +114,4 @@ Issue an event for a given transaction id and a block height and return the resu
 
 *Substrate* ::
 
-  VerifyTransaction(Hash, U256, bool);
+  VerifyTransaction(Hash, U256, U256);
