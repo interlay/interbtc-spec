@@ -73,12 +73,12 @@ Hard and Soft forks
 Permanent chain splits or hard forks occur where consensus rules are "loosened" or new conflicting rules are introduced.
 As a result, multiple instances of the same blockchain are created, e.g. as in the case of Bitcoin and Bitcoin Cash. 
 
-BTC-Relay by defalt will follow the old consensus rules, and must be updated accordingly if it is to follow the new system.
+BTC-Relay by default will follow the old consensus rules, and must be updated accordingly if it is to follow the new system.
 
 Thereby, is it for the *governance mechanism* to determine (i) if an update will be executed and (ii) if two parallel blockchains result from the hard fork, whether an additional new instance of BTC-Relay is to be deployed (and how). 
 
 
 Note: to differentiate between the two resulting chains after a hard fork, replay protection is necessary for secure operation. 
-While typically accounted for by the developers of the verified blockchain, the absence of replay protection can lead to undesirable behaviour. 
+While typically accounted for by the developers of the verified blockchain, the absence of replay protection can lead to undesirable behavior. 
 Specifically, payments made on one fork may be accepted as valid on the other as well - and propagated to BTC-Relay.
 To this end, *if a fork lacks replay protection*, **halting of the relay** may be necessary recommended, until the matter is resolved.

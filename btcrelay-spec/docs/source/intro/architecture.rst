@@ -69,8 +69,3 @@ Parser
 ------
 
 The Parser component offers functions to parse Bitcoin's block and transaction data structures, e.g. extracting the Merkle tree root from a block header or the OP_RETURN field from a transaction output. See :ref:`parser` for the full function specification.
-
-Failure Handling
------------------
-
-The Failure Handling component exposes the control mechanism for BTC-Relay's operation. Specifically, *staked relayers* and the *governance mechanism* can halt BTC-Relay if failures are detected, and recover from previous failures. See :ref:`failure-handling` for an overview of possible failure modes and the full function specification.

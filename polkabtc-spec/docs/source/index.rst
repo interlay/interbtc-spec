@@ -23,7 +23,8 @@ Welcome to PolkaBTC's documentation!
    spec/redeem
    spec/replace
    spec/oracle
-   spec/failureHandling
+   spec/btc-relay
+   spec/failure-handling
    spec/helpers
    spec/events
    spec/errors

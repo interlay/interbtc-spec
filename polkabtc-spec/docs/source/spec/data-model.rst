@@ -1,6 +1,8 @@
 Data Model
 ==========
 
+.. todo:: This is duplicate. Remove as soon as all component data model are complete.
+
 The data model covers the necessary information to handle the issue and redeem process as well as the management of tokens, i.e. accounts and balances.
 
 Treasury
