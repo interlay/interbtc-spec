@@ -23,8 +23,8 @@ Specification
 
 *Parameters*
 
-* ``blockHeaderBytes``: raw Bitcoin block header bytes (80 bytes).
-* ``blockHeight``: Bitcoin block height of the submitted block header 
+* ``blockHeaderBytes``: 80 byte raw Bitcoin block header.
+* ``blockHeight``: integer Bitcoin block height of the submitted block header 
 
 *Returns*
 
@@ -37,7 +37,7 @@ Specification
 
 *Errors*
 
-* ``ERR_ALREADY_INITIALIZED`` = "Already initialized.": raise exception if this function is called after BTC-Relay has already been initialized.
+* ``ERR_ALREADY_INITIALIZED`` = "Already initialized"``: raise exception if this function is called after BTC-Relay has already been initialized.
 
 *Substrate*
 
@@ -59,9 +59,7 @@ Function sequence
 
 The ``initialize`` function takes as input an 80 byte raw Bitcoin block header and the corresponding Bitcoin block height, and follows the sequence below:
 
-1. Check if ``initialize`` is called for the first time. This can be done by checking if ``BestBlock == None``. 
-
-   a. Raise ``ERR_ALREADY_INITIALIZED`` if BTC-Relay has already been initialized. 
+1. Check if ``initialize`` is called for the first time. This can be done by checking if ``BestBlock == None``. Raise ``ERR_ALREADY_INITIALIZED`` if BTC-Relay has already been initialized. 
 
 2. Parse ``blockHeaderBytes``, extracting the ``merkleRoot`` using :ref:`extractMerkleRoot`, compute the Bitcoin block hash (``hashCurrentBlock``) of the block header (use :ref:`sha256d`), and store the block header data in ``BlockHeaders``. 
 
@@ -90,7 +88,7 @@ Specification
 
 *Parameters*
 
-* ``blockHeaderBytes``: raw Bitcoin block header bytes (80 bytes).
+* ``blockHeaderBytes``: 80 byte raw Bitcoin block header.
 
 *Returns*
 
@@ -103,7 +101,7 @@ Specification
 
 *Errors*
 
-* ``ERR_NOT_MAIN_CHAIN`` = "Main chain submission indicated, but submitted block is on a fork": raise exception if the block header submission indicates that it is extending the current longest chain, but is actually on a (new) fork.
+* ``ERR_NOT_MAIN_CHAIN`` = "Main chain submission indicated, but submitted block is on a fork"``: raise exception if the block header submission indicates that it is extending the current longest chain, but is actually on a (new) fork.
 
 *Substrate*
 
@@ -126,13 +124,9 @@ Function sequence
 
 The ``storeMainChainBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and follows the sequence below:
 
-1. Check that the submitted block header is extending the ``MainChain`` of BTC-Relay. That is, ``hashPrevBlock`` (extract using :ref:`extractHashPrevBlock`) must be equal to ``BestBlock``. 
+1. Check that the submitted block header is extending the ``MainChain`` of BTC-Relay. That is, ``hashPrevBlock`` (extract using :ref:`extractHashPrevBlock`) must be equal to ``BestBlock``. Raise ``ERR_NOT_MAIN_CHAIN`` error if this check fails.
 
-    a. Raise ``ERR_NOT_MAIN_CHAIN`` error if this check fails.
-
-2. Call :ref:`verifyTransaction` passing ``blockHeaderBytes)`` as function parameter. 
-
-    a. If this call **does not return** ``True`` (i.e., fails or returns ``False``), then abort and return ``False``. 
+2. Call :ref:`verifyTransaction` passing ``blockHeaderBytes)`` as function parameter. If this call **does not return** ``True`` (i.e., fails or returns ``False``), then abort and return ``False``. 
 
 3. Store the ``height`` and ``merkleRoot`` of the block header in the ``BlockHeaders`` map, using ``hashCurrentBlock`` as key.
 
@@ -154,8 +148,8 @@ The ``storeMainChainBlockHeader`` function takes as input the 80 byte raw Bitcoi
 
 storeForkBlockHeader
 --------------------
-Method to submit block headers to the BTC-Relay, which extend an existing of create a new *fork* (as tracked in ``Forks`` in the BTC-Relay). 
-This function calls the ``verifyBlockHeader`` proving the 80 bytes Bitcoin block header as input, and, if the latter returns ``True``, extracts from the block header and stores (i) the hash, height and Merkle tree root of the given block header in ``BlockHeaders`` and (ii) the hash of the block header as well as the starting block height of the fork and the current lenght (1 if a new fork) in ``forks``.
+Method to submit block headers to the BTC-Relay, which extend an existing (as tracked in ``Forks`` in BTC-Relay) of create a new *fork*. 
+This function calls :ref:`verifyBlockHeader` passing the 80 bytes Bitcoin block header as parameter, and, if the latter returns ``True``, extracts from the block header and stores (i) the hash, height and Merkle tree root of the given block header in ``BlockHeaders`` and (ii) the hash of the block header as well as the starting block height of the fork and the current length (1 if a new fork) in ``Forks``.
 
 Specification
 ~~~~~~~~~~~~~~
@@ -166,13 +160,13 @@ Specification
 
 *Parameters*
 
-* ``blockHeaderBytes``: raw Bitcoin block header bytes (80 bytes).
-* ``forkId``: if block header is on a fork, specifies which fork is being extended (or being newly created).
+* ``blockHeaderBytes``: 80 byte raw Bitcoin block header.
+* ``forkId``: integer tracked fork identifier. Set to ``-1`` if a new fork is being created (default).
 
 *Returns*
 
-* ``True``: if the block header passes all checks and extends new or extends an existing fork of the currenlty known longest chain
-* ``False``: otherwise.
+* ``True``: if the block header passes all checks and creates a new or extends an existing fork of the currently known longest chain
+* ``False`` (or raises exception): otherwise.
 
 *Events*
 
@@ -181,8 +175,9 @@ Specification
 
 *Errors*
 
-* ``ERR_FORK_PREV_BLOCK`` = "Previous block hash does not match last block in fork submission": raise exception if the block header does not reference the heighest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
-* ``ERR_NOT_FORK`` = "Indicated fork submission, but block is in main chain":  raise exception if the block header creates a new or extends an existing fork, but is actually extending the current longest chain.
+* ``ERR_INVALID_FORK_ID`` = "Incorrect fork identifier"``: raise an exception when a non-existent fork identifier or ``0`` (blocked for special meaning) is passed. 
+* ``ERR_FORK_PREV_BLOCK`` = "Previous block hash does not match last block in fork submission`"`: raise exception if the block header does not reference the highest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
+* ``ERR_NOT_FORK`` = "Indicated fork submission, but block is in main chain"``:  raise exception if the submitted block header is actually extending the current longest chain tracked by BTC-Relay (``MainChain``).
 
 *Substrate*
 
@@ -191,49 +186,32 @@ Specification
   fn storeForkBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader, forkId: U256) -> Result {...}
 
 
-User Story
-~~~~~~~~~~
+Preconditions
+~~~~~~~~~~~~~~
 
-A user calls the ``storeForkBlockHeader`` function when submitting a new Bitcoin block header, which is not extending the tip of the ``MainChain`` tracked in BTC-Relay. 
-Thereby, the user performes the following steps (see notes and warnings in ``storeMainChainBlockHeader``):
-
-1. The user checks that the to-be-submitted Bitcoin block header in **not part** of the longest (main) chain *tracked by the BTC-Relay*. 
-
-2. If the block header is on an existing *fork tracked by the BTC-Relay*, the user looks up the ``forkId`` in ``Forks`` in the BTC-Relay. If it is a new fork, specify ``-1`` as ``forkId`` (or other pre-defined value) - BTC-Relay will then create a new entry in ``Forks`` and assign a new ``forkId`` when storing the block header.
-
-3. The user calls the function passing an 80 byte block header (``blockHeaderBytes``) and receives one of two possible results:
-
-    a. ``True``: the block header was successfully verified and stored as a fork.
-    b. ``False``: if verification fails (see exceptions raised for reason).
-
-
-.. Use Cases
-~~~~~~~~~~~~
-
-**Detection and Tracking of Forks**:
-Blockchain reorganizations or forks which occur on Bitcoin are detected and set up for tracking when a block header is submitted whose block height is lower than the currently tracked main chain height.
+* The submitted block header must either create a new fork or extend an existing fork (in ``Forks``) as tracked by BTC-Relay.
+* If the submission extends an existing fork, the ``forkId`` must be set to the correct identifier as tracked in ``Forks``.
+* If the submission creates a new fork, the ``forkId`` must be set to ``-1``.
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
 The ``storeForkBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and a ``forkId`` and follows the following sequence:
 
-1.  Call ``verifyTransaction(blockHeaderBytes)``. 
-
-    a. If this call **does not return** ``True`` (i.e., fails or returns ``False``), then abort and return ``False``. 
+1.  Call :ref:`verifyTransaction` passing ``blockHeaderBytes`` as parameter. If this call **does not return** ``True`` (i.e., fails or returns ``False``), then abort and return ``False``. 
 
 2. Check if ``forkId == -1``.
 
-    a. If ``forkId == -1``, generate a new ``forkId`` and create a new entry in ``Forks``, setting the ``heigh`` of the block header as the ``startHeight`` of the fork.
+    a. If ``forkId == -1``, generate a new ``forkId`` and create a new entry in ``Forks``, setting the ``height`` of the block header as the ``startHeight`` of the fork.
     
     b. Otherwise:
 
-        b.1 Check if a fork is tracked in ``Forks`` under the specified ``forkId``. If no fork can be found, raise an ``ERR_INVALID_FORK_ID`` exception and abort. 
+        b.1) Check if a fork is tracked in ``Forks`` under the specified ``forkId``. If no fork can be found, raise an ``ERR_INVALID_FORK_ID`` exception and abort. 
 
-        b.2 Check that the ``hashPrevBlock`` of the submitted block header indeed references the last block submitted to the fork specified by ``forkId`` (use ``getLastForkHash(forkId)``). Raise ``ERR_FORK_PREV_BLOCK`` exception and abort if this check fails.
+        b.2) Check that the ``hashPrevBlock`` of the submitted block header indeed references the last block submitted to the fork, specified by ``forkId``. Raise ``ERR_FORK_PREV_BLOCK`` exception and abort if this check fails.
 
 
-3. Store the ``height`` and ``merkleRoot`` of the block header in the ``blockHeaders`` map, using ``hashCurrentBlock`` as key.
+3. Store the ``height`` and ``merkleRoot`` of the block header in the ``blockHeaders`` map, using ``hashCurrentBlock`` as key (compute using :ref:`sha256d`).
 
 4. Update ``Fork[forkId]`` entry, incrementing the fork ``length`` and inserting ``hashCurrentBlock`` into the list of block hashes contained in that fork (``forkBlockHashes``).  
 
@@ -242,9 +220,6 @@ The ``storeForkBlockHeader`` function takes as input the 80 byte raw Bitcoin blo
 6. Check if the fork at ``forkId`` has become longer than the current ``MainChain``. This is the case if the block height ``height`` of the submitted block header exceeds the ``BestBlockHeight``. 
 
     a. If ``height > BestBlockHeight`` call ``chainReorg(forkId)`` and return the value returned form this call.
-    b. Otherwise return ``True``.
-
-
 
 4. Return ``True``.
 
@@ -262,11 +237,11 @@ verifyBlockHeader
 The ``verifyBlockHeader`` function parses and verifies Bitcoin block
 headers. 
 
-.. Warning:: This function must called and return ``True`` **before**  a Bitcoin block header is stored in the BTC-Relay (i.e., must be called by the ``storeMainChainBlockHeader`` and ``storeForkBlockHeader`` functions).
+.. Warning:: This function must called and return ``True`` **before**  a Bitcoin block header is stored in the BTC-Relay (i.e., must be called by the :ref:`storeMainChainBlockHeader` and :ref:`storeForkBlockHeader` functions).
 
-.. note:: This function does not check whether the submitted block header extends the main chain or a fork. This check is performed in ``storeMainChainBlockHeader`` and ``storeForkBlockHeader`` respectively.
+.. note:: This function does not check whether the submitted block header extends the main chain or a fork. This check is performed in :ref:`storeMainChainBlockHeader` and :ref:`storeForkBlockHeader` respectively.
 
-Other operations, such as verification of transaction inclusion, can only be executed once a block header has been verified and conseauently stored in the BTC-Relay. 
+Other operations, such as verification of transaction inclusion, can only be executed once a block header has been verified and consequently stored in the BTC-Relay. 
 
 
 Specification
@@ -277,7 +252,7 @@ Specification
 
 *Parameters*
 
-* ``blockHeaderBytes``: raw Bitcoin block header bytes (80 bytes).
+* ``blockHeaderBytes``: 80 byte raw Bitcoin block header.
 
 
 *Returns*
@@ -287,12 +262,11 @@ Specification
 
 *Errors*
 
-* ``ERR_INVALID_FORK_ID`` = "Incorrect fork identifier.": raise an exception when a non-existent fork identifiert or ``0`` (blocked for special meaning) is passed. 
-* ``ERR_INVALID_HEADER_SIZE`` = "Invalid block header size": raise exception if the submitted block header is not exactly 80 bytes long.
-* ``ERR_DUPLICATE_BLOCK`` = "Block already stored": raise exception if the submitted block header is already stored in the BTC-Relay (same PoW ``blockHash``). 
-* ``ERR_PREV_BLOCK`` = "Previous block hash not found": raise an exception if the submitted block does not reference an already stored block header as predecessor (via ``prevBlockHash``). 
-* ``ERR_LOW_DIFF`` = "PoW hash does not meet difficulty target of header": raise exception when the header's ``blockHash`` does not meet the ``target`` specified in the block header.
-* ``ERR_DIFF_TARGET_HEADER`` = "Incorrect difficulty target specified in block header": raise exception if the ``target`` specified in the block header is incorrect for its block height (difficulty re-target not executed).
+* ``ERR_INVALID_HEADER_SIZE`` = "Invalid block header size"``: raise exception if the submitted block header is not exactly 80 bytes long.
+* ``ERR_DUPLICATE_BLOCK`` = "Block already stored"``: raise exception if the submitted block header is already stored in BTC-Relay (duplicate PoW ``blockHash``). 
+* ``ERR_PREV_BLOCK`` = "Previous block hash not found"``: raise exception if the submitted block does not reference an already stored block header as predecessor (via ``prevBlockHash``). 
+* ``ERR_LOW_DIFF`` = "PoW hash does not meet difficulty target of header"``: raise exception when the header's ``blockHash`` does not meet the ``target`` specified in the block header.
+* ``ERR_DIFF_TARGET_HEADER`` = "Incorrect difficulty target specified in block header"``: raise exception if the ``target`` specified in the block header is incorrect for its block height (difficulty re-target not executed).
 
 *Substrate*
 
@@ -300,31 +274,13 @@ Specification
 
   fn verifyBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader) -> Result {...}
 
-User Story
-~~~~~~~~~~
-This function is called from both ``storeMainChainBlockHeader`` and ``storeForkBlockHeader``, but (typically) not by the user directly.
-Optionally, a user can call this function and submit an 80 byte Bitcoin block header. 
-
-The caller of this function receives as return value:
-
-    a. ``True``: the block header was successfully verified 
-    b. ``False`` (or an exceptin is raised): if verification fails
-
-.. Use Cases
-~~~~~~~~~~~~
-
-**Verification of Transaction Inclusion**:
-To be able to verify that a transaction is included in the Bitcoin blockchain, the corresponding block at the specified ``txBlockHeight`` must be first submitted, verified and stored in the BTC-Relay via ``verifyBlockHeader``. 
-
-
-
 Function Sequence
 ~~~~~~~~~~~~~~~~~
-The ``verifyBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and follows the following sequence:
+The ``verifyBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and follows the sequence below:
 
-1. Check that the ``blockHeaderBytes`` are 80 bytes long. Raise ``ERR_INVALID_HEADER_SIZE`` exception and abort otherwise.
-2. Check that the block header is not yet stored in the BTC-Relay (``blockHash`` is unique in ``blockHeaders``). Raise ``ERR_DUPLICATE_BLOCK`` exception and abort otherwise. 
-3. Check that the previous block referenced by the submitted block header (``hashPrevBlock``) exists in ``BlockHeaders``. Raise ``ERR_PREV_BLOCK`` exception adn abort otherwise. 
+1. Check that the ``blockHeaderBytes`` is 80 bytes long. Raise ``ERR_INVALID_HEADER_SIZE`` exception and abort otherwise.
+2. Check that the block header is not yet stored in BTC-Relay (``blockHash`` is unique in ``blockHeaders``). Raise ``ERR_DUPLICATE_BLOCK`` exception and abort otherwise. 
+3. Check that the previous block referenced by the submitted block header (``hashPrevBlock``) exists in ``BlockHeaders``. Raise ``ERR_PREV_BLOCK`` exception and abort otherwise. 
 4. Check that the Proof-of-Work hash (``blockHash``) is below the ``target`` specified in the block header. Raise ``ERR_LOW_DIFF`` exception and abort otherwise.
 5. Check that the ``target`` specified in the block header is correct by calling ``correctTarget(hashPrevBlock, height, target)`` (as per Bitcoin's difficulty adustment mechanism, see `here <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_). If this call returns ``False``, raise ``ERR_DIFF_TARGET_HEADER`` exception and abort. 
 6. Return ``True``
@@ -340,83 +296,67 @@ The ``verifyBlockHeader`` function takes as input the 80 byte raw Bitcoin block 
 verifyTransaction
 -----------------
 
-The ``verifyTransaction`` function is one of the core components of the BTC-Relay:
-this function returns whether a given transaction is valid by considering a number of parameters.
-The core idea is that a user submits a transaction hash including the parameters to proof to another party that  the transaction is included in the Bitcoin blockchain.
-Since the verification is based on the data in the BTC-Relay, other parties can rely on the trustworthiness of such a proof.
+The ``verifyTransaction`` function is one of the core components of the BTC-Relay: this function checks if a given transaction was indeed included in a given block (as stored in ``BlockHeaders`` and tracked by ``MainChain``), by reconstructing the Merkle tree root (given a Merkle proof). Also checks if sufficient confirmations have passed since the inclusion of the transaction (considering the current state of the BTC-Relay ``MainChain``).
 
 Specification
 ~~~~~~~~~~~~~
 
 *Function Signature*
 
-``verifyTransaction(txId, txBlockHeight, txIndex, merkleProof)``
+``verifyTransaction(txId, txBlockHeight, txIndex, merkleProof, confirmations)``
 
 *Parameters*
 
-* ``txId``: the hash of the transaction.
-* ``txBlockHeight``: block height at which transaction is supposedly included.
-* ``txIndex``: index of transaction in the block's tx Merkle tree.
-* ``merkleProof``: Merkle tree path (concatenated LE sha256 hashes).
+* ``txId``: 32 byte hash identifier of the transaction.
+* ``txBlockHeight``: integer block height at which transaction is supposedly included.
+* ``txIndex``: integer index of transaction in the block's tx Merkle tree.
+* ``merkleProof``: Merkle tree path (concatenated LE sha256 hashes, dynamic sized).
+* ``confirmations``: integer number of confirmation required.
+
+.. note:: The Merkle proof for a Bitcoin transaction can be retrieved using the ``bitcoin-rpc`` `gettxoutproof <https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/gettxoutproof/>`_ method and dropping the first 170 characters.
+
 
 *Returns*
 
-* ``True``: if txId is at the claimed position in the block at the given txBlockHeight.
-* ``False``: otherwise.
+* ``True``: if the given ``txId`` appears in at the position specified by ``txIndex`` in the transaction Merkle tree of the block at height ``blockHeight`` and sufficient confirmations have passed since inclusion.
+* ``False`` (or throws exception): otherwise.
 
 *Events*
 
-* ``VerifyTransaction(txId, txBlockHeight, result)``: issue an event for a given txId and a blockHeight and return the result of the verification (either ``True`` or ``False``).
+* ``VerifyTransaction(txId, txBlockHeight, confirmations)``: if verification was successful, emit an event specifying the ``txId``, the ``blockHeight`` and the requested number of ``confirmations``.
 
 *Errors*
 
-* ``ERR_INVALID_TXID = "Invalid transaction identifier"``: raise an exception when the transaction id (``txId``) is malformed.
-* ``ERR_CONFIRMATIONS = "Transaction has less confirmations than requested"``: raise an exception when the number of confirmations is less than required.
-* ``ERR_MERKLE_PROOF = "Invalid Merkle Proof structure"``: raise an exception when the Merkle proof is malformed.
+* ``ERR_INVALID_TXID = "Invalid transaction identifier"``: raise exception if the transaction identifier (``txId``) is malformed.
+* ``ERR_CONFIRMATIONS = "Transaction has less confirmations than requested"``: raise exception if the block in which the transaction specified by ``txId`` was included has less confirmations than requested.
+* ``ERR_MERKLE_PROOF = "Invalid Merkle Proof structure"``: raise exception if the Merkle proof is malformed.
 
 *Substrate*
 
 ::
 
-  fn verifyTransaction(origin, txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: String) -> Result {...}
-
-
-User Story
-~~~~~~~~~~
-
-Generally, a user has to follow four steps to successfully verify a transaction:
-
-
-1. The user ensures that the Bitcoin block header, in which his transaction is included, is stored in the BTCRelay (see `verifyBlockHeader`_).
-2. The user ensures that the block has the minimum number of required confirmations (typically ``6``).
-3. The user prepares the necessary input parameters from the Bitcoin blockchain to call the ``verifyTransaction`` function. The user can receive these parameters from the `bitcoin-rpc client <https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list>`_.
-
-    a. The *transaction hash* is the transaction that should be verified. The user should note the transaction hash when sending a Bitcoin transaction he wants to verify.
-    b. The *block height* refers to the block in which the transaction is included. The user receives the block height from the `getrawtransaction <https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/rawtransactions/getrawtransaction/>`_ ``bitcoin-rpc`` method by querying for his transaction hash and receiving the ``blockindex``.
-    c. The *transaction index* specifies the index of the transaction in the block. The user receives the index from the ``bitcoin-rpc`` method `getblock <https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/getblock/>`_ by geting the index from the ``tx`` array storing the all transaction hashes in that block.
-    d. The *Merkle proof* encodes how to calculate the Merkle root from the transaction hash. The user receives the proof from the ``bitcoin-rpc`` method `gettxoutproof <https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/gettxoutproof/>`_.
-
-4. The user submits the above parameters to the ``verifyTransaction`` function and receives one of two possible results.
-
-    a. ``True``: the transaction is successfully verified.
-    b. ``False``: the transaction cannot be verified given the input parameters provided by the user.
-
-.. Use Cases
-~~~~~~~~~~~~
-**Issue of Bitcoin-backed Assets**: Users can create Bitcoin-backed tokens on Polkadot by proving to the Polkadot blockchain that they have sent a number of Satoshis to a vault's Bitcoin address. To realize this, a user acts as a so-called CbA Requester. First the CbA-Requester transfers the Satoshis to the Bitcoin address of a Vault on the Bitcoin blockchain. The CbA-Requester notes the transaction hash of this transaction. Next, the CbA-Requester proves to the Polka-BTC bridge that the vault has received his Satoshis. He achieves this by ensuring that the block header of his transaction is included in the BTCRelay and has enough confirmations. He then extracts the input parameters as described in step 3 of the `User Story`_ above. With these input parameters he calls the ``verifyTransaction`` to receive a successful transaction inclusion proof.
+  fn verifyTransaction(origin, txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: u64) -> Result {...}
 
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-The ``verifyTransaction`` function takes four inputs and follows the following sequence to verify if a transaction is valid:
+The ``verifyTransaction`` function follows the function sequence below:
 
-1. The *transaction hash* (``txId``) needs to be 32 bytes long. If this condition is not met, the ``ERR_INVALID_TXID`` error is raised.
-2. The submitted *block height* (``txBlockHeight``) is stored in BTCRelay and the block in which the transaction is included has enough confirmations. This check ensures that the submitted *block height* has at least the required amount of previous blocks (default ``6``). Raises ``ERR_CONFIRMATIONS`` if the condition is not met. 
-3. The user submitted a valid *Merkle proof*. The Merkle proof needs to contain the *transaction hash* in its first 32 bytes. Further, the last hash in the Merkle proof must be the block header hash in which the transaction is included. If this condition is not met, the function raises an ``ERR_MERKLE_PROOF`` error.
-4. The *Merkle proof* must be either 32 bytes long if the block contains only the coinbase transaction, or be above 64 bytes if the block contains more than one transaction. If this condition is not met, the function raises an ``ERR_MERKLE_PROOF`` error.
-5. Last, the function calls the ``computeMerkle`` helper function to calculate the Merkle root. If ``computeMerkle`` returns the merkleRoot, the function returns ``True``, otherwise ``False``. On completion of the function the ``VerifyTransaction`` event is generated including the transaction hash (``txId``), the block height (``txBlockHeight``), and the result (either ``True`` or ``False``).
 
+1. Check that ``txId`` is 32 bytes long. Raise ``ERR_INVALID_FORK_ID`` error if this check fails. 
+
+2. Check that the current ``BestBlockHeight`` exceeds ``blockHeight`` by the specified number of ``confirmation``. Raise ``ERR_CONFIRMATIONS`` if this check fails. 
+
+3. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``MainChain`` at the passed ``blockHeight``.    
+
+3. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Raise ``ERR_MERKLE_PROOF`` error if one of these checks fails.
+
+4. Call :ref:`computeMerkle` passing ``txId``, ``txIndex`` and ``merkleProof`` as parameters. 
+
+  a. If this call returns the ``merkleRoot``, emit a ``VerifyTransaction(txId, blockHeight, confirmations)`` event and return ``True``.
+  
+  b. Otherwise return ``False``. 
 
 .. figure:: ../figures/verifyTransaction-sequence.png
     :alt: verifyTransaction sequence diagram
