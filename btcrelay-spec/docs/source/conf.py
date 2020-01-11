@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = u'Polkadot BTC-Relay'
-copyright = u'2019, Interlay'
+copyright = u'2020, Interlay'
 author = u'Interlay'
 
 # The short X.Y version
