@@ -130,6 +130,6 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message**: "Fork ID not found for specified block hash"
 
-* **Function**: ``getForkIdByBlockHash``
+* **Function**: :ref:`getForkIdByBlockHash`
 
 * **Cause**: Return this error if there exists no ``forkId`` for the given ``blockHash``.
