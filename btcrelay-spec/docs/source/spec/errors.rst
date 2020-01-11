@@ -124,4 +124,12 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Function**: :ref:`verifyTransaction`
 
-* **Cause**: Raised if the Merkle proof is malformed.
+* **Cause**: Exception raised in ``verifyTransaction`` when the Merkle proof is malformed.
+
+``ERR_FORK_ID_NOT_FOUND``
+
+* **Message**: "Fork ID not found for specified block hash"
+
+* **Function**: ``getForkIdByBlockHash``
+
+* **Cause**: Return this error if there exists no ``forkId`` for the given ``blockHash``.

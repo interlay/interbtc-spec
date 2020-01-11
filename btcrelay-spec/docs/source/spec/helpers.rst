@@ -11,6 +11,9 @@ sha256d
 -------
 Bitcoin uses a double SHA256 hash to protect against `"length-extension" attacks <https://en.wikipedia.org/wiki/Length_extension_attack>`_. 
 
+.. note:: Bitcoin uses little endian representations when sending hashes across the network and for storing values internally. For more details, see the `documentation <https://en.bitcoin.it/wiki/Protocol_documentation#common-structures>`_. The output of the SHA256 function is big endian by default.
+
+
 *Function Signature*
 
 ``sha256d(data)``
@@ -21,7 +24,7 @@ Bitcoin uses a double SHA256 hash to protect against `"length-extension" attacks
 
 *Returns*
 
-* ``hash``: the double sha256 hash encodes as a bytes from ``data``.
+* ``hash``: the double SHA256 hash encodes as a bytes from ``data``.
 
 *Substrate*
 
@@ -42,6 +45,8 @@ Function Sequence
 concatSha256d
 -------------
 
+A function that computes a parent hash from two child nodes. This function is used in the reconstruction of the Merkle tree.
+
 *Function Signature*
 
 ``concatSha256d(left, right)``
@@ -53,7 +58,7 @@ concatSha256d
 
 *Returns*
 
-* ``hash``: the double sha256 hash encodes as a bytes from ``left`` and ``right``.
+* ``hash``: the double sha256 hash encoded as a bytes from ``left`` and ``right``.
 
 *Substrate*
 
@@ -86,25 +91,25 @@ This function calculates the PoW difficulty target from a compressed nBits repre
 
 *Parameters*
 
-* ``nBits``: u256 compressed PoW target representation.
+* ``nBits``: 4 bytes compressed PoW target representation.
 
 
 *Returns*
 
-* ``target``: u256 PoW difficulty target computed from nBits.
+* ``target``: PoW difficulty target computed from nBits.
 
 *Substrate*
 
 ::
 
-  fn nBitsToTarget(nBits: U256) -> U256 {...}
+  fn nBitsToTarget(nBits: u32) -> U256 {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
 1. Extract the *exponent* by shifting the ``nBits`` to the right by 24.
 2. Extract the *significand* by taking the first three bytes of ``nBits``.
-3. Calculate the ``target`` via the equation above and using 2 as the *base* (as we use uint256 types).
+3. Calculate the ``target`` via the equation above and using 2 as the *base* (as we use the U256 type).
 4. Return ``target``.
 
 .. _checkCorrectTarget:
@@ -114,7 +119,6 @@ checkCorrectTarget
 
 Verifies the currently submitted block header has the correct difficulty target. 
 
-.. todo:: Add events to give reason for failures.
 
 *Function Signature*
 
@@ -122,9 +126,9 @@ Verifies the currently submitted block header has the correct difficulty target.
 
 *Parameters*
 
-* ``hashPrevBlock``: bytes[32] Previous block hash (necessary to retrieve previous target).
-* ``blockHeight``: u256 height of the current block submission.
-* ``target``: u256 PoW difficulty target computed from nBits.
+* ``hashPrevBlock``: 32 bytes previous block hash (necessary to retrieve previous target).
+* ``blockHeight``: height of the current block submission.
+* ``target``: PoW difficulty target computed from nBits.
 
 *Returns*
 
@@ -140,17 +144,15 @@ Verifies the currently submitted block header has the correct difficulty target.
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-.. todo:: Verify why we need to check if previous block target is not 0.
+1. Retrieve the previous block header with the ``hashPrevBlock`` from the ``BlockHeaders`` storage and extract the ``target`` difficulty of the previous block.
+2. Check if the ``target`` difficulty should be adjusted at this ``blockHeight``.
 
-1. Retrieve the previous block header with the ``hashPrevBlock`` from storage and extract the target of the previous block.
-2. Check if the difficulty should be adjusted at this ``blockHeight``.
-
-    a. The difficulty should not be adjusted. Check if the ``target`` of the submitted block matches the target of the previous block and check that the target of the previous block is not ``0``.
+    a. If the difficulty should not be adjusted, check if the ``target`` of the submitted block matches the target of the previous block and check that the target of the previous block is not ``0``.
 
         i. If the target difficulties match, return ``True``.
         ii. Otherwise, return ``False``.
 
-    b. The difficulty should be adjusted. Call the `computeNewTarget`_ function to get the correct target difficulty. Check that the new target difficulty matches ``target``.
+    b. If the difficulty should be adjusted, call the `computeNewTarget`_ function to get the correct target difficulty. Check that the new target difficulty matches ``target``.
 
         i. If the new target difficulty matches ``target``, return ``True``.
         ii. Otherwise, return ``False``.
@@ -161,7 +163,7 @@ Function Sequence
 computeNewTarget
 ----------------
 
-Computes the new difficulty target based on the given parameters, `according to <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_.
+Computes the new difficulty target based on the given parameters, `as implemented in the Bitcoin core client <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_.
 
 *Function Signature*
 
@@ -171,11 +173,11 @@ Computes the new difficulty target based on the given parameters, `according to 
 
 * ``prevTime``: timestamp of previous block.
 * ``startTime``: timestamp of last re-target.
-* ``prevTarget``: u256 PoW difficulty target of the previous block.
+* ``prevTarget``: PoW difficulty target of the previous block.
 
 *Returns*
 
-* ``newTarget``: u256 PoW difficulty target of the current block.
+* ``newTarget``: PoW difficulty target of the current block.
 
 *Substrate*
 
@@ -190,7 +192,7 @@ Function Sequence
 2. Compare if the actual time span is smaller than the target interval divided by 4 (default target interval in Bitcoin is two weeks). If true, set the actual time span to the target interval divided by 4.
 3. Compare if the actual time span is greater than the target interval multiplied by 4. If true, set the actual time span to the target interval multiplied by 4.
 4. Calculate the ``newTarget`` by multiplying the actual time span with the ``prevTarget`` and dividing by the target time span (2 weeks for Bitcoin).
-5. If the ``newTarget`` is greater tha the maximum target in Bitcoin, set the ``newTarget`` to the maximum target (Bitcoin maximum target is :math:`2^{224}-1`).
+5. If the ``newTarget`` is greater than the maximum target in Bitcoin, set the ``newTarget`` to the maximum target (Bitcoin maximum target is :math:`2^{224}-1`).
 6. Return the ``newTarget``.
 
 
@@ -200,7 +202,7 @@ Function Sequence
 computeMerkle
 -------------
 
-The computeMerkle function calculates the root of the Merkle tree of transactions in a Bitcoin block. The root is calculated by hashing the transaction hash (``txId``), its position in the tree (``txIndex``), and the according hash in the ``merkleProof``. Further details are included in the `Bitcoin developer reference <https://bitcoin.org/en/developer-reference#parsing-a-merkleblock-message>`_. 
+The computeMerkle function calculates the root of the Merkle tree of transactions in a Bitcoin block. Further details are included in the `Bitcoin developer reference <https://bitcoin.org/en/developer-reference#parsing-a-merkleblock-message>`_. 
 
 *Function Signature*
 
@@ -208,8 +210,8 @@ The computeMerkle function calculates the root of the Merkle tree of transaction
 
 *Parameters*
 
-* ``txId``: the hash of the transaction.
-* ``txIndex``: index of transaction in the block's tx Merkle tree.
+* ``txId``: the hash identifier of the transaction.
+* ``txIndex``: index of transaction in the block's transaction Merkle tree.
 * ``merkleProof``: Merkle tree path (concatenated LE sha256 hashes).
 
 *Returns*
@@ -218,7 +220,7 @@ The computeMerkle function calculates the root of the Merkle tree of transaction
 
 *Errors*
 
-* ``ERR_MERKLE_PROOF = "Invalid Merkle Proof structure"``: raise an exception when the Merkle proof is malformed.
+* ``ERR_MERKLE_PROOF = "Invalid Merkle Proof structure"``: raise an exception if the Merkle proof is malformed.
 
 *Substrate*
 
@@ -245,10 +247,10 @@ Function Sequence
     a. Determine the position of transaction hash (or the last resulting hash) at either ``0`` or ``1``.
     b. Slice the next 32 bytes from the Merkle proof.
     c. Concatenate the transaction hash (or last resulting hash) with the 32 bytes of the Merkle proof in the right order (depending on the transaction/last calculated hash position).
-    d. Calculate the double sha256 hash from the concatenated input with the `concatSha256d`_ function.
+    d. Calculate the double SHA256 hash of the concatenated input with the `concatSha256d`_ function.
     e. Repeat until there are no more hashes in the ``merkleProof``.
 
-4. The last resulting hash from step 3 is the Merkle root. Return ``merkleRoot``.
+4. The last resulting hash from step 3 is the ``merkleRoot``. Return ``merkleRoot``.
 
 Example
 ~~~~~~~
@@ -259,7 +261,7 @@ Assume we have the following input:
 * txIndex: ``0``
 * merkleProof: ``86353fb7245cbf1c365bd755c13d2dded808770afd73305838c56951c1bb0d33b635f586cf6c4763f3fc98b99daf8ac14ce1146dc775777c2cd2c4290578ef2e``
 
-The ``computeMerkle`` function would go past step 1 as our proof is longer than 32 bytes. Next, step 2 would also be passed as the proof is equal to 64 bytes and a power of 2. Last we calculate the Merkle root in step 3 as shown below.
+The ``computeMerkle`` function would go past step 1 as our proof is longer than 32 bytes. Next, step 2 would also be passed as the proof length is equal to 64 bytes and a power of 2. Last, we calculate the Merkle root in step 3 as shown below.
 
 .. figure:: ../figures/computeMerkle.png
     :alt: Compute Merkle example execution.
@@ -272,7 +274,7 @@ The ``computeMerkle`` function would go past step 1 as our proof is longer than 
 
 calculateDifficulty
 -------------------
-Given the ``target``, calculates the Proof-of-Work ``difficulty`` value, as defined in `https://en.bitcoin.it/wiki/Difficulty <https://en.bitcoin.it/wiki/Difficulty>`_ .
+Given the ``target``, calculates the Proof-of-Work ``difficulty`` value, as defined in `the Bitcoin wiki <https://en.bitcoin.it/wiki/Difficulty>`_.
 
 *Function Signature*
 
@@ -284,7 +286,7 @@ Given the ``target``, calculates the Proof-of-Work ``difficulty`` value, as defi
 
 *Returns*
 
-* ``difficulty``: difficulty calculated from passed ``target``.
+* ``difficulty``: difficulty calculated from given ``target``.
 
 *Substrate*
 
@@ -304,7 +306,7 @@ chainReorg
 ----------
 
 The ``chainReorg`` function is called from ``storeForkBlockHeader`` and handles blockchain reorganizations in BTC-Relay, i.e., when a fork overtakes the tracked main chain in terms of length (and accumulated PoW). 
-As a result, the ``MainChain`` references to stored block headers (in ``_blockHeaders``) are updated to point to the blocks contained in the overtaking fork.
+As a result, the ``MainChain`` references the stored block headers (in ``BlockHeaders``) are updated to point to the blocks contained in the overtaking fork.
 
 
 Specification
@@ -334,14 +336,14 @@ Specification
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-1. Retrieve fork data (``Fork``, see `Data Model <spec/data-model.html#fork>`_) for ``Fork[forkId]``
+1. Retrieve fork data (``Fork``, see :ref:`data-model`) via ``Fork[forkId]``
 2. Create new entry in ``Forks``, (generate a new identifier ``newForkId``), setting ``Forks[newForkId].startHeight = Forks[forkId].startHeight`` and ``Forks[newForkId].length = Forks[forkId].length - 1``.
-3. Replace the current ``MainChain`` references to ``_blockHeaders`` (i.e., the ``blockHash`` at each ``blockHeight``) with the corresponding entry in ``forkHashes`` of the given fork. In this process, store the replaced ``MainChain`` entries to a new fork. In detail: starting at ``Fork[forkId].startHeight``, loop over ``Fork[forkId].forkHashes`` (``forkHash``) and for each ``forkHash`` (loop counter ``counter = 0`` incremented each round):
+3. Replace the current ``MainChain`` references to ``BlockHeaders`` (i.e., the ``blockHash`` at each ``blockHeight``) with the corresponding entry in ``forkHashes`` of the given fork. In this process, store the replaced ``MainChain`` entries to a new fork. In detail: starting at ``Fork[forkId].startHeight``, loop over ``Fork[forkId].forkHashes`` (``forkHash``) and for each ``forkHash`` (loop counter ``counter = 0`` incremented each round):
 
     a. Copy the  ``blockHash`` referenced in ``mainChain`` at the corresponding block height (``startHeight + counter``) to ``Forks[newForkId].forkHashes``. 
     b. Overwrite the ``blockHash`` in ``MainChain`` at the corresponding block height (``startHeight + counter``) with the given ``forkHash``. 
 
-4. Update ``BestBlock`` and ``BestBlockHeight`` to point to updated heighest block in ``MainChain``.
+4. Update ``BestBlock`` and ``BestBlockHeight`` to point to updated highest block in ``MainChain``.
 
 5. Delete ``Fork[forkId]``.
 
@@ -354,7 +356,7 @@ Function Sequence
     Overview of a the BTC-Relay state before (above) and after (below) ``chainReorg(forkId)``.
 
 
-.. warning:: **Do not instantly delete** the block headers that were removed from the ``MainChain`` through the reorganization. If deletion is required, wait at least until sufficient confirmations have passed, as defined by the security parameter *k* (see `Security <spec/data-model.html#fork>`_). 
+.. warning:: **Do not instantly delete** the block headers that were removed from the ``MainChain`` through the reorganization. If deletion is required, wait at least until sufficient confirmations have passed, as defined by the security parameter *k* (see :ref:`security`). 
 
 
 .. _getForkIdByBlockHash:
@@ -362,7 +364,7 @@ Function Sequence
 getForkIdByBlockHash
 --------------------
 
-Helper function allowing to query the list of tracked forks ``Forks`` for the identifier of a fork given it's last submitted ("heighest") block hash.
+Helper function allowing to query the list of tracked forks (``Forks``) for the identifier of a fork given its last submitted ("highest") block hash.
 
 Specification
 ~~~~~~~~~~~~~~
@@ -377,8 +379,12 @@ Specification
 
 *Returns*
 
-* ``forkId``: if there exists a fork with ``blockHash`` as latest submitted block in ``forkHashes``
-* ``-1`` (or throws exception): otherwise.
+* ``forkId``: if there exists a fork with ``blockHash`` as latest submitted block in ``forkHashes``.
+* ``ERR_FORK_ID_NOT_FOUND``: otherwise.
+
+*Errors*
+
+* ``ERR_FORK_ID_NOT_FOUND = Fork ID not found for specified block hash."``: return this error if there exists no ``forkId`` for the given ``blockHash``.
 
 *Substrate*
 
@@ -394,6 +400,6 @@ Function Sequence
     
     a. If ``True``: return the corresponding ``forkId``.
 
-2. Return ``forkId`` not found otherwise.
+2. Return ``ERR_FORK_ID_NOT_FOUND`` otherwise.
 
 
