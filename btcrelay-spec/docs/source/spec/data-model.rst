@@ -15,7 +15,7 @@ BTCBlockHeader
 
 An 80 bytes long Bitcoin blockchain header.
 
-* Substrate* ::
+*Substrate* ::
 
    pub type BTCBlockHeader = [u8; 80];
 

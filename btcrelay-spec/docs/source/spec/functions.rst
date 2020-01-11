@@ -113,6 +113,7 @@ Preconditions
 ~~~~~~~~~~~~~
 
 * The to-be-submitted Bitcoin block header must extend ``MainChain`` as *tracked by the BTC-Relay*. 
+* The failure handling state must not be set to ``SHUTDOWN: 3``.
 
 .. warning:: The BTC-Relay does not necessarily have the same view of the Bitcoin blockchain as the user's local Bitcoin client. This can happen if (i) the BTC-Relay is under attack, (ii) the BTC-Relay is out of sync, or, similarly, (iii) if the user's local Bitcoin client is under attack or out of sync (see :ref:`security`). 
 
@@ -196,6 +197,7 @@ Preconditions
 * The submitted block header must either create a new fork or extend an existing fork (in ``Forks``) as tracked by BTC-Relay.
 * If the submission extends an existing fork, the ``forkId`` must be set to the correct identifier as tracked in ``Forks``.
 * If the submission creates a new fork, the ``forkId`` must be set to ``-1``.
+* The failure handling state must not be set to ``SHUTDOWN: 3``.
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -343,6 +345,11 @@ Specification
 
   fn verifyTransaction(origin, txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: U256) -> Result {...}
 
+Preconditions
+~~~~~~~~~~~~~
+
+* If the failure handling status is set to ``PARTIAL: 1``, transaction verification is disabled for the latest blocks.
+* The failure handling status must not be set to ``HALTED: 2``. If ``HALTED``, all transaction verification is disabled.
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
