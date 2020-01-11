@@ -73,6 +73,7 @@ Integer block height of ``BestBlock`` in ``MainChain``.
 
   BestBlockHeight: U256;
 
+
 Maps
 ~~~~
 
@@ -87,7 +88,7 @@ Mapping of ``<blockHash,BlockHeader>``, storing all verified Bitcoin block heade
 
 MainChain
 .........
-Mapping of ``<blockHeight,blockHash>``. Tracks the current Bitcoin main chain (refers to stored block headers in ``BlockHeaders``).
+Mapping of ``<blockHeight,blockHash>`` (``<u256, byte32>``). Tracks the current Bitcoin main chain (refers to stored block headers in ``BlockHeaders``).
 
 *Substrate* ::
 
@@ -96,7 +97,7 @@ Mapping of ``<blockHeight,blockHash>``. Tracks the current Bitcoin main chain (r
 Forks
 .....
 
-Mapping of ``<forkId,Fork>``.
+Mapping of ``<forkId,Fork>`` (``<u256, Fork>``), tracking ongoing forks in BTC-Relay.
 
 
 *Substrate* ::
@@ -111,12 +112,14 @@ BlockHeader
 
 .. tabularcolumns:: |l|l|L|
 
-======================  =========  ============================================
+======================  =========  ========================================================================
 Parameter               Type       Description
-======================  =========  ============================================
-``blockHeight``         U256       Height of the current block header.
-``merkleRoot``          H256       Root of the Merkle tree referencing transactions included in the block.
-======================  =========  ============================================
+======================  =========  ========================================================================
+``blockHeight``         u256       Height of this block in the Bitcoin main chain.
+``merkleRoot``          byte32     Root of the Merkle tree referencing transactions included in the block.
+``target``              u256       Difficulty target of this block.
+``timestamp``           timestamp  UNIX timestamp indicating when this block was mined in Bitcoin.
+======================  =========  ========================================================================
 
 *Substrate* 
 
@@ -124,9 +127,11 @@ Parameter               Type       Description
 
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct BlockHeader<H256> {
+  pub struct BlockHeader<H256, Moment> {
         blockHeight: U256,
-        merkleRoot: H256 
+        merkleRoot: H256,
+        target: U256,
+        timestamp: Moment
   }
   
 
@@ -137,11 +142,11 @@ Fork
 .. tabularcolumns:: |l|l|L|
 
 ======================  =============  ===========================================================
-Parameter               Type           Description
+Parameter               Types          Description
 ======================  =============  ===========================================================
-``startHeight``         U256           Height of the block at which this fork starts (forkpoint).
-``length``              U256           Length of the fork (in blocks).
-``forkBlockHashes``     Vec<H256>      Linked hash set of block hashes, which references Bitcoin block headers stored in ``BlockHeaders``, contained in this fork (maintains insertion order).
+``startHeight``         u256           Height of the block at which this fork starts (forkpoint).
+``length``              u256           Length of the fork (in blocks).
+``forkBlockHashes``     byte32[]       List  of block hashes, which references Bitcoin block headers stored in ``BlockHeaders``, contained in this fork (in insertion order).
 ======================  =============  ===========================================================
 
 *Substrate*

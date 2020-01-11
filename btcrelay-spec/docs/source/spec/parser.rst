@@ -10,7 +10,7 @@ See the Bitcoin Developer Reference for details on the `block header <https://bi
 Block Header 
 ------------
 
-:: _extractHashPrevBlock_ 
+.. _extractHashPrevBlock:
 
 extractHashPrevBlock
 ~~~~~~~~~~~~~~~~~~~~
@@ -104,3 +104,40 @@ Function Sequence
 
 1. Return ``blockHeaderBytes[72:4]`` (``nBits`` starts at position 72 of the 80 byte block header).
 
+
+.. _extractTimestamp:
+
+extractTimestamp
+~~~~~~~~~~~~~~~~~
+
+Extracts the timestamp from the block header.
+
+*Function Signature*
+
+``extractTimestamp(blockHeaderBytes)``
+
+*Parameters*
+
+* ``blockHeaderBytes``: 80 byte raw Bitcoin block header
+
+*Returns*
+
+* ``timestamp``: timestamp representation of the 4 byte timestamp field of the block header
+
+*Substrate*
+
+::
+
+  fn extractTimestamp(blockHeaderBytes: T::BTCBlockHeader) -> T::Moment {...}
+
+Function Sequence
+.................
+
+1. Return ``blockHeaderBytes[68:4]`` (``timestamp`` starts at position 68 of the 80 byte block header).
+
+
+
+Transactions 
+-------------
+
+.. todo:: The parser functions used for transaction processing (called by other modules) will be added on demand. See PolkaBTC specification for more details.

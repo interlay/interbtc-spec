@@ -128,7 +128,7 @@ Verifies the currently submitted block header has the correct difficulty target.
 
 *Returns*
 
-* ``True``: if correct difficulty target is found.
+* ``True``: if the difficulty target is set correctly.
 * ``False``: otherwise.
 
 *Substrate*
@@ -150,7 +150,7 @@ Function Sequence
         i. If the target difficulties match, return ``True``.
         ii. Otherwise, return ``False``.
 
-    b. The difficulty should be adjusted. Call the `computeNewTarget`_ function to get the correct target difficulty. Check that the new target difficulty matches ``target``.
+    b. The difficulty should be adjusted. Calculate the new expected target by calling the `computeNewTarget`_ function and passing the timestamp of the previous block (get using ``hashPrevBlock`` key in ``BlockHeaders``), the timestamp of the last re-target (get block hash from ``MainChain`` using ``blockHeight - 2016`` as key, then query ``BlockHeaders``) and the target of the previous block (get using ``hashPrevBlock`` key in ``BlockHeaders``) as parameters. Check that the new target matches the ``target`` of the current block (i.e., the block's target was set correctly).
 
         i. If the new target difficulty matches ``target``, return ``True``.
         ii. Otherwise, return ``False``.
