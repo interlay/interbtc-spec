@@ -14,7 +14,7 @@ The correct operation of BTC-Relay is crucial: should BTC-Relay cease to operate
 .. figure:: ../figures/polkaBTC-btcrelay.png
     :alt: Overview of BTC-Relay as a component of the BTC Parachain
 
-    BTC-Relay is the key component of the BTC Parachain: it is necessary to verify and keep track of the state of Bitcoin. 
+    BTC-Relay (highlighted in blue) is a key component of the BTC Parachain: it is necessary to verify and keep track of the state of Bitcoin. 
 
 
 How to Use this Document
