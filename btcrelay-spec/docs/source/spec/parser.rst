@@ -71,7 +71,7 @@ Extracts the ``merkleRoot`` from a Bitcoin block header.
 Function Sequence
 .................
 
-1. Return ``blockHeaderBytes[36:32]`` (``merkleRoot`` starts an position 36 of the 80 byte block header).
+1. Return ``blockHeaderBytes[36:32]`` (``merkleRoot`` starts at position 36 of the 80 byte block header).
 
 
 .. _extractNBits:
@@ -102,5 +102,5 @@ Extracts the ``nBits`` from a Bitcoin block header. This field is necessary to c
 Function Sequence
 .................
 
-1. Return ``blockHeaderBytes[72:4]`` (``nBits`` starts an position 72 of the 80 byte block header).
+1. Return ``blockHeaderBytes[72:4]`` (``nBits`` starts at position 72 of the 80 byte block header).
 

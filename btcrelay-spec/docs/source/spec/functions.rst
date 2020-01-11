@@ -37,7 +37,7 @@ Specification
 
 *Errors*
 
-* ``ERR_ALREADY_INITIALIZED`` = "Already initialized"``: raise exception if this function is called after BTC-Relay has already been initialized.
+* ``ERR_ALREADY_INITIALIZED = "Already initialized"``: raise exception if this function is called after BTC-Relay has already been initialized.
 
 *Substrate*
 
@@ -101,7 +101,7 @@ Specification
 
 *Errors*
 
-* ``ERR_NOT_MAIN_CHAIN`` = "Main chain submission indicated, but submitted block is on a fork"``: raise exception if the block header submission indicates that it is extending the current longest chain, but is actually on a (new) fork.
+* ``ERR_NOT_MAIN_CHAIN = "Main chain submission indicated, but submitted block is on a fork"``: raise exception if the block header submission indicates that it is extending the current longest chain, but is actually on a (new) fork.
 
 *Substrate*
 
@@ -175,9 +175,9 @@ Specification
 
 *Errors*
 
-* ``ERR_INVALID_FORK_ID`` = "Incorrect fork identifier"``: raise an exception when a non-existent fork identifier or ``0`` (blocked for special meaning) is passed. 
-* ``ERR_FORK_PREV_BLOCK`` = "Previous block hash does not match last block in fork submission`"`: raise exception if the block header does not reference the highest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
-* ``ERR_NOT_FORK`` = "Indicated fork submission, but block is in main chain"``:  raise exception if the submitted block header is actually extending the current longest chain tracked by BTC-Relay (``MainChain``).
+* ``ERR_INVALID_FORK_ID = "Incorrect fork identifier"``: raise an exception when a non-existent is passed. 
+* ``ERR_FORK_PREV_BLOCK = "Previous block hash does not match last block in fork submission"``: raise exception if the block header does not reference the highest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
+* ``ERR_NOT_FORK = "Indicated fork submission, but block is in main chain"``:  raise exception if the submitted block header is actually extending the current longest chain tracked by BTC-Relay (``MainChain``) instead of a fork.
 
 *Substrate*
 
@@ -262,11 +262,11 @@ Specification
 
 *Errors*
 
-* ``ERR_INVALID_HEADER_SIZE`` = "Invalid block header size"``: raise exception if the submitted block header is not exactly 80 bytes long.
-* ``ERR_DUPLICATE_BLOCK`` = "Block already stored"``: raise exception if the submitted block header is already stored in BTC-Relay (duplicate PoW ``blockHash``). 
-* ``ERR_PREV_BLOCK`` = "Previous block hash not found"``: raise exception if the submitted block does not reference an already stored block header as predecessor (via ``prevBlockHash``). 
-* ``ERR_LOW_DIFF`` = "PoW hash does not meet difficulty target of header"``: raise exception when the header's ``blockHash`` does not meet the ``target`` specified in the block header.
-* ``ERR_DIFF_TARGET_HEADER`` = "Incorrect difficulty target specified in block header"``: raise exception if the ``target`` specified in the block header is incorrect for its block height (difficulty re-target not executed).
+* ``ERR_INVALID_HEADER_SIZE = "Invalid block header size"``: raise exception if the submitted block header is not exactly 80 bytes long.
+* ``ERR_DUPLICATE_BLOCK = "Block already stored"``: raise exception if the submitted block header is already stored in BTC-Relay (duplicate PoW ``blockHash``). 
+* ``ERR_PREV_BLOCK = "Previous block hash not found"``: raise exception if the submitted block does not reference an already stored block header as predecessor (via ``prevBlockHash``). 
+* ``ERR_LOW_DIFF = "PoW hash does not meet difficulty target of header"``: raise exception when the header's ``blockHash`` does not meet the ``target`` specified in the block header.
+* ``ERR_DIFF_TARGET_HEADER = "Incorrect difficulty target specified in block header"``: raise exception if the ``target`` specified in the block header is incorrect for its block height (difficulty re-target not executed).
 
 *Substrate*
 
@@ -282,7 +282,7 @@ The ``verifyBlockHeader`` function takes as input the 80 byte raw Bitcoin block 
 2. Check that the block header is not yet stored in BTC-Relay (``blockHash`` is unique in ``blockHeaders``). Raise ``ERR_DUPLICATE_BLOCK`` exception and abort otherwise. 
 3. Check that the previous block referenced by the submitted block header (``hashPrevBlock``) exists in ``BlockHeaders``. Raise ``ERR_PREV_BLOCK`` exception and abort otherwise. 
 4. Check that the Proof-of-Work hash (``blockHash``) is below the ``target`` specified in the block header. Raise ``ERR_LOW_DIFF`` exception and abort otherwise.
-5. Check that the ``target`` specified in the block header is correct by calling ``correctTarget(hashPrevBlock, height, target)`` (as per Bitcoin's difficulty adustment mechanism, see `here <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_). If this call returns ``False``, raise ``ERR_DIFF_TARGET_HEADER`` exception and abort. 
+5. Check that the ``target`` specified in the block header is correct by calling ``correctTarget(hashPrevBlock, height, target)`` (as per Bitcoin's difficulty adjustment mechanism, see `here <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_). If this call returns ``False``, raise ``ERR_DIFF_TARGET_HEADER`` exception and abort. 
 6. Return ``True``
 
 .. figure:: ../figures/verifyBlockHeader-sequence.png
