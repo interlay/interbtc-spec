@@ -147,7 +147,7 @@ The ``storeMainChainBlockHeader`` function takes as input the 80 byte raw Bitcoi
 .. figure:: ../figures/storeMainChainBlockHeader-sequence.png
     :alt: storeMainChainBlockHeader sequence diagram
 
-    Sequence diagram showing the function sequence of ``storeMainChainBlockHeader``.
+    Sequence diagram showing the function sequence of :ref:`storeMainChainBlockHeader`.
 
 .. _storeForkBlockHeader:
 
@@ -234,7 +234,7 @@ The ``storeForkBlockHeader`` function takes as input the 80 byte raw Bitcoin blo
 .. figure:: ../figures/storeForkBlockHeader-sequence.png
     :alt: storeForkBlockHeader sequence diagram
 
-    Sequence diagram showing the function sequence of ``storeForkBlockHeader``.
+    Sequence diagram showing the function sequence of :ref:`storeForkBlockHeader`.
 
 
 .. _verifyBlockHeader:
@@ -296,7 +296,7 @@ The ``verifyBlockHeader`` function takes as input the 80 byte raw Bitcoin block 
 .. figure:: ../figures/verifyBlockHeader-sequence.png
     :alt: verifyBlockHeader sequence diagram
 
-    Sequence diagram showing the function sequence of ``verifyBlockHeader``.
+    Sequence diagram showing the function sequence of :ref:`verifyBlockHeader`.
 
 
 .. _verifyTransaction:
@@ -374,7 +374,7 @@ The ``verifyTransaction`` function follows the function sequence below:
 .. figure:: ../figures/verifyTransaction-sequence.png
     :alt: verifyTransaction sequence diagram
 
-    The steps to verify a transaction in the ``verifyTransaction`` function.
+    The steps to verify a transaction in the :ref:`verifyTransaction` function.
 
 
 
