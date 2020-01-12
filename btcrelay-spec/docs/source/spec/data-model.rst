@@ -39,7 +39,7 @@ Expected duration of the different adjustment interval in seconds. Defaults to `
 
 *Substrate* ::
 
-  const TARGET_TIMESPAN: Moment = 1209600;
+  const TARGET_TIMESPAN: U256 = 1209600;
 
 UNROUNDED_MAX_TARGET
 ....................
@@ -134,11 +134,11 @@ Parameter               Type       Description
 
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct BlockHeader<H256, Moment> {
+  pub struct BlockHeader<H256, DateTime> {
         blockHeight: U256,
         merkleRoot: H256,
         target: U256,
-        timestamp: Moment,
+        timestamp: DateTime,
         // Optional fields
         version: U32, 
         hashPrevBlock: H256,

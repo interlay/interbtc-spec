@@ -183,7 +183,7 @@ Computes the new difficulty target based on the given parameters, `as implemente
 
 ::
 
-  fn computeNewTarget(prevTime: T::Moment, startTime: T::Moment, prevTarget: U256) -> U256 {...}
+  fn computeNewTarget(prevTime: T::DateTime, startTime: T::DateTime, prevTarget: U256) -> U256 {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~

@@ -128,7 +128,7 @@ Extracts the timestamp from the block header.
 
 ::
 
-  fn extractTimestamp(blockHeaderBytes: T::BTCBlockHeader) -> T::Moment {...}
+  fn extractTimestamp(blockHeaderBytes: T::BTCBlockHeader) -> T::DateTime {...}
 
 Function Sequence
 .................
