@@ -152,8 +152,10 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 * **Cause**: The BTC Parachain has been halted.
 
 ``ERR_SHUTDOWN``
+
 * **Message**: "BTC Parachain has shut down"
 
 * **Function**: :ref:`verifyTransaction` | :ref:`storeForkBlockHeader` | :ref:`storeMainChainBlockHeader`
+
 * **Cause**: The BTC Parachain has been shutdown by a manual intervention of the governance mechanism.
 
