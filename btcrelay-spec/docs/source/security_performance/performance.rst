@@ -14,17 +14,19 @@ Estimation of Storage Costs
 
 BTC-Relay only stores Bitcoin block headers. Transactions are not stored directly in the relay -- this responsibility lies with other components or applications interacting with BTC-Relay. 
 
-The size of the necessary storage allocation hence grows linear with the lenght of the Bitcoin blockchain (tracked in BTC-Relay) -- specifically, the block headers stored in ``BlockHeaders`` which are referenced in ``MainChain`` or in an entry of ``Forks``.
+The size of the necessary storage allocation hence grows linear with the length of the Bitcoin blockchain (tracked in BTC-Relay) -- specifically, the block headers stored in ``BlockHeaders`` which are referenced in ``MainChain`` or in an entry of ``Forks``.
 
 Recall, for each block header, BTC-Relay merely stores:
 
 * the 32 byte ``blockHash``
 * 4 byte ``blockHeight`` (twice for better referencing, so 8 bytes in total)
-* and the 32 byte ``merkleRoot``
+* the 32 byte ``merkleRoot``
+* the 4 byte ``timestamp`` (u32, wrapped in `DateTime <https://substrate.dev/rustdocs/v1.0/chrono/struct.DateTime.html>`_ )
+* and the 32 byte ``target`` (u256 integer) 
 
-That is, in total 72 bytes per submitted Bitcoin block header (fork or main chain block). 
+That is, in total 108 bytes per submitted Bitcoin block header (fork or main chain block). 
 
-At the current block height of **607515**, the storage requirements would amount to around **44 MB** -- an arguably negligible number.
+For example, if we were to sync BTC-Relay from the genesis block all the way to block height **612450**, the storage requirements would amount to around **66 MB** -- an arguably negligible number. At the current rate and under this configuration, we would reach 100 MB in about 10 years. 
 
 .. note:: Fork submissions take up additional storage space, depending om the length of the tracked fork. Compared to the (already negligible) size of the main chain block headers, this overhead is negligible. Furthermore, fork entries are deleted when a chain reorganization occurs, while old entries (with sufficient confirmations) can be subject to pruning. 
 
@@ -35,7 +37,7 @@ Pruning
 ~~~~~~~
 
 Optionally, to further reduce storage requirements (e.g., in case more data is to be stored per block in the future), *pruning* of ``MainChain`` and ``BlockHeaders`` can be introduced.
-While the storage overhead for Bitcoin itself may be acceptable, Polkadot is exepcted to connect to numerous blockchains and tracking the entire blockchain history for each could unnecessarily bloat Parachains (even more so, if parachains are non-exclusive to specific blockchains).
+While the storage overhead for Bitcoin itself may be acceptable, Polkadot is expected to connect to numerous blockchains and tracking the entire blockchain history for each could unnecessarily bloat Parachains (even more so, if Parachains are non-exclusive to specific blockchains).
 
 With pruning activated, ``MainChain`` would be implemented as a FIFO queue, where sufficiently old block headers are removed from ``BlockHeaders`` (and the references from ``MainChain`` and ``Forks`` accordingly). 
 The pruning depth can be set to e.g. 10 000 blocks. There is no need to store more block headers, as verification of transactions contained in older blocks can still be performed by requiring users to *re-spend*.

@@ -110,6 +110,10 @@ Structs
 BlockHeader
 ...........
 
+Representation of a Bitcoin block header. 
+
+.. note:: Fields marked as [Optional] are not critical for the secure operation of BTC-Relay, but can be stored anyway, at the developers discretion. We omit these fields in the rest of this specification. 
+
 .. tabularcolumns:: |l|l|L|
 
 ======================  =========  ========================================================================
@@ -117,8 +121,11 @@ Parameter               Type       Description
 ======================  =========  ========================================================================
 ``blockHeight``         u256       Height of this block in the Bitcoin main chain.
 ``merkleRoot``          byte32     Root of the Merkle tree referencing transactions included in the block.
-``target``              u256       Difficulty target of this block.
+``target``              u256       Difficulty target of this block (converted from ``nBits``, see `Bitcoin documentation <https://bitcoin.org/en/developer-reference#target-nbits>`_.).
 ``timestamp``           timestamp  UNIX timestamp indicating when this block was mined in Bitcoin.
+``version``             u32        [Optional] Version of the submitted block.
+``hashPrevBlock``       byte32     [Optional] Block hash of the predecessor of this block.
+``nonce``               u32        [Optional] Nonce used to solve the PoW of this block. 
 ======================  =========  ========================================================================
 
 *Substrate* 
@@ -131,20 +138,27 @@ Parameter               Type       Description
         blockHeight: U256,
         merkleRoot: H256,
         target: U256,
-        timestamp: Moment
+        timestamp: Moment,
+        // Optional fields
+        version: U32, 
+        hashPrevBlock: H256,
+        nonce: U32
   }
   
 
 Fork
 ....
 
+Representation of an ongoing Bitcoin fork, tracked in BTC-Relay. 
+
+.. warning:: Forks tracked in BTC-Relay and observed in Bitcoin must not necessarily be the same. See :ref:`relay-poisoning` for more details.
 
 .. tabularcolumns:: |l|l|L|
 
 ======================  =============  ===========================================================
 Parameter               Types          Description
 ======================  =============  ===========================================================
-``startHeight``         u256           Height of the block at which this fork starts (forkpoint).
+``startHeight``         u256           Main chain block height of the block at which this fork starts (*forkpoint*).
 ``length``              u256           Length of the fork (in blocks).
 ``forkBlockHashes``     byte32[]       List  of block hashes, which references Bitcoin block headers stored in ``BlockHeaders``, contained in this fork (in insertion order).
 ======================  =============  ===========================================================
