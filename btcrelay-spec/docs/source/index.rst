@@ -8,8 +8,8 @@ Welcome to the BTC-Relay documentation!
    :caption: Introduction
 
    intro/at-a-glance
-   intro/bitcoin
    intro/architecture
+   intro/bitcoin
 
 
 
