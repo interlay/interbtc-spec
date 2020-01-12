@@ -39,4 +39,4 @@ Welcome to the BTC-Relay documentation!
    :caption: All the rest
 
    other/license
-   
+   other/ref   
