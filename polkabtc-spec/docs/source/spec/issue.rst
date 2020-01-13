@@ -272,7 +272,7 @@ Function Sequence
 
 .. todo:: Insert link to BTC-Relay to get Bitcoin data.
 
-.. todo:: What happends if the Vault goes into buffered collateral/liquidation at this point?
+.. todo:: What happens if the Vault goes into buffered collateral/liquidation at this point?
 
 
 1. The Requester prepares the inputs and calls the ``issue`` function.

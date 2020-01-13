@@ -25,6 +25,9 @@ Step-by-Step
 6. **Optional**: Vault1 can be required to provide some additional DOT collateral as griefing protection, to prevent Vault1 from holding Vault2's DOT collateral locked in the BTC Parachain without ever finalizing the redeem protocol (transfer of BTC). 
 
 
+Data Model
+~~~~~~~~~~~
+
 Scalars
 -------
 
@@ -51,7 +54,7 @@ The time difference in number of blocks between a replace request is accepted by
 Nonce
 .....
 
-A counter that increases with every use.
+A counter that increases with every new replace request.
 
 *Substrate* ::
 
@@ -98,14 +101,14 @@ Parameter           Type        Description
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct Commit<AccountId, BlockNumber, Balance> {
+  pub struct Commit<AccountId, BlockNumber, Balance, H160>  {
         oldVault: AccountId,
         opentime: BlockNumber,
         amount: Balance,
         newVault: AccountId,
         collateral: Balance,
         acceptTime: BlockNumber,
-        btcAddress: [u8, 20]
+        btcAddress: H160
   }
 
 Functions
@@ -115,7 +118,7 @@ Functions
 requestReplace
 --------------
 
-A Vault opens an replace request.
+A Vault submits a request to be (partially) replaced. 
 
 
 Specification
@@ -127,9 +130,9 @@ Specification
 
 *Parameters*
 
-* ``vault``: The Vault to be replaced (BTC Parachain account)
-* ``btcAmount``: The amount of BTC / PolkaBTC to be replaced.
-* ``timeout``: time in blocks after which this request expires.
+* ``vault``: Account identifier of the Vault to be replaced (as tracked in ``Vaults`` in :ref:`vault-registry`).
+* ``btcAmount``: Integer amount of BTC / PolkaBTC to be replaced.
+* ``timeout``: Time in blocks after which this request expires.
 
 *Returns*
 
@@ -150,26 +153,15 @@ Specification
   fn requestReplace(origin, amount: U256, timeout: BlockNumber) -> Result {...}
 
 
-User Story
-............
+Preconditions
+...............
 
-A Vault creates a replacement request.
-
-Thereby, the requested amount is in BTC(!), not in DOT. 
-The Vault must make that the remaining DOT collateral is above the ``MinimumCollateralVault`` rate as defined in ``VaultRegistry``.
-
-If the Vault requests replacement of more BTC, than it holds, then the replace request will be fore the Vault's entire BTC holdings. 
-
+* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
 
 Function Sequence
 .................
 
-
-.. todo:: Figure out how to safely use the nonce.
-
-1. Check that caller of the function is indeed the to-be-replaced Vault. 
-
-  a. Raise ``ERR_UNAUTHORIZED`` error if this check fails.
+1. Check that caller of the function is indeed the to-be-replaced Vault. Return ``ERR_UNAUTHORIZED`` error if this check fails.
 
 2. Retrieve the ``Vault`` as per the ``vault`` parameter from ``Vaults`` in the ``VaultRegistry``.
 
@@ -177,26 +169,23 @@ Function Sequence
 
   a. If ``btcAmount > Vault.committedTokens`` set ``btcAmount = Vault.committedTokens`` (i.e., the request is for the entire BTC holdings of the Vault).
 
-4. If the request is not for the entire BTC holdings, check that the remaining DOT collateral of the Vault is higher than ``MinimumCollateralVault`` as defined in ``VaultRegistry``.
-
-  a. Raise ``ERR_MIN_AMOUNT`` error if this check fails.
+4. If the request is not for the entire BTC holdings, check that the remaining DOT collateral of the Vault is higher than ``MinimumCollateralVault`` as defined in ``VaultRegistry``. Return ``ERR_MIN_AMOUNT`` error if this check fails.
 
 4. Generate a ``replaceId`` by hashing a random seed, a nonce, and the address of the Requester.
 
-5. Create new ``Replace`` entry, using the provided parameters, and store it in ``ReplaceRequest`` using ``replaceId`` as key.
+5. Create new ``Replace`` entry:
 
-6. Increase the ``Nonce``.
-
-7. Emit ``ReplaceRequest`` event. 
-
-8. Return ``True``.
-
+   * ``Replace.oldVault = vault``,
+   * ``Replace.opentime`` = current time on Parachain,
+   * ``Replace.amount = amount``.
+   
+7. Emit ``ReplaceRequest(vault, btcAmount, timeout, replaceId)`` event.  
 
 
 acceptReplace
 --------------
 
-A Vault accepts a replace request, committing the necessary DOT collateral.
+A Vault accepts an existing replace request, locking the necessary DOT collateral.
 
 
 Specification
@@ -208,20 +197,13 @@ Specification
 
 *Parameters*
 
-* ``newVault``: The Vault accepting the replace request.
-* ``repalceId``: The identifier of the replace request in ``ReplaceRequests``
-* ``collateral``: DOT collateral provided to match the replace request. Can be more than the necessary amount, if the new Vault wants to hedge against exchange rate fluctuations.
-
-*Returns*
-
-* ``True``: If sufficient collateral is provided and the ``Replace`` request is updated correctly.
-* ``False``: Otherwise.
+* ``newVault``: Accound identifier of the Vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``repalceId``: The identifier of the replace request in ``ReplaceRequests``.
+* ``collateral``: DOT collateral provided to match the replace request. Can be more than the necessary amount.
 
 *Events*
 
-* ``ReplaceAccepted(newVault, replaceId, collateral, acceptedTime)``: emits an event stating which Vault (``newVault``) has accepted the ``Replace`` request (``requestId``) and how much collateral in DOT it provided (``collateral``), as well as the block height at which it was accepted.
-
-.. todo:: Not sure if we need the extra block height - this is linked to the Event anyway.
+* ``ReplaceAccepted(newVault, replaceId, collateral)``: emits an event stating which Vault (``newVault``) has accepted the ``Replace`` request (``requestId``), and how much collateral in DOT it provided (``collateral``).
 
 *Errors*
 
@@ -234,32 +216,80 @@ Specification
 
   fn acceptReplace(origin, replaceId: Hash, collateral: Balance) -> Result {...}
 
+Preconditions
+...............
 
-User Story
-............
+The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
 
-A Vault accepts a replace request, locking (at least) the necessary amount of DOT collateral.
 
 Function Sequence
-.................
-
-.. todo:: Figure out how to safely use the nonce.
+..................
 
 
-1. Retrieve the ``Replace`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``.
+1. Retrieve the ``Replace`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_INVALID_REPLACE_ID`` error if no such ``Replace`` request was found.
 
-   a. Raise ``ERR_INVALID_REPLACE_ID`` if no such ``Replace`` request was found
+2. Retrieve the ``Vault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return``ERR_VAULT_NOT_FOUND`` error if no such Vault can be found.
 
-2. Retrieve the ``Vault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``.
+3. Check that the provided ``collateral`` exceeds the necessary amount, i.e., ``collateral >= SecureCollateralRate * Replace.btcAmount``. Return``ERR_INSUFFICIENT_COLLATERAL`` error if this check fails.
 
-   a. Raise ``ERR_VAULT_NOT_FOUND`` error if no such Vault can be found,
+4. Update the ``Replace`` entry:
 
-3. Check that the provided ``collateral`` exceeds the necessary amount, i.e., ``collateral >= SecureCollateralRate * Replace.btcAmount``.
+  * ``Replace.newVault = newVault``,
+  * ``Replace. acceptTime`` = current Parachain time, 
+  * ``Replace.btcAddress = btcAddress`` (new Vault's BTC address),
+  * ``Replace.collateral = collateral`` (DOT collateral locked by new Vault).
 
-  a Raise ``ERR_INSUFFICIENT_COLLATERAL`` error if this check fails.
+5. Emit a ``ReplaceAccepted(newVault, replaceId, collateral)`` event.
 
-4. Update the ``Replace`` entry with the ``newVault``, the current block height as ``Replace.acceptTime``, and the new Vault's BTC address as per the ``Vaults`` entry (as ``Replace.btcAddress``)
 
-5. Emit a ``ReplaceAccepted`` event, with the details of the new Vault  
-4. Return ``True``.
+acceptReplace
+--------------
+
+A Vault accepts an existing replace request, locking the necessary DOT collateral.
+
+
+Specification
+.............
+
+*Function Signature*
+
+``acceptReplace(newVault, replaceId, collateral)``
+
+*Parameters*
+
+* ``newVault``: Accound identifier of the Vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``repalceId``: The identifier of the replace request in ``ReplaceRequests``.
+* ``collateral``: DOT collateral provided to match the replace request. Can be more than the necessary amount.
+
+*Events*
+
+* ``ReplaceAccepted(newVault, replaceId, collateral)``: emits an event stating which Vault (``newVault``) has accepted the ``Replace`` request (``requestId``), and how much collateral in DOT it provided (``collateral``).
+
+*Errors*
+
+
+* ``ERR_INVALID_REPLACE_ID``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
+* ``ERR_INSUFFICIENT_COLLATERAL``: The provided collateral is insufficient to match the replace request. 
+* ``ERR_VAULT_NOT_FOUND``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
+
+*Substrate* ::
+
+  fn acceptReplace(origin, replaceId: Hash, collateral: Balance) -> Result {...}
+
+Preconditions
+...............
+
+The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+
+
+Function Sequence
+..................
+
+
+
+
+
+
+
+
 
