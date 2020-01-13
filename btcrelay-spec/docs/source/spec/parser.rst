@@ -33,7 +33,7 @@ Extracts the ``hashPrevBlock`` (reference to previous block) from a Bitcoin bloc
 
 ::
 
-  fn extractHashPrevBlock(blockHeaderBytes: T::RawBlockHeader) -> T::Hash {...}
+  fn extractHashPrevBlock(blockHeaderBytes: T::RawBlockHeader) -> T::H256 {...}
 
 
 Function Sequence
@@ -64,7 +64,7 @@ Extracts the ``merkleRoot`` from a Bitcoin block header.
 
 ::
 
-  fn extractMerkleRoot(blockHeaderBytes: T::RawBlockHeader) -> T::Hash {...}
+  fn extractMerkleRoot(blockHeaderBytes: T::RawBlockHeader) -> T::H256 {...}
 
 
 Function Sequence

@@ -226,7 +226,7 @@ The computeMerkle function calculates the root of the Merkle tree of transaction
 
 ::
 
-  fn computeMerkle(txId: T::Hash, txIndex: u64, merkleProof: String) -> Hash {...}
+  fn computeMerkle(txId: T::Hash, txIndex: u64, merkleProof: String) -> Result<H256, ERR_INVALID_MERKLE_PROOF> {...}
 
 
 Function Sequence
@@ -237,7 +237,7 @@ Function Sequence
     a. If true, only the coinbase transaction is included in the block and the Merkle proof is the ``merkleRoot``. Return the ``merkleRoot``.
     b. If false, continue function execution.
 
-2. Check if the length of the Merkle proof is greater or equal to 64 and if it is a  power of 2.
+2. Check if the length of the Merkle proof is greater or equal to 64 and if it is a power of 2.
 
     a. If true, continue function execution.
     b. If false, raise ``ERR_INVALID_MERKLE_PROOF``.
@@ -321,16 +321,16 @@ Specification
 * ``forkId``: identifier of the fork as stored in ``Forks``, which is to replace the ``MainChain``. 
 
 
-*Returns*
+.. *Returns*
 
-* ``True``: if the ``MainChain`` is updated to point to the block headers contained in the fork specified by ``forkId``.
-* ``False`` (or throws exception): otherwise.
+.. * ``True``: if the ``MainChain`` is updated to point to the block headers contained in the fork specified by ``forkId``.
+.. * ``False`` (or throws exception): otherwise.
 
 *Substrate*
 
 ::
 
-  fn chainReorg(forkId: U256) -> bool {...}
+  fn chainReorg(forkId: U256) -> Result {...}
 
 
 Function Sequence
@@ -390,7 +390,7 @@ Specification
 
 ::
 
-  fn getForkIdByBlockHash(blockHash: T::Hash) -> U256 {...}
+  fn getForkIdByBlockHash(blockHash: T::Hash) -> Result<U256, ERR_FORK_ID_NOT_FOUND> {...}
 
 
 Function Sequence

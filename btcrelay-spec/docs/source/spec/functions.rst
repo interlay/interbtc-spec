@@ -251,6 +251,7 @@ Specification
 
 
 *Returns*
+
 * ``True``: if the block header passes all checks.
 * Error otherwise.
 
