@@ -14,16 +14,21 @@ Bitcoin transactions used in the :ref:`issue`, :ref:`redeem`, and :ref:`replace`
 
 
 
-.. tabularcolumns:: |L|L|
+.. tabularcolumns:: |l|L|
 
-===========================  ==========================================================
+===========================  ===========================================================
 Inputs                       Outputs
-===========================  ==========================================================
-Arbitrary amount of inputs   1) P2PKH / P2WPKH output to ``btcAddress`` Bitcoin address.
-                             2) OP_RETURN containing ``identifier``
-                             3) Arbitrary amount of other UTXOs
-===========================  ==========================================================
+===========================  ===========================================================
+Arbitrary amount of inputs   UTXO 1: P2PKH / P2WPKH output to ``btcAddress`` Bitcoin address.
 
+                             UTXO 2: OP_RETURN containing ``identifier``
+                            
+                             ...
+                             
+                             Arbitrary amount of other UTXOs
+                             
+                             ...
+===========================  ===========================================================
 
 The value and recipient address (``btcAddress``) of the first UTXO and the ``identifier`` in the (2nd) OP_RETURN UTXO depend on the executed PolkaBTC protocol:
 
