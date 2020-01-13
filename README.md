@@ -19,7 +19,7 @@ The specification consists of two parts:
 ### BTC-Relay
 
 - [Website](https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/)
-- [PDF]()
+- [PDF](https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec.pdf)
 
 ## Contributing
 
