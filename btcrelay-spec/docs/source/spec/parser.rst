@@ -33,14 +33,13 @@ Extracts the ``hashPrevBlock`` (reference to previous block) from a Bitcoin bloc
 
 ::
 
-  fn extractHashPrevBlock(blockHeaderBytes: T::BTCBlockHeader) -> T::Hash {...}
+  fn extractHashPrevBlock(blockHeaderBytes: T::RawBlockHeader) -> T::Hash {...}
 
 
 Function Sequence
 .................
 
-1. Return ``blockHeaderBytes[4:32]`` (``hashPrevBlock`` starts an position 4 of the 80 byte block header).
-
+1. Return 32 bytes starting at index 4 of ``blockHeaderBytes``
 
 .. _extractMerkleRoot:
 
@@ -65,44 +64,13 @@ Extracts the ``merkleRoot`` from a Bitcoin block header.
 
 ::
 
-  fn extractMerkleRoot(blockHeaderBytes: T::BTCBlockHeader) -> T::Hash {...}
+  fn extractMerkleRoot(blockHeaderBytes: T::RawBlockHeader) -> T::Hash {...}
 
 
 Function Sequence
 .................
 
-1. Return ``blockHeaderBytes[36:32]`` (``merkleRoot`` starts at position 36 of the 80 byte block header).
-
-
-.. _extractNBits:
-
-extractNBits
-~~~~~~~~~~~~
-
-Extracts the ``nBits`` from a Bitcoin block header. This field is necessary to compute that ``target`` in ``nBitsToTarget``.
-
-*Function Signature*
-
-``extractNBits(blockHeaderBytes)``
-
-*Parameters*
-
-* ``blockHeaderBytes``: 80 byte raw Bitcoin block header
-
-*Returns*
-
-* ``nBits``: the 4 byte nBits field of the block header
-
-*Substrate*
-
-::
-
-  fn extractNBits(blockHeaderBytes: T::BTCBlockHeader) -> T::Bytes {...}
-
-Function Sequence
-.................
-
-1. Return ``blockHeaderBytes[72:4]`` (``nBits`` starts at position 72 of the 80 byte block header).
+1. Return 32 bytes starting at index 36 of ``blockHeaderBytes``.
 
 
 .. _extractTimestamp:
@@ -128,12 +96,44 @@ Extracts the timestamp from the block header.
 
 ::
 
-  fn extractTimestamp(blockHeaderBytes: T::BTCBlockHeader) -> T::DateTime {...}
+  fn extractTimestamp(blockHeaderBytes: T::RawBlockHeader) -> T::DateTime {...}
 
 Function Sequence
 .................
 
-1. Return ``blockHeaderBytes[68:4]`` (``timestamp`` starts at position 68 of the 80 byte block header).
+1. Return 32 bytes starting at index 68 of ``blockHeaderBytes``.
+
+
+
+.. _extractNBits:
+
+extractNBits
+~~~~~~~~~~~~
+
+Extracts the ``nBits`` from a Bitcoin block header. This field is necessary to compute that ``target`` in ``nBitsToTarget``.
+
+*Function Signature*
+
+``extractNBits(blockHeaderBytes)``
+
+*Parameters*
+
+* ``blockHeaderBytes``: 80 byte raw Bitcoin block header
+
+*Returns*
+
+* ``nBits``: the 4 byte nBits field of the block header
+
+*Substrate*
+
+::
+
+  fn extractNBits(blockHeaderBytes: T::RawBlockHeader) -> T::Bytes {...}
+
+Function Sequence
+.................
+
+1. Return 4 bytes starting at index 72 of ``blockHeaderBytes``.
 
 
 

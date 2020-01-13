@@ -10,14 +10,14 @@ Specifically, only data that is absolutely necessary to perform correct verifica
 Types
 ~~~~~
 
-BTCBlockHeader
+RawBlockHeader
 ..............
 
 An 80 bytes long Bitcoin blockchain header.
 
 *Substrate* ::
 
-   pub type BTCBlockHeader = [u8; 80];
+   pub type RawBlockHeader = [u8; 80];
 
 
 Constants
@@ -26,7 +26,7 @@ Constants
 DIFFICULTY_ADJUSTMENT_INTERVAL
 ..............................
 
-The interval in number of blocks at which Bitcoin adjusts its difficulty. Defaults to ``2016``.
+The interval in number of blocks at which Bitcoin adjusts its difficulty (approx. every 2 weeks = 2016 blocks).
 
 *Substrate* ::
 
@@ -62,7 +62,8 @@ Byte 32 block hash identifying the current blockchain tip, i.e., the most signif
 
   BestBlock: T::H256;
 
-.. ..note:: In Subtrate, ``T::H256`` defauls to the 32 byte long ``T::H256``. Bitcoin uses SHA256 for its block hashes, transaction identifiers and Merkle trees. For simplicity, we use ``T::H256`` in the rest of this specification as type when storing/referring to SHA256 hashes.
+
+.. note:: In Substrate, Bitcoin uses SHA256 (32 bytes) for its block hashes, transaction identifiers and Merkle trees.  In Substrate, we use the ``T::H256`` type.
 
 BestBlockHeight
 ...............
@@ -160,7 +161,7 @@ Parameter               Types          Description
 ======================  =============  ===========================================================
 ``startHeight``         u256           Main chain block height of the block at which this fork starts (*forkpoint*).
 ``length``              u256           Length of the fork (in blocks).
-``forkBlockHashes``     byte32[]       List  of block hashes, which references Bitcoin block headers stored in ``BlockHeaders``, contained in this fork (in insertion order).
+``forkBlockHashes``     array          List  of block hashes, which references Bitcoin block headers stored in ``BlockHeaders``, contained in this fork (in insertion order).
 ======================  =============  ===========================================================
 
 *Substrate*

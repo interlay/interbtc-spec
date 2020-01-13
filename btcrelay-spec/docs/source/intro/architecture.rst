@@ -2,8 +2,8 @@ BTC-Relay Architecture
 ======================
 
 BTC-Relay is a component / module of the BTC Parachain. 
-It's main functionality is verification and storage of Bitcoin block headers, as well as verification of Bitcoin transaction inclusion proofs. 
-Below, we provide an overview of it's components, as well as relevant actors - offering references to the full specification contained in the rest of this document. 
+Its main functionality is verification and storage of Bitcoin block headers, as well as verification of Bitcoin transaction inclusion proofs. 
+Below, we provide an overview of its components, as well as relevant actors - offering references to the full specification contained in the rest of this document. 
 
 .. figure:: ../figures/architecture.png
     :alt: BTC Parachain architecture diagram
@@ -89,7 +89,7 @@ On a high level, BTC-Relay can enter four possible states:
 * ``SHUTDOWN``: submission of block headers (both main chain and forks) and transactions verification are disabled. This state can be triggered manually by the Governance Mechanism if a major failure is detected or a soft / hard fork has ocurred in Bitcoin (and hence BTC-Relay needs updating). 
 
 
-A full state machine, explaining how BTC-Relay transitions between different states, if provided in the Failure Handling section of the PolkaBTC specification.
+A full state machine, explaining how BTC-Relay transitions between different states, is provided in the Failure Handling section of the PolkaBTC specification.
 
 .. todo:: Links to the PolkaBTC specification will be included once the documents are merged.
 

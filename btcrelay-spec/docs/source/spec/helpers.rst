@@ -220,7 +220,7 @@ The computeMerkle function calculates the root of the Merkle tree of transaction
 
 *Errors*
 
-* ``ERR_MERKLE_PROOF = "Invalid Merkle Proof structure"``: raise an exception if the Merkle proof is malformed.
+* ``ERR_INVALID_MERKLE_PROOF = "Invalid Merkle Proof structure"``: raise an exception if the Merkle proof is malformed.
 
 *Substrate*
 
@@ -240,7 +240,7 @@ Function Sequence
 2. Check if the length of the Merkle proof is greater or equal to 64 and if it is a  power of 2.
 
     a. If true, continue function execution.
-    b. If false, raise ``ERR_MERKLE_PROOF``.
+    b. If false, raise ``ERR_INVALID_MERKLE_PROOF``.
 
 3. Calculate the ``merkleRoot``. For each 32 bytes long hash in the Merkle proof:
 

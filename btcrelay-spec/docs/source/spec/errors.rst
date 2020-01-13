@@ -117,10 +117,10 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Cause**: Raised if the number of confirmations is less than required.
 
-``ERR_MERKLE_PROOF``
+``ERR_INVALID_MERKLE_PROOF``
 
 
-* **Message**: "Invalid Merkle Proof structure"
+* **Message**: "Invalid Merkle Proof"
 
 * **Function**: :ref:`verifyTransaction`
 
