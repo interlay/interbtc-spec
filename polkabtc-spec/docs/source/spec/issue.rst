@@ -240,11 +240,11 @@ Specification
 
 * ``requester``: the account of the Requester.
 * ``issueId``: the unique hash created during the ``commit`` function,
-* ``txId``: the hash of the transaction.
-* ``txBlockHeight``: block height at which transaction is supposedly included.
-* ``txIndex``: index of transaction in the block’s tx Merkle tree.
-* ``MerkleProof``: Merkle tree path (concatenated LE sha256 hashes).
-* ``rawTx``: raw transaction including the transaction inputs and outputs.
+* ``txId``: The hash of the Bitcoin transaction.
+* ``txBlockHeight``: Bitcoin block height at which the transaction is supposedly included.
+* ``txIndex``: Index of transaction in the Bitcoin block’s transaction Merkle tree.
+* ``MerkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
+* ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
 
 *Returns*

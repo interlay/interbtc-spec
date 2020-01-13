@@ -1,4 +1,6 @@
 
+.. _btc-relay:
+
 BTC-Relay
 ==========
 
