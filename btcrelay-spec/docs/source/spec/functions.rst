@@ -339,8 +339,8 @@ Preconditions
 ~~~~~~~~~~~~~
 
 * If the failure handling status is set to ``PARTIAL: 1``, transaction verification is disabled for the latest blocks.
-* The failure handling status must not be set to ``HALTED: 2``. If ``HALTED``, all transaction verification is disabled.
-* The failure handling status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN``, all transaction verification is disabled.
+* The failure handling status must not be set to ``HALTED: 2``. If ``HALTED`` is set, all transaction verification is disabled.
+* The failure handling status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN`` is set, all transaction verification is disabled.
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -433,7 +433,7 @@ Specification
 Preconditions
 ~~~~~~~~~~~~~
 
-* The failure handling status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN``, all transaction validation is disabled.
+* The failure handling status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN`` is set, all transaction validation is disabled.
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
