@@ -130,13 +130,16 @@ Specification
 
 *Function Signature*
 
-``requestReplace(vault, btcAmount, timeout)``
+``requestReplace(vault, btcAmount, timeout, collateral)``
 
 *Parameters*
 
 * ``oldVault``: Account identifier of the Vault to be replaced (as tracked in ``Vaults`` in :ref:`vault-registry`).
 * ``btcAmount``: Integer amount of BTC / PolkaBTC to be replaced.
 * ``timeout``: Time in blocks after which this request expires.
+* ``collateral``: collateral locked by the ``vault`` as griefing protection
+
+.. todo:: Handle Griefing collateral (how do we check that a transaction correctly transferred DOT to the Parachain?)
 
 *Returns*
 
@@ -300,7 +303,11 @@ Function Sequence
 
 3. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
 
-4. 
+4. Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-replaced BTC (``Replace.amount``), the ``newVault``'s Bitcoin address (``Vault.btcAddress``), and the ``replaceId`` as parameters. If this call returns an error, abort and return the received error. 
+
+5. 
+
+TODO: update ReplaceRequest, update VaultRegistry, release oldVault's collateral, emit event
 
 
 .. todo:: First define Bitcoin transaction format. Then add parsing functions. Then specify how to parse (separate function). 
