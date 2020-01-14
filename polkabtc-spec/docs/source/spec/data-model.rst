@@ -113,7 +113,7 @@ ReplacePeriod
 
 The time difference in seconds between a replacement vault indicates that it will replace a vault and required completion time by that vault.
 
-*Substrate*: ``ReplacePeriod: Moment;``
+*Substrate*: ``ReplacePeriod: DateTime;``
 
 Maps
 ----
@@ -124,7 +124,7 @@ Vaults
 
 Mapping from accounts of vaults to their struct. ``<Account, Vault>``.
 
-*Substrate*: ``Vaults map T::AccountId => Vault<T::AccountId, T::Balance, T::Moment>``
+*Substrate*: ``Vaults map T::AccountId => Vault<T::AccountId, T::Balance, T::DateTime>``
 
 Structs
 -------
@@ -155,13 +155,13 @@ Parameter            Type       Description
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct Vault<AccountId, Balance, Moment> {
+  pub struct Vault<AccountId, Balance, DateTime> {
         vault: AccountId,
         committedTokens: Balance,
         collateral: Balance,
         replacement: AccountId,
         replace: bool,
-        replacePeriod: Moment
+        replacePeriod: DateTime
   }
 
 
@@ -184,7 +184,7 @@ CommitPeriod
 
 The time difference in seconds between a commit request is created and required completion time by a CbA-Requester. The commit period has an upper limit to prevent grieving of vault collateral.
 
-*Substrate*: ``CommitPeriod: Moment;``
+*Substrate*: ``CommitPeriod: DateTime;``
 
 Maps
 ----
@@ -222,9 +222,9 @@ Parameter           Type        Description
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct Commit<AccountId, Balance, Moment> {
+  pub struct Commit<AccountId, Balance, DateTime> {
         vault: AccountId,
-        opentime: Moment,
+        opentime: DateTime,
         collateral: Balance,
         amount: Balance,
         receiver: AccountId,
@@ -243,7 +243,7 @@ RedeemPeriod
 
 The time difference in seconds between a redeem request is created and required completion time by a vault. The redeem period has an upper limit to enforce the vault to release the CbA-Redeemer's Bitcoin.
 
-*Substrate*: ``RedeemPeriod: Moment;``
+*Substrate*: ``RedeemPeriod: DateTime;``
 
 Maps
 ----
@@ -253,7 +253,7 @@ RedeemRequests
 
 CbA-Redeemers create redeem requests to burn their PolkaBTC and receive BTC in return. This mapping provides access from a unique hash ``RedeemId`` to the ``Redeem`` struct. ``<RedeemId, Redeem>``.
 
-*Substrate*: ``RedeemRequests map T::Hash => Redeem<T::AccountId, T::Balance, T::Moment>;``
+*Substrate*: ``RedeemRequests map T::Hash => Redeem<T::AccountId, T::Balance, T::DateTime>;``
 
 Structs
 -------
@@ -279,9 +279,9 @@ Parameter           Type        Description
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct Redeem<AccountId, Balance, Moment> {
+  pub struct Redeem<AccountId, Balance, DateTime> {
         vault: AccountId,
-        opentime: Moment,
+        opentime: DateTime,
         amount: Balance,
         redeemer: AccountId,
         btcPublicKey: Bytes

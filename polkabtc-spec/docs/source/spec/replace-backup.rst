@@ -5,7 +5,7 @@ ReplacePeriod
 
 The time difference in seconds between a replacement Vault indicates that it will replace a Vault and required completion time by that Vault.
 
-*Substrate*: ``ReplacePeriod: Moment;``
+*Substrate*: ``ReplacePeriod: DateTime;``
 
 
 

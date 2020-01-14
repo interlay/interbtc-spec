@@ -183,7 +183,7 @@ Computes the new difficulty target based on the given parameters, `as implemente
 
 ::
 
-  fn computeNewTarget(prevTime: T::Moment, startTime: T::Moment, prevTarget: U256) -> U256 {...}
+  fn computeNewTarget(prevTime: T::DateTime, startTime: T::DateTime, prevTarget: U256) -> U256 {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -220,13 +220,13 @@ The computeMerkle function calculates the root of the Merkle tree of transaction
 
 *Errors*
 
-* ``ERR_MERKLE_PROOF = "Invalid Merkle Proof structure"``: raise an exception if the Merkle proof is malformed.
+* ``ERR_INVALID_MERKLE_PROOF = "Invalid Merkle Proof structure"``: raise an exception if the Merkle proof is malformed.
 
 *Substrate*
 
 ::
 
-  fn computeMerkle(txId: T::Hash, txIndex: u64, merkleProof: String) -> Hash {...}
+  fn computeMerkle(txId: T::Hash, txIndex: u64, merkleProof: String) -> Result<H256, ERR_INVALID_MERKLE_PROOF> {...}
 
 
 Function Sequence
@@ -237,10 +237,10 @@ Function Sequence
     a. If true, only the coinbase transaction is included in the block and the Merkle proof is the ``merkleRoot``. Return the ``merkleRoot``.
     b. If false, continue function execution.
 
-2. Check if the length of the Merkle proof is greater or equal to 64 and if it is a  power of 2.
+2. Check if the length of the Merkle proof is greater or equal to 64 and if it is a power of 2.
 
     a. If true, continue function execution.
-    b. If false, raise ``ERR_MERKLE_PROOF``.
+    b. If false, raise ``ERR_INVALID_MERKLE_PROOF``.
 
 3. Calculate the ``merkleRoot``. For each 32 bytes long hash in the Merkle proof:
 
@@ -321,16 +321,16 @@ Specification
 * ``forkId``: identifier of the fork as stored in ``Forks``, which is to replace the ``MainChain``. 
 
 
-*Returns*
+.. *Returns*
 
-* ``True``: if the ``MainChain`` is updated to point to the block headers contained in the fork specified by ``forkId``.
-* ``False`` (or throws exception): otherwise.
+.. * ``True``: if the ``MainChain`` is updated to point to the block headers contained in the fork specified by ``forkId``.
+.. * ``False`` (or throws exception): otherwise.
 
 *Substrate*
 
 ::
 
-  fn chainReorg(forkId: U256) -> bool {...}
+  fn chainReorg(forkId: U256) -> Result {...}
 
 
 Function Sequence
@@ -390,7 +390,7 @@ Specification
 
 ::
 
-  fn getForkIdByBlockHash(blockHash: T::Hash) -> U256 {...}
+  fn getForkIdByBlockHash(blockHash: T::Hash) -> Result<U256, ERR_FORK_ID_NOT_FOUND> {...}
 
 
 Function Sequence

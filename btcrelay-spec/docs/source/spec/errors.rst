@@ -117,10 +117,10 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Cause**: Raised if the number of confirmations is less than required.
 
-``ERR_MERKLE_PROOF``
+``ERR_INVALID_MERKLE_PROOF``
 
 
-* **Message**: "Invalid Merkle Proof structure"
+* **Message**: "Invalid Merkle Proof"
 
 * **Function**: :ref:`verifyTransaction`
 
@@ -133,3 +133,29 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 * **Function**: :ref:`getForkIdByBlockHash`
 
 * **Cause**: Return this error if there exists no ``forkId`` for the given ``blockHash``.
+
+
+``ERR_PARTIAL``
+
+* **Message**: "BTC Parachain partially deactivated"
+
+* **Function**: :ref:`verifyTransaction`
+
+* **Cause**: The BTC Parachain has been partially deactivated since a specific block height.
+
+``ERR_HALTED``
+
+* **Message**: "BTC Parachain is halted"
+
+* **Function**: :ref:`verifyTransaction`
+
+* **Cause**: The BTC Parachain has been halted.
+
+``ERR_SHUTDOWN``
+
+* **Message**: "BTC Parachain has shut down"
+
+* **Function**: :ref:`verifyTransaction` | :ref:`storeForkBlockHeader` | :ref:`storeMainChainBlockHeader`
+
+* **Cause**: The BTC Parachain has been shutdown by a manual intervention of the governance mechanism.
+

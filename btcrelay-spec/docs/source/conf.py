@@ -24,9 +24,9 @@ copyright = u'2020, Interlay'
 author = u'Interlay'
 
 # The short X.Y version
-version = u''
+version = u'v1.0'
 # The full version, including alpha/beta/rc tags
-release = u'0.0.1'
+release = u'v1.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -127,7 +127,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'PolkaBTCdoc'
+htmlhelp_basename = 'BTCRelaydoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -154,7 +154,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'PolkaBTC.tex', u'PolkaBTC Documentation: BTCRelay',
+    (master_doc, 'BTCRelay.tex', u'PolkaBTC Documentation: BTCRelay',
      u'Interlay', 'manual'),
 ]
 
@@ -175,8 +175,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'PolkaBTC', u'PolkaBTC Documentation: BTCRelay',
-     author, 'PolkaBTC', 'One line description of project.',
+    (master_doc, 'BTCRelay', u'PolkaBTC Documentation: BTCRelay',
+     author, 'BTCRelay', 'One line description of project.',
      'Miscellaneous'),
 ]
 

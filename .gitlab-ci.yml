@@ -1,6 +1,5 @@
-# Official language image. Look for the different tagged releases at:
-# https://hub.docker.com/r/library/python/tags/
-image: python:latest
+# Custom docker image at: https://github.com/nud3l/sphinx-latex-docker
+image: dominik0int/sphinx
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
@@ -18,16 +17,15 @@ cache:
     - venv/
 
 before_script:
-    - python -V  # Print out python version for debugging
-    - pip install virtualenv
-    - virtualenv venv
-    - source venv/bin/activate
-    - pip install -r requirements.txt
+    - python3 -V  # Print out python version for debugging
+    - pip3 install -r requirements.txt
 
 btcrelay:
     stage: test
     script:
     - cd btcrelay-spec/docs; make html
+    - sphinx-build -b latex source build/latex
+    - make -C build/latex  
     only:
     - branches
     except:
@@ -37,6 +35,8 @@ polkabtc:
     stage: test
     script:
     - cd polkabtc-spec/docs; make html
+    - sphinx-build -b latex source build/latex
+    - make -C build/latex    
     only:
     - branches
     except:
@@ -45,10 +45,19 @@ polkabtc:
 pages:
     stage: deploy
     script:
-    - cd btcrelay-spec/docs; make html; cd ../..
-    - mv btcrelay-spec/docs/build/html/ public/btcrelay-spec/
-    - cd polkabtc-spec/docs; make html; cd ../..
-    - mv polkabtc-spec/docs/build/html/* public/
+    - cd btcrelay-spec/docs
+    - make html
+    - sphinx-build -b latex source build/latex
+    - make -C build/latex
+    - mv build/html/ ../../public/btcrelay-spec/
+    - mv build/latex/BTCRelay.pdf ../../public/btcrelay-spec.pdf
+    - cd ../..
+      #- cd polkabtc-spec/docs
+      #- make html
+      #- sphinx-build -b latex source build/latex
+      #- make -C build/latex
+      #- mv build/html/* ../../public/
+      #- mv build/latex/PolkaBTC.pdf ../../public/polkabtc-spec.pdf
     artifacts:
         paths:
         - public

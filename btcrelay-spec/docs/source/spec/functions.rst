@@ -26,24 +26,19 @@ Specification
 * ``blockHeaderBytes``: 80 byte raw Bitcoin block header.
 * ``blockHeight``: integer Bitcoin block height of the submitted block header 
 
-*Returns*
-
-* ``True``: if initialization is executed correctly (and for the first time only)
-* ``False`` (or throws exception): otherwise.
-
 *Events*
 
 * ``Initialized(blockHeight, blockHash)``: if the first block header was stored successfully, emit an event with the stored block's height (``blockHeight``) and the (PoW) block hash (``blockHash``).
 
 *Errors*
 
-* ``ERR_ALREADY_INITIALIZED = "Already initialized"``: raise exception if this function is called after BTC-Relay has already been initialized.
+* ``ERR_ALREADY_INITIALIZED = "Already initialized"``: return error if this function is called after BTC-Relay has already been initialized.
 
 *Substrate*
 
 ::
 
-  fn initialize(origin, blockHeaderBytes: T::BTCBlockHeader, blockHeight: U256) -> Result {...}
+  fn initialize(origin, blockHeaderBytes: T::RawBlockHeader, blockHeight: U256) -> Result {...}
 
 Preconditions
 ~~~~~~~~~~~~~
@@ -59,7 +54,7 @@ Function sequence
 
 The ``initialize`` function takes as input an 80 byte raw Bitcoin block header and the corresponding Bitcoin block height, and follows the sequence below:
 
-1. Check if ``initialize`` is called for the first time. This can be done by checking if ``BestBlock == None``. Raise ``ERR_ALREADY_INITIALIZED`` if BTC-Relay has already been initialized. 
+1. Check if ``initialize`` is called for the first time. This can be done by checking if ``BestBlock == None``. Return ``ERR_ALREADY_INITIALIZED`` if BTC-Relay has already been initialized. 
 
 2. Parse ``blockHeaderBytes``, extracting the ``merkleRoot`` using :ref:`extractMerkleRoot`, compute the Bitcoin block hash (``hashCurrentBlock``) of the block header (use :ref:`sha256d`), and store the block header data in ``BlockHeaders``. 
 
@@ -67,7 +62,7 @@ The ``initialize`` function takes as input an 80 byte raw Bitcoin block header a
 
 4. Set ``BestBlock = hashCurrentBlock`` and ``BestBlockHeight = blockHeight``.
 
-5. Return ``True``. 
+5. Emit a ``Initialized`` event using ``height`` and ``hashCurrentBlock`` as input (``Initialized(height, hashCurrentBlock)``). 
 
 .. warning:: Attention: the Bitcoin block header submitted to ``initialize`` must be in the Bitcoin main chain - this must be checked outside of the BTC Parachain **before** making this function call! A wrong initialization will cause the entire BTC Parachain to fail, since verification requires that all submitted blocks **must** (indirectly) point to the initialized block (i.e., have it as ancestor, just like the actual Bitcoin genesis block).
 
@@ -90,11 +85,6 @@ Specification
 
 * ``blockHeaderBytes``: 80 byte raw Bitcoin block header.
 
-*Returns*
-
-* ``True``: if ``verifyBlockHeader`` returns ``True`` and the extraction and storage of the block header data was executed correctly. 
-* ``False`` (or throws exception): otherwise.
-
 *Events*
 
 * ``StoreMainChainHeader(blockHeight, blockHash)``: if the block header was stored successfully, emit an event with the stored block's height (``blockHeight``) and the (PoW) block hash (``blockHash``).
@@ -102,13 +92,13 @@ Specification
 *Errors*
 
 * ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the governance mechanism.
-* ``ERR_NOT_MAIN_CHAIN = "Main chain submission indicated, but submitted block is on a fork"``: raise exception if the block header submission indicates that it is extending the current longest chain, but is actually on a (new) fork.
+* ``ERR_NOT_MAIN_CHAIN = "Main chain submission indicated, but submitted block is on a fork"``: return error if the block header submission indicates that it is extending the current longest chain, but is actually on a (new) fork.
 
 *Substrate*
 
 ::
 
-  fn storeMainChainBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader) -> Result {...}
+  fn storeMainChainBlockHeader(origin, blockHeaderBytes: T::RawBlockHeader) -> Result {...}
 
 Preconditions
 ~~~~~~~~~~~~~
@@ -126,11 +116,11 @@ Function sequence
 
 The ``storeMainChainBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and follows the sequence below:
 
-1. Check if the failure handling state is set to ``SHUTDOWN``. If true, raise ``ERR_SHUTDOWN`` and return. 
+1. Check if the failure handling state is set to ``SHUTDOWN``. If true, return ``ERR_SHUTDOWN``. 
 
-2. Check that the submitted block header is extending the ``MainChain`` of BTC-Relay. That is, ``hashPrevBlock`` (extract using :ref:`extractHashPrevBlock`) must be equal to ``BestBlock``. Raise ``ERR_NOT_MAIN_CHAIN`` error if this check fails.
+2. Check that the submitted block header is extending the ``MainChain`` of BTC-Relay. That is, ``hashPrevBlock`` (extract using :ref:`extractHashPrevBlock`) must be equal to ``BestBlock``. Return ``ERR_NOT_MAIN_CHAIN`` error if this check fails.
 
-3. Call :ref:`verifyBlockHeader` passing ``blockHeaderBytes)`` as function parameter. If this call **does not return** ``True`` (i.e., fails or returns ``False``), then abort and return ``False``. 
+3. Call :ref:`verifyBlockHeader` passing ``blockHeaderBytes`` as function parameter. If this call **returns an error** , then abort and return the raised error. 
 
 4. Extract the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` amd :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter)..
 
@@ -143,14 +133,12 @@ The ``storeMainChainBlockHeader`` function takes as input the 80 byte raw Bitcoi
 6. Store ``hashCurrentBlock`` as a new entry in ``MainChain``, using ``blockHeight`` as key.
 
 7. Emit a ``StoreMainChainBlockHeader`` event using ``height`` and ``hashCurrentBlock`` as input (``StoreMainChainHeader(height, hashCurrentBlock)``). 
-
-8. Return ``True``.
  
 
 .. figure:: ../figures/storeMainChainBlockHeader-sequence.png
     :alt: storeMainChainBlockHeader sequence diagram
 
-    Sequence diagram showing the function sequence of ``storeMainChainBlockHeader``.
+    Sequence diagram showing the function sequence of :ref:`storeMainChainBlockHeader`.
 
 .. _storeForkBlockHeader:
 
@@ -171,11 +159,6 @@ Specification
 * ``blockHeaderBytes``: 80 byte raw Bitcoin block header.
 * ``forkId``: integer tracked fork identifier. Set to ``0`` if a new fork is being created (default).
 
-*Returns*
-
-* ``True``: if the block header passes all checks and creates a new or extends an existing fork of the currently known longest chain
-* ``False`` (or raises exception): otherwise.
-
 *Events*
 
 * ``StoreForkHeader(forkId, blockHeight, blockHash)``: if the submitted block header is on a fork, emit an event with the fork's id (``forkId``), block height (``blockHeight``) and the (PoW) block hash (``blockHash``).
@@ -184,15 +167,15 @@ Specification
 *Errors*
 
 * ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the governance mechanism.
-* ``ERR_INVALID_FORK_ID = "Incorrect fork identifier"``: raise an exception when a non-existent is passed. 
-* ``ERR_FORK_PREV_BLOCK = "Previous block hash does not match last block in fork submission"``: raise exception if the block header does not reference the highest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
-* ``ERR_NOT_FORK = "Indicated fork submission, but block is in main chain"``:  raise exception if the submitted block header is actually extending the current longest chain tracked by BTC-Relay (``MainChain``) instead of a fork.
+* ``ERR_INVALID_FORK_ID = "Incorrect fork identifier"``: return error if a non-existent fork identifier is passed. 
+* ``ERR_FORK_PREV_BLOCK = "Previous block hash does not match last block in fork submission"``: return error if the block header does not reference the highest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
+* ``ERR_NOT_FORK = "Indicated fork submission, but block is in main chain"``:  return error if the submitted block header is actually extending the current longest chain tracked by BTC-Relay (``MainChain``) instead of a fork.
 
 *Substrate*
 
 ::
 
-  fn storeForkBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader, forkId: U256) -> Result {...}
+  fn storeForkBlockHeader(origin, blockHeaderBytes: T::RawBlockHeader, forkId: U256) -> Result {...}
 
 
 Preconditions
@@ -208,9 +191,9 @@ Function Sequence
 
 The ``storeForkBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and a ``forkId`` and follows the following sequence:
 
-1. Check if the failure handling state is set to ``SHUTDOWN``. If true, raise ``ERR_SHUTDOWN`` and return. 
+1. Check if the failure handling state is set to ``SHUTDOWN``. If true, return ``ERR_SHUTDOWN`` and return. 
 
-2. Call :ref:`verifyBlockHeader` passing ``blockHeaderBytes`` as parameter. If this call **does not return** ``True`` (i.e., fails or returns ``False``), then abort and return ``False``. 
+2. Call :ref:`verifyBlockHeader` passing ``blockHeaderBytes`` as function parameter. If this call **returns an error** , then abort and return the raised error. 
 
 3. Check if ``forkId == 0``.
 
@@ -218,9 +201,9 @@ The ``storeForkBlockHeader`` function takes as input the 80 byte raw Bitcoin blo
     
     b. Otherwise:
 
-        b.1) Check if a fork is tracked in ``Forks`` under the specified ``forkId``. If no fork can be found, raise an ``ERR_INVALID_FORK_ID`` exception and abort. 
+        b.1) Check if a fork is tracked in ``Forks`` under the specified ``forkId``. If no fork can be found, abort and return ``ERR_INVALID_FORK_ID``. 
 
-        b.2) Check that the ``hashPrevBlock`` of the submitted block header indeed references the last block submitted to the fork, specified by ``forkId``. Raise ``ERR_FORK_PREV_BLOCK`` exception and abort if this check fails.
+        b.2) Check that the ``hashPrevBlock`` of the submitted block header indeed references the last block submitted to the fork, specified by ``forkId``. Abort and return ``ERR_FORK_PREV_BLOCK`` if this check fails.
 
 
 4. Extract the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` amd :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
@@ -233,14 +216,12 @@ The ``storeForkBlockHeader`` function takes as input the 80 byte raw Bitcoin blo
 
 8. Check if the fork at ``forkId`` has become longer than the current ``MainChain``. This is the case if the block height ``height`` of the submitted block header exceeds the ``BestBlockHeight``. 
 
-    a. If ``height > BestBlockHeight`` call ``chainReorg(forkId)`` and return the value returned form this call.
-
-9. Return ``True``.
+    a. If ``height > BestBlockHeight`` call ``chainReorg(forkId)``. If this call returns an error, return the error.
 
 .. figure:: ../figures/storeForkBlockHeader-sequence.png
     :alt: storeForkBlockHeader sequence diagram
 
-    Sequence diagram showing the function sequence of ``storeForkBlockHeader``.
+    Sequence diagram showing the function sequence of :ref:`storeForkBlockHeader`.
 
 
 .. _verifyBlockHeader:
@@ -272,37 +253,37 @@ Specification
 *Returns*
 
 * ``True``: if the block header passes all checks.
-* ``False`` (or throws exception): otherwise.
+* Error otherwise.
 
 *Errors*
 
-* ``ERR_INVALID_HEADER_SIZE = "Invalid block header size"``: raise exception if the submitted block header is not exactly 80 bytes long.
-* ``ERR_DUPLICATE_BLOCK = "Block already stored"``: raise exception if the submitted block header is already stored in BTC-Relay (duplicate PoW ``blockHash``). 
-* ``ERR_PREV_BLOCK = "Previous block hash not found"``: raise exception if the submitted block does not reference an already stored block header as predecessor (via ``prevBlockHash``). 
-* ``ERR_LOW_DIFF = "PoW hash does not meet difficulty target of header"``: raise exception when the header's ``blockHash`` does not meet the ``target`` specified in the block header.
-* ``ERR_DIFF_TARGET_HEADER = "Incorrect difficulty target specified in block header"``: raise exception if the ``target`` specified in the block header is incorrect for its block height (difficulty re-target not executed).
+* ``ERR_INVALID_HEADER_SIZE = "Invalid block header size"``: return error if the submitted block header is not exactly 80 bytes long.
+* ``ERR_DUPLICATE_BLOCK = "Block already stored"``: return error if the submitted block header is already stored in BTC-Relay (duplicate PoW ``blockHash``). 
+* ``ERR_PREV_BLOCK = "Previous block hash not found"``: return error if the submitted block does not reference an already stored block header as predecessor (via ``prevBlockHash``). 
+* ``ERR_LOW_DIFF = "PoW hash does not meet difficulty target of header"``: return error when the header's ``blockHash`` does not meet the ``target`` specified in the block header.
+* ``ERR_DIFF_TARGET_HEADER = "Incorrect difficulty target specified in block header"``: return error if the ``target`` specified in the block header is incorrect for its block height (difficulty re-target not executed).
 
 *Substrate*
 
 ::
 
-  fn verifyBlockHeader(origin, blockHeaderBytes: T::BTCBlockHeader) -> Result {...}
+  fn verifyBlockHeader(origin, blockHeaderBytes: T::RawBlockHeader) -> Result {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 The ``verifyBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and follows the sequence below:
 
-1. Check that the ``blockHeaderBytes`` is 80 bytes long. Raise ``ERR_INVALID_HEADER_SIZE`` exception and abort otherwise.
-2. Check that the block header is not yet stored in BTC-Relay (``blockHash`` is unique in ``blockHeaders``). Raise ``ERR_DUPLICATE_BLOCK`` exception and abort otherwise. 
-3. Check that the previous block referenced by the submitted block header (``hashPrevBlock``, extract using :ref:`extractHashPrevBlock`) exists in ``BlockHeaders``. Raise ``ERR_PREV_BLOCK`` exception and abort otherwise. 
-4. Check that the Proof-of-Work hash (``blockHash``) is below the ``target`` specified in the block header. Raise ``ERR_LOW_DIFF`` exception and abort otherwise.
-5. Check that the ``target`` specified in the block header (extract using :ref:`extractNBits` and :ref:`nBitsToTarget`) is correct by calling :ref:`checkCorrectTarget` passing ``hashPrevBlock``, ``height`` and ``target`` as parameters (as per Bitcoin's difficulty adjustment mechanism, see `here <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_). If this call returns ``False``, raise ``ERR_DIFF_TARGET_HEADER`` exception and abort. 
+1. Check that the ``blockHeaderBytes`` is 80 bytes long. Return ``ERR_INVALID_HEADER_SIZE`` exception and abort otherwise.
+2. Check that the block header is not yet stored in BTC-Relay (``blockHash`` is unique in ``blockHeaders``). Return ``ERR_DUPLICATE_BLOCK`` otherwise. 
+3. Check that the previous block referenced by the submitted block header (``hashPrevBlock``, extract using :ref:`extractHashPrevBlock`) exists in ``BlockHeaders``. Return ``ERR_PREV_BLOCK`` otherwise. 
+4. Check that the Proof-of-Work hash (``blockHash``) is below the ``target`` specified in the block header. Return ``ERR_LOW_DIFF`` otherwise.
+5. Check that the ``target`` specified in the block header (extract using :ref:`extractNBits` and :ref:`nBitsToTarget`) is correct by calling :ref:`checkCorrectTarget` passing ``hashPrevBlock``, ``height`` and ``target`` as parameters (as per Bitcoin's difficulty adjustment mechanism, see `here <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_). If this call returns ``False``, return ``ERR_DIFF_TARGET_HEADER``. 
 6. Return ``True``
 
 .. figure:: ../figures/verifyBlockHeader-sequence.png
     :alt: verifyBlockHeader sequence diagram
 
-    Sequence diagram showing the function sequence of ``verifyBlockHeader``.
+    Sequence diagram showing the function sequence of :ref:`verifyBlockHeader`.
 
 
 .. _verifyTransaction:
@@ -333,7 +314,7 @@ Specification
 *Returns*
 
 * ``True``: if the given ``txId`` appears in at the position specified by ``txIndex`` in the transaction Merkle tree of the block at height ``blockHeight`` and sufficient confirmations have passed since inclusion.
-* ``False`` (or throws exception): otherwise.
+* Error otherwise.
 
 *Events*
 
@@ -344,9 +325,9 @@ Specification
 * ``ERR_PARTIAL = "BTC Parachain partially deactivated"``: the BTC Parachain has been partially deactivated since a specific block height.
 * ``ERR_HALTED = "BTC Parachain is halted"``: the BTC Parachain has been halted.
 * ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the governance mechanism.
-* ``ERR_INVALID_TXID = "Invalid transaction identifier"``: raise exception if the transaction identifier (``txId``) is malformed.
-* ``ERR_CONFIRMATIONS = "Transaction has less confirmations than requested"``: raise exception if the block in which the transaction specified by ``txId`` was included has less confirmations than requested.
-* ``ERR_MERKLE_PROOF = "Invalid Merkle Proof structure"``: raise exception if the Merkle proof is malformed.
+* ``ERR_INVALID_TXID = "Invalid transaction identifier"``: return error if the transaction identifier (``txId``) is malformed.
+* ``ERR_CONFIRMATIONS = "Transaction has less confirmations than requested"``: return error if the block in which the transaction specified by ``txId`` was included has less confirmations than requested.
+* ``ERR_INVALID_MERKLE_PROOF = "Invalid Merkle Proof"``: return error if the Merkle proof is malformed or fails verification (does not hash to Merkle root).
 
 *Substrate*
 
@@ -366,28 +347,28 @@ Function Sequence
 
 The ``verifyTransaction`` function follows the function sequence below:
 
-1. Check if the failure handling state is set to ``HALTED`` or ``SHUTDOWN``. If true, raise ``ERR_HALTED`` or ``ERR_SHUTDOWN`` and return. 
+1. Check if the failure handling state is set to ``HALTED`` or ``SHUTDOWN``. If true, return ``ERR_HALTED`` or ``ERR_SHUTDOWN`` and return. 
 
-2. Check if the failure handling state is set to ``PARTIAL``. If true, check if the ``txBlockHeight`` is equal to or greater than the first ``NO_DATA`` block. If false, raise ``ERR_PARTIAL`` and return.
+2. Check if the failure handling state is set to ``PARTIAL``. If true, check if the ``txBlockHeight`` is equal to or greater than the first ``NO_DATA`` block. If false, return ``ERR_PARTIAL`` and return.
 
-3. Check that ``txId`` is 32 bytes long. Raise ``ERR_INVALID_FORK_ID`` error if this check fails. 
+3. Check that ``txId`` is 32 bytes long. Return ``ERR_INVALID_FORK_ID`` error if this check fails. 
 
-4. Check that the current ``BestBlockHeight`` exceeds ``txBlockHeight`` by the specified number of ``confirmations``. Raise ``ERR_CONFIRMATIONS`` if this check fails. 
+4. Check that the current ``BestBlockHeight`` exceeds ``txBlockHeight`` by the specified number of ``confirmations``. Return ``ERR_CONFIRMATIONS`` if this check fails. 
 
 5. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``MainChain`` at the passed ``txBlockHeight``.    
 
-6. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Raise ``ERR_MERKLE_PROOF`` error if one of these checks fails.
+6. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Return ``ERR_INVALID_MERKLE_PROOF`` if one of these checks fails.
 
 7. Call :ref:`computeMerkle` passing ``txId``, ``txIndex`` and ``merkleProof`` as parameters. 
 
   a. If this call returns the ``merkleRoot``, emit a ``VerifyTransaction(txId, txBlockHeight, confirmations)`` event and return ``True``.
   
-  b. Otherwise return ``False``. 
+  b. Otherwise return ``ERR_INVALID_MERKLE_PROOF``. 
 
 .. figure:: ../figures/verifyTransaction-sequence.png
     :alt: verifyTransaction sequence diagram
 
-    The steps to verify a transaction in the ``verifyTransaction`` function.
+    The steps to verify a transaction in the :ref:`verifyTransaction` function.
 
 
 

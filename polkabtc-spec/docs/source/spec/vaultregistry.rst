@@ -80,7 +80,7 @@ Vaults
 
 Mapping from accounts of Vaults to their struct. ``<Account, Vault>``.
 
-*Substrate*: ``Vaults map T::AccountId => Vault<T::AccountId, T::Balance, T::Moment>``
+*Substrate*: ``Vaults map T::AccountId => Vault<T::AccountId, T::Balance, T::DateTime>``
 
 
 RegisterRequests (Optional)
@@ -88,7 +88,7 @@ RegisterRequests (Optional)
 
 Mapping from registerIDs of RegisterRequest to their structs. ``<U256, RegisterRequest>``.
 
-*Substrate*: ``RegisterRequests map T::U256 => Vault<T::AccountId, T::Moment>``
+*Substrate*: ``RegisterRequests map T::U256 => Vault<T::AccountId, T::DateTime>``
 
 
 
@@ -137,7 +137,7 @@ Parameter            Type       Description
 ===================  =========  ========================================================
 ``nonce``   u256       Random nonce used to link a Bitcoin transaction inclusion proof to this registration request (included in OP_RETURN). 
 ``vault``            Account    Acconnt identifier of the registered Vault
-``timeout``          Moment     Optional maximum delay before the Vault must submit a valid tranasction inclusion proof.
+``timeout``          DateTime     Optional maximum delay before the Vault must submit a valid tranasction inclusion proof.
 ===================  =========  ========================================================
 
 *Substrate*
@@ -146,10 +146,10 @@ Parameter            Type       Description
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct Vault<AccountId, Moment> {
+  pub struct Vault<AccountId, DateTime> {
         registrationID: U256,
         vault: AccountId,
-        timeout: Moment
+        timeout: DateTime
   }
 
 Functions

@@ -2,8 +2,8 @@ BTC-Relay Architecture
 ======================
 
 BTC-Relay is a component / module of the BTC Parachain. 
-It's main functionality is verification and storage of Bitcoin block headers, as well as verification of Bitcoin transaction inclusion proofs. 
-Below, we provide an overview of it's components, as well as relevant actors - offering references to the full specification contained in the rest of this document. 
+Its main functionality is verification and storage of Bitcoin block headers, as well as verification of Bitcoin transaction inclusion proofs. 
+Below, we provide an overview of its components, as well as relevant actors - offering references to the full specification contained in the rest of this document. 
 
 .. figure:: ../figures/architecture.png
     :alt: BTC Parachain architecture diagram
@@ -69,3 +69,27 @@ Parser
 ------
 
 The Parser component offers functions to parse Bitcoin's block and transaction data structures, e.g. extracting the Merkle tree root from a block header or the OP_RETURN field from a transaction output. See :ref:`parser` for the full function specification.
+
+
+Failure Handling
+-----------------
+
+BTC-Relay interacts with the Failure Handling component of the BTC Parachain: since failures of BTC-Relay impact the entire operation of the BTC Parachain, the Failure Handling components tracks and reacts to changes in BTC-Relay's operation. 
+
+Specifically, Staked Relayers and the Governance Mechanism can restrict or entirely halt the operation of BTC-Relay, which in turn affects the available functionality of the entire BTC Parachain. 
+See Failure Handling section of the PolkaBTC specification document for a full specification of failure handling on the BTC Parachain, and the interactions with BTC-Relay. 
+On a high level, BTC-Relay can enter four possible states:
+
+* ``RUNNING``: correct operation, all functions are available. 
+
+* ``PARTIAL``: transaction verification is disabled for blocks above a specified block height. This state is triggered by a ``NO_DATA`` failure by Staked Relayers (missing transaction data for submitted block headers), or manually by the Governance Mechanism. 
+
+* ``HALTED``: transaction verification is entirely disabled. This state is triggered by a ``INVALID`` failure by Staked Relayers (invalid transaction was detected in a submitted block header) or manually by the Governance Mechanism.
+
+* ``SHUTDOWN``: submission of block headers (both main chain and forks) and transactions verification are disabled. This state can be triggered manually by the Governance Mechanism if a major failure is detected or a soft / hard fork has ocurred in Bitcoin (and hence BTC-Relay needs updating). 
+
+
+A full state machine, explaining how BTC-Relay transitions between different states, is provided in the Failure Handling section of the PolkaBTC specification.
+
+.. todo:: Links to the PolkaBTC specification will be included once the documents are merged.
+

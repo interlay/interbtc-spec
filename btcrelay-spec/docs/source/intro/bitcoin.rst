@@ -13,7 +13,7 @@ The `80 bytes block header hash <https://bitcoin.org/en/developer-reference#bloc
 =====  ======================  =========  ======================================================================
 Bytes  Parameter               Type       Description
 =====  ======================  =========  ======================================================================
-4      ``version``             u32        The block version to follow.
+4      ``version``             i32        The block version to follow.
 32     ``hashPrevBlock``       char[32]   The double sha256 hash of the previous block header.
 32     ``merkleRoot``          char[32]   The double sha256 hash of the Merkle root of all transaction hashes in this block.
 4      ``time``                u32        The block timestamp included by the miner.
@@ -38,6 +38,7 @@ var    ``tx_out``              txOut      Transaction outputs.
 4      ``lock_time``           u32        A Unix timestamp OR block number.
 =====  ======================  =========  ==================================
 
+.. note:: Bitcoin uses the term "CompactSize Unsigned Integers" to refer to variable-length integers, which are used to indicate the number of bytes representing transaction inputs and outputs. See the `Developer Reference <https://bitcoin.org/en/developer-reference#compactsize-unsigned-integers>`_ for more details.
 
 Inputs
 ~~~~~~
@@ -65,7 +66,7 @@ The transaction output has the following format according to the `reference <htt
 =====  ======================  =========  ==================================
 Bytes  Parameter               Type       Description
 =====  ======================  =========  ==================================
-8      ``value``               i64        Number of satoshis to be spend.   
+8      ``value``               i64        Number of satoshis to be spent.   
 1+     ``pk_script bytes``     uint       Number of bytes in the script.
 var    ``pk_script``           char[]     Spending condition as script.
 =====  ======================  =========  ==================================
