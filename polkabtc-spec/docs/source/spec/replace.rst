@@ -18,7 +18,7 @@ Step-by-Step
 
 3. A new candidate Vault (*NewVault*), commits to executing the replacement by locking up the necessary DOT collateral to back the to-be-transferred BTC (according to the ``SecureCollateralRate``). 
 
-4. Within a pre-defined delay, *OldVault* must release the BTC on Bitcoin to *NewVault*'s BTC address, and submit a valid transaction inclusion proof (call to ``verifyTransaction`` in :ref:`btc-relay`).
+4. Within a pre-defined delay, *OldVault* must release the BTC on Bitcoin to *NewVault*'s BTC address, and submit a valid transaction inclusion proof (call to ``verifyTransactionInclusion`` in :ref:`btc-relay`).
 
   a. Note: to prevent *OldVault* from trying to re-use old transactions (or other payments to *NewVaults* on Bitcoin) as fake proofs, we require *OldVault* to include a ``nonce`` in an OP_RETURN output of the transfer transaction on Bitcoin.
 
@@ -250,7 +250,7 @@ executeReplace
 --------------
 
 The to-be-replaced Vault finalizes the replace process by submitting a proof that it transferred the correct amount of BTC to the BTC address of the new Vault, as specified in the ``ReplaceRequest``.
-This function calls *verifyTransaction* in :ref:`btc-relay`, proving a transaction inclusion proof (``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof``) as input. 
+This function calls *verifyTransactionInclusion* in :ref:`btc-relay`, proving a transaction inclusion proof (``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof``) as input. 
 
 
 Specification
@@ -279,7 +279,7 @@ Specification
 
 * ``ERR_INVALID_REPLACE_ID``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
 * ``ERR_VAULT_NOT_FOUND``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
-* See errors returned by *verifyTransaction* in :ref:`btc-relay`.
+* See errors returned by *verifyTransactionInclusion* in :ref:`btc-relay`.
 
 *Substrate* ::
 
@@ -298,7 +298,7 @@ Function Sequence
 
 2. Retrieve the ``Vault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such Vault can be found.
 
-3. Call *verifyTransaction* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
+3. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
 
 4. 
 

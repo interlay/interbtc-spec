@@ -100,12 +100,12 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 * **Cause**: Raised if the ``target`` specified in the block header is incorrect for its block height (difficulty re-target not executed).
 
 
-``ERR_INVALID_TXID``
+``ERR_MALFORMED_TXID``
 
 
-* **Message**: "Invalid transaction identifier"
+* **Message**: "Malformed transaction identifier"
 
-* **Function**: :ref:`verifyTransaction`
+* **Function**: :ref:`verifyTransactionInclusion`
 
 * **Cause**: Raised if the transaction id (``txId``) is malformed.
 
@@ -113,7 +113,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message**: "Transaction has less confirmations than requested"
 
-* **Function**: :ref:`verifyTransaction`
+* **Function**: :ref:`verifyTransactionInclusion`
 
 * **Cause**: Raised if the number of confirmations is less than required.
 
@@ -122,9 +122,9 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message**: "Invalid Merkle Proof"
 
-* **Function**: :ref:`verifyTransaction`
+* **Function**: :ref:`verifyTransactionInclusion`
 
-* **Cause**: Exception raised in ``verifyTransaction`` when the Merkle proof is malformed.
+* **Cause**: Exception raised in ``verifyTransactionInclusion`` when the Merkle proof is malformed.
 
 ``ERR_FORK_ID_NOT_FOUND``
 
@@ -139,7 +139,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message**: "BTC Parachain partially deactivated"
 
-* **Function**: :ref:`verifyTransaction`
+* **Function**: :ref:`verifyTransactionInclusion`
 
 * **Cause**: The BTC Parachain has been partially deactivated since a specific block height.
 
@@ -147,7 +147,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message**: "BTC Parachain is halted"
 
-* **Function**: :ref:`verifyTransaction`
+* **Function**: :ref:`verifyTransactionInclusion`
 
 * **Cause**: The BTC Parachain has been halted.
 
@@ -155,7 +155,54 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message**: "BTC Parachain has shut down"
 
-* **Function**: :ref:`verifyTransaction` | :ref:`storeForkBlockHeader` | :ref:`storeMainChainBlockHeader`
+* **Function**: :ref:`verifyTransactionInclusion` | :ref:`storeForkBlockHeader` | :ref:`storeMainChainBlockHeader`
 
 * **Cause**: The BTC Parachain has been shutdown by a manual intervention of the governance mechanism.
 
+
+
+``ERR_INVALID_TXID``
+
+* **Message**: "Transaction hash does not match given txid"
+
+* **Function**: :ref:`validateTransaction`
+
+* **Cause**: The transaction identifier (``txId``) does not match the actual hash of the transaction.
+
+
+
+``ERR_INSUFFICIENT_VALUE``: 
+
+* **Message**: "Value of payment below requested amount"
+
+* **Function**: :ref:`validateTransaction`
+
+* **Cause**: The value of the (first) *Payment UTXO* in the validated transaction is lower than the specified ``paymentValue``.
+
+
+``ERR_TX_FORMAT``:
+
+* **Message**: "Transaction has incorrect format"
+
+* **Function**: :ref:`validateTransaction`
+
+* **Cause**: The parsed transaction has an incorrect format (see :ref:`accepted-tx-format`).
+
+
+
+``ERR_WRONG_RECIPIENT``
+
+* **Message**: "Incorrect recipient Bitcoin address"
+
+* **Function**: :ref:`validateTransaction`
+
+* **Cause**: The recipient specified in the (first) *Payment UTXO* of the validated transaction does not match the specified ``recipientBtcAddress``.
+
+
+``ERR_INVALID_OPRETURN``
+
+* **Message**: "Incorrect identifier in OP_RETURN field"
+
+* **Function**: :ref:`validateTransaction`
+
+* **Cause**: The OP_RETURN field of the (second) *Data UTXO* of the validated transaction does not match the specified ``opReturnId``.

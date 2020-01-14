@@ -145,7 +145,7 @@ Transactions
 .. _extractNoUTXO:
 
 extractNoUTXO
--------------
+~~~~~~~~~~~~~
 
 Returns the number of unspent transaction outputs in a given (raw) transaction. The number of inputs and outputs in a raw transaction is encoded in the `compact unsigned integer format <https://bitcoin.org/en/developer-reference#compactsize-unsigned-integers>`_.
 
@@ -180,7 +180,7 @@ Function Sequence
 extractOPRETURN
 ~~~~~~~~~~~~~~~
 
-Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used to store `40 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like.`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in PolkaBTC.
+Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used to store `40 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in PolkaBTC.
 
 *Function Signature*
 
@@ -212,34 +212,3 @@ Function Sequence
 
 
 
-.. _parseRawTransaction:
-
-parseRawTransaction
-~~~~~~~~~~~~~~~~~~~~
-
-Parses a raw Bitcoin transaction and extracts 1) the value of the first output, 2) the recipient address of the first output and 3) the OP_RETURN value of the second output of the transaction. 
-See *Accepted Bitcoin Transaction Format* in the PolkaBTC specification.
-
-.. todo:: Add link to PolkaBTC spec. 
-
-
-*Function Signature*
-
-``parseRawTransaction(rawTransaction)``
-
-*Parameters*
-
-* ``rawTransaction``: string (variable length) raw Bitcoin transaction.
-
-*Returns*
-
-* ``nBits``: the 4 byte nBits field of the block header
-
-*Substrate*
-
-::
-
-  fn extractNBits(blockHeaderBytes: T::RawBlockHeader) -> T::Bytes {...}
-
-Function Sequence
-.................

@@ -237,7 +237,7 @@ Specification
 
 *Returns*
 
-* ``True``: If the transaction with ``txid`` was indeed included in Bitcoin (call to ``verifyTransaction`` in BTC-Relay) and cointains an OP_RETURN output containing the ``nonce`` in the RegisterRequest.
+* ``True``: If the transaction with ``txid`` was indeed included in Bitcoin (call to ``verifyTransactionInclusion`` in BTC-Relay) and cointains an OP_RETURN output containing the ``nonce`` in the RegisterRequest.
 * ``False``: Otherwise.
 
 *Events*
@@ -247,7 +247,7 @@ Specification
 *Errors*
 
 * ``ERR_INVALID_BTC_ADDRESS``: The provided collateral was insufficient - it must be above ``MinimumCollateralVault``.
-* see ``verifyTransaction`` in BTC-Relay.  
+* see ``verifyTransactionInclusion`` in BTC-Relay.  
 
 *Substrate* ::
 
@@ -261,7 +261,7 @@ A Vault submits a transaction inclusion proof, showing that its BTC address can 
 This function can optionally be called after ``registerVault``.
 
 
-See ``verifyTransaction`` in BTC-Relay for details on handling Bitcoin transaction inclusion proofs.
+See ``verifyTransactionInclusion`` in BTC-Relay for details on handling Bitcoin transaction inclusion proofs.
 
 Function Sequence
 .................
@@ -270,9 +270,9 @@ Function Sequence
 
   a) Throw ``ERR_INVALID_REGISTER_ID`` error if no active RegisterRequest ``registerID`` can be found in ``RegisterRequests``.
 
-2) Call ``verifyTransaction(txid, txBlockHeight, txIndex, merkleProof)``.
+2) Call ``verifyTransactionInclusion(txid, txBlockHeight, txIndex, merkleProof)``.
 
-3) If ``verifyTransaction`` returns ``True``, exctract the (second?) output from the ``transactionBytes`` (use Parser functionality in BTC-Relay), extract the OP_RETURN value and check if it matches the ``nonce`` of the ``RegisterRequest``.
+3) If ``verifyTransactionInclusion`` returns ``True``, exctract the (second?) output from the ``transactionBytes`` (use Parser functionality in BTC-Relay), extract the OP_RETURN value and check if it matches the ``nonce`` of the ``RegisterRequest``.
 
  a) Throw ``ERR_INCORRECT_NONCE`` if the transaction cannot be parsed or the value of the OP_RETURN field does not match the ``nonce`` of the ``RegisterRequest``.
 

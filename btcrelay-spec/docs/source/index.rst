@@ -10,6 +10,7 @@ Welcome to the BTC-Relay documentation!
    intro/at-a-glance
    intro/architecture
    intro/bitcoin
+   intro/accepted-format
 
 
 
