@@ -70,11 +70,11 @@ Maps
 ReplaceRequests
 ................
 
-Vaults create replace requests if they want to have (a part of) their DOT collateral to be replaced by other Vaults. This mapping provides access from a unique hash ``ReplaceID`` to a ``Replace`` struct. ``<ReplaceID, Replace>``.
+Vaults create replace requests if they want to have (a part of) their DOT collateral to be replaced by other Vaults. This mapping provides access from a unique hash ``ReplaceID`` to a ``ReplaceRequest`` struct. ``<ReplaceID, Replace>``.
 
 *Substrate* ::
 
-  ReplaceRequests map T::Hash => Replace<T::AccountId, T::BlockNumber, T::Balance>
+  ReplaceRequests map T::H256 => Replace<T::AccountId, T::BlockNumber, T::Balance>
 
 
 Structs
@@ -85,17 +85,18 @@ Replace
 
 Stores the status and information about a single replace request.
 
-==================  ==========  =======================================================	
-Parameter           Type        Description                                            
-==================  ==========  =======================================================
-``oldVault``        Account     BTC Parachain account of the Vault that is to be replaced.
-``opentime``        u256        Block height of opening the request.
-``amount``          PolkaBTC    Amount of BTC / PolkaBTC to be replaced.
-``newVault``        Account     Account of the new Vault, which accepts the replace request.
-``collateral``      DOT         DOT collateral locked by the new Vault.
-``acceptTime``      u256        Block height at which this replace request was accepted by a new Vault. Serves as start for the countdown until when the old Vault must transfer the BTC.
-``btcAddress``      bytes[20]   Base58 encoded Bitcoin public key of the new Vault.  
-==================  ==========  =======================================================
+======================  ==========  =======================================================	
+Parameter               Type        Description                                            
+======================  ==========  =======================================================
+``oldVault``            Account     BTC Parachain account of the Vault that is to be replaced.
+``opentime``            u256        Block height of opening the request.
+``amount``              PolkaBTC    Amount of BTC / PolkaBTC to be replaced.
+``griefingCollateral``  DOT         Griefing protection collateral locked by ``oldVault``.
+``newVault``            Account     Account of the new Vault, which accepts the replace request.
+``collateral``          DOT         DOT collateral locked by the new Vault.
+``acceptTime``          u256        Block height at which this replace request was accepted by a new Vault. Serves as start for the countdown until when the old Vault must transfer the BTC.
+``btcAddress``          bytes[20]   Base58 encoded Bitcoin public key of the new Vault.  
+====================== ==========  =======================================================
 
 .. note:: The ``btcAddress`` parameter is not to be set the the new Vault, but is extracted from the ``Vaults`` mapping in ``VaultRegistry`` for the account of the new Vault.  
 
@@ -109,6 +110,7 @@ Parameter           Type        Description
         oldVault: AccountId,
         opentime: BlockNumber,
         amount: Balance,
+        griefingCollateral: Balance,
         newVault: AccountId,
         collateral: Balance,
         acceptTime: BlockNumber,
@@ -153,12 +155,14 @@ Specification
 
 
 * ``ERR_MIN_AMOUNT``: The remaining DOT collateral (converted from the requested BTC replacement value given the current exchange rate) would be below the ``MinimumCollateralVault`` as defined in ``VaultRegistry``.
-* ``ERR_UNAUTHORIZED``: The caller of the replace request is not the specified Vault, and hence not authorized to take this action.
+* ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated Vault``: The caller of this function is not the associated Vault, and hence not authorized to take this action.
 
 *Substrate* ::
 
   fn requestReplace(origin, amount: U256, timeout: BlockNumber) -> Result {...}
 
+
+.. todo:: Check how to attach DOT value to transactions.
 
 Preconditions
 ...............
@@ -178,16 +182,78 @@ Function Sequence
 
 4. If the request is not for the entire BTC holdings, check that the remaining DOT collateral of the Vault is higher than ``MinimumCollateralVault`` as defined in ``VaultRegistry``. Return ``ERR_MIN_AMOUNT`` error if this check fails.
 
-4. Generate a ``replaceId`` by hashing a random seed, a nonce, and the address of the Requester.
+5. Check that the provided DOT value is at least ``ReplaceGriefingCollateral``
 
-5. Create new ``Replace`` entry:
+.. todo:: Lock ``ReplaceGriefingCollateral``
+
+6. Generate a ``replaceId`` by hashing a random seed, a nonce, and the address of the Requester.
+
+7. Create new ``ReplaceRequest`` entry:
 
    * ``Replace.oldVault = vault``,
    * ``Replace.opentime`` = current time on Parachain,
    * ``Replace.amount = amount``.
    
-7. Emit ``ReplaceRequested(vault, btcAmount, timeout, replaceId)`` event.  
+8. Emit ``ReplaceRequested(vault, btcAmount, timeout, replaceId)`` event.  
 
+
+
+withdrawReplaceRequest
+-----------------------
+
+The *OldVault* withdraws an existing ReplaceRequest that is made.
+
+
+Specification
+.............
+
+*Function Signature*
+
+``withdrawReplaceRequest(oldVault, replaceId)``
+
+*Parameters*
+
+* ``oldVault``: Account identifier of the Vault withdrawing it's replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``repalceId``: The identifier of the replace request in ``ReplaceRequests``.
+
+*Events*
+
+* ``WithdrawReplaceRequest(oldVault, replaceId)``: emits an event stating that a Vault (``oldVault``) has withdrawn an existing replace request (``requestId``).
+
+*Errors*
+
+
+* ``ERR_INVALID_REPLACE_ID =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
+* ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated Vault``: The caller of this function is not the associated Vault, and hence not authorized to take this action.
+* ``ERR_CANCEL_ACCEPTED_REQUEST = Cannot cancel the ReplaceRequest as it was already accepted by a Vault``: The ``ReplaceRequest`` was already accepted by another Vault and can hence no longer be withdrawn.
+
+*Substrate* ::
+
+  fn WithdrawReplaceRequest(origin, replaceId: H256) -> Result {...}
+
+Preconditions
+...............
+
+The ReplaceRequest must have not yet been accepted by another Vault.
+
+
+Function Sequence
+..................
+
+1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_INVALID_REPLACE_ID`` error if no such ``ReplaceRequest`` was found.
+
+2. Check that caller of the function is indeed the to-be-replaced Vault as specified in the ``ReplaceRequest``. Return ``ERR_UNAUTHORIZED`` error if this check fails.
+
+3. Check that the ``ReplaceRequest`` was not yet accepted by another Vault. Return ``ERR_CANCEL_ACCEPTED_REQUEST`` error if this check fails.
+
+4. Transfer the ``ReplaceGriefingCollateral`` associated with this ``ReplaceRequests`` to the ``oldVault``.
+
+.. todo:: Unlock ``ReplaceGriefingCollateral``
+
+5. Remove the ``ReplaceRequest`` from ``ReplaceRequests``.
+
+6. Emit a ``WithdrawReplaceRequest(oldVault, replaceId)`` event.
+ 
 
 acceptReplace
 --------------
@@ -210,18 +276,18 @@ Specification
 
 *Events*
 
-* ``AcceptReplace(newVault, replaceId, collateral)``: emits an event stating which Vault (``newVault``) has accepted the ``Replace`` request (``requestId``), and how much collateral in DOT it provided (``collateral``).
+* ``AcceptReplace(newVault, replaceId, collateral)``: emits an event stating which Vault (``newVault``) has accepted the ``ReplaceRequest`` request (``requestId``), and how much collateral in DOT it provided (``collateral``).
 
 *Errors*
 
 
-* ``ERR_INVALID_REPLACE_ID``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
+* ``ERR_INVALID_REPLACE_ID =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
 * ``ERR_INSUFFICIENT_COLLATERAL``: The provided collateral is insufficient to match the replace request. 
 * ``ERR_VAULT_NOT_FOUND``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
 
 *Substrate* ::
 
-  fn acceptReplace(origin, replaceId: Hash, collateral: Balance) -> Result {...}
+  fn acceptReplace(origin, replaceId: H256, collateral: Balance) -> Result {...}
 
 Preconditions
 ...............
@@ -233,13 +299,13 @@ Function Sequence
 ..................
 
 
-1. Retrieve the ``Replace`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_INVALID_REPLACE_ID`` error if no such ``Replace`` request was found.
+1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from  ``ReplaceRequests``. Return ``ERR_INVALID_REPLACE_ID`` error if no such ``ReplaceRequest`` was found.
 
 2. Retrieve the ``Vault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return``ERR_VAULT_NOT_FOUND`` error if no such Vault can be found.
 
 3. Check that the provided ``collateral`` exceeds the necessary amount, i.e., ``collateral >= SecureCollateralRate * Replace.btcAmount``. Return``ERR_INSUFFICIENT_COLLATERAL`` error if this check fails.
 
-4. Update the ``Replace`` entry:
+4. Update the ``ReplaceRequest`` entry:
 
   * ``Replace.newVault = newVault``,
   * ``Replace. acceptTime`` = current Parachain time, 
@@ -275,18 +341,20 @@ Specification
 
 *Events*
 
-* ``ExecuteReplace(oldVault, newVault, replaceId)``: emits an event stating that the old Vault (``oldVault``) has executed the BTC transfer to the new Vault (``newVault``), finalizing the ``Replace`` request (``requestId``).
+* ``ExecuteReplace(oldVault, newVault, replaceId)``: emits an event stating that the old Vault (``oldVault``) has executed the BTC transfer to the new Vault (``newVault``), finalizing the ``ReplaceRequest`` request (``requestId``).
 
 *Errors*
 
 
-* ``ERR_INVALID_REPLACE_ID``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
-* ``ERR_VAULT_NOT_FOUND``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
-* See errors returned by *verifyTransactionInclusion* in :ref:`btc-relay`.
+* ``ERR_INVALID_REPLACE_ID =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
+* ``ERR_VAULT_NOT_FOUND = No Vault with given Account identifier found``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
+* ``ERR_PERIOD_EXPIRED = Replace request expired``: 
+* See errors returned by *verifyTransactionInclusion* and *validateTransaction* in :ref:`btc-relay`.
+
 
 *Substrate* ::
 
-  fn executeReplace(origin, replaceId: Hash, collateral: Balance) -> Result {...}
+  fn executeReplace(origin, replaceId: H256, collateral: Balance) -> Result {...}
 
 Preconditions
 ...............
@@ -297,7 +365,9 @@ Preconditions
 Function Sequence
 ..................
 
-1. Retrieve the ``Replace`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_INVALID_REPLACE_ID`` error if no such ``Replace`` request was found.
+1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_INVALID_REPLACE_ID`` error if no such ``ReplaceRequest`` request was found.
+
+2. Check that the current Parachain block height minus the ``ReplacePeriod`` is smaller than the ``opentime`` of the ``ReplaceRequest``. 
 
 2. Retrieve the ``Vault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such Vault can be found.
 
@@ -305,15 +375,56 @@ Function Sequence
 
 4. Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-replaced BTC (``Replace.amount``), the ``newVault``'s Bitcoin address (``Vault.btcAddress``), and the ``replaceId`` as parameters. If this call returns an error, abort and return the received error. 
 
-5. 
+5. Update 
 
-TODO: update ReplaceRequest, update VaultRegistry, release oldVault's collateral, emit event
-
-
-.. todo:: First define Bitcoin transaction format. Then add parsing functions. Then specify how to parse (separate function). 
-
+TODO: update VaultRegistry, release oldVault's collateral, emit event, remove ReplaceRequest
 
 
 .. note:: It can be the case that the to-be-replaced *OldVault* controls a significant numbers of Bitcoin UTXOs with user funds, making it impossible to execute the migration of funds to the *NewVault* within a single Bitcoin transaction. As a result, it may be necessary to "merge" these UTXOs using multiple "merge transactions" on Bitcoin, i.e., transactions which takes as input multiple UTXOs controlled by the *OldVault* and create a single UTXO controlled (again) by the *OldVault*. Once the UTXOs produced by "merge transactions" can be merged by a single, final transaction, the *OldVault* moves the funds to the *NewVault*. (An alternative is to allow the *OldVault* to submit multiple transaction inclusion proofs when calling ``executeReplace``, although this significantly increases the complexity of transaction parsing on the BTC Parachain side).
+
+
+
+
+cancelReplace
+--------------
+
+..todo:: TODO
+
+Specification
+.............
+
+*Function Signature*
+
+``cancelReplace(newVault, replaceId)``
+
+*Parameters*
+
+* ``newVault``: Account identifier of the Vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``repalceId``: The identifier of the replace request in ``ReplaceRequests``.
+
+
+*Events*
+
+* ``CancelReplace(newVault, replaceId)``: emits an event stating that the old Vault (``oldVault``) has executed the BTC transfer to the new Vault (``newVault``), finalizing the ``ReplaceRequest`` request (``requestId``).
+
+*Errors*
+
+
+* ``ERR_INVALID_REPLACE_ID =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
+* ``ERR_VAULT_NOT_FOUND = No Vault with given Account identifier found``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
+* ``ERR_PERIOD_EXPIRED = Replace request expired``: 
+* See errors returned by *verifyTransactionInclusion* and *validateTransaction* in :ref:`btc-relay`.
+
+
+*Substrate* ::
+
+  fn cancelReplace(origin, replaceId: H256) -> Result {...}
+
+Preconditions
+...............
+
+
+Function Sequence
+..................
 
 
