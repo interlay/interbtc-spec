@@ -206,3 +206,20 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 * **Function**: :ref:`validateTransaction`
 
 * **Cause**: The OP_RETURN field of the (second) *Data UTXO* of the validated transaction does not match the specified ``opReturnId``.
+
+
+``ERR_INVALID_TX_VERSION``
+
+* **Message**: "Invalid transaction version"
+
+* **Function**: :ref:`getOutputStartIndex`
+
+* **Cause**: : The version of the given transaction is not 1 or 2. See `transaction format details <https://bitcoin.org/en/developer-reference#raw-transaction-format>`_ in the Bitcoin Developer Reference. 
+
+``ERR_NOT_OP_RETURN``
+
+* **Message**: "Expecting OP_RETURN output, but got another type."
+
+* **Function**: :ref:`extractOPRETURN`
+
+* **Cause**: The given output was not an OP_RETURN output.

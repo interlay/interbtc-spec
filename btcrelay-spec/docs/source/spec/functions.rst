@@ -404,7 +404,7 @@ Specification
 * ``rawTx``:  raw Bitcoin transaction including the transaction inputs and outputs.
 * ``paymentValue``: integer value of BTC sent in the (first) *Payment UTXO* of transaction.
 * ``recipientBtcAddress``: 20 byte Bitcoin address of recipient of the BTC in the (first) *Payment UTXO*.
-* ``opReturnId``: 32 byte hash identifier expected in OP_RETURN (replay protection).
+* ``opReturnId``: 32 byte hash identifier expected in OP_RETURN (see :ref:`_replace-attacks`).
 
 *Returns*
 

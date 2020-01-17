@@ -142,19 +142,20 @@ Transactions
 
 .. todo:: The parser functions used for transaction processing (called by other modules) will be added on demand. See PolkaBTC specification for more details.
 
-.. _extractNoUTXO:
 
-extractNoUTXO
-~~~~~~~~~~~~~
+.. _extractOutputs:
 
-Returns the number of unspent transaction outputs in a given (raw) transaction. The number of inputs and outputs in a raw transaction is encoded in the `compact unsigned integer format <https://bitcoin.org/en/developer-reference#compactsize-unsigned-integers>`_.
+extractOutputs
+~~~~~~~~~~~~~~~
+
+Extracts the outputs from the given (raw) transaction (``rawTransaction``).
 
 Specification
 .............
 
 *Function Signature*
 
-``extractNoUTXO(rawTransaction) -> u64``
+``extractOutputs(rawTransaction) -> u64``
 
 *Parameters*
 
@@ -162,25 +163,122 @@ Specification
 
 *Returns*
 
-* ``outputsNumber``: The number of outputs in a transaction.
+* ``outputs``: A list of variable byte size encoded outputs of the given transaction.
 
 *Substrate* ::
 
-  fn extractNoUTXO(rawTransaction: T::Vec<u8>) -> u64 {...}
+  fn extractOutputs(rawTransaction: T::Vec<u8>) -> T::Vec<T::Vec<u8>> {...}
 
 Function Sequence
 .................
 
-1. Slice off the first 4 bytes of the raw transaction.
+1. Determine the start of the output list in the transaction using :ref:`getOutputStartIndex`.
 
-2. Determine the number of transaction inputs by 
+2. Determine the number of outputs (determine VarInt size using :ref:`determineVarIntDataLength` and extract bytes indicating the number of outputs accordingly).
+
+3. Loop over the output size, determining the output length for each output (determine VarInt size using :ref:`determineVarIntDataLength` and extract bytes indicating the output size accordingly). Extract the bytes for each output and append them to the ``outputs`` list.
+
+4. Return ``outputs``. 
+
+
+.. note:: Optionally, check the output type here and add flag to return list (use tuple of flag and output bytes then).
+
+
+.. _getOutputStartIndex:
+
+getOutputStartIndex
+~~~~~~~~~~~~~~~~~~~
+
+Extracts the starting index of the outputs in a transaction (i.e., skips over the variable size list of inputs).
+
+*Function Signature*
+
+``getOutputStartIndex(rawTransaction -> u64)``
+
+*Parameters*
+
+* ``rawTransaction``:  A variable byte size encoded transaction. 
+
+*Returns*
+
+* ``outputIndex``: integer index indicating the starting point of the list of outputs in the raw transaction.
+
+
+*Errors*
+
+* ``ERR_INVALID_TX_VERSION = "Invalid transaction version"``: The version of the given transaction is not 1 or 2.
+
+.. note:: Currently, the transaction version can be 1 or 2. See `transaction format details <https://bitcoin.org/en/developer-reference#raw-transaction-format>`_ in the Bitcoin Developer Reference. 
+
+*Substrate* ::
+
+  fn getOutputStartIndex(origin, ) -> Result {...}
+
+
+Function Sequence
+.................
+
+See the `Bitcoin transaction format in the Bitcoin Developer Reference <https://bitcoin.org/en/developer-reference#raw-transaction-format>`_.
+
+
+1. Init position counter ``pos = 0``.
+
+2. Check the ``version`` bytes of the transaction (must be 1 or 2). Then skip over: ``pos = pos + 4``. 
+
+3. Check if the transaction is a SegWit transaction. If yes, ``pos = pos + 2``. 
+
+4. Parse the VarInt size (:ref:``determineVarIntDataLength``) and extract the bytes indicating the number of inputs accordingly. Increment ``pos`` accordingly.
+
+5. Iterate over the number of inputs and skip over (incrementing ``pos``). Note: it is necessary to determine the length of the ``scriptSig`` using :ref:`determineVarIntDataLength`.
+
+6. Return ``pos`` indicating the start of the output list in the raw transaction.
+
+
+.. _determineVarIntDataLength:
+
+determineVarIntDataLength
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Determines the length of the Bitcoin VarInt in bytes.
+
+*Function Signature*
+
+``getOutputStartIndex(varIntFlag -> u64)``
+
+*Parameters*
+
+* ``varIntFlag``:  1 byte flag indicating size of Bitcoin's VarInt
+
+*Returns*
+
+* ``varInt``: integer length of the VarInt (excluding flag).
+
+
+*Substrate* ::
+
+  fn determineVarIntDataLength(varIntFlag: T::Vec<u8>) -> u8 {...}
+
+
+Function Sequence
+.................
+
+1. Check flag and return accordingly:
+
+  * If ``0xff`` return ``8``,
+
+  * Else if ``0xfe`` return 4,
+
+  * Else if ``0xfd`` return 2,
+
+  * Otherwise return ``0`` 
+
 
 .. _extractOPRETURN:
 
 extractOPRETURN
 ~~~~~~~~~~~~~~~
 
-Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used to store `40 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in PolkaBTC.
+Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used to store `80 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in PolkaBTC.
 
 *Function Signature*
 
@@ -188,27 +286,97 @@ Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used t
 
 *Parameters*
 
-* ````: 
+* ``rawOutput``: raw encoded output 
 
 *Returns*
 
-* ````:
-
-*Events*
-
-* ````:
+* ``opreturn``: value of the OP_RETURN data.
 
 *Errors*
 
-* ````:
+* ``ERR_NOT_OP_RETURN = "Expecting OP_RETURN output, but got another type.``: The given output was not an OP_RETURN output.
 
 *Substrate* ::
 
-  fn extractOpreturn(origin, ) -> Result {...}
+  fn extractOpreturn(output: T::Vec<u8>) -> T::Vec<u8> {...}
 
 
 Function Sequence
 .................
 
+1. Check that the output is indeed an OP_RETURN output: ``pk_script[0] == 0x6a``. Return ``ERR_NOT_OP_RETURN`` error if this check fails. Note: the ``pk_script`` starts at index ``9`` of the output (nevertheless, make sure to check the length of VarInt indicating the output size using :ref:`determineVarIntDataLength`).
+
+2. Determine the length of the OP_RETURN field (``pk_script[10]``) and return the OP_RETURN value (excluding the flag and size, i.e., starting at index ``11``).
 
 
+
+
+.. _extractOPRETURN:
+
+extractOPRETURN
+~~~~~~~~~~~~~~~
+
+Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used to store `80 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in PolkaBTC.
+
+*Function Signature*
+
+``extractOPRETURN(rawOutput)``
+
+*Parameters*
+
+* ``rawOutput``: raw encoded output 
+
+*Returns*
+
+* ``opreturn``: value of the OP_RETURN data.
+
+*Errors*
+
+* ``ERR_NOT_OP_RETURN = "Expecting OP_RETURN output, but got another type.``: The given output was not an OP_RETURN output.
+
+*Substrate* ::
+
+  fn extractOpreturn(rawOutput: T::Vec<u8>) -> T::Vec<u8> {...}
+
+
+Function Sequence
+.................
+
+1. Check that the output is indeed an OP_RETURN output: ``pk_script[0] == 0x6a``. Return ``ERR_NOT_OP_RETURN`` error if this check fails. Note: the ``pk_script`` starts at index ``9`` of ``rawOutput`` (nevertheless, make sure to check the length of VarInt indicating the output size using :ref:`determineVarIntDataLength`).
+
+2. Determine the length of the OP_RETURN field (``pk_script[10]``) and return the OP_RETURN value (excluding the flag and size, i.e., starting at index ``11``).
+
+
+
+.. _extractOutputValue:
+
+extractOutputValue
+~~~~~~~~~~~~~~~~~~
+
+Extracts the value of the given output.
+
+*Function Signature*
+
+``extractOutputValue(rawOutput)``
+
+*Parameters*
+
+* ``rawOutput``: raw encoded output 
+
+*Returns*
+
+* ``value``: value of the output.
+
+*Errors*
+
+* `` ``
+
+*Substrate* ::
+
+  fn extractOutputValue(output: T::Vec<u8>) -> T::Vec<u8> {...}
+
+
+Function Sequence
+.................
+
+TODO

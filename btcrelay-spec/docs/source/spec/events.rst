@@ -142,6 +142,6 @@ If parsing and validation of the given raw transaction was successful, emit an e
 
 *Substrate* ::
 
-  VerifyTransaction(H256, U256, H160, H256);
+  ValidateTransaction(H256, U256, H160, H256);
 
 
