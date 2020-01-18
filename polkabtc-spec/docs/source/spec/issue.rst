@@ -10,9 +10,9 @@ Step-by-step
 ------------
 
 1. Precondition: a Vault has locked collateral as described in the `Vault registry <vault-registry>`_.
-2. A user executes the ``commit`` function to open an issue request on the BTC Parachain. The issue request includes the amount of PolkaBTC the user wants to have, which Vault(s) the user uses, and a small collateral to prevent `griefing <griefing>`_.
+2. A user executes the ``requestIssue`` function to open an issue request on the BTC Parachain. The issue request includes the amount of PolkaBTC the user wants to have, which Vault the user uses, and a small collateral to prevent `griefing <griefing>`_.
 3. A user sends the equivalent amount of BTC that he wants to issue as PolkaBTC to the Vault on the Bitcoin blockchain with the ``lockBTC`` function. The user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain.
-4. The user executes the ``issue`` function on the BTC Parachain. The issue function requires a reference to the previous issue request and the transaction inclusion proof of the ``lockBTC`` transaction. If the function completes successfully, the user receives the requested amount of PolkaBTC into his account.
+4. The user executes the ``executeIssue`` function on the BTC Parachain. The issue function requires a reference to the previous issue request and the transaction inclusion proof of the ``lockBTC`` transaction. If the function completes successfully, the user receives the requested amount of PolkaBTC into his account.
 5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``CommitPeriod``), anyone is able to call the ``abort`` function to cancel the issue request.
 
 Data Model
@@ -33,7 +33,7 @@ MinimumCollateralUser
 
 The minimum collateral (DOT) a user needs to provide as griefing protection. 
 
-.. note:: Serves to disincentivize griefing attacks against vaults, where users create issue requests, temporarily locking a Vault's collateral, but never execute the issue process.
+.. note:: Serves to disincentivize griefing attacks against vault, where users create issue requests, temporarily locking a Vault's collateral, but never execute the issue process.
 
 *Substrate*: ``MinimumCollateralUser: Balance;``
 
@@ -76,8 +76,8 @@ Parameter           Type        Description
 ``opentime``        u256        Block height of opening the request.
 ``collateral``      DOT         Collateral provided by a user.
 ``amount``          PolkaBTC    Amount of PolkaBTC to be issued.
-``requester``        Account     user account receiving PolkaBTC upon successful issuing.
-``btcPublicKey``    bytes[20]   Base58 encoded Bitcoin public key of the Vault.  
+``requester``       Account     User account receiving PolkaBTC upon successful issuing.
+``btcAddress``      bytes[20]   Base58 encoded Bitcoin public key of the Vault.  
 ``completed``       bool        Indicates if the issue has been completed.
 ==================  ==========  =======================================================
 
@@ -93,7 +93,7 @@ Parameter           Type        Description
         collateral: Balance,
         amount: Balance,
         requester: AccountId,
-        btcPublicKey: Bytes,
+        btcAddress: H160,
         completed: bool
   }
 
@@ -112,13 +112,13 @@ Specification
 
 *Function Signature*
 
-``requestIssue(requester, amount, vaults)``
+``requestIssue(requester, amount, vault)``
 
 *Parameters*
 
 * ``requester``: The user's BTC Parachain account.
 * ``amount``: The amount of PolkaBTC to be issued.
-* ``vaults``: The BTC Parachain address of the Vault involved in this issue request.
+* ``vault``: The BTC Parachain address of the Vault involved in this issue request.
 
 *Returns*
 
@@ -126,7 +126,7 @@ Specification
 
 *Events*
 
-* ``CommitIssue(requester, amount, vaults, issueId)``:
+* ``CommitIssue(requester, amount, vault, issueId)``:
 
 *Errors*
 
@@ -136,7 +136,7 @@ Specification
 
 *Substrate* ::
 
-  fn requestIssue(origin, amount: U256, vaults: Vec<AccountId>) -> Result {...}
+  fn requestIssue(origin, amount: U256, vault: Vec<AccountId>) -> Result {...}
 
 
 Function Sequence
@@ -158,7 +158,7 @@ Function Sequence
 
 4. Generate a ``issueId`` by hashing a random seed, a nonce from the security module, and the address of the user.
 
-5. Store a new ``Issue`` struct in the ``IssueRequests`` mapping. The ``IssueId`` refers to the ``Issue``. Fill the ``vault`` with the requested ``vault``, the ``opentime`` with the current block number, the ``collateral`` with the collateral provided by the user, ``amount`` with the ``amount`` provided as input, ``requester`` the requester account, and ``btcPublicKey`` the Bitcoin address of the Vault.
+5. Store a new ``Issue`` struct in the ``IssueRequests`` mapping. The ``IssueId`` refers to the ``Issue``. Fill the ``vault`` with the requested ``vault``, the ``opentime`` with the current block number, the ``collateral`` with the collateral provided by the user, ``amount`` with the ``amount`` provided as input, ``requester`` the requester account, and ``btcAddress`` the Bitcoin address of the Vault.
 
 7. Call the VaultRegistry ``occupyCollateral`` function with the amount of ``collateral`` that should be reserved for the issue request for a specific ``vault`` identified by its address.
 
@@ -186,8 +186,8 @@ Specification
 
 * ``requester``: The user's BTC Parachain account.
 * ``amount``: The amount of PolkaBTC to be issued.
-* ``vaults``: The BTC Parachain address of the Vault(s) involved in this issue request.
-* ``issueId``: the unique hash created during the ``commit`` function,
+* ``vault``: The BTC Parachain address of the Vault involved in this issue request.
+* ``issueId``: the unique hash created during the ``requestIssue`` function.
 
 *Returns*
 
@@ -208,8 +208,8 @@ Function Sequence
    a. The input(s) must be spendable from the user.
    b. The transaction has at least two outputs with the following conditions:
 
-        1. One output is spendable by the ``btcPublicKey`` of the Vault selected in the ``commit`` function. The output includes the ``amount`` requested in the ``commit`` function in the ``value`` field. This means the number of requested PolkaBTC must be the same amount of transferred BTC (expressed as satoshis).
-        2. One output must include a ``OP_RETURN`` with the ``issueId`` received in the ``commit`` function. This output will not be spendable and therefore the ``value`` field should be ``0``.
+        1. One output is spendable by the ``btcAddress`` of the Vault selected in the ``requestIssue`` function. The output includes the ``amount`` requested in the ``requestIssue`` function in the ``value`` field. This means the number of requested PolkaBTC must be the same amount of transferred BTC (expressed as satoshis).
+        2. One output must include a ``OP_RETURN`` with the ``issueId`` received in the ``requestIssue`` function. This output will not be spendable and therefore the ``value`` field should be ``0``.
 
 2. The user sends the transaction prepared in step 1 to the Bitcoin network and locally stores the ``txId``, i.e. the unique hash of the transaction.
 
@@ -226,12 +226,12 @@ Specification
 
 *Function Signature*
 
-``issue(requester, issueId, txId, txBlockHeight, txIndex, merkleProof, rawTx)``
+``executeIssue(requester, issueId, txId, txBlockHeight, txIndex, merkleProof, rawTx)``
 
 *Parameters*
 
 * ``requester``: the account of the user.
-* ``issueId``: the unique hash created during the ``commit`` function,
+* ``issueId``: the unique hash created during the ``requestIssue`` function,
 * ``txId``: The hash of the Bitcoin transaction.
 * ``txBlockHeight``: Bitcoin block height at which the transaction is supposedly included.
 * ``txIndex``: Index of transaction in the Bitcoin block’s transaction Merkle tree.
@@ -256,7 +256,7 @@ Specification
 
 *Substrate* ::
 
-  fn issue(origin, issueId: T::Hash, txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: Bytes, rawTx: Bytes) -> Result {...}
+  fn executeIssue(origin, issueId: T::H256, txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: Bytes, rawTx: Bytes) -> Result {...}
 
 
 Function Sequence
@@ -267,10 +267,10 @@ Function Sequence
 .. todo:: What happens if the Vault goes into buffered collateral/liquidation at this point?
 
 
-1. The user prepares the inputs and calls the ``issue`` function.
+1. The user prepares the inputs and calls the ``executeIssue`` function.
     
     a. ``requester``: The BTC Parachain address of the requester.
-    b. ``issueId``: The unique hash received in the ``commit`` function.
+    b. ``issueId``: The unique hash received in the ``requestIssue`` function.
     c. ``txId``: the hash of the Bitcoin transaction to the Vault. With the ``txId`` the user can get the remainder of the Bitcoin transaction data including ``txBlockHeight``, ``txIndex``, ``MerkleProof``, and ``rawTx``. See BTC-Relay documentation for details.
 
 2. Checks if the ``issueId`` exists. Throws ``ERR_ISSUE_ID_NOT_FOUND`` if not found. Else, continues.
