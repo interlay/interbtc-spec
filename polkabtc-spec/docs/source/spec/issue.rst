@@ -132,12 +132,11 @@ Specification
 
 *Events*
 
-* ``RequestIssue(requester, amount, vault, issueId)``:
+* ``RequestIssue(requester, amount, vault, issueId)``
 
 *Errors*
 
 * ``ERR_INSUFFICIENT_COLLATERAL``: The user did not provide enough collateral.
-* ``ERR_EXCEEDING_VAULT_LIMIT``: The selected vault has not provided collateral to issue the requested ``amount``.
 * ``ERR_VAULT_COLLATERAL_RATIO``: The selected vault is below the collateral safety ratio.
 
 *Substrate* ::
@@ -157,18 +156,18 @@ Function Sequence
     d. ``collateral``: The user transfers collateral against griefing.
 
 2. The user calls the ``requestIssue`` function and provides his own address, the amount, and the vault he wants to use. Further, he provides a small collateral to prevent griefing.
+
 3. Checks if the user provided enough collateral by checking if the collateral is equal or greater than ``MinimumCollateral``. If not, throws ``ERR_INSUFFICIENT_COLLATERAL``.
-4. Checks if the selected vault has locked enough collateral to cover the ``amount`` of PolkaBTC to be issued. Query the VaultRegistry for the ``vault`` and check the ``vault.committedTokens`` and ``vault.collateral``. Calculate how much free ``vault.collateral`` is available by multiplying the collateral with the ``ExchangeRate`` (from the Oracle) and subtract the ``vault.committedTokens``. If not enough ``vault.collateral`` is free, throw ``ERR_EXCEEDING_VAULT_LIMIT``.
+
+4. Call the VaultRegistry ``lockVault`` function with the ``amount`` of tokens to be issue, the ``collateral`` that should be reserved for the issue request, and the ``vault`` identified by its address.
 
 5. Generate an ``issueId`` by hashing a random seed, a nonce from the security module, and the address of the user.
 
-6. Call the VaultRegistry ``lockVault`` function with the amount of ``collateral`` that should be reserved for the issue request for a specific ``vault`` identified by its address.
+6. Store a new ``Issue`` struct in the ``IssueRequests`` mapping. The ``issueId`` refers to the ``Issue``. Fill the ``vault`` with the requested ``vault``, the ``opentime`` with the current block number, the ``collateral`` with the collateral provided by the user, ``amount`` with the ``amount`` provided as input, ``requester`` the requester account, and ``btcAddress`` the Bitcoin address of the Vault.
 
-7. Store a new ``Issue`` struct in the ``IssueRequests`` mapping. The ``issueId`` refers to the ``Issue``. Fill the ``vault`` with the requested ``vault``, the ``opentime`` with the current block number, the ``collateral`` with the collateral provided by the user, ``amount`` with the ``amount`` provided as input, ``requester`` the requester account, and ``btcAddress`` the Bitcoin address of the Vault.
+7. Issue the ``RequestIssue`` event with the ``requester`` account, ``amount``, ``vault``, and ``issueId``.
 
-8. Issue the ``RequestIssue`` event with the ``requester`` account, ``amount``, ``vault``, and ``issueId``.
-
-9. Return the ``issueId``. The user stores this for future reference and the next steps, locally.
+8. Return the ``issueId``. The user stores this for future reference and the next steps, locally.
 
 
 .. lock
@@ -338,7 +337,7 @@ Function Sequence
 
 3. Check if the ``issue.completed`` field is set to true. If yes, throw ``ERR_ISSUE_COMPLETED``.
 
-4. Release the vault's collateral through the collateral module.
+4. Release the vault's collateral by calling ``releaseVault`` in the VaultRegistry with the ``issue.vault`` and the ``issue.amount``.
 
 5. Transfer the griefing collateral of the user requesting the issue to the vault assigned to this issue request.
 
@@ -425,12 +424,6 @@ Error Codes
 * **Message**: "Provided collateral below limit."
 * **Function**: :ref:`requestIssue`
 * **Cause**: User provided collateral below the ``MinimumCollateral``.
-
-``ERR_EXCEEDING_VAULT_LIMIT``
-
-* **Message**: "Issue request exceeds vault collateral limit."
-* **Function**: :ref:`requestIssue`
-* **Cause**: The collateral provided by the vault combined with the exchange rate forms an upper limit on how much PolkaBTC can be issued. The requested amount exceeds this limit.
 
 ``ERR_VAULT_COLLATERAL_RATIO``
 
