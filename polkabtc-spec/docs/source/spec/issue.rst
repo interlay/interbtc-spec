@@ -108,7 +108,7 @@ Functions
 .. _requestIssue:
 
 requestIssue
------------
+------------
 
 A user opens an issue request by providing a small amount of collateral.
 
@@ -252,6 +252,8 @@ Specification
 
 * ``ERR_ISSUE_ID_NOT_FOUND``: Throws if the ``issueId`` cannot be found.
 * ``ERR_COMMIT_PERIOD_EXPIRED``: Throws if the time limit as defined by the ``CommitPeriod`` is not met.
+* ``ERR_UNAUTHORIZED_USER = Unauthorized: Caller must be associated user``: The caller of this function is not the associated user, and hence not authorized to take this action.
+
 
 *Substrate* ::
 
@@ -272,18 +274,19 @@ Function Sequence
     b. ``issueId``: The unique hash received in the ``requestIssue`` function.
     c. ``txId``: the hash of the Bitcoin transaction to the Vault. With the ``txId`` the user can get the remainder of the Bitcoin transaction data including ``txBlockHeight``, ``txIndex``, ``MerkleProof``, and ``rawTx``. See BTC-Relay documentation for details.
 
-2. Checks if the ``issueId`` exists. Throws ``ERR_ISSUE_ID_NOT_FOUND`` if not found. Else, continues.
-3. Checks if the current block height minus the ``CommitPeriod`` is smaller than the ``opentime`` specified in the ``Issue`` struct. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``. Else, continues.
-4. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
-5. Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-issued BTC (``Issue.amount``), the ``vault``'s Bitcoin address (``Issue.btcAddress``), and the ``issueId`` as parameters. If this call returns an error, abort and return the received error. 
-6. Check if the function has thrown an error.
+2. Checks if the ``requester`` is the ``issue.requester``. Throws ``ERR_UNAUTHORIZED_USER`` if called by any account other than the associated ``issue.requester``.
+3. Checks if the ``issueId`` exists. Throws ``ERR_ISSUE_ID_NOT_FOUND`` if not found. Else, continues.
+4. Checks if the current block height minus the ``CommitPeriod`` is smaller than the ``opentime`` specified in the ``Issue`` struct. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``. Else, continues.
+5. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
+6. Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-issued BTC (``Issue.amount``), the ``vault``'s Bitcoin address (``Issue.btcAddress``), and the ``issueId`` as parameters. If this call returns an error, abort and return the received error. 
+7. Check if the function has thrown an error.
 
     a. If the function has thrown an error, execute ``free`` in the VaultRegistry to release the locked collateral for this issue request for the vault. Return ``False``.
     b. Else, continue.
 
-7. Call the ``mint`` function in the Treasury with the ``amount`` and the user's address as the ``receiver``.
-8. Issue an ``Execute   Issue`` event with the user's address, the issueId, the amount, and the Vault's address.
-9. Return ``True``.
+8. Call the ``mint`` function in the Treasury with the ``amount`` and the user's address as the ``receiver``.
+9. Issue an ``Execute   Issue`` event with the user's address, the issueId, the amount, and the Vault's address.
+10. Return ``True``.
 
 .. _cancelIssue:
 
@@ -427,9 +430,14 @@ Error Codes
 
 ``ERR_VAULT_COLLATERAL_RATIO``
 
-* **Message**: "The vault collateral rate is below the safety limit ."
+* **Message**: "The vault collateral rate is below the safety limit."
 * **Function**: :ref:`requestIssue`
 * **Cause**: The vault's collateral needs to be greater than the already issued PolkaBTC under consideration of the safety limit. If the vault's collateral ratio falls below the safety rate, this vault cannot issue new tokens.
+
+* ``ERR_UNAUTHORIZED_USER``
+* **Message**: "Unauthorized: Caller must be associated user"
+* **Function**: :ref:`executeIssue`
+* **Cause**: The caller of this function is not the associated user, and hence not authorized to take this action.
 
 ``ERR_ISSUE_ID_NOT_FOUND``
 
