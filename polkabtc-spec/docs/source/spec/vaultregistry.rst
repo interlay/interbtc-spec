@@ -429,7 +429,7 @@ Specification
 
 *Parameters*
 
-* ``vault``: The BTC Parachain address of the Vault involved in this issue request.
+* ``vault``: The BTC Parachain address of the Vault.
 * ``tokens``: The amount of PolkaBTC to be locked.
 * ``collateral``: The amount of DOT collateral to be locked.
 
@@ -447,7 +447,7 @@ Specification
 
 *Substrate* ::
 
-  fn lockVault(origin, vault: AccountId, tokens: U256, collateral: Balance) -> Result {...}
+  fn lockVault(vault: AccountId, tokens: U256, collateral: Balance) -> Result {...}
 
 Preconditions
 .............
@@ -463,6 +463,55 @@ Function Sequence
 4. Else, add ``tokens`` to ``vault.committedTokens``.
 5. Return.
 
+releaseVault
+------------
+
+.. todo:: add reference to replace function.
+
+A Vault's committed tokens can be released when either (i) an issue request is cancelled before being executed (:ref:`cancelIssue`), (ii) the tokens are redeemed (:ref:`executeRedeem`), or (iii) the Vault is replaced.
+
+Specification
+.............
+
+*Function Signature*
+
+``releaseVault(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC to be released.
+
+*Returns*
+
+* ``None``: Does not return anything.
+
+*Events*
+
+* ``ReleaseVault(vault, tokens, committedTokens)``
+
+*Errors*
+
+* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``committedTokens`` by this vault.
+
+*Substrate* ::
+
+  fn releaseVault(vault: AccountId, tokens: U256) -> Result {...}
+
+Preconditions
+.............
+
+.. todo:: I suppose it should always be possible to exit the system?
+
+
+Function Sequence
+.................
+
+1. Checks if the amount of ``tokens`` to be released is less or equal to the amount of ``vault.committedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+
+2. Subtracts ``tokens`` from ``vault.committedTokens``.
+
+3. Returns.
 
 Events
 ~~~~~~
