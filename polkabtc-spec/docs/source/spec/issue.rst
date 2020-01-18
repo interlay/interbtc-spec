@@ -171,51 +171,48 @@ Function Sequence
 9. Return the ``issueId``. The user stores this for future reference and the next steps, locally.
 
 
-.. todo:: Remove this and make a note at the end. 
-   
-   
-lock
-----
-
-The user sends BTC to a vault's address.
-
-Specification
-.............
-
-*Function Signature*
-
-``lock(requester, amount, vault, issueId)``
-
-*Parameters*
-
-* ``requester``: The user's BTC Parachain account.
-* ``amount``: The amount of PolkaBTC to be issued.
-* ``vault``: The BTC Parachain address of the Vault involved in this issue request.
-* ``issueId``: the unique hash created during the ``requestIssue`` function.
-
-*Returns*
-
-* ``txId``: A unique hash identifying the Bitcoin transaction.
-
-.. todo:: Do we define the Bitcoin transactions here?
-
-*Bitcoin* ::
-
-  OP_RETURN
-
-
-Function Sequence
-.................
-
-1. The user prepares a Bitcoin transaction with the following details:
-
-   a. The input(s) must be spendable from the user.
-   b. The transaction has at least two outputs with the following conditions:
-
-        1. One output is spendable by the ``btcAddress`` of the Vault selected in the ``requestIssue`` function. The output includes the ``amount`` requested in the ``requestIssue`` function in the ``value`` field. This means the number of requested PolkaBTC must be the same amount of transferred BTC (expressed as satoshis).
-        2. One output must include a ``OP_RETURN`` with the ``issueId`` received in the ``requestIssue`` function. This output will not be spendable and therefore the ``value`` field should be ``0``.
-
-2. The user sends the transaction prepared in step 1 to the Bitcoin network and locally stores the ``txId``, i.e. the unique hash of the transaction.
+.. lock
+.. ----
+.. 
+.. The user sends BTC to a vault's address.
+.. 
+.. Specification
+.. .............
+.. 
+.. *Function Signature*
+.. 
+.. ``lock(requester, amount, vault, issueId)``
+.. 
+.. *Parameters*
+.. 
+.. * ``requester``: The user's BTC Parachain account.
+.. * ``amount``: The amount of PolkaBTC to be issued.
+.. * ``vault``: The BTC Parachain address of the Vault involved in this issue request.
+.. * ``issueId``: the unique hash created during the ``requestIssue`` function.
+.. 
+.. *Returns*
+.. 
+.. * ``txId``: A unique hash identifying the Bitcoin transaction.
+.. 
+.. .. todo:: Do we define the Bitcoin transactions here?
+.. 
+.. *Bitcoin* ::
+.. 
+..   OP_RETURN
+.. 
+.. 
+.. Function Sequence
+.. .................
+.. 
+.. 1. The user prepares a Bitcoin transaction with the following details:
+.. 
+..    a. The input(s) must be spendable from the user.
+..    b. The transaction has at least two outputs with the following conditions:
+.. 
+..         1. One output is spendable by the ``btcAddress`` of the Vault selected in the ``requestIssue`` function. The output includes the ``amount`` requested in the ``requestIssue`` function in the ``value`` field. This means the number of requested PolkaBTC must be the same amount of transferred BTC (expressed as satoshis).
+..         2. One output must include a ``OP_RETURN`` with the ``issueId`` received in the ``requestIssue`` function. This output will not be spendable and therefore the ``value`` field should be ``0``.
+.. 
+.. 2. The user sends the transaction prepared in step 1 to the Bitcoin network and locally stores the ``txId``, i.e. the unique hash of the transaction.
 
 
 .. _executeIssue:
