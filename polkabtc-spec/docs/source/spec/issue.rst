@@ -143,6 +143,10 @@ Specification
 
   fn requestIssue(origin, amount: U256, vault: AccountId) -> Result {...}
 
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
 
 Function Sequence
 .................
@@ -259,6 +263,10 @@ Specification
 
   fn executeIssue(origin, issueId: T::H256, txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: Bytes, rawTx: Bytes) -> Result {...}
 
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
 
 Function Sequence
 .................
@@ -434,7 +442,8 @@ Error Codes
 * **Function**: :ref:`requestIssue`
 * **Cause**: The vault's collateral needs to be greater than the already issued PolkaBTC under consideration of the safety limit. If the vault's collateral ratio falls below the safety rate, this vault cannot issue new tokens.
 
-* ``ERR_UNAUTHORIZED_USER``
+``ERR_UNAUTHORIZED_USER``
+
 * **Message**: "Unauthorized: Caller must be associated user"
 * **Function**: :ref:`executeIssue`
 * **Cause**: The caller of this function is not the associated user, and hence not authorized to take this action.
