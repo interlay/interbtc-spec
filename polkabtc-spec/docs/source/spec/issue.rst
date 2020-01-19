@@ -47,7 +47,7 @@ The minimum collateral (DOT) a user needs to provide as griefing protection.
 IssuePeriod
 ............
 
-The time difference in number of blocks between a issue request is created and required completion time by a user. The commit period has an upper limit to prevent griefing of vault collateral.
+The time difference in number of blocks between an issue request is created and required completion time by a user. The issue period has an upper limit to prevent griefing of vault collateral.
 
 *Substrate* ::
 
