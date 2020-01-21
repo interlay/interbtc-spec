@@ -47,7 +47,7 @@ Safety Failures
 
 One of the major questions that arises in cross-chain communication is: what to do if one of the interlinked chains fails?
 
-In the case of BTC-Relay, a major chain reorganization in Bitcoin would be accepted, if the new chain exceeds the tracked ``MainChain`` in BTC-Relay.
+In the case of BTC-Relay, a major chain reorganization in Bitcoin would be accepted, if the new chain exceeds the tracked ``Chains`` in BTC-Relay.
 If the length of the fork exceeds the security parameter *k* relied upon by applications using BTC-Relay, this can have sever impacts, beyond that of users loosing BTC. 
 
 However, as BTC-Relay acts only as mirror of the Bitcoin blockchain, the only possible mitigation of a 51% attack on Bitcoin **halting BTC-Relay** via manual intervention of *staked relayers* or the *governance mechanism*.
@@ -63,7 +63,7 @@ Relay Poisoning
 ~~~~~~~~~~~~~~~
 
 BTC-Relay poisoning is a more subtle way of interfering with correct operation of the system: an adversary submits a Bitcoin fork to BTC-Relay, but does not broadcast it to the actual Bitcoin network. 
-If Liveness of BTC-Relay is breached, e.g. *staked relayers* are unavailable, BTC-Relay can be tricked into accepting an alternate ``MainChain`` than actually maintained in Bitcoin.
+If Liveness of BTC-Relay is breached, e.g. *staked relayers* are unavailable, BTC-Relay can be tricked into accepting an alternate ``Chains`` than actually maintained in Bitcoin.
 
 However, as long as a single honest participant is online and capable of submitting Bitcoin block headers from the Bitcoin main chain to BTC-Relay within *k* blocks, poisoning attacks can be mitigated. 
 

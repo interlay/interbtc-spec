@@ -35,7 +35,7 @@ The interval in number of blocks at which Bitcoin adjusts its difficulty (approx
 TARGET_TIMESPAN
 ...............
 
-Expected duration of the different adjustment interval in seconds. Defaults to ``1209600`` seconds or two weeks.
+Expected duration of the different adjustment interval in seconds, ``1209600`` seconds (two weeks) in the case of Bitcoin.
 
 *Substrate* ::
 
@@ -44,70 +44,15 @@ Expected duration of the different adjustment interval in seconds. Defaults to `
 UNROUNDED_MAX_TARGET
 ....................
 
-The maximum difficulty target. Defaults to :math:`2^{224}-1`. For more information, see the `Bitcoin Wiki <https://en.bitcoin.it/wiki/Target>`_.
+The maximum difficulty target, :math:`2^{224}-1` in the case of Bitcoin. For more information, see the `Bitcoin Wiki <https://en.bitcoin.it/wiki/Target>`_.
 
 *Substrate* ::
 
   const UNROUNDED_MAX_TARGET: U256 = 26959946667150639794667015087019630673637144422540572481103610249215;
 
-Scalars
-~~~~~~~~~
-
-BestBlock
-.........
-
-Byte 32 block hash identifying the current blockchain tip, i.e., the most significant block in ``MainChain``. 
-
-*Substrate* ::
-
-  BestBlock: T::H256;
-
-
-.. note:: In Substrate, Bitcoin uses SHA256 (32 bytes) for its block hashes, transaction identifiers and Merkle trees.  In Substrate, we use the ``T::H256`` type.
-
-BestBlockHeight
-...............
-
-Integer block height of ``BestBlock`` in ``MainChain``. 
-
-*Substrate* ::
-
-  BestBlockHeight: U256;
-
-
-Maps
-~~~~
-
-BlockHeaders
-............
-
-Mapping of ``<blockHash,BlockHeader>``, storing all verified Bitcoin block headers (fork and main chain) submitted to BTC-Relay.
-
-*Substrate* ::
-
-  BlockHeaders: map T::H256 => BlockHeader<T::H256>;
-
-MainChain
-.........
-Mapping of ``<blockHeight,blockHash>`` (``<u256, byte32>``). Tracks the current Bitcoin main chain (refers to stored block headers in ``BlockHeaders``).
-
-*Substrate* ::
-
-  MainChain: map U256 => T::H256;
-
-Forks
-.....
-
-Mapping of ``<forkId,Fork>`` (``<u256, Fork>``), tracking ongoing forks in BTC-Relay.
-
-
-*Substrate* ::
-
-  Forks: map U256 => Fork<Vec<T::H256>>;
-
 Structs
 ~~~~~~~
-
+  
 BlockHeader
 ...........
 
@@ -145,33 +90,71 @@ Parameter               Type       Description
         hashPrevBlock: H256,
         nonce: U32
   }
-  
 
-Fork
-....
 
-Representation of an ongoing Bitcoin fork, tracked in BTC-Relay. 
+BlockChain
+..........
 
-.. warning:: Forks tracked in BTC-Relay and observed in Bitcoin must not necessarily be the same. See :ref:`relay-poisoning` for more details.
+Representation of a Bitcoin blockchain. 
 
 .. tabularcolumns:: |l|l|L|
 
-======================  =============  ===========================================================
-Parameter               Types          Description
-======================  =============  ===========================================================
-``startHeight``         u256           Main chain block height of the block at which this fork starts (*forkpoint*).
-``length``              u256           Length of the fork (in blocks).
-``forkBlockHashes``     array          List  of block hashes, which references Bitcoin block headers stored in ``BlockHeaders``, contained in this fork (in insertion order).
-======================  =============  ===========================================================
+======================  ==============  ========================================================================
+Parameter               Type            Description
+======================  ==============  ========================================================================
+``chain``               Map<u256,H256>  Mapping of ``blockHeight`` to ``blockHash``, which points to a ``BlockHeader`` entry in ``BlockHeaders``.
+``maxHeight``           U256            Max. block height in the ``chain`` mapping. Used for ordering in the ``Chains`` priority queue.
+======================  ==============  ========================================================================
 
-*Substrate*
 
-::
+Data Structures
+~~~~~~~~~~~~~~~
 
-  #[derive(Encode, Decode, Default, Clone, PartialEq)]
-  #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct Fork<> {
-        startHeight: U256,
-        length: U256,
-        forkBlockHahes: Vec<H256>
-  }
+BlockHeaders
+............
+
+Mapping of ``<blockHash, BlockHeader>``, storing all verified Bitcoin block headers (fork and main chain) submitted to BTC-Relay.
+
+*Substrate* ::
+
+  BlockHeaders: map T::H256 => BlockHeader<T::H256>;
+
+
+
+Chains
+.........
+
+Priority queue of ``BlockChain`` elements, **ordered by** ``maxHeight`` (**descending**).
+The ``BlockChain`` entry with the most significant ``maxHeight`` value (i.e., topmost element) in this mapping is considered to be the Bitcoin *main chain*.
+
+*Substrate* ::
+
+  Chains: map U256 => Vec<T::H256>;
+
+
+BestBlock
+.........
+
+32 byte Bitcoin block hash (double SHA256) identifying the current blockchain tip, i.e., the ``BlockHeader`` with the highest ``blockHeight`` in the ``BlockChain`` entry, which has the most significant ``height`` in the ``Chains`` priority queue (topmost position). 
+
+*Substrate* ::
+
+  BestBlock: T::H256;
+
+
+.. note:: Bitcoin uses SHA256 (32 bytes) for its block hashes, transaction identifiers and Merkle trees. In Substrate, we hence use ``T::H256`` to represent these hashes.
+
+BestBlockHeight
+...............
+
+Integer representing the maximum block height (``height``) in the ``Chains`` priority queue. This is also the ``blockHeight`` of the ``BlockHeader`` entry pointed to by ``BestBlock``.
+
+*Substrate* ::
+
+  BestBlockHeight: U256;
+
+
+
+
+
+

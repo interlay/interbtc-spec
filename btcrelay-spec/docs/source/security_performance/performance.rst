@@ -14,7 +14,7 @@ Estimation of Storage Costs
 
 BTC-Relay only stores Bitcoin block headers. Transactions are not stored directly in the relay -- this responsibility lies with other components or applications interacting with BTC-Relay. 
 
-The size of the necessary storage allocation hence grows linear with the length of the Bitcoin blockchain (tracked in BTC-Relay) -- specifically, the block headers stored in ``BlockHeaders`` which are referenced in ``MainChain`` or in an entry of ``Forks``.
+The size of the necessary storage allocation hence grows linear with the length of the Bitcoin blockchain (tracked in BTC-Relay) -- specifically, the block headers stored in ``BlockHeaders`` which are referenced in ``Chains`` or in an entry of ``Forks``.
 
 Recall, for each block header, BTC-Relay merely stores:
 
@@ -36,15 +36,15 @@ BTC-Relay Optimizations
 Pruning
 ~~~~~~~
 
-Optionally, to further reduce storage requirements (e.g., in case more data is to be stored per block in the future), *pruning* of ``MainChain`` and ``BlockHeaders`` can be introduced.
+Optionally, to further reduce storage requirements (e.g., in case more data is to be stored per block in the future), *pruning* of ``Chains`` and ``BlockHeaders`` can be introduced.
 While the storage overhead for Bitcoin itself may be acceptable, Polkadot is expected to connect to numerous blockchains and tracking the entire blockchain history for each could unnecessarily bloat Parachains (even more so, if Parachains are non-exclusive to specific blockchains).
 
-With pruning activated, ``MainChain`` would be implemented as a FIFO queue, where sufficiently old block headers are removed from ``BlockHeaders`` (and the references from ``MainChain`` and ``Forks`` accordingly). 
+With pruning activated, ``Chains`` would be implemented as a FIFO queue, where sufficiently old block headers are removed from ``BlockHeaders`` (and the references from ``Chains`` and ``Forks`` accordingly). 
 The pruning depth can be set to e.g. 10 000 blocks. There is no need to store more block headers, as verification of transactions contained in older blocks can still be performed by requiring users to *re-spend*.
 More detailed analysis of the spending behavior in Bitcoin, i.e., UTXOs of which age are spent most frequently and at which "depth" the spending behavior declines, can be considered to optimize the cost reduction. 
 
 
-.. warning:: If pruning is implemented for ``BlockHeaders`` and ``MainChain`` as performance optimization, it is important to make sure there are no ``Forks`` entries left which reference pruned blocks.
+.. warning:: If pruning is implemented for ``BlockHeaders`` and ``Chains`` as performance optimization, it is important to make sure there are no ``Forks`` entries left which reference pruned blocks.
 
 Batch Submissions
 ~~~~~~~~~~~~~~~~~~

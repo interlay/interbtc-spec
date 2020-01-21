@@ -56,7 +56,7 @@ StatusLog
 
 Array of ``StatusUpdate`` structs, providing a history of status changes of BTC-Relay.
 
-.. note:: If pruning is implemented for ``BlockHeaders`` and ``MainChain`` as performance optimization, ``StatusLog`` entries referencing pruned blocks should be deleted as well. 
+.. note:: If pruning is implemented for ``BlockHeaders`` and ``Chains`` as performance optimization, ``StatusLog`` entries referencing pruned blocks should be deleted as well. 
 
 
 *Substrate* ::

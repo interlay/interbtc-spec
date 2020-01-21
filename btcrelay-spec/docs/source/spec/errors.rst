@@ -41,7 +41,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Function**: :ref:`storeForkBlockHeader` 
 
-* **Cause**:  Raised if raise exception if the submitted block header is actually extending the current longest chain tracked by BTC-Relay (``MainChain``), instead of a fork.
+* **Cause**:  Raised if raise exception if the submitted block header is actually extending the current longest chain tracked by BTC-Relay (``Chains``), instead of a fork.
 
 ``ERR_INVALID_FORK_ID``
 

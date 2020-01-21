@@ -5,6 +5,37 @@ Functions: Utils
 
 There are several helper methods available that abstract Bitcoin internals away in the main function implementation.
 
+
+
+
+.. _getChainId:
+
+getChainId
+----------
+
+Increments ``ChainId`` and returns the new value. Called when a new entry is being added to ``Chains`` (fork submission to BTC-Relay).
+
+*Function Signature*
+
+``getChainId()``
+
+*Returns*
+
+* ``chainId``: the next value of ``ChainId``.
+
+*Substrate*
+
+::
+
+  fn getChainId() -> U256 {...}
+  
+Function Sequence
+~~~~~~~~~~~~~~~~~
+
+1. ``ChainId++``
+2. Return ``ChainId``
+
+
 .. _sha256d:
 
 sha256d
@@ -152,7 +183,7 @@ Function Sequence
         i. If the target difficulties match, return ``True``.
         ii. Otherwise, return ``False``.
 
-    b. The difficulty should be adjusted. Calculate the new expected target by calling the `computeNewTarget`_ function and passing the timestamp of the previous block (get using ``hashPrevBlock`` key in ``BlockHeaders``), the timestamp of the last re-target (get block hash from ``MainChain`` using ``blockHeight - 2016`` as key, then query ``BlockHeaders``) and the target of the previous block (get using ``hashPrevBlock`` key in ``BlockHeaders``) as parameters. Check that the new target matches the ``target`` of the current block (i.e., the block's target was set correctly).
+    b. The difficulty should be adjusted. Calculate the new expected target by calling the `computeNewTarget`_ function and passing the timestamp of the previous block (get using ``hashPrevBlock`` key in ``BlockHeaders``), the timestamp of the last re-target (get block hash from ``Chains`` using ``blockHeight - 2016`` as key, then query ``BlockHeaders``) and the target of the previous block (get using ``hashPrevBlock`` key in ``BlockHeaders``) as parameters. Check that the new target matches the ``target`` of the current block (i.e., the block's target was set correctly).
 
         i. If the new target difficulty matches ``target``, return ``True``.
         ii. Otherwise, return ``False``.
@@ -306,7 +337,7 @@ chainReorg
 ----------
 
 The ``chainReorg`` function is called from ``storeForkBlockHeader`` and handles blockchain reorganizations in BTC-Relay, i.e., when a fork overtakes the tracked main chain in terms of length (and accumulated PoW). 
-As a result, the ``MainChain`` references the stored block headers (in ``BlockHeaders``) are updated to point to the blocks contained in the overtaking fork.
+As a result, the ``Chains`` references the stored block headers (in ``BlockHeaders``) are updated to point to the blocks contained in the overtaking fork.
 
 
 Specification
@@ -318,12 +349,12 @@ Specification
 
 *Parameters*
 
-* ``forkId``: identifier of the fork as stored in ``Forks``, which is to replace the ``MainChain``. 
+* ``forkId``: identifier of the fork as stored in ``Forks``, which is to replace the ``Chains``. 
 
 
 .. *Returns*
 
-.. * ``True``: if the ``MainChain`` is updated to point to the block headers contained in the fork specified by ``forkId``.
+.. * ``True``: if the ``Chains`` is updated to point to the block headers contained in the fork specified by ``forkId``.
 .. * ``False`` (or throws exception): otherwise.
 
 *Substrate*
@@ -338,16 +369,16 @@ Function Sequence
 
 1. Retrieve fork data (``Fork``, see :ref:`data-model`) via ``Fork[forkId]``
 2. Create new entry in ``Forks``, (generate a new identifier ``newForkId``), setting ``Forks[newForkId].startHeight = Forks[forkId].startHeight`` and ``Forks[newForkId].length = Forks[forkId].length - 1``.
-3. Replace the current ``MainChain`` references to ``BlockHeaders`` (i.e., the ``blockHash`` at each ``blockHeight``) with the corresponding entry in ``forkHashes`` of the given fork. In this process, store the replaced ``MainChain`` entries to a new fork. In detail: starting at ``Fork[forkId].startHeight``, loop over ``Fork[forkId].forkHashes`` (``forkHash``) and for each ``forkHash`` (loop counter ``counter = 0`` incremented each round):
+3. Replace the current ``Chains`` references to ``BlockHeaders`` (i.e., the ``blockHash`` at each ``blockHeight``) with the corresponding entry in ``forkHashes`` of the given fork. In this process, store the replaced ``Chains`` entries to a new fork. In detail: starting at ``Fork[forkId].startHeight``, loop over ``Fork[forkId].forkHashes`` (``forkHash``) and for each ``forkHash`` (loop counter ``counter = 0`` incremented each round):
 
     a. Copy the  ``blockHash`` referenced in ``mainChain`` at the corresponding block height (``startHeight + counter``) to ``Forks[newForkId].forkHashes``. 
-    b. Overwrite the ``blockHash`` in ``MainChain`` at the corresponding block height (``startHeight + counter``) with the given ``forkHash``. 
+    b. Overwrite the ``blockHash`` in ``Chains`` at the corresponding block height (``startHeight + counter``) with the given ``forkHash``. 
 
-4. Update ``BestBlock`` and ``BestBlockHeight`` to point to updated highest block in ``MainChain``.
+4. Update ``BestBlock`` and ``BestBlockHeight`` to point to updated highest block in ``Chains``.
 
 5. Delete ``Fork[forkId]``.
 
-.. note:: The last block hash in ``forkHashes`` will be added to ``MainChain`` with a block height exceeding the current ``BestBlockHeight``, since the fork that caused the reorganization is by definition 1 block longer than the ``MainChain`` tracked in BTC-Relay. 
+.. note:: The last block hash in ``forkHashes`` will be added to ``Chains`` with a block height exceeding the current ``BestBlockHeight``, since the fork that caused the reorganization is by definition 1 block longer than the ``Chains`` tracked in BTC-Relay. 
 
 
 .. figure:: ../figures/chainReorg.png
@@ -356,7 +387,7 @@ Function Sequence
     Overview of a the BTC-Relay state before (above) and after (below) ``chainReorg(forkId)``.
 
 
-.. warning:: **Do not instantly delete** the block headers that were removed from the ``MainChain`` through the reorganization. If deletion is required, wait at least until sufficient confirmations have passed, as defined by the security parameter *k* (see :ref:`security`). 
+.. warning:: **Do not instantly delete** the block headers that were removed from the ``Chains`` through the reorganization. If deletion is required, wait at least until sufficient confirmations have passed, as defined by the security parameter *k* (see :ref:`security`). 
 
 
 .. _getForkIdByBlockHash:

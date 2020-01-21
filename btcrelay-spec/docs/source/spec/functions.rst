@@ -58,7 +58,7 @@ The ``initialize`` function takes as input an 80 byte raw Bitcoin block header a
 
 2. Parse ``blockHeaderBytes``, extracting the ``merkleRoot`` using :ref:`extractMerkleRoot`, compute the Bitcoin block hash (``hashCurrentBlock``) of the block header (use :ref:`sha256d`), and store the block header data in ``BlockHeaders``. 
 
-3. Store ``hashCurrentBlock`` in ``MainChain`` using the given ``blockHeight`` as key. 
+3. Create new entry in ``Chains``, using the result of :ref:`getChainId` as key and setting a new array with ``hashCurrentBlock`` as first item as value. 
 
 4. Set ``BestBlock = hashCurrentBlock`` and ``BestBlockHeight = blockHeight``.
 
@@ -70,8 +70,8 @@ The ``initialize`` function takes as input an 80 byte raw Bitcoin block header a
 
 storeMainChainBlockHeader
 -------------------------
-Method to submit block headers to the BTC-Relay, which extend the Bitcoin main chain (as tracked in ``MainChain`` in BTC-Relay). 
-This function calls  :ref:`verifyBlockHeader` proving the 80 bytes Bitcoin block header as input, and, if the latter returns ``True``, extracts from the block header and stores (i) the hash, height and Merkle tree root of the given block header in ``BlockHeaders`` and (ii) the hash and block height in ``MainChain``.
+Method to submit block headers to the BTC-Relay, which extend the Bitcoin main chain (as tracked in ``Chains`` in BTC-Relay). 
+This function calls  :ref:`verifyBlockHeader` proving the 80 bytes Bitcoin block header as input, and, if the latter returns ``True``, extracts from the block header and stores (i) the hash, height and Merkle tree root of the given block header in ``BlockHeaders`` and (ii) the hash and block height in ``Chains``.
 
 
 Specification
@@ -104,7 +104,7 @@ Preconditions
 ~~~~~~~~~~~~~
 
 * The failure handling state must not be set to ``SHUTDOWN: 3``.
-* The to-be-submitted Bitcoin block header must extend ``MainChain`` as *tracked by the BTC-Relay*. 
+* The to-be-submitted Bitcoin block header must extend ``Chains`` as *tracked by the BTC-Relay*. 
 
 .. warning:: The BTC-Relay does not necessarily have the same view of the Bitcoin blockchain as the user's local Bitcoin client. This can happen if (i) the BTC-Relay is under attack, (ii) the BTC-Relay is out of sync, or, similarly, (iii) if the user's local Bitcoin client is under attack or out of sync (see :ref:`security`). 
 
@@ -118,7 +118,7 @@ The ``storeMainChainBlockHeader`` function takes as input the 80 byte raw Bitcoi
 
 1. Check if the failure handling state is set to ``SHUTDOWN``. If true, return ``ERR_SHUTDOWN``. 
 
-2. Check that the submitted block header is extending the ``MainChain`` of BTC-Relay. That is, ``hashPrevBlock`` (extract using :ref:`extractHashPrevBlock`) must be equal to ``BestBlock``. Return ``ERR_NOT_MAIN_CHAIN`` error if this check fails.
+2. Check that the submitted block header is extending the ``Chains`` of BTC-Relay. That is, ``hashPrevBlock`` (extract using :ref:`extractHashPrevBlock`) must be equal to ``BestBlock``. Return ``ERR_NOT_MAIN_CHAIN`` error if this check fails.
 
 3. Call :ref:`verifyBlockHeader` passing ``blockHeaderBytes`` as function parameter. If this call **returns an error** , then abort and return the raised error. 
 
@@ -130,7 +130,7 @@ The ``storeMainChainBlockHeader`` function takes as input the 80 byte raw Bitcoi
     + ``merkleRoot`` is the root of the transaction Merkle tree of the block header. Use :ref:`extractMerkleRoot` to extract from block header. 
     + ``height`` is the blockchain height of the submitted block header. Compute by incrementing the height of the block header referenced by ``hashPrevBlock`` (retrieve from ``BlockHeaders`` using ``hashPrevBlock`` as key).
 
-6. Store ``hashCurrentBlock`` as a new entry in ``MainChain``, using ``blockHeight`` as key.
+6. Store ``hashCurrentBlock`` as a new entry in ``Chains``, using ``blockHeight`` as key.
 
 7. Emit a ``StoreMainChainBlockHeader`` event using ``height`` and ``hashCurrentBlock`` as input (``StoreMainChainHeader(height, hashCurrentBlock)``). 
  
@@ -169,7 +169,7 @@ Specification
 * ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the governance mechanism.
 * ``ERR_INVALID_FORK_ID = "Incorrect fork identifier"``: return error if a non-existent fork identifier is passed. 
 * ``ERR_FORK_PREV_BLOCK = "Previous block hash does not match last block in fork submission"``: return error if the block header does not reference the highest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
-* ``ERR_NOT_FORK = "Indicated fork submission, but block is in main chain"``:  return error if the submitted block header is actually extending the current longest chain tracked by BTC-Relay (``MainChain``) instead of a fork.
+* ``ERR_NOT_FORK = "Indicated fork submission, but block is in main chain"``:  return error if the submitted block header is actually extending the current longest chain tracked by BTC-Relay (``Chains``) instead of a fork.
 
 *Substrate*
 
@@ -214,7 +214,7 @@ The ``storeForkBlockHeader`` function takes as input the 80 byte raw Bitcoin blo
 
 7. Emit a ``StoreForkBlockHeader`` event using ``height`` and ``hashCurrentBlock`` as input (``StoreMainChainHeader(height, hashCurrentBlock)``). 
 
-8. Check if the fork at ``forkId`` has become longer than the current ``MainChain``. This is the case if the block height ``height`` of the submitted block header exceeds the ``BestBlockHeight``. 
+8. Check if the fork at ``forkId`` has become longer than the current ``Chains``. This is the case if the block height ``height`` of the submitted block header exceeds the ``BestBlockHeight``. 
 
     a. If ``height > BestBlockHeight`` call ``chainReorg(forkId)``. If this call returns an error, return the error.
 
@@ -291,7 +291,7 @@ The ``verifyBlockHeader`` function takes as input the 80 byte raw Bitcoin block 
 verifyTransactionInclusion
 --------------------------
 
-The ``verifyTransactionInclusion`` function is one of the core components of the BTC-Relay: this function checks if a given transaction was indeed included in a given block (as stored in ``BlockHeaders`` and tracked by ``MainChain``), by reconstructing the Merkle tree root (given a Merkle proof). Also checks if sufficient confirmations have passed since the inclusion of the transaction (considering the current state of the BTC-Relay ``MainChain``).
+The ``verifyTransactionInclusion`` function is one of the core components of the BTC-Relay: this function checks if a given transaction was indeed included in a given block (as stored in ``BlockHeaders`` and tracked by ``Chains``), by reconstructing the Merkle tree root (given a Merkle proof). Also checks if sufficient confirmations have passed since the inclusion of the transaction (considering the current state of the BTC-Relay ``Chains``).
 
 Specification
 ~~~~~~~~~~~~~
@@ -355,7 +355,7 @@ The ``verifyTransactionInclusion`` function follows the function sequence below:
 
 4. Check that the current ``BestBlockHeight`` exceeds ``txBlockHeight`` by the specified number of ``confirmations``. Return ``ERR_CONFIRMATIONS`` if this check fails. 
 
-5. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``MainChain`` at the passed ``txBlockHeight``.    
+5. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``Chains`` at the passed ``txBlockHeight``.    
 
 6. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Return ``ERR_INVALID_MERKLE_PROOF`` if one of these checks fails.
 
