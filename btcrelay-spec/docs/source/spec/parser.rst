@@ -239,11 +239,11 @@ See the `Bitcoin transaction format in the Bitcoin Developer Reference <https://
 determineVarIntDataLength
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Determines the length of the Bitcoin VarInt in bytes.
+Determines the length of the Bitcoin CompactSize Unsigned Integers (other term for *VarInt*) in bytes. See `CompactSize Unsigned Integers <https://bitcoin.org/en/developer-reference#compactsize-unsigned-integers>`_ for details.
 
 *Function Signature*
 
-``getOutputStartIndex(varIntFlag -> u64)``
+``getOutputStartIndex(varIntFlag -> u64)`` 
 
 *Parameters*
 
@@ -278,7 +278,9 @@ Function Sequence
 extractOPRETURN
 ~~~~~~~~~~~~~~~
 
-Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used to store `80 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in PolkaBTC.
+Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used to store `80 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. 
+
+.. note:: The OP_RETURN field is used to include replay protection data in the PolkaBTC *Issue*, *Redeem*, and *Replace* protocols.
 
 *Function Signature*
 
@@ -305,44 +307,6 @@ Function Sequence
 .................
 
 1. Check that the output is indeed an OP_RETURN output: ``pk_script[0] == 0x6a``. Return ``ERR_NOT_OP_RETURN`` error if this check fails. Note: the ``pk_script`` starts at index ``9`` of the output (nevertheless, make sure to check the length of VarInt indicating the output size using :ref:`determineVarIntDataLength`).
-
-2. Determine the length of the OP_RETURN field (``pk_script[10]``) and return the OP_RETURN value (excluding the flag and size, i.e., starting at index ``11``).
-
-
-
-
-.. _extractOPRETURN:
-
-extractOPRETURN
-~~~~~~~~~~~~~~~
-
-Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used to store `80 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in PolkaBTC.
-
-*Function Signature*
-
-``extractOPRETURN(rawOutput)``
-
-*Parameters*
-
-* ``rawOutput``: raw encoded output 
-
-*Returns*
-
-* ``opreturn``: value of the OP_RETURN data.
-
-*Errors*
-
-* ``ERR_NOT_OP_RETURN = "Expecting OP_RETURN output, but got another type.``: The given output was not an OP_RETURN output.
-
-*Substrate* ::
-
-  fn extractOpreturn(rawOutput: T::Vec<u8>) -> T::Vec<u8> {...}
-
-
-Function Sequence
-.................
-
-1. Check that the output is indeed an OP_RETURN output: ``pk_script[0] == 0x6a``. Return ``ERR_NOT_OP_RETURN`` error if this check fails. Note: the ``pk_script`` starts at index ``9`` of ``rawOutput`` (nevertheless, make sure to check the length of VarInt indicating the output size using :ref:`determineVarIntDataLength`).
 
 2. Determine the length of the OP_RETURN field (``pk_script[10]``) and return the OP_RETURN value (excluding the flag and size, i.e., starting at index ``11``).
 
@@ -380,3 +344,38 @@ Function Sequence
 .................
 
 TODO
+
+
+
+.. _extractP2PKHAddress:
+
+extractP2PKHAddress
+~~~~~~~~~~~~~~~~~~~
+
+Extracts the value of the given output.
+
+*Function Signature*
+
+``extractOutputValue(rawOutput)``
+
+*Parameters*
+
+* ``rawOutput``: raw encoded output 
+
+*Returns*
+
+* ``value``: value of the output.
+
+*Errors*
+
+* ``ERR_INVALID_P2PKH = "Invalid or not P2PKH output"``
+
+*Substrate* ::
+
+  fn extractOutputValue(output: T::Vec<u8>) -> T::H160 {...}
+
+
+Function Sequence
+.................
+
+1. Determine the length of the output script (``output[0]``)

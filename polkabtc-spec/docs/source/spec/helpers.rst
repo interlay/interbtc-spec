@@ -23,7 +23,7 @@ Specification
 
 *Substrate* ::
 
-  fn generateId(account: AccountId) -> T::Hash {...}
+  fn generateId(account: AccountId) -> T::H256 {...}
 
 Function Sequence
 .................

@@ -194,7 +194,7 @@ IssueRequests
 
 CbA-Requesters create issue requests to issue PolkaBTC. This mapping provides access from a unique hash ``IssueId`` to a ``Commit`` struct. ``<CommitId, Commit>``.
 
-*Substrate*: ``IssueRequests map T::Hash => Commit<T::AccountId, T::Balance>``
+*Substrate*: ``IssueRequests map T::H256 => Commit<T::AccountId, T::Balance>``
 
 Structs
 -------
@@ -253,7 +253,7 @@ RedeemRequests
 
 CbA-Redeemers create redeem requests to burn their PolkaBTC and receive BTC in return. This mapping provides access from a unique hash ``RedeemId`` to the ``Redeem`` struct. ``<RedeemId, Redeem>``.
 
-*Substrate*: ``RedeemRequests map T::Hash => Redeem<T::AccountId, T::Balance, T::DateTime>;``
+*Substrate*: ``RedeemRequests map T::H256 => Redeem<T::AccountId, T::Balance, T::DateTime>;``
 
 Structs
 -------

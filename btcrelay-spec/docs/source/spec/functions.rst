@@ -333,7 +333,7 @@ Specification
 
 ::
 
-  fn verifyTransactionInclusion(txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: U256) -> Result {...}
+  fn verifyTransactionInclusion(txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: U256) -> Result {...}
 
 Preconditions
 ~~~~~~~~~~~~~
