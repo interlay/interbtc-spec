@@ -42,7 +42,7 @@ Users create redeem requests to receive BTC in return for PolkaBTC. This mapping
 
 *Substrate* ::
 
-  RedeemRequests map T::Hash => Redeem<T::AccountId, T::BlockNumber, T::Balance>
+  RedeemRequests map T::H256 => Redeem<T::AccountId, T::BlockNumber, T::Balance>
 
 
 Structs

@@ -30,7 +30,7 @@ Bitcoin uses a double SHA256 hash to protect against `"length-extension" attacks
 
 ::
 
-  fn sha256d(data: String) -> T::Hash {...}
+  fn sha256d(data: String) -> T::H256 {...}
   
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -64,7 +64,7 @@ A function that computes a parent hash from two child nodes. This function is us
 
 ::
 
-  fn concatSha256d(left: T::Hash, right: T::Hash) -> T::Hash {...}
+  fn concatSha256d(left: T::H256, right: T::H256) -> T::H256 {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -139,7 +139,7 @@ Verifies the currently submitted block header has the correct difficulty target.
 
 ::
 
-  fn checkCorrectTarget(hashPrevBlock: T::Hash, blockHeight: U256, target: U256) -> bool {...}
+  fn checkCorrectTarget(hashPrevBlock: T::H256, blockHeight: U256, target: U256) -> bool {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -226,7 +226,7 @@ The computeMerkle function calculates the root of the Merkle tree of transaction
 
 ::
 
-  fn computeMerkle(txId: T::Hash, txIndex: u64, merkleProof: String) -> Result<H256, ERR_INVALID_MERKLE_PROOF> {...}
+  fn computeMerkle(txId: T::H256, txIndex: u64, merkleProof: String) -> Result<H256, ERR_INVALID_MERKLE_PROOF> {...}
 
 
 Function Sequence
@@ -390,7 +390,7 @@ Specification
 
 ::
 
-  fn getForkIdByBlockHash(blockHash: T::Hash) -> Result<U256, ERR_FORK_ID_NOT_FOUND> {...}
+  fn getForkIdByBlockHash(blockHash: T::H256) -> Result<U256, ERR_FORK_ID_NOT_FOUND> {...}
 
 
 Function Sequence

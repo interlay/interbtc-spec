@@ -63,7 +63,7 @@ Users create issue requests to issue PolkaBTC. This mapping provides access from
 
 *Substrate* ::
 
-  IssueRequests map T::Hash => Issue<T::AccountId, T::BlockNumber, T::Balance>
+  IssueRequests map T::H256 => Issue<T::AccountId, T::BlockNumber, T::Balance>
 
 
 Structs

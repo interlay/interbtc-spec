@@ -7,6 +7,10 @@ Functions: Parser
 List of functions used to extract data from Bitcoin block headers and transactions.
 See the Bitcoin Developer Reference for details on the `block header <https://bitcoin.org/en/developer-reference#block-chain>`_ and `transaction <https://bitcoin.org/en/developer-reference#transactions>`_ format.
 
+
+.. note:: When comparing byte values, use the hash (e.g. SHA256) to avoid errors. 
+
+
 Block Header 
 ------------
 
@@ -239,11 +243,11 @@ See the `Bitcoin transaction format in the Bitcoin Developer Reference <https://
 determineVarIntDataLength
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Determines the length of the Bitcoin VarInt in bytes.
+Determines the length of the Bitcoin CompactSize Unsigned Integers (other term for *VarInt*) in bytes. See `CompactSize Unsigned Integers <https://bitcoin.org/en/developer-reference#compactsize-unsigned-integers>`_ for details.
 
 *Function Signature*
 
-``getOutputStartIndex(varIntFlag -> u64)``
+``getOutputStartIndex(varIntFlag -> u64)`` 
 
 *Parameters*
 
@@ -278,7 +282,9 @@ Function Sequence
 extractOPRETURN
 ~~~~~~~~~~~~~~~
 
-Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used to store `80 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in PolkaBTC.
+Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used to store `80 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. 
+
+.. note:: The OP_RETURN field is used to include replay protection data in the PolkaBTC *Issue*, *Redeem*, and *Replace* protocols.
 
 *Function Signature*
 
@@ -310,50 +316,15 @@ Function Sequence
 
 
 
-
-.. _extractOPRETURN:
-
-extractOPRETURN
-~~~~~~~~~~~~~~~
-
-Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used to store `80 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in PolkaBTC.
-
-*Function Signature*
-
-``extractOPRETURN(rawOutput)``
-
-*Parameters*
-
-* ``rawOutput``: raw encoded output 
-
-*Returns*
-
-* ``opreturn``: value of the OP_RETURN data.
-
-*Errors*
-
-* ``ERR_NOT_OP_RETURN = "Expecting OP_RETURN output, but got another type.``: The given output was not an OP_RETURN output.
-
-*Substrate* ::
-
-  fn extractOpreturn(rawOutput: T::Vec<u8>) -> T::Vec<u8> {...}
-
-
-Function Sequence
-.................
-
-1. Check that the output is indeed an OP_RETURN output: ``pk_script[0] == 0x6a``. Return ``ERR_NOT_OP_RETURN`` error if this check fails. Note: the ``pk_script`` starts at index ``9`` of ``rawOutput`` (nevertheless, make sure to check the length of VarInt indicating the output size using :ref:`determineVarIntDataLength`).
-
-2. Determine the length of the OP_RETURN field (``pk_script[10]``) and return the OP_RETURN value (excluding the flag and size, i.e., starting at index ``11``).
-
-
-
 .. _extractOutputValue:
 
 extractOutputValue
 ~~~~~~~~~~~~~~~~~~
 
 Extracts the value of the given output.
+
+
+.. note:: Needs conversion to Big Endian when converting to integer. 
 
 *Function Signature*
 
@@ -367,16 +338,59 @@ Extracts the value of the given output.
 
 * ``value``: value of the output.
 
-*Errors*
-
-* `` ``
-
 *Substrate* ::
 
-  fn extractOutputValue(output: T::Vec<u8>) -> T::Vec<u8> {...}
+  fn extractOutputValue(output: T::Vec<u8>) -> u64 {...}
 
 
 Function Sequence
 .................
 
-TODO
+1. Return the first 8 bytes of ``output``, converted from LE to BE. 
+
+
+
+.. _extractOutputAddress:
+
+extractOutputAddress
+~~~~~~~~~~~~~~~~~~~~
+
+Extracts the value of the given output.
+
+.. note:: Please refer to the `Bitcoin Developer Reference on Transactions <https://bitcoin.org/en/transactions-guide#introduction>`_ when implementing this function.
+
+*Function Signature*
+
+``extractOutputAddress(rawOutput)``
+
+*Parameters*
+
+* ``rawOutput``: raw encoded output 
+
+*Returns*
+
+* ``value``: value of the output.
+
+*Errors*
+
+* ``ERR_INVALID_OUTPUT_SCRIPT = "Invalid or malformed output script"``: The script of the given output is invalid or malformed. 
+
+*Substrate* ::
+
+  fn extractOutputAddress(output: T::Vec<u8>) -> T::H160 {...}
+
+
+Function Sequence
+.................
+
+1. Check if output is a SegWit output: ``output[9] == 0``. 
+
+   a. If SegWit output (P2WPKH or P2WSH), check that ``output[10]`` equals the length of the output script (extract from``output[8]``). If this check fails, return ``ERR_INVALID_OUTPUT_SCRIPT``.
+   b. Return the number of characters specified in ``output[8]`` (length of the output script), starting with ``output[11]``. This will be 20 bytes for `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_ and 32 bytes for `P2WSH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WSH-Transactions>`_.
+
+2. Otherwise, extract the ``tag`` indicating  the output type: 3 bytes starting at index ``8`` in ``output``.
+
+   a. If P2PKH output (``tag == [0x19, 0x76, 0xa9]``). Check that ``output[11] == [0x14]`` or the last two bytes are equal to ``[0x88, 0xac]. If this check fails, return ``ERR_INVALID_OUTPUT_SCRIPT``. Otherwise, return 20 bytes starting with ``output[12]``.
+
+
+   b. If P2WSH output (``tag == [0x17, 0xa9, 0x14]``). Check that the last byte is equal to ``[0x87]``. If this check fails, return ``ERR_INVALID_OUTPUT_SCRIPT``. Otherwise, return 32 bytes starting with ``output[12]``.
