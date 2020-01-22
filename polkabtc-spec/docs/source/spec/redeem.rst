@@ -77,6 +77,10 @@ Parameter           Type        Description
         completed: bool
   }
 
+
+Functions
+~~~~~~~~~
+
 .. _requestRedeem:
 
 requestRedeem
