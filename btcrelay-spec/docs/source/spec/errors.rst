@@ -22,7 +22,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message:** "Main chain submission indicated, but submitted block is on a fork"
 
-* **Function:** :ref:`storeMainChainBlockHeader`
+* **Function:** :ref:`storeBlockHeader`
 
 * **Cause**:   Raised if the block header submission indicates that it is extending the current longest chain, but is actually on a (new) fork.
 
@@ -155,7 +155,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message**: "BTC Parachain has shut down"
 
-* **Function**: :ref:`verifyTransactionInclusion` | :ref:`storeForkBlockHeader` | :ref:`storeMainChainBlockHeader`
+* **Function**: :ref:`verifyTransactionInclusion` | :ref:`storeForkBlockHeader` | :ref:`storeBlockHeader`
 
 * **Cause**: The BTC Parachain has been shutdown by a manual intervention of the governance mechanism.
 

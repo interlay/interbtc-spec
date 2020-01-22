@@ -41,7 +41,7 @@ If the block header was stored successfully, emit an event with the stored block
 
 *Functions*
 
-* :ref:`storeMainChainBlockHeader`
+* :ref:`storeBlockHeader`
 
 *Substrate* ::
 

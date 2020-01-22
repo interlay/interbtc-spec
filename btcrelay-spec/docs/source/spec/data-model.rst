@@ -69,6 +69,8 @@ Parameter               Type       Description
 ``merkleRoot``          byte32     Root of the Merkle tree referencing transactions included in the block.
 ``target``              u256       Difficulty target of this block (converted from ``nBits``, see `Bitcoin documentation <https://bitcoin.org/en/developer-reference#target-nbits>`_.).
 ``timestamp``           timestamp  UNIX timestamp indicating when this block was mined in Bitcoin.
+``chain``               pointer    Pointer to the ``BlockChain`` struct in which this block header is contained.
+.                       .          .
 ``version``             u32        [Optional] Version of the submitted block.
 ``hashPrevBlock``       byte32     [Optional] Block hash of the predecessor of this block.
 ``nonce``               u32        [Optional] Nonce used to solve the PoW of this block. 
@@ -85,6 +87,7 @@ Parameter               Type       Description
         merkleRoot: H256,
         target: U256,
         timestamp: DateTime,
+        chain: &Chain,
         // Optional fields
         version: U32, 
         hashPrevBlock: H256,
@@ -127,10 +130,41 @@ Chains
 Priority queue of ``BlockChain`` elements, **ordered by** ``maxHeight`` (**descending**).
 The ``BlockChain`` entry with the most significant ``maxHeight`` value (i.e., topmost element) in this mapping is considered to be the Bitcoin *main chain*.
 
+The exact choice of data structure is left to the developer. We recommend to use a heap, which allows re-balancing (changing the priority/order of items while in the heap). Specifically, we require the following operations to be available:
+
+  * ``max`` ... returns the item with the maximum value (as used for sorting).
+  * ``insert`` ... inserts a new item, maintaining ordering in relation to other items.
+  * ``delete`` ... removes an item.
+  * ``find`` ... returns an item with a given index (by sorting key and stored value).
+  * ``update`` ... [Optional] modifies the sorting key of an item and updates ordering if necessary (incrementing ``maxHeight`` of a BlockChain entry). Can be implemented using ``delete`` and ``insert``.
+
+.. attention:: If two ``BlockChain`` entries have the same ``maxHeight``, do **not** change ordering! 
+
+.. note:: The assumption for ``Chains`` is that, in the majority of cases, block headers will be appended to the *main chain* (longest chain), i.e., the ``BlockChain`` entry at the most significant position in the queue/heap. Similarly, transaction inclusion proofs (:ref:`verifyTransaction`) are only checked against the *main chain*. This means, in the average case lookup complexity will be O(1). Furthermore, block headers can only be appended if they (i) have a valid PoW and (ii) do not yet exist in ``BlockHeaders`` - hence, spamming is very costly and unlikely. Finally, blockchain forks and re-organizations occur infrequently, especially in Bitcoin. In principle, optimizing lookup costs should be prioritized, ideally O(1), while inserting of new items and re-balancing can even be O(n). 
+
 *Substrate* ::
 
-  Chains: map U256 => Vec<T::H256>;
+  // ideally:
+  // Chains: PriorityQueue<BlockChain, Ord>;
+  // alternative:
+  Chains: BinaryHeap<BlockChain, Ord>;
+  
+  impl Ord for BlockChain {
+    fn cmp(&self, other: &BlockChain) -> Ordering {
+    other.maxHeight.cmp(&self.maxHeight)
+    // Keeps ordering if equal ("first seen" as in Bitcoin)
+    }
+  }
 
+  // Also needs to be implemented for BinaryHeap
+  impl PartialOrd for BlockChain {
+    fn partial_cmp(&self, other: &BlockChain) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+  }
+  
+
+.. attention:: ``PriorityQueue`` is **currently not** natively supported in Substrate. A Rust implementation can be found `here <https://docs.rs/priority-queue/0.7.0/priority_queue/>`_, which has O(1) lookup and O(log(n)) re-balancing. This functionality can be emulated using a ``BinaryHeap`` by deleting and re-inserting ``BlockChain`` entries when necessary.
 
 BestBlock
 .........

@@ -175,17 +175,15 @@ Verifies the currently submitted block header has the correct difficulty target.
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-1. Retrieve the previous block header with the ``hashPrevBlock`` from the ``BlockHeaders`` storage and extract the ``target`` difficulty of the previous block.
-2. Check if the ``target`` difficulty should be adjusted at this ``blockHeight``.
+1. Retrieve the previous block header with the ``hashPrevBlock`` from the ``BlockHeaders`` storage and the difficulty target (``prevTarget``) of this (previous) block.
 
-    a. If the difficulty should not be adjusted, check if the ``target`` of the submitted block matches the target of the previous block and check that the target of the previous block is not ``0``.
+2. Check if the ``prevTarget`` difficulty should be adjusted at this ``blockHeight``.
 
-        i. If the target difficulties match, return ``True``.
-        ii. Otherwise, return ``False``.
+    a. If the difficulty should not be adjusted, check if the ``target`` of the submitted block matches the ``prevTarget`` of the previous block and check that ``prevTarget``is not ``0``. Return false if either of these checks fails.
 
     b. The difficulty should be adjusted. Calculate the new expected target by calling the `computeNewTarget`_ function and passing the timestamp of the previous block (get using ``hashPrevBlock`` key in ``BlockHeaders``), the timestamp of the last re-target (get block hash from ``Chains`` using ``blockHeight - 2016`` as key, then query ``BlockHeaders``) and the target of the previous block (get using ``hashPrevBlock`` key in ``BlockHeaders``) as parameters. Check that the new target matches the ``target`` of the current block (i.e., the block's target was set correctly).
 
-        i. If the new target difficulty matches ``target``, return ``True``.
+        i. If the newly calculated target difficulty matches ``target``, return ``True``.
         ii. Otherwise, return ``False``.
 
 
@@ -432,5 +430,6 @@ Function Sequence
     a. If ``True``: return the corresponding ``forkId``.
 
 2. Return ``ERR_FORK_ID_NOT_FOUND`` otherwise.
+
 
 
