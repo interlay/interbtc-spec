@@ -19,6 +19,7 @@ Welcome to PolkaBTC's documentation!
    spec/data-model
    spec/treasury
    spec/vaultregistry
+   spec/collateral
    spec/issue
    spec/redeem
    spec/replace
