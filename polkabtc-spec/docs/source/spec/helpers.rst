@@ -32,3 +32,4 @@ Function Sequence
 2. Hash the result of step 1.
 3. Return the resulting hash.
 
+.. todo:: Get ``Nonce`` from Security module 

@@ -1,3 +1,5 @@
+.. _bitcoin-data-model:
+
 Bitcoin Data Model
 ==================
 

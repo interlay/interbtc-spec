@@ -68,9 +68,11 @@ If Liveness of BTC-Relay is breached, e.g. *staked relayers* are unavailable, BT
 However, as long as a single honest participant is online and capable of submitting Bitcoin block headers from the Bitcoin main chain to BTC-Relay within *k* blocks, poisoning attacks can be mitigated. 
 
 
+.. _replace-attacks:
+
 Replay Attacks
 ~~~~~~~~~~~~~~
-Since BTC-Relay does not store Bitcoin transactions, nor can it be aware of all possible applications using ``verifyTransaction``, duplicate submission of transaction inclusion proofs **cannot be easily detected** by BTC-Relay.
+Since BTC-Relay does not store Bitcoin transactions, nor can it be aware of all possible applications using ``verifyTransactionInclusion``, duplicate submission of transaction inclusion proofs **cannot be easily detected** by BTC-Relay.
 
 As such, it lies in the responsibility of each application interacting with BTC-Relay to introduce necessary replay protection mechanisms (e.g. nonces stored in OP_RETURN outputs of verified transactions) and to check the latter using the :ref:`parser` component of BTC-Relay. 
 

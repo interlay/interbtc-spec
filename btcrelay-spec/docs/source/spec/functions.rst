@@ -288,17 +288,17 @@ The ``verifyBlockHeader`` function takes as input the 80 byte raw Bitcoin block 
 
 .. _verifyTransaction:
 
-verifyTransaction
------------------
+verifyTransactionInclusion
+--------------------------
 
-The ``verifyTransaction`` function is one of the core components of the BTC-Relay: this function checks if a given transaction was indeed included in a given block (as stored in ``BlockHeaders`` and tracked by ``MainChain``), by reconstructing the Merkle tree root (given a Merkle proof). Also checks if sufficient confirmations have passed since the inclusion of the transaction (considering the current state of the BTC-Relay ``MainChain``).
+The ``verifyTransactionInclusion`` function is one of the core components of the BTC-Relay: this function checks if a given transaction was indeed included in a given block (as stored in ``BlockHeaders`` and tracked by ``MainChain``), by reconstructing the Merkle tree root (given a Merkle proof). Also checks if sufficient confirmations have passed since the inclusion of the transaction (considering the current state of the BTC-Relay ``MainChain``).
 
 Specification
 ~~~~~~~~~~~~~
 
 *Function Signature*
 
-``verifyTransaction(txId, txBlockHeight, txIndex, merkleProof, confirmations)``
+``verifyTransactionInclusion(txId, txBlockHeight, txIndex, merkleProof, confirmations)``
 
 *Parameters*
 
@@ -325,7 +325,7 @@ Specification
 * ``ERR_PARTIAL = "BTC Parachain partially deactivated"``: the BTC Parachain has been partially deactivated since a specific block height.
 * ``ERR_HALTED = "BTC Parachain is halted"``: the BTC Parachain has been halted.
 * ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the governance mechanism.
-* ``ERR_INVALID_TXID = "Invalid transaction identifier"``: return error if the transaction identifier (``txId``) is malformed.
+* ``ERR_MALFORMED_TXID = "Malformed transaction identifier"``: return error if the transaction identifier (``txId``) is malformed.
 * ``ERR_CONFIRMATIONS = "Transaction has less confirmations than requested"``: return error if the block in which the transaction specified by ``txId`` was included has less confirmations than requested.
 * ``ERR_INVALID_MERKLE_PROOF = "Invalid Merkle Proof"``: return error if the Merkle proof is malformed or fails verification (does not hash to Merkle root).
 
@@ -333,19 +333,19 @@ Specification
 
 ::
 
-  fn verifyTransaction(origin, txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: U256) -> Result {...}
+  fn verifyTransactionInclusion(txId: T::Hash, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: U256) -> Result {...}
 
 Preconditions
 ~~~~~~~~~~~~~
 
 * If the failure handling status is set to ``PARTIAL: 1``, transaction verification is disabled for the latest blocks.
-* The failure handling status must not be set to ``HALTED: 2``. If ``HALTED``, all transaction verification is disabled.
-* The failure handling status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN``, all transaction verification is disabled.
+* The failure handling status must not be set to ``HALTED: 2``. If ``HALTED`` is set, all transaction verification is disabled.
+* The failure handling status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN`` is set, all transaction verification is disabled.
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-The ``verifyTransaction`` function follows the function sequence below:
+The ``verifyTransactionInclusion`` function follows the function sequence below:
 
 1. Check if the failure handling state is set to ``HALTED`` or ``SHUTDOWN``. If true, return ``ERR_HALTED`` or ``ERR_SHUTDOWN`` and return. 
 
@@ -366,9 +366,92 @@ The ``verifyTransaction`` function follows the function sequence below:
   b. Otherwise return ``ERR_INVALID_MERKLE_PROOF``. 
 
 .. figure:: ../figures/verifyTransaction-sequence.png
-    :alt: verifyTransaction sequence diagram
+    :alt: verifyTransactionInclusion sequence diagram
 
-    The steps to verify a transaction in the :ref:`verifyTransaction` function.
+    The steps to verify a transaction in the :ref:`verifyTransactionInclusion` function.
 
 
+
+
+
+.. _validateTransaction:
+
+validateTransaction
+--------------------
+
+Given a raw Bitcoin transaction, this function 
+
+1) Parses and extracts 
+
+   a. the value of the first output, 
+   b. the recipient address of the first output and 
+   c. the OP_RETURN value of the second output of the transaction.
+
+2) Validates the extracted values against the function parameters.
+
+.. note:: See :ref:`bitcoin-data-model` for more details on the transaction structure, and :ref:`accepted-tx-format` for the transaction format of Bitcoin transactions validated in this function.
+
+Specification
+~~~~~~~~~~~~~
+
+*Function Signature*
+
+``validateTransaction(txId, rawTx, paymentValue, recipientBtcAddress, opReturnId)``
+
+*Parameters*
+
+* ``txId``: 32 byte hash identifier of the transaction.
+* ``rawTx``:  raw Bitcoin transaction including the transaction inputs and outputs.
+* ``paymentValue``: integer value of BTC sent in the (first) *Payment UTXO* of transaction.
+* ``recipientBtcAddress``: 20 byte Bitcoin address of recipient of the BTC in the (first) *Payment UTXO*.
+* ``opReturnId``: 32 byte hash identifier expected in OP_RETURN (see :ref:`_replace-attacks`).
+
+*Returns*
+
+* ``True``: if the transaction was successfully parsed and validation of the passed values was correct. 
+* Error otherwise.
+
+*Events*
+
+* ``ValidateTransaction(txId, paymentValue, recipientBtcAddress, opReturnId)``: if parsing and validation was successful, emit an event specifying the ``txId``, the ``paymentValue``, the ``recipientBtcAddress`` and the ``opReturnId``.
+
+*Errors*
+
+* ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the governance mechanism.
+* ``ERR_INVALID_TXID = "Transaction hash does not match given txid"``: return error if the transaction identifier (``txId``) does not match the actual hash of the transaction.
+* ``ERR_INSUFFICIENT_VALUE = "Value of payment below requested amount"``: return error the value of the (first) *Payment UTXO* is lower than ``paymentValue``.
+* ``ERR_TX_FORMAT = "Transaction has incorrect format"``: return error if the transaction has an incorrect format (see :ref:`accepted-tx-format`).
+* ``ERR_WRONG_RECIPIENT = "Incorrect recipient Bitcoin address"``: return error if the recipient specified in the (first) *Payment UTXO* does not match the given ``recipientBtcAddress``.
+* ``ERR_INVALID_OPRETURN = "Incorrect identifier in OP_RETURN field"``: return error if the OP_RETURN field of the (second) *Data UTXO* does not match the given ``opReturnId``.
+
+*Substrate*
+
+::
+
+  fn validateTransaction(txId: H256, rawTx: String, paymentValue: Balance, recipientBtcAddress: H160, opReturnId: H256) -> Result {...}
+
+Preconditions
+~~~~~~~~~~~~~
+
+* The failure handling status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN`` is set, all transaction validation is disabled.
+
+Function Sequence
+~~~~~~~~~~~~~~~~~
+
+See the `raw Transaction Format section in the Bitcoin Developer Reference <https://bitcoin.org/en/developer-reference#raw-transaction-format>`_ for a full specification of Bitcoin's transaction format (and how to extract inputs, outputs etc. from the raw transaction format). 
+
+1. Check that the double SHA256 hash of ``rawTx`` (use :ref:`sha256d`) equals to the ``txid``. Return ``ERR_INVALID_TXID`` if this check fails. 
+
+2. Check that the transaction (``rawTx``) has at least 2 outputs. The first output (*Payment UTXO*) must be a `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_ or `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_ output. The second output (*Data UTXO*) must be an `OP_RETURN <https://bitcoin.org/en/transactions-guide#term-null-data>`_ output. Raise ``ERR_TX_FORMAT`` if this check fails. 
+
+3. Extract the value of the (first) *Payment UTXO* from ``rawTx`` and check that it is equal (or greater) than ``paymentValue``. Return ``ERR_INSUFFICIENT_VALUE`` if this check fails. 
+
+4. Extract the Bitcoin address specified as recipient in the (first) *Payment UTXO* and check that it matches ``recipientBtcAddress``. Return ``ERR_WRONG_RECIPIENT`` if this check fails.
+
+5. Extract the OP_RETURN value from the (second) *Data UTXO* and check that it matches ``opReturnId``. Return ``ERR_INVALID_OPRETURN`` error if this check fails.
+
+6. Return ``True``.
+
+
+.. todo:: Decide how to best react if more BTC was sent, than expected. Different handling of this may be necessary, depending on the protocol (Issue, Redeem, Replace). Returning an error aborts the program flow, which may be unwanted in some cases. 
 

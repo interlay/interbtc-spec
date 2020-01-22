@@ -23,7 +23,7 @@ If the first block header was stored successfully, emit an event with the stored
 
 *Substrate* ::
 
-  Initialized(U256, Hash);
+  Initialized(U256, H256);
 
 StoreMainChainHeader
 --------------------
@@ -45,7 +45,7 @@ If the block header was stored successfully, emit an event with the stored block
 
 *Substrate* ::
 
-  StoreMainChainHeader(U256, Hash);
+  StoreMainChainHeader(U256, H256);
 
 StoreForkHeader
 ---------------
@@ -68,7 +68,7 @@ If the submitted block header is on a fork, emit an event with the fork’s id, 
 
 *Substrate* ::
 
-  StoreForkHeader(U256, U256, Hash);
+  StoreForkHeader(U256, U256, H256);
 
 ChainReorg
 ----------
@@ -91,7 +91,7 @@ If the submitted block header on a fork results in a reorganization (fork longer
 
 *Substrate* ::
 
-  ChainReorg(Hash, U256, U256);
+  ChainReorg(H256, U256, U256);
 
 VerifyTransaction
 -----------------
@@ -110,8 +110,38 @@ If the verification of the transaction inclusion proof was successful, emit an e
 
 *Functions*
 
-* :ref:`verifyTransaction`
+* :ref:`verifyTransactionInclusion`
 
 *Substrate* ::
 
-  VerifyTransaction(Hash, U256, U256);
+  VerifyTransaction(H256, U256, U256);
+
+
+
+
+
+ValidateTransaction
+---------------------
+
+If parsing and validation of the given raw transaction was successful, emit an event specifying the ``txId``, the ``paymentValue``, the ``recipientBtcAddress`` and the ``opReturnId``.
+
+*Event Signature*
+
+``ValidateTransaction(txId, paymentValue, recipientBtcAddress, opReturnId)``
+
+*Parameters*
+
+* ``txId``: the hash of the transaction.
+* ``paymentValue``: integer value of BTC sent in the (first) *Payment UTXO* of transaction.
+* ``recipientBtcAddress``: 20 byte Bitcoin address of recipient of the BTC in the (first) *Payment UTXO*.
+* ``opReturnId``: 32 byte hash identifier expected in OP_RETURN (replay protection).
+
+*Functions*
+
+* :ref:`validateTransaction`
+
+*Substrate* ::
+
+  ValidateTransaction(H256, U256, H160, H256);
+
+
