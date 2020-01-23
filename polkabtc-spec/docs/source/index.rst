@@ -26,8 +26,6 @@ Welcome to PolkaBTC's documentation!
    spec/btc-relay
    spec/failure-handling
    spec/helpers
-   spec/events
-   spec/errors
 
 .. toctree::
    :maxdepth: 2
