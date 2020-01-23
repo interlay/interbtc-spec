@@ -16,7 +16,6 @@ Welcome to PolkaBTC's documentation!
    :maxdepth: 2
    :caption: Specification
 
-   spec/data-model
    spec/treasury
    spec/vaultregistry
    spec/collateral
