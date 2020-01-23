@@ -58,9 +58,9 @@ The ``initialize`` function takes as input an 80 byte raw Bitcoin block header a
 
 2. Parse ``blockHeaderBytes``, extracting  the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` and :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash (``hashCurrentBlock``) using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
 
-3. Create new ``Blockchain`` entry in ``Chains``, setting ``maxHeight = blockHeight`` and inserting ``hashCurrentBlock`` in the ``chains`` mapping using ``blockHeight`` as key. 
+3. Create new ``Blockchain`` entry in ``Chains``, setting ``maxHeight = blockHeight`` and inserting ``hashCurrentBlock`` in the ``chain`` mapping using ``blockHeight`` as key. 
 
-4.Store the ``merkleRoot``, ``blockHeight``, ``timestamp``, ``target``, and a pointer to the ``BlockChain`` containing this block header (``BlockHeader`` struct) in ``BlockHeaders``, using ``hashCurrentBlock`` as key. 
+4.Store a new ``BlockHeader`` struct containing ``merkleRoot``, ``blockHeight``, ``timestamp``, ``target``, and a pointer (``chainRef``) to the ``BlockChain`` struct - as associated with this block header - in ``BlockHeaders``, using ``hashCurrentBlock`` as key. 
 
 5. Set ``BestBlock = hashCurrentBlock`` and ``BestBlockHeight = blockHeight``.
 
@@ -119,151 +119,65 @@ The ``storeBlockHeader`` function takes as input the 80 byte raw Bitcoin block h
 
 1. Check if the failure handling state is set to ``SHUTDOWN``. If true, return ``ERR_SHUTDOWN``. 
 
-2. Check that the ``blockHeaderBytes`` is 80 bytes long. Return ``ERR_INVALID_HEADER_SIZE`` exception and abort otherwise.
+2. Call :ref:`verifyBlockHeader` passing ``blockHeaderBytes`` as function parameter. If this call **returns an error** , then abort and return the raised error. If successful, this call returns the hash of the previous block (``hashPrevBlock``), referenced in ``blockHeaderBytes``, as stored in ``BlockHeaders``.
 
-3. Compute the PoW block hash (``hashCurrentBlock``) using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
+3. Determine which ``BlockChain`` entry in ``Chains`` this block header is extending, or if it is a new fork and hence a new ``BlockChain`` entry needs to be created. For this, get the ``BlockHeader`` struct stored in ``BlockHeaders`` with ``hashPrevBlock`` and use its ``chainRef`` pointer as key to lookup the associated ``BlockChain`` struct. Then, check if the  ``BlockHeader.blockHeight`` (as referenced by ``hashPrevBlock``) is equal  to ``BlockChain.maxHeight``.
 
-4. Check that the block header is not yet stored in BTC-Relay (``hashCurrentBlock`` must not yet be in ``BlockHeaders``). Return ``ERR_DUPLICATE_BLOCK`` otherwise. 
-
-5. Get the ``BlockHeader`` referenced by the submitted block header via ``hashPrevBlock`` (extract from ``blockHeaderBytes`` using :ref:`extractHashPrevBlock`). Return ``ERR_PREV_BLOCK`` if no such entry was found.
-
-6. Check that the Proof-of-Work hash (``blockHash``) is below the ``target`` specified in the block header. Return ``ERR_LOW_DIFF`` otherwise.
-
-7. Check that the ``target`` specified in the block header (extract using :ref:`extractNBits` and :ref:`nBitsToTarget`) is correct by calling :ref:`checkCorrectTarget` passing ``hashPrevBlock``, ``height`` and ``target`` as parameters (as per Bitcoin's difficulty adjustment mechanism, see `here <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_). If this call returns ``False``, return ``ERR_DIFF_TARGET_HEADER``. 
-
-.. 2. Call :ref:`verifyBlockHeader` passing ``blockHeaderBytes`` as function parameter. If this call **returns an error** , then abort and return the raised error. If successful, this call returns (i) a pointer to the ``BlockChain`` entry stored in ``Chains`` to which this block header is to be appended or (ii) ``0`` indicating that a new ``BlockChain`` entry needs to be created.
-
-8. Determine which ``BlockChain`` entry in ``Chains`` this block header is extending, or if it is a new fork and hence a new ``BlockChain`` entry needs to be created. For this, check if the ``blockHeight`` of the ``BlockHeader`` referenced by ``hashPrevBlock`` is equal to the ``maxHeight`` of the ``BlockChain`` entry in ``Chains`` referenced in this ``BlockHeader``. 
-
-   a. If this check fails, then the current submission is creating a new fork. 
+   a. If not equal (can only be less in this case), then the current submission is creating a **new fork**. 
      
-    (i) Create a new ``BlockChain`` struct, setting ``maxHeight`` to the height of the ``BlockHeader`` referenced by ``hashPrevBlock`` **incremented by 1**, and appending ``hashCurrentBlock`` to the (currently empty) ``chains`` mapping. 
+    i ) Create a new ``BlockChain`` struct, setting ``BlockChain.maxHeight = BlockHeader.blockHeight + 1`` (as referenced in ``hashPrevBlock``), and appending ``hashCurrentBlock`` to the (currently empty) ``BlockChain.chain`` mapping. 
      
-    (ii) Insert the new ``BlockChain`` into ``Chains``. Return.
+    ii ) Insert the new ``BlockChain`` into ``Chains``. Return.
    
-    If this check if successful, then the current submission is extending the ``BlockChain`` referenced in the ``BlockHeader`` entry defined by ``hashPrevBlock``. 
+  b. If equal, then the current submission is **extending** the ``BlockChain`` referenced by ``BlockHeader.chainRef`` (as per``hashPrevBlock``). 
 
-Call :ref:`determineBlockChain` passing the ``BlockHeader`` referenced by ``hashPrevBlock`` as parameter. This call returns a pointer to an existing ``BlockChain`` entry, creating a new ``BlockChain`` entry if necessary (if this submission is a new fork, i.e., does not extend any of the tracked ``BlockChain`` entries in ``Chains``). 
+    i )  Append the ``hashCurrentBlock`` to the ``chain``  map in ``BlockChain`` and increment ``maxHeight``
 
+    ii ) Check ordering of the ``BlockChain`` entry needs updating. For this, check the ``maxHeight`` of the "next-highest" ``Chains`` (parent in heap or predecessor in sorted linked list). If ``BlockChain`` is the top-level element, do nothing. If the "next-highest" entry has a lower ``maxHeight``, switch position - continue, until reaching the "top" of the data structure or a ``BlockChain`` entry with a higher ``maxHeight``. 
+
+    iii ) If ordering was updated, check if the top-level element in the ``Chains`` data structure changed. If yes, emit a ``ChainReorg(hashCurrentBlock, forkDepth, blockHeight)``, where ``forkDepth`` is the size of the ``chain`` mapping in the new top-level ``BlockChain`` (new *main chain*).
+  
+
+4. Extract the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` and :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
+
+5.  Store the ``height``, ``merkleRoot``, ``timestamp`` and ``target`` as a new entry in the ``BlockHeaders`` map, using ``hashCurrentBlock`` as key.
+
+    + ``merkleRoot`` is the root of the transaction Merkle tree of the block header. Use :ref:`extractMerkleRoot` to extract from block header. 
+    + ``timestamp`` is the UNIX timestamp indicating when the block was generated in Bitcoin.
+    + ``target`` indicated the PoW difficulty target of this block.
+
+6. Emit a ``StoreMainChainBlockHeader`` event using ``height`` and ``hashCurrentBlock`` as input (``StoreMainChainHeader(height, hashCurrentBlock)``). 
+
+
+.. Call :ref:`determineBlockChain` passing the ``BlockHeader`` referenced by ``hashPrevBlock`` as parameter. This call returns a pointer to an existing ``BlockChain`` entry, creating a new ``BlockChain`` entry if necessary (if this submission is a new fork, i.e., does not extend any of the tracked ``BlockChain`` entries in ``Chains``). 
 3. Extract the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` and :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
-
 4a. If :ref:`verifyBlockHeader` returned a pointer to an existing ``BlockChain`` entry, append ``hashCurrentBlock`` to the ``chains`` mapping and increment the ``maxHeight``.
  ``Chains``, using ``blockHeight`` as key.
-
 4b. If :ref:`verifyBlockHeader` returned ``0``, create a new ``BlockChain`` entry
-
 5. Store the ``height``, ``merkleRoot``, ``timestamp`` and ``target`` as a new entry in the ``BlockHeaders`` map, using ``hashCurrentBlock`` as key.
-
     + ``hashCurrentBlock`` is the double SHA256 hash over the 80 bytes block header and can be calculated via :ref:`sha256d`.
     + ``merkleRoot`` is the root of the transaction Merkle tree of the block header. Use :ref:`extractMerkleRoot` to extract from block header. 
     + ``height`` is the blockchain height of the submitted block header. Compute by incrementing the height of the block header referenced by ``hashPrevBlock`` (retrieve from ``BlockHeaders`` using ``hashPrevBlock`` as key).
-
-
 7. Emit a ``StoreMainChainBlockHeader`` event using ``height`` and ``hashCurrentBlock`` as input (``StoreMainChainHeader(height, hashCurrentBlock)``). 
- 
+
 
 .. figure:: ../figures/storeBlockHeader-sequence.png
     :alt: storeBlockHeader sequence diagram
 
     Sequence diagram showing the function sequence of :ref:`storeBlockHeader`.
 
-.. _storeForkBlockHeader:
-
-storeForkBlockHeader
---------------------
-Method to submit block headers to the BTC-Relay, which extend an existing (as tracked in ``Forks`` in BTC-Relay) of create a new *fork*. 
-This function calls :ref:`verifyBlockHeader` passing the 80 bytes Bitcoin block header as parameter, and, if the latter returns ``True``, extracts from the block header and stores (i) the hash, height and Merkle tree root of the given block header in ``BlockHeaders`` and (ii) the hash of the block header as well as the starting block height of the fork and the current length (1 if a new fork) in ``Forks``.
-
-Specification
-~~~~~~~~~~~~~~
-
-*Function Signature*
-
-``storeForkHeader(blockHeaderBytes, forkId)``
-
-*Parameters*
-
-* ``blockHeaderBytes``: 80 byte raw Bitcoin block header.
-* ``forkId``: integer tracked fork identifier. Set to ``0`` if a new fork is being created (default).
-
-*Events*
-
-* ``StoreForkHeader(forkId, blockHeight, blockHash)``: if the submitted block header is on a fork, emit an event with the fork's id (``forkId``), block height (``blockHeight``) and the (PoW) block hash (``blockHash``).
-*  ``ChainReorg(newChainTip, startHeight, forkId)``: if the submitted block header on a fork results in a reorganization (fork longer than current main chain), emit an event with the block hash of the new highest block (``newChainTip``), the start block height of the fork (``startHeight``) and the fork identifier (``forkId``).
-
-*Errors*
-
-* ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the governance mechanism.
-* ``ERR_INVALID_FORK_ID = "Incorrect fork identifier"``: return error if a non-existent fork identifier is passed. 
-* ``ERR_FORK_PREV_BLOCK = "Previous block hash does not match last block in fork submission"``: return error if the block header does not reference the highest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
-* ``ERR_NOT_FORK = "Indicated fork submission, but block is in main chain"``:  return error if the submitted block header is actually extending the current longest chain tracked by BTC-Relay (``Chains``) instead of a fork.
-
-*Substrate*
-
-::
-
-  fn storeForkBlockHeader(origin, blockHeaderBytes: T::RawBlockHeader, forkId: U256) -> Result {...}
-
-
-Preconditions
-~~~~~~~~~~~~~~
-
-* The failure handling state must not be set to ``SHUTDOWN: 3``.
-* The submitted block header must either create a new fork or extend an existing fork (in ``Forks``) as tracked by BTC-Relay.
-* If the submission extends an existing fork, the ``forkId`` must be set to the correct identifier as tracked in ``Forks``.
-* If the submission creates a new fork, the ``forkId`` must be set to ``0``.
-
-Function Sequence
-~~~~~~~~~~~~~~~~~
-
-The ``storeForkBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and a ``forkId`` and follows the following sequence:
-
-1. Check if the failure handling state is set to ``SHUTDOWN``. If true, return ``ERR_SHUTDOWN`` and return. 
-
-2. Call :ref:`verifyBlockHeader` passing ``blockHeaderBytes`` as function parameter. If this call **returns an error** , then abort and return the raised error. 
-
-3. Check if ``forkId == 0``.
-
-    a. If ``forkId == 0``, generate a new ``forkId`` and create a new entry in ``Forks``, setting the ``height`` of the block header as the ``startHeight`` of the fork.
-    
-    b. Otherwise:
-
-        b.1) Check if a fork is tracked in ``Forks`` under the specified ``forkId``. If no fork can be found, abort and return ``ERR_INVALID_FORK_ID``. 
-
-        b.2) Check that the ``hashPrevBlock`` of the submitted block header indeed references the last block submitted to the fork, specified by ``forkId``. Abort and return ``ERR_FORK_PREV_BLOCK`` if this check fails.
-
-
-4. Extract the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` amd :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
-
-5. Store the ``height``, ``merkleRoot``, ``timestamp`` and ``target`` as a new entry in the ``blockHeaders`` map, using ``hashCurrentBlock`` as key (compute using :ref:`sha256d`).
-
-6. Update ``Fork[forkId]`` entry, incrementing the fork ``length`` and inserting ``hashCurrentBlock`` into the list of block hashes contained in that fork (``forkBlockHashes``).  
-
-7. Emit a ``StoreForkBlockHeader`` event using ``height`` and ``hashCurrentBlock`` as input (``StoreMainChainHeader(height, hashCurrentBlock)``). 
-
-8. Check if the fork at ``forkId`` has become longer than the current ``Chains``. This is the case if the block height ``height`` of the submitted block header exceeds the ``BestBlockHeight``. 
-
-    a. If ``height > BestBlockHeight`` call ``chainReorg(forkId)``. If this call returns an error, return the error.
-
-.. figure:: ../figures/storeForkBlockHeader-sequence.png
-    :alt: storeForkBlockHeader sequence diagram
-
-    Sequence diagram showing the function sequence of :ref:`storeForkBlockHeader`.
-
+.. todo:: Update sequence dia
 
 .. _verifyBlockHeader:
 
 verifyBlockHeader
 -----------------
 
-The ``verifyBlockHeader`` function parses and verifies Bitcoin block
-headers. 
+The ``verifyBlockHeader`` function parses and verifies Bitcoin block headers. 
+If all checks are successful, returns the hash of the predecessor of the passed block header, as stored in ``BlockHeaders``.
 
-.. Warning:: This function must called and return ``True`` **before**  a Bitcoin block header is stored in the BTC-Relay (i.e., must be called by the :ref:`storeBlockHeader` and :ref:`storeForkBlockHeader` functions).
+.. note:: This function does not check whether the submitted block header extends the main chain or a fork. This check is performed in :ref:`storeBlockHeader`.
 
-.. note:: This function does not check whether the submitted block header extends the main chain or a fork. This check is performed in :ref:`storeBlockHeader` and :ref:`storeForkBlockHeader` respectively.
-
-Other operations, such as verification of transaction inclusion, can only be executed once a block header has been verified and consequently stored in the BTC-Relay. 
 
 
 Specification
@@ -279,8 +193,7 @@ Specification
 
 *Returns*
 
-* ``True``: if the block header passes all checks.
-* Error otherwise.
+* ``hashPrevBlock``: if all checks pass successfully, return the hash of the previous block header, as stored in ``BlockHeaders``.
 
 *Errors*
 
@@ -294,23 +207,32 @@ Specification
 
 ::
 
-  fn verifyBlockHeader(origin, blockHeaderBytes: T::RawBlockHeader) -> Result {...}
+  fn verifyBlockHeader(origin, blockHeaderBytes: T::RawBlockHeader) -> H256 {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 The ``verifyBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and follows the sequence below:
 
 1. Check that the ``blockHeaderBytes`` is 80 bytes long. Return ``ERR_INVALID_HEADER_SIZE`` exception and abort otherwise.
-2. Check that the block header is not yet stored in BTC-Relay (``blockHash`` is unique in ``blockHeaders``). Return ``ERR_DUPLICATE_BLOCK`` otherwise. 
-3. Check that the previous block referenced by the submitted block header (``hashPrevBlock``, extract using :ref:`extractHashPrevBlock`) exists in ``BlockHeaders``. Return ``ERR_PREV_BLOCK`` otherwise. 
-4. Check that the Proof-of-Work hash (``blockHash``) is below the ``target`` specified in the block header. Return ``ERR_LOW_DIFF`` otherwise.
-5. Check that the ``target`` specified in the block header (extract using :ref:`extractNBits` and :ref:`nBitsToTarget`) is correct by calling :ref:`checkCorrectTarget` passing ``hashPrevBlock``, ``height`` and ``target`` as parameters (as per Bitcoin's difficulty adjustment mechanism, see `here <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_). If this call returns ``False``, return ``ERR_DIFF_TARGET_HEADER``. 
-6. Return ``True``
+
+2. Compute ``hashCurrentBlock``, the double SHA256 hash over the 80 bytes block header, using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).  
+
+3. Check that the block header is not yet stored in BTC-Relay (``hashCurrentBlock`` must not yet be in ``BlockHeaders``). Return ``ERR_DUPLICATE_BLOCK`` otherwise. 
+
+4. Get the ``BlockHeader`` referenced by the submitted block header via ``hashPrevBlock`` (extract from ``blockHeaderBytes`` using :ref:`extractHashPrevBlock`). Return ``ERR_PREV_BLOCK`` if no such entry was found.
+
+5. Check that the Proof-of-Work hash (``blockHash``) is below the ``target`` specified in the block header. Return ``ERR_LOW_DIFF`` otherwise.
+
+6. Check that the ``target`` specified in the block header (extract using :ref:`extractNBits` and :ref:`nBitsToTarget`) is correct by calling :ref:`checkCorrectTarget` passing ``hashPrevBlock``, ``height`` and ``target`` as parameters (as per Bitcoin's difficulty adjustment mechanism, see `here <https://github.com/bitcoin/bitcoin/blob/78dae8caccd82cfbfd76557f1fb7d7557c7b5edb/src/pow.cpp>`_). If this call returns ``False``, return ``ERR_DIFF_TARGET_HEADER``. 
+
+7. Return ``hashPrevBlock``.
 
 .. figure:: ../figures/verifyBlockHeader-sequence.png
     :alt: verifyBlockHeader sequence diagram
 
     Sequence diagram showing the function sequence of :ref:`verifyBlockHeader`.
+
+
 
 
 .. _verifyTransaction:

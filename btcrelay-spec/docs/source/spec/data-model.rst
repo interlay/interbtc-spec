@@ -69,7 +69,7 @@ Parameter               Type       Description
 ``merkleRoot``          byte32     Root of the Merkle tree referencing transactions included in the block.
 ``target``              u256       Difficulty target of this block (converted from ``nBits``, see `Bitcoin documentation <https://bitcoin.org/en/developer-reference#target-nbits>`_.).
 ``timestamp``           timestamp  UNIX timestamp indicating when this block was mined in Bitcoin.
-``chain``               pointer    Pointer to the ``BlockChain`` struct in which this block header is contained.
+``chainRef``               pointer    Pointer to the ``BlockChain`` struct in which this block header is contained.
 .                       .          .
 ``version``             u32        [Optional] Version of the submitted block.
 ``hashPrevBlock``       byte32     [Optional] Block hash of the predecessor of this block.
@@ -87,7 +87,7 @@ Parameter               Type       Description
         merkleRoot: H256,
         target: U256,
         timestamp: DateTime,
-        chain: &Chain,
+        chainRef: &Chain,
         // Optional fields
         version: U32, 
         hashPrevBlock: H256,
@@ -142,20 +142,17 @@ The exact choice of data structure is left to the developer. We recommend to use
 
 .. note:: The assumption for ``Chains`` is that, in the majority of cases, block headers will be appended to the *main chain* (longest chain), i.e., the ``BlockChain`` entry at the most significant position in the queue/heap. Similarly, transaction inclusion proofs (:ref:`verifyTransaction`) are only checked against the *main chain*. This means, in the average case lookup complexity will be O(1). Furthermore, block headers can only be appended if they (i) have a valid PoW and (ii) do not yet exist in ``BlockHeaders`` - hence, spamming is very costly and unlikely. Finally, blockchain forks and re-organizations occur infrequently, especially in Bitcoin. In principle, optimizing lookup costs should be prioritized, ideally O(1), while inserting of new items and re-balancing can even be O(n). 
 
-*Substrate* ::
-
+.. *Substrate* ::
   // ideally:
   // Chains: PriorityQueue<BlockChain, Ord>;
   // alternative:
   Chains: BinaryHeap<BlockChain, Ord>;
-  
   impl Ord for BlockChain {
     fn cmp(&self, other: &BlockChain) -> Ordering {
     other.maxHeight.cmp(&self.maxHeight)
     // Keeps ordering if equal ("first seen" as in Bitcoin)
     }
   }
-
   // Also needs to be implemented for BinaryHeap
   impl PartialOrd for BlockChain {
     fn partial_cmp(&self, other: &BlockChain) -> Option<Ordering> {
@@ -164,7 +161,7 @@ The exact choice of data structure is left to the developer. We recommend to use
   }
   
 
-.. attention:: ``PriorityQueue`` is **currently not** natively supported in Substrate. A Rust implementation can be found `here <https://docs.rs/priority-queue/0.7.0/priority_queue/>`_, which has O(1) lookup and O(log(n)) re-balancing. This functionality can be emulated using a ``BinaryHeap`` by deleting and re-inserting ``BlockChain`` entries when necessary.
+.. attention:: ``PriorityQueue`` is **currently not** natively supported in Substrate. A Rust implementation can be found `here <https://docs.rs/priority-queue/0.7.0/priority_queue/>`_, which has O(1) lookup and O(log(n)) re-balancing. This functionality can be emulated using a ``LinkedList`` by maintaining ordering upon insertion (worst case O(n), but will be O(1) is most cases as explained above). In theory, this can also be implemented using a ``BinaryHeap`` by deleting and re-inserting ``BlockChain`` entries when necessary.
 
 BestBlock
 .........
