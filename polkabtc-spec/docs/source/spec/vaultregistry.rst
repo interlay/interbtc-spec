@@ -117,6 +117,7 @@ Vault
 
 Stores the information of a Vault.
 
+.. tabularcolumns:: |l|l|L|
 
 ===================  =========  ========================================================
 Parameter            Type       Description
