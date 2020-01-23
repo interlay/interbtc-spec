@@ -415,6 +415,7 @@ Function Sequence
 
 6) Emit ``WithdrawCollateral`` event and return ``True``.
 
+.. _lockVault:
 
 lockVault
 ---------
@@ -467,6 +468,8 @@ Function Sequence
 
 2. Get the Bitcoin address of the vault as ``btcAddress``.
 3. Return the ``btcAddress``.
+
+.. _releaseVault:
 
 releaseVault
 ------------
