@@ -11,3 +11,9 @@ Add operation modes for each Vault
 * Buffered Collateral
 * Liquidation
 
+.. _griefing:
+
+Griefing
+~~~~~~~~
+
+Add details about griefing here.

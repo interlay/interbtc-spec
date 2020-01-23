@@ -85,6 +85,8 @@ Replace
 
 Stores the status and information about a single replace request.
 
+.. tabularcolumns:: |l|l|L|
+
 ======================  ==========  =======================================================	
 Parameter               Type        Description                                            
 ======================  ==========  =======================================================

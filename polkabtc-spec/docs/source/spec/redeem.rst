@@ -53,6 +53,8 @@ Redeem
 
 Stores the status and information about a single redeem request.
 
+.. tabularcolumns:: |l|l|L|
+
 ==================  ==========  =======================================================	
 Parameter           Type        Description                                            
 ==================  ==========  =======================================================
