@@ -421,22 +421,23 @@ lockVault
 
 During the issue request function (:ref:`requestIssue`), a user must be able to assign a Vault to the issue request. As a Vault could be assigned to multiple issue requests, race conditions could occur. To prevent these race conditions, a Vault is *locked*, i.e. its collateral is assigned to the issue request.
 
+This function further calculates the amount of collateral that will be assigned to the issue request.
+
 Specification
 .............
 
 *Function Signature*
 
-``lockVault(vault, committedTokens, collateral)``
+``lockVault(vault, tokens)``
 
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
 * ``tokens``: The amount of PolkaBTC to be locked.
-* ``collateral``: The amount of DOT collateral to be locked.
 
 *Returns*
 
-* ``None``: Does not return anything.
+* ``btcAddress``: The Bitcoin address of the vault.
 
 *Events*
 
@@ -448,7 +449,7 @@ Specification
 
 *Substrate* ::
 
-  fn lockVault(vault: AccountId, tokens: U256, collateral: Balance) -> Result {...}
+  fn lockVault(vault: AccountId, tokens: U256) -> Result {...}
 
 Preconditions
 .............
@@ -458,11 +459,14 @@ Preconditions
 Function Sequence
 .................
 
-1.  Checks if the selected vault has locked enough collateral to cover the amount of PolkaBTC ``tokens`` to be issued. Select the ``vault`` from the registry and get the ``vault.committedTokens`` and ``vault.collateral``. 
-2. Calculate how much free ``vault.collateral`` is available by multiplying the collateral with the ``ExchangeRate`` (from the Oracle) and subtract the ``vault.committedTokens``. 
-3. Check if the free collateral is greater than ``tokens``. If not enough ``vault.collateral`` is free, throw ``ERR_EXCEEDING_VAULT_LIMIT``.
-4. Else, add ``tokens`` to ``vault.committedTokens``.
-5. Return.
+1.  Checks if the selected vault has locked enough collateral to cover the amount of PolkaBTC ``tokens`` to be issued. Throws and error if this checks fails. Otherwise, assigns the tokens to the vault.
+
+    - Select the ``vault`` from the registry and get the ``vault.committedTokens`` and ``vault.collateral``. 
+    - Calculate how many tokens can be issued by multiplying the ``vault.collateral`` with the ``ExchangeRate`` (from the :ref:`oracle`) considering the ``GRANULARITY`` (from the :ref:`oracle`) and subtract the ``vault.committedTokens``. Memorize the result as ``available_tokens``. 
+    - Check if the ``available_tokens`` is greater than ``tokens``. If not enough ``available_tokens`` is free, throw ``ERR_EXCEEDING_VAULT_LIMIT``. Else, add ``tokens`` to ``vault.committedTokens``.
+
+2. Get the Bitcoin address of the vault as ``btcAddress``.
+3. Return the ``btcAddress``.
 
 releaseVault
 ------------

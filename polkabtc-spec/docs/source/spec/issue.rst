@@ -36,9 +36,11 @@ MinimumCollateralUser
 
 The minimum collateral (DOT) a user needs to provide as griefing protection. 
 
-.. note:: Serves to disincentivize griefing attacks against vault, where users create issue requests, temporarily locking a Vault's collateral, but never execute the issue process.
+.. note:: Serves as a measurement to disincentivize griefing attacks against a vault. A user can otherwise create an issue request, temporarily locking a vault's collateral and never execute the issue process.
 
-*Substrate*: ``MinimumCollateralUser: Balance;``
+*Substrate* ::
+    
+    MinimumCollateralUser: Balance;
 
 
 
@@ -110,14 +112,14 @@ Functions
 requestIssue
 ------------
 
-A user opens an issue request by providing a small amount of collateral.
+A user opens an issue request to create a specific amount of PolkaBTC. The user also has to provide a small amount of collateral.
 
 Specification
 .............
 
 *Function Signature*
 
-``requestIssue(requester, amount, vault)``
+``requestIssue(requester, amount, vault, collateral)``
 
 *Parameters*
 
@@ -137,7 +139,6 @@ Specification
 *Errors*
 
 * ``ERR_INSUFFICIENT_COLLATERAL``: The user did not provide enough collateral.
-* ``ERR_VAULT_COLLATERAL_RATIO``: The selected vault is below the collateral safety ratio.
 
 *Substrate* ::
 
@@ -156,11 +157,18 @@ Function Sequence
 
 2. Checks if the user provided enough collateral by checking if the collateral is equal or greater than ``MinimumCollateral``. If not, throws ``ERR_INSUFFICIENT_COLLATERAL``.
 
-3. Call the VaultRegistry ``lockVault`` function with the ``amount`` of tokens to be issue, the ``collateral`` that should be reserved for the issue request, and the ``vault`` identified by its address.
+3. Call the VaultRegistry ``lockVault`` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. If the vault has not locked enough collateral, throws a ``ERR_EXCEEDING_VAULT_LIMIT`` error. This function returns a ``btcAddress`` that the user should send Bitcoin to.
 
 4. Generate an ``issueId`` by hashing a random seed, a nonce from the security module, and the address of the user.
 
-5. Store a new ``Issue`` struct in the ``IssueRequests`` mapping. The ``issueId`` refers to the ``Issue``. Fill the ``vault`` with the requested ``vault``, the ``opentime`` with the current block number, the ``collateral`` with the collateral provided by the user, ``amount`` with the ``amount`` provided as input, ``requester`` the requester account, and ``btcAddress`` the Bitcoin address of the Vault.
+5. Store a new ``Issue`` struct in the ``IssueRequests`` mapping as ``IssueRequests[issueId] = issue``, where ``issue`` is the ``Issue`` struct as:
+
+    -  ``issue.vault`` is the ``vault``
+    - ``issue.opentime`` is the current block number
+    - ``issue.collateral`` is the collateral provided by the user
+    - ``issue.amount`` is the ``amount`` provided as input
+    - ``issue.requester`` is the user's account
+    - ``issue.btcAddress`` the Bitcoin address of the Vault as returned in step 3
 
 6. Issue the ``RequestIssue`` event with the ``requester`` account, ``amount``, ``vault``, and ``issueId``.
 
