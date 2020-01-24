@@ -197,7 +197,7 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 Function Sequence
 .................
@@ -253,7 +253,7 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 Function Sequence
 .................
@@ -438,7 +438,7 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 Function Sequence
 .................
@@ -492,7 +492,7 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 .. todo:: Exclude a crashed exchange rate oracle failure from this - this call should be allowed even if we have no exchange rate, as it is only used in failed Issue and Replace, or in successful Redeem and Replace. The check for an up-an-running exchange rate oracle is handled separately in each of these protocols, if necessary.
 

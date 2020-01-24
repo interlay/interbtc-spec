@@ -125,7 +125,7 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 
 Function Sequence
@@ -193,7 +193,7 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 Function Sequence
 .................
@@ -278,4 +278,15 @@ Function Sequence
 6. Send the ``CancelRedeem`` event with the ``redeemId``.
 
 7. Return.
+
+
+
+Events
+~~~~~~~
+
+Error Codes
+~~~~~~~~~~~
+
+
+
 

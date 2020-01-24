@@ -339,7 +339,7 @@ The ``verifyTransactionInclusion`` function follows the function sequence below:
 
 1. Check if the failure handling state is set to ``HALTED`` or ``SHUTDOWN``. If true, return ``ERR_HALTED`` or ``ERR_SHUTDOWN`` and return. 
 
-2. Check if the failure handling state is set to ``PARTIAL``. If true, check if the ``txBlockHeight`` is equal to or greater than the first ``NO_DATA`` block. If false, return ``ERR_PARTIAL`` and return.
+2. Check if the failure handling state is set to ``PARTIAL``. If true, check if the ``txBlockHeight`` is equal to or greater than the first ``NO_DATA_BTC_RELAY`` block. If false, return ``ERR_PARTIAL`` and return.
 
 3. Check that ``txId`` is 32 bytes long. Return ``ERR_INVALID_FORK_ID`` error if this check fails. 
 

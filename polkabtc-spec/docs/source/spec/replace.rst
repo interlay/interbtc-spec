@@ -172,7 +172,7 @@ Specification
 Preconditions
 ...............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 Function Sequence
 .................
@@ -299,7 +299,7 @@ Specification
 Preconditions
 ...............
 
-The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 
 Function Sequence
@@ -370,7 +370,7 @@ Specification
 Preconditions
 ...............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 * The to-be-replaced Vault transferred the correct amount of BTC to the BTC address of the new Vault on Bitcoin, and has generated a transaction inclusion proof. 
 
 Function Sequence
@@ -437,5 +437,14 @@ Preconditions
 
 Function Sequence
 ..................
+
+
+Events
+~~~~~~~
+
+Error Codes
+~~~~~~~~~~~
+
+
 
 

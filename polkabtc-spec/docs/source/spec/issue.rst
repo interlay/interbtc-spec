@@ -149,7 +149,7 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 Function Sequence
 .................
@@ -268,7 +268,7 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 Function Sequence
 .................

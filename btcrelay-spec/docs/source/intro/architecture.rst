@@ -19,7 +19,7 @@ BTC-Relay differentiates between the following actors:
 
 * **Users** - BTC Parachain users which interact with the BTC-Relay directly or with other modules which make calls to BTC-Relay.
 
-* **Staked Relayers** - staked relayers lock up collateral in the BTC Parachain and are responsible for running Bitcoin `full nodes <https://bitcoin.org/en/full-node>`_ and verify that blocks submitted to BTC-Relay are valid (and that transactional data for these blocks is available). Staked relayers can halt BTC-Relay in case a failure is detected. See :ref:`failure-handling` for more details. 
+* **Staked Relayers** - staked relayers lock up collateral in the BTC Parachain and are responsible for running Bitcoin `full nodes <https://bitcoin.org/en/full-node>`_ and verify that blocks submitted to BTC-Relay are valid (and that transactional data for these blocks is available). Staked relayers can halt BTC-Relay in case a failure is detected. See :ref:`security` for more details. 
 
 .. note:: While any user can submit block headers to BTC-Relay, this role can be assigned to staked relayers, given these participants already run Bitcoin full nodes and check validity of stored blocks.
 
@@ -82,9 +82,9 @@ On a high level, BTC-Relay can enter four possible states:
 
 * ``RUNNING``: correct operation, all functions are available. 
 
-* ``PARTIAL``: transaction verification is disabled for blocks above a specified block height. This state is triggered by a ``NO_DATA`` failure by Staked Relayers (missing transaction data for submitted block headers), or manually by the Governance Mechanism. 
+* ``PARTIAL``: transaction verification is disabled for blocks above a specified block height. This state is triggered by a ``NO_DATA_BTC_RELAY`` failure by Staked Relayers (missing transaction data for submitted block headers), or manually by the Governance Mechanism. 
 
-* ``HALTED``: transaction verification is entirely disabled. This state is triggered by a ``INVALID`` failure by Staked Relayers (invalid transaction was detected in a submitted block header) or manually by the Governance Mechanism.
+* ``HALTED``: transaction verification is entirely disabled. This state is triggered by a ``INVALID_BTC_RELAY`` failure by Staked Relayers (invalid transaction was detected in a submitted block header) or manually by the Governance Mechanism.
 
 * ``SHUTDOWN``: submission of block headers (both main chain and forks) and transactions verification are disabled. This state can be triggered manually by the Governance Mechanism if a major failure is detected or a soft / hard fork has ocurred in Bitcoin (and hence BTC-Relay needs updating). 
 
