@@ -329,65 +329,6 @@ Function Sequence
 1. Return ``0xffff0000000000000000000000000000000000000000000000000000`` (max. possible target, also referred to as "difficulty 1") divided by ``target``.
 
 
-.. _chainReorg:
-
-chainReorg
-----------
-
-The ``chainReorg`` function is called from ``storeForkBlockHeader`` and handles blockchain reorganizations in BTC-Relay, i.e., when a fork overtakes the tracked main chain in terms of length (and accumulated PoW). 
-As a result, the ``Chains`` references the stored block headers (in ``BlockHeaders``) are updated to point to the blocks contained in the overtaking fork.
-
-
-Specification
-~~~~~~~~~~~~~
-
-*Function Signature*
-
-``chainReorg(forkId)``
-
-*Parameters*
-
-* ``forkId``: identifier of the fork as stored in ``Forks``, which is to replace the ``Chains``. 
-
-
-.. *Returns*
-
-.. * ``True``: if the ``Chains`` is updated to point to the block headers contained in the fork specified by ``forkId``.
-.. * ``False`` (or throws exception): otherwise.
-
-*Substrate*
-
-::
-
-  fn chainReorg(forkId: U256) -> Result {...}
-
-
-Function Sequence
-~~~~~~~~~~~~~~~~~
-
-1. Retrieve fork data (``Fork``, see :ref:`data-model`) via ``Fork[forkId]``
-2. Create new entry in ``Forks``, (generate a new identifier ``newForkId``), setting ``Forks[newForkId].startHeight = Forks[forkId].startHeight`` and ``Forks[newForkId].length = Forks[forkId].length - 1``.
-3. Replace the current ``Chains`` references to ``BlockHeaders`` (i.e., the ``blockHash`` at each ``blockHeight``) with the corresponding entry in ``forkHashes`` of the given fork. In this process, store the replaced ``Chains`` entries to a new fork. In detail: starting at ``Fork[forkId].startHeight``, loop over ``Fork[forkId].forkHashes`` (``forkHash``) and for each ``forkHash`` (loop counter ``counter = 0`` incremented each round):
-
-    a. Copy the  ``blockHash`` referenced in ``mainChain`` at the corresponding block height (``startHeight + counter``) to ``Forks[newForkId].forkHashes``. 
-    b. Overwrite the ``blockHash`` in ``Chains`` at the corresponding block height (``startHeight + counter``) with the given ``forkHash``. 
-
-4. Update ``BestBlock`` and ``BestBlockHeight`` to point to updated highest block in ``Chains``.
-
-5. Delete ``Fork[forkId]``.
-
-.. note:: The last block hash in ``forkHashes`` will be added to ``Chains`` with a block height exceeding the current ``BestBlockHeight``, since the fork that caused the reorganization is by definition 1 block longer than the ``Chains`` tracked in BTC-Relay. 
-
-
-.. figure:: ../figures/chainReorg.png
-    :alt: chainReorg overview
-
-    Overview of a the BTC-Relay state before (above) and after (below) ``chainReorg(forkId)``.
-
-
-.. warning:: **Do not instantly delete** the block headers that were removed from the ``Chains`` through the reorganization. If deletion is required, wait at least until sufficient confirmations have passed, as defined by the security parameter *k* (see :ref:`security`). 
-
-
 .. _getForkIdByBlockHash:
 
 getForkIdByBlockHash

@@ -90,7 +90,7 @@ Specification
 
 * ``StoreMainChainHeader(blockHeight, blockHash)``: if the block header was successful appended to the currently longest chain (*main chain*) emit an event with the stored block's height (``blockHeight``) and the (PoW) block hash (``blockHash``).
 * ``StoreForkHeader(forkId, blockHeight, blockHash)``: f the block header was successful appended to a new or existing fork, emit an event with the block height (``blockHeight``) and the (PoW) block hash (``blockHash``).
-*  ``ChainReorg(newChainTip, blockHeight, forkDepth)``: if the submitted block header on a fork results in a reorganization (fork longer than current main chain), emit an event with the block hash of the new highest block (``newChainTip``), the new maximum block height (``blockHeight``) and the depth of the fork (``forkDepth``).
+
 
 *Errors*
 
@@ -127,15 +127,13 @@ The ``storeBlockHeader`` function takes as input the 80 byte raw Bitcoin block h
      
     i ) Create a new ``BlockChain`` struct, setting ``BlockChain.maxHeight = BlockHeader.blockHeight + 1`` (as referenced in ``hashPrevBlock``), and appending ``hashCurrentBlock`` to the (currently empty) ``BlockChain.chain`` mapping. 
      
-    ii ) Insert the new ``BlockChain`` into ``Chains``. Return.
-   
-  b. If equal, then the current submission is **extending** the ``BlockChain`` referenced by ``BlockHeader.chainRef`` (as per``hashPrevBlock``). 
+    ii ) Insert the new ``BlockChain`` into ``Chains``.
+       
+  b. Otherwise, if equal, then the current submission is **extending** the ``BlockChain`` referenced by ``BlockHeader.chainRef`` (as per``hashPrevBlock``). 
 
     i )  Append the ``hashCurrentBlock`` to the ``chain``  map in ``BlockChain`` and increment ``maxHeight``
 
-    ii ) Check ordering of the ``BlockChain`` entry needs updating. For this, check the ``maxHeight`` of the "next-highest" ``Chains`` (parent in heap or predecessor in sorted linked list). If ``BlockChain`` is the top-level element, do nothing. If the "next-highest" entry has a lower ``maxHeight``, switch position - continue, until reaching the "top" of the data structure or a ``BlockChain`` entry with a higher ``maxHeight``. 
-
-    iii ) If ordering was updated, check if the top-level element in the ``Chains`` data structure changed. If yes, emit a ``ChainReorg(hashCurrentBlock, blockHeight, forkDepth)``, where ``forkDepth`` is the size of the ``chain`` mapping in the new top-level ``BlockChain`` (new *main chain*).
+    ii ) Check ordering in ``Chains`` needs updating. For this, call :ref:`checkAndDoReorg` passing the pointer to ``BlockChain`` as parameter.
   
 
 4. Extract the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` and :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
@@ -146,19 +144,13 @@ The ``storeBlockHeader`` function takes as input the 80 byte raw Bitcoin block h
     + ``timestamp`` is the UNIX timestamp indicating when the block was generated in Bitcoin.
     + ``target`` indicated the PoW difficulty target of this block.
 
-6. Emit a ``StoreMainChainBlockHeader`` event using ``height`` and ``hashCurrentBlock`` as input (``StoreMainChainHeader(height, hashCurrentBlock)``). 
+6. Emit event. 
 
+   a. If submission was to *main chain* (``BlockChain`` entry with highest ``maxChain``), emit ``StoreMainChainBlockHeader`` event using ``height`` and ``hashCurrentBlock`` as input (``StoreMainChainHeader(height, hashCurrentBlock)``). 
 
-.. Call :ref:`determineBlockChain` passing the ``BlockHeader`` referenced by ``hashPrevBlock`` as parameter. This call returns a pointer to an existing ``BlockChain`` entry, creating a new ``BlockChain`` entry if necessary (if this submission is a new fork, i.e., does not extend any of the tracked ``BlockChain`` entries in ``Chains``). 
-3. Extract the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` and :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
-4a. If :ref:`verifyBlockHeader` returned a pointer to an existing ``BlockChain`` entry, append ``hashCurrentBlock`` to the ``chains`` mapping and increment the ``maxHeight``.
- ``Chains``, using ``blockHeight`` as key.
-4b. If :ref:`verifyBlockHeader` returned ``0``, create a new ``BlockChain`` entry
-5. Store the ``height``, ``merkleRoot``, ``timestamp`` and ``target`` as a new entry in the ``BlockHeaders`` map, using ``hashCurrentBlock`` as key.
-    + ``hashCurrentBlock`` is the double SHA256 hash over the 80 bytes block header and can be calculated via :ref:`sha256d`.
-    + ``merkleRoot`` is the root of the transaction Merkle tree of the block header. Use :ref:`extractMerkleRoot` to extract from block header. 
-    + ``height`` is the blockchain height of the submitted block header. Compute by incrementing the height of the block header referenced by ``hashPrevBlock`` (retrieve from ``BlockHeaders`` using ``hashPrevBlock`` as key).
-7. Emit a ``StoreMainChainBlockHeader`` event using ``height`` and ``hashCurrentBlock`` as input (``StoreMainChainHeader(height, hashCurrentBlock)``). 
+   b. If submission was to another ``BlockChain`` entry (new or existing), emit ``StoreForkHeader(height, hashCurrentBlock)``.
+
+7. Return.
 
 
 .. figure:: ../figures/storeBlockHeader-sequence.png
@@ -166,7 +158,56 @@ The ``storeBlockHeader`` function takes as input the 80 byte raw Bitcoin block h
 
     Sequence diagram showing the function sequence of :ref:`storeBlockHeader`.
 
-.. todo:: Update sequence dia
+
+.. _checkAndDoReorg:
+
+checkAndDoReorg
+---------------
+
+This function is called from :ref:`storeBlockHeader` and checks if a block header submission resulted in a chain reorganization.
+Updates the ordering in / re-balances ``Chains`` if necessary.
+
+
+Specification
+~~~~~~~~~~~~~
+
+*Function Signature*
+
+``checkAndDoReorg(blockChain)``
+
+*Parameters*
+
+* ``&blockChain``: pointer to a ``BlockChain`` entry in ``Chains``. 
+
+*Events*
+
+*  ``ChainReorg(newChainTip, blockHeight, forkDepth)``: if the submitted block header on a fork results in a reorganization (fork longer than current main chain), emit an event with the block hash of the new highest block (``newChainTip``), the new maximum block height (``blockHeight``) and the depth of the fork (``forkDepth``).
+
+*Substrate*
+
+::
+
+  fn checkAndDoReorg(blockChain: &BlockChain) -> Result {...}
+
+
+Function Sequence
+~~~~~~~~~~~~~~~~~
+
+1.  Check ordering of the ``BlockChain`` entry needs updating. For this, check the ``maxHeight`` of the "next-highest" ``BlockChain`` (parent in heap or predecessor in sorted linked list). 
+
+   a. If ``BlockChain`` is the top-level element, do nothing.
+   
+   b. Else if the "next-highest" entry has a lower ``maxHeight``, switch position - continue, until reaching the "top" of the data structure or a ``BlockChain`` entry with a higher ``maxHeight``. 
+
+2. If ordering was updated, check if the top-level element in the ``Chains`` data structure changed. 
+
+   a. If yes, emit a ``ChainReorg(hashCurrentBlock, blockHeight, forkDepth)``, where ``forkDepth`` is the size of the ``chain`` mapping in the new top-level ``BlockChain`` (new *main chain*) entry.
+
+3. Return.
+
+.. note:: The exact implementation of :ref:`checkAndDoReorg` depends on the data structure used for ``Chains``.
+
+
 
 .. _verifyBlockHeader:
 
