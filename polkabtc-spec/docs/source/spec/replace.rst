@@ -189,7 +189,7 @@ Function Sequence
 
 5. Check that the ``griefingCollateral`` is greater or equal ``ReplaceGriefingCollateral``
 
-6. Lock the ``oldVault``'s griefing collateral by calling :ref`lockCollateral` and passing ``griefingCollateral`` as parameter.
+6. Lock the *oldVault*'s griefing collateral by calling :ref:`lockCollateral` and passing ``oldVault`` and ``griefingCollateral`` as parameters.
 
 7. Generate a ``replaceId`` by hashing a random seed, a nonce, and the address of the Requester.
 
@@ -203,6 +203,7 @@ Function Sequence
 9. Emit ``ReplaceRequested(vault, btcAmount, timeout, replaceId)`` event.  
 
 
+.. _withdrawReplaceRequest:
 
 withdrawReplaceRequest
 -----------------------
@@ -252,14 +253,14 @@ Function Sequence
 
 3. Check that the ``ReplaceRequest`` was not yet accepted by another Vault. Return ``ERR_CANCEL_ACCEPTED_REQUEST`` error if this check fails.
 
-4. Transfer the ``ReplaceGriefingCollateral`` associated with this ``ReplaceRequests`` to the ``oldVault``.
-
-.. todo:: Unlock ``ReplaceGriefingCollateral``
+4. Release the *oldVault*'s griefing collateral associated with this ``ReplaceRequests`` by calling :ref:`releaseCollateral` and passing the ``oldVault`` and ``griefingCollateral`` as parameters.
 
 5. Remove the ``ReplaceRequest`` from ``ReplaceRequests``.
 
 6. Emit a ``WithdrawReplaceRequest(oldVault, replaceId)`` event.
  
+
+.. _acceptReplace:
 
 acceptReplace
 --------------
@@ -278,7 +279,7 @@ Specification
 
 * ``newVault``: Account identifier of the Vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
 * ``repalceId``: The identifier of the replace request in ``ReplaceRequests``.
-* ``collateral``: DOT collateral provided to match the replace request. Can be more than the necessary amount.
+* ``collateral``: DOT collateral provided to match the replace request (i.e., for backing the locked BTC). Can be more than the necessary amount.
 
 *Events*
 
@@ -311,6 +312,8 @@ Function Sequence
 
 3. Check that the provided ``collateral`` exceeds the necessary amount, i.e., ``collateral >= SecureCollateralRate * Replace.btcAmount``. Return``ERR_INSUFFICIENT_COLLATERAL`` error if this check fails.
 
+4. Lock the *newVault*'s collateral by calling :ref:`lockCollateral` and providing ``newVault`` and ``collateral`` as parameters.
+
 4. Update the ``ReplaceRequest`` entry:
 
   * ``Replace.newVault = newVault``,
@@ -321,11 +324,13 @@ Function Sequence
 5. Emit a ``AcceptReplace(newVault, replaceId, collateral)`` event.
 
 
+.. _executeReplace: 
+
 executeReplace
 --------------
 
 The to-be-replaced Vault finalizes the replace process by submitting a proof that it transferred the correct amount of BTC to the BTC address of the new Vault, as specified in the ``ReplaceRequest``.
-This function calls *verifyTransactionInclusion* in :ref:`btc-relay`, proving a transaction inclusion proof (``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof``) as input. 
+This function calls *verifyTransactionInclusion* in :ref:`btc-relay`, proving a transaction inclusion proof (``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof``) as input, as well as *validateTransaction* proving the ``rawTx``, ``replaceId`` and the *newVault*'s Bitcoin address as parameters.
 
 
 Specification

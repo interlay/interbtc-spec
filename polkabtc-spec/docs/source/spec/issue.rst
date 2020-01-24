@@ -157,7 +157,7 @@ Function Sequence
 
 1. Check if the ``griefingCollateral`` is greater or equal ``MinimumCollateral``. If this check fails, return ``ERR_INSUFFICIENT_COLLATERAL``.
 
-2. Lock the user's collateral by calling the :ref:`lockCollateral` function with the ``requester`` as the sender and the ``griefingCollateral`` as the amount.
+2. Lock the user's griefing collateral by calling the :ref:`lockCollateral` function with the ``requester`` as the sender and the ``griefingCollateral`` as the amount.
 
 3. Call the VaultRegistry :ref:`lockVault` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. If the vault has not locked enough collateral, throws a ``ERR_EXCEEDING_VAULT_LIMIT`` error. This function returns a ``btcAddress`` that the user should send Bitcoin to.
 
