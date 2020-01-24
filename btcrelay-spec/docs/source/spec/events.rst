@@ -71,19 +71,19 @@ If the submitted block header is on a fork, emit an event with the fork’s id, 
   StoreForkHeader(U256, U256, H256);
 
 ChainReorg
-----------
+---------- 
 
-If the submitted block header on a fork results in a reorganization (fork longer than current main chain), emit an event with the block hash of the new highest block, the start block height of the fork and the fork identifier.
+If the submitted block header on a fork results in a reorganization (fork longer than current main chain), emit an event with the block hash of the new highest block, the new maximum block height and the depth of the fork
 
 *Event Signature*
 
-``ChainReorg(newChainTip, startHeight, forkId)``
+``ChainReorg(newChainTip, blockHeight, forkDepth)``
 
 *Parameters*
 
 * ``newChainTip``: hash of the new highest block.
-* ``startHeight``: height of the new highest block.
-* ``forkId``: a unique id for the fork.
+* ``blockHeight``: new maximum block height (block height of fork tip).
+* ``forkDepth``: depth of the fork (number of block after diverging from previous main chain).
 
 *Functions*
 

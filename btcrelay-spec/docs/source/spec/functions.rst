@@ -90,7 +90,7 @@ Specification
 
 * ``StoreMainChainHeader(blockHeight, blockHash)``: if the block header was successful appended to the currently longest chain (*main chain*) emit an event with the stored block's height (``blockHeight``) and the (PoW) block hash (``blockHash``).
 * ``StoreForkHeader(forkId, blockHeight, blockHash)``: f the block header was successful appended to a new or existing fork, emit an event with the block height (``blockHeight``) and the (PoW) block hash (``blockHash``).
-*  ``ChainReorg(newChainTip, startHeight, blockHeight)``: if the submitted block header on a fork results in a reorganization (fork longer than current main chain), emit an event with the block hash of the new highest block (``newChainTip``), the start block height of the fork (``startHeight``) and the new maximum block height (``blockHeight``).
+*  ``ChainReorg(newChainTip, blockHeight, forkDepth)``: if the submitted block header on a fork results in a reorganization (fork longer than current main chain), emit an event with the block hash of the new highest block (``newChainTip``), the new maximum block height (``blockHeight``) and the depth of the fork (``forkDepth``).
 
 *Errors*
 
@@ -135,7 +135,7 @@ The ``storeBlockHeader`` function takes as input the 80 byte raw Bitcoin block h
 
     ii ) Check ordering of the ``BlockChain`` entry needs updating. For this, check the ``maxHeight`` of the "next-highest" ``Chains`` (parent in heap or predecessor in sorted linked list). If ``BlockChain`` is the top-level element, do nothing. If the "next-highest" entry has a lower ``maxHeight``, switch position - continue, until reaching the "top" of the data structure or a ``BlockChain`` entry with a higher ``maxHeight``. 
 
-    iii ) If ordering was updated, check if the top-level element in the ``Chains`` data structure changed. If yes, emit a ``ChainReorg(hashCurrentBlock, forkDepth, blockHeight)``, where ``forkDepth`` is the size of the ``chain`` mapping in the new top-level ``BlockChain`` (new *main chain*).
+    iii ) If ordering was updated, check if the top-level element in the ``Chains`` data structure changed. If yes, emit a ``ChainReorg(hashCurrentBlock, blockHeight, forkDepth)``, where ``forkDepth`` is the size of the ``chain`` mapping in the new top-level ``BlockChain`` (new *main chain*).
   
 
 4. Extract the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` and :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
