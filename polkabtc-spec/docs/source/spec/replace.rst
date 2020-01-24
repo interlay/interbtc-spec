@@ -181,9 +181,9 @@ Function Sequence
 
 2. Retrieve the ``Vault`` as per the ``oldVault`` account identifier from ``Vaults`` in the ``VaultRegistry``.
 
-3. Check that the requested ``btcAmount`` is lower than ``Vault.committedTokens``.
+3. Check that the requested ``btcAmount`` is lower than ``Vault.issuedTokens``.
 
-  a. If ``btcAmount > Vault.committedTokens`` set ``btcAmount = Vault.committedTokens`` (i.e., the request is for the entire BTC holdings of the Vault).
+  a. If ``btcAmount > Vault.issuedTokens`` set ``btcAmount = Vault.issuedTokens`` (i.e., the request is for the entire BTC holdings of the Vault).
 
 4. If the request is not for the entire BTC holdings, check that the remaining DOT collateral of the Vault is higher than ``MinimumCollateralVault`` as defined in ``VaultRegistry``. Return ``ERR_MIN_AMOUNT`` error if this check fails.
 

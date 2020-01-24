@@ -135,7 +135,7 @@ Function Sequence
 
 2. Checks if the ``amount`` is less or equal to the user's balance in the treasury. Throws ``ERR_AMOUNT_EXCEEDS_USER_BALANCE`` if this check is false.
 
-3. Checks if the ``amount`` is less or equal to the ``committedTokens`` by the selected vault in the VaultRegistry. Throws ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE`` if this check is false.
+3. Checks if the ``amount`` is less or equal to the ``issuedTokens`` by the selected vault in the VaultRegistry. Throws ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE`` if this check is false.
 
 4. Generate an ``redeemId`` by hashing a random seed, a nonce from the security module, and the address of the user.
 
@@ -214,7 +214,7 @@ Function Sequence
     - Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-redeemed BTC (``redeem.amount``), the ``redeemer``'s Bitcoin address (``redeem.btcAddress``), and the ``redeemId`` as parameters. If this call returns an error, abort and return the received error. 
 
 6. Burn the ``redeem.amount`` of PolkaBTC for the user with the ``burn`` function in the Treasury.
-7. Release the vault's collateral by calling ``releaseVault`` in the VaultRegistry with the ``redeem.vault`` and the ``redeem.amount``.
+7. Release the vault's collateral by calling ``unreserveTokens`` in the VaultRegistry with the ``redeem.vault`` and the ``redeem.amount``.
 8. Set the ``redeem.completed`` field to true.
 9. Send an ``ExecuteRedeem`` event with the user's address, the redeemId, the amount, and the Vault's address.
 10. Return.

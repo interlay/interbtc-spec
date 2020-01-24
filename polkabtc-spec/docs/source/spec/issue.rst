@@ -159,7 +159,7 @@ Function Sequence
 
 2. Lock the user's griefing collateral by calling the :ref:`lockCollateral` function with the ``requester`` as the sender and the ``griefingCollateral`` as the amount.
 
-3. Call the VaultRegistry :ref:`lockVault` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. If the vault has not locked enough collateral, throws a ``ERR_EXCEEDING_VAULT_LIMIT`` error. This function returns a ``btcAddress`` that the user should send Bitcoin to.
+3. Call the VaultRegistry :ref:`reserveTokens` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. If the vault has not locked enough collateral, throws a ``ERR_EXCEEDING_VAULT_LIMIT`` error. This function returns a ``btcAddress`` that the user should send Bitcoin to.
 
 4. Generate an ``issueId`` by hashing a random seed, a nonce from the security module, and the address of the user.
 
@@ -350,7 +350,7 @@ Function Sequence
 
 3. Check if the ``issue.completed`` field is set to true. If yes, throw ``ERR_ISSUE_COMPLETED``.
 
-4. Call the :ref:`releaseVault` function in the VaultRegistry with the ``issue.vault`` and the ``issue.amount`` to release the vault's collateral.
+4. Call the :ref:`unreserveTokens` function in the VaultRegistry with the ``issue.vault`` and the ``issue.amount`` to release the vault's collateral.
 
 5. Call the :ref:`slashCollateral` function to transfer the ``griefingCollateral`` of the user requesting the issue to the vault assigned to this issue request with the ``issue.requester`` as sender, the ``issue.vault`` as receiver, and ``issue.griefingCollateral`` as amount.
 
