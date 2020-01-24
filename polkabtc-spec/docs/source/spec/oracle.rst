@@ -96,7 +96,7 @@ Specification
     fn setExchangeRate(origin, rate:u128) -> Result {...}
 
 
-.. todo:: Check how to handle caller validation in Substrate - only pre-defined oracle should be allowed to call this function.
+.. .. todo:: Check how to handle caller validation in Substrate - only pre-defined oracle should be allowed to call this function.
 
 Preconditions
 .............

@@ -3,6 +3,8 @@
 Treasury
 ========
 
+The treasury serves as the central storage for all PolkaBTC.
+
 Data Model
 ~~~~~~~~~~
 
@@ -35,6 +37,8 @@ Mapping from accounts to their balance. ``<Account, Balance>``.
 Functions
 ~~~~~~~~~
 
+.. _transfer:
+
 transfer
 --------
 
@@ -55,8 +59,7 @@ Specification
 
 *Returns*
 
-* ``True``: If the sender has enough funds, the sender's balance is reduced by ``amount`` and the receivers balance increased by ``amount``.
-* ``False``: Otherwise.
+* ``None``
 
 *Events*
 
@@ -70,27 +73,21 @@ Specification
 
 ``fn transfer(origin, receiver: AccountId, amount: Balance) -> Result {...}``
 
-User Story
-..........
-
-Any user that owns PolkaBTC can act as a Sender. The Sender transfers an amount of PolkaBTC to a Receiver. This is the standard interface to change ownership of PolkaBTC.
-
 Function Sequence
 .................
 
 The ``transfer`` function takes as input the sender, the receiver, and an amount. The function executes the following steps:
 
-1. Verify that the ``sender`` is authorised to send the transaction by verifying the signature attached to the transaction.
-2. Verify that the ``sender``'s balance is above the ``amount``.
-
-    a. If ``balance(sender) < amount`` (in Substrate ``free_balance``), raise ``ERR_INSUFFICIENT_FUNDS`` and return ``False``.
-    b. Else, continue.
+1. Check that the ``sender`` is authorised to send the transaction by verifying the signature attached to the transaction.
+2. Check that the ``sender``'s balance is above the ``amount``. If ``balance(sender) < amount`` (in Substrate ``free_balance``), raise ``ERR_INSUFFICIENT_FUNDS`` and return ``False``.
         
 3. Subtract the Sender's balance by ``amount`` and add ``amount`` to the Receiver's balance.
 
-4. Issue ``Transfer(sender, receiver, amount)`` event.
+4. Emit the ``Transfer(sender, receiver, amount)`` event.
 
-5. Return ``True``.
+5. Return.
+
+.. _mint:
 
 mint
 ----
@@ -115,8 +112,7 @@ Specification
 
 *Returns*
 
-* ``True``: If the balance of the ``requester`` is increased by the ``amount``.
-* ``False``: Otherwise.
+* ``None``
 
 *Events*
 
@@ -127,8 +123,8 @@ Specification
 ``fn mint(requester: AccountId, amount: Balance) -> Bool {...}``
 
 
-User Story
-..........
+Preconditions
+.............
 
 This is an internal function and can only be called by the :ref:`Issue module <issue-protocol>`.
 
@@ -136,8 +132,8 @@ Function Sequence
 .................
 
 1. Increase the ``requester`` balance by ``amount``.
-2. Issue the ``Mint(requester, amount)`` event.
-3. Return ``True``.
+2. Emit the ``Mint(requester, amount)`` event.
+3. Return.
 
 burn
 ----
@@ -175,29 +171,25 @@ Specification
 
 ``fn burn(redeemer: AccountId, amount: Balance) -> Bool {...}``
 
-User Story
-..........
+Preconditions
+.............
 
 This is an internal function and can only be called by the :ref:`Redeem module <redeem-protocol>`.
 
 Function Sequence
 .................
 
-1. Verify that the ``redeemer``'s balance is above the ``amount``.
-
-    a. If ``balance(redeemer) < amount`` (in Substrate ``free_balance``), raise ``ERR_INSUFFICIENT_FUNDS`` and return ``False``.
-    b. Else, continue.
-        
+1. Check that the ``redeemer``'s balance is above the ``amount``. If ``balance(redeemer) < amount`` (in Substrate ``free_balance``), raise ``ERR_INSUFFICIENT_FUNDS`` and return ``False``.
 3. Subtract the Redeemer's balance by ``amount``. 
-4. Issue ``Burn(redeemer, amount)`` event.
+4. Emit the ``Burn(redeemer, amount)`` event.
 5. Return ``True``.
+
+.. _lock:
 
 lock
 ----
 
 During the redeem process, Redeemers need to be able to lock PolkaBTC.
-
-.. warning:: Can only be called by the Redeem module.
 
 Specification
 .............
@@ -213,8 +205,7 @@ Specification
 
 *Returns*
 
-* ``True``: If the Redeemer has enough funds to lock and they are locked.
-* ``False``: Otherwise.
+* ``None``
 
 *Events*
 
@@ -228,13 +219,15 @@ Specification
 
   fn lock(origin, ) -> Result {...}
 
-User Story
-..........
+Precondition
+............
 
+* Can only be called by the redeem module.
 
 Function Sequence
 .................
 
+1. 
 
 
 Events
