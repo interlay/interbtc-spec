@@ -80,14 +80,14 @@ The minimum collateral (DOT) a vault needs to provide to participate in the issu
 
 *Substrate*: ``MinimumCollateralVault: Balance;``
 
-MinimumCollateralUser
+IssueGriefingCollateral
 .....................
 
 The minimum collateral (DOT) a user needs to provide.
 
 .. note:: Prevent grieving attacks against vaults.
 
-*Substrate*: ``MinimumCollateralUser: Balance;``
+*Substrate*: ``IssueGriefingCollateral: Balance;``
 
 
 SecureOperationLimit
