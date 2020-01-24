@@ -143,7 +143,7 @@ Specification
 
 *Substrate* ::
 
-  fn requestIssue(origin, amount: U256, vault: AccountId) -> Result {...}
+  fn requestIssue(origin, amount: U256, vault: AccountId, collateral: DOT) -> Result {...}
 
 Preconditions
 .............

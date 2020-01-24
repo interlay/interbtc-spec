@@ -6,6 +6,9 @@ Replace
 Overview
 ~~~~~~~~~
 
+The Replace module allows a Vault (*OldVault*) be replaced by transferring the BTC it is holding locked to another Vault, which provides the necessary DOT collateral. As a result, the DOT collateral of the *OldVault*, corresponding to the amount of replaced BTC, is unlocked. The *OldVault* must thereby provide some amount of collateral to protect against griefing attacks, where the *OldVault* never finalizes the Replace protocol and the *NewVault* hence temporarily locked DOT collateral for nothing.
+
+Conceptual-wise, the Replace protocol resembles a SPV atomic cross-chain swap.
 
 Step-by-Step
 -------------
