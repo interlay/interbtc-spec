@@ -1,5 +1,4 @@
-
-1. .. _issue-protocol:
+.. _issue-protocol:
 
 Issue
 =====
