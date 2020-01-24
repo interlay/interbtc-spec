@@ -137,14 +137,14 @@ Specification
 
 *Function Signature*
 
-``requestReplace(vault, btcAmount, timeout, collateral)``
+``requestReplace(oldVault, btcAmount, timeout, griefingCollateral)``
 
 *Parameters*
 
 * ``oldVault``: Account identifier of the Vault to be replaced (as tracked in ``Vaults`` in :ref:`vault-registry`).
 * ``btcAmount``: Integer amount of BTC / PolkaBTC to be replaced.
 * ``timeout``: Time in blocks after which this request expires.
-* ``collateral``: collateral locked by the ``vault`` as griefing protection
+* ``griefingCollateral``: collateral locked by the ``oldVault`` as griefing protection
 
 .. todo:: Handle Griefing collateral (how do we check that a transaction correctly transferred DOT to the Parachain?)
 
@@ -179,7 +179,7 @@ Function Sequence
 
 1. Check that caller of the function is indeed the to-be-replaced Vault. Return ``ERR_UNAUTHORIZED`` error if this check fails.
 
-2. Retrieve the ``Vault`` as per the ``oldVault`` parameter from ``Vaults`` in the ``VaultRegistry``.
+2. Retrieve the ``Vault`` as per the ``oldVault`` account identifier from ``Vaults`` in the ``VaultRegistry``.
 
 3. Check that the requested ``btcAmount`` is lower than ``Vault.committedTokens``.
 
@@ -187,19 +187,20 @@ Function Sequence
 
 4. If the request is not for the entire BTC holdings, check that the remaining DOT collateral of the Vault is higher than ``MinimumCollateralVault`` as defined in ``VaultRegistry``. Return ``ERR_MIN_AMOUNT`` error if this check fails.
 
-5. Check that the provided DOT value is at least ``ReplaceGriefingCollateral``
+5. Check that the ``griefingCollateral`` is greater or equal ``ReplaceGriefingCollateral``
 
-.. todo:: Lock ``ReplaceGriefingCollateral``
+6. Lock the ``oldVault``'s griefing collateral by calling :ref`lockCollateral` and passing ``griefingCollateral`` as parameter.
 
-6. Generate a ``replaceId`` by hashing a random seed, a nonce, and the address of the Requester.
+7. Generate a ``replaceId`` by hashing a random seed, a nonce, and the address of the Requester.
 
-7. Create new ``ReplaceRequest`` entry:
+8. Create new ``ReplaceRequest`` entry:
 
    * ``Replace.oldVault = vault``,
    * ``Replace.opentime`` = current time on Parachain,
-   * ``Replace.amount = amount``.
+   * ``Replace.amount = amount``,
+   * ``Replace.griefingCollateral = griefingCollateral``.
    
-8. Emit ``ReplaceRequested(vault, btcAmount, timeout, replaceId)`` event.  
+9. Emit ``ReplaceRequested(vault, btcAmount, timeout, replaceId)`` event.  
 
 
 

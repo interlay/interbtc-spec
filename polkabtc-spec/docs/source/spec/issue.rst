@@ -82,7 +82,7 @@ Parameter           Type        Description
 ==================  ==========  =======================================================
 ``vault``           Account     The BTC Parachain address of the Vault responsible for this commit request.
 ``opentime``        u256        Block height of opening the request.
-``collateral``      DOT         Collateral provided by a user.
+``griefingCollateral``      DOT         Collateral provided by a user.
 ``amount``          PolkaBTC    Amount of PolkaBTC to be issued.
 ``requester``       Account     User account receiving PolkaBTC upon successful issuing.
 ``btcAddress``      bytes[20]   Base58 encoded Bitcoin public key of the Vault.  
@@ -98,7 +98,7 @@ Parameter           Type        Description
   pub struct Issue<AccountId, BlockNumber, Balance> {
         vault: AccountId,
         opentime: BlockNumber,
-        collateral: Balance,
+        griefingCollateral: Balance,
         amount: Balance,
         requester: AccountId,
         btcAddress: H160,
@@ -114,20 +114,21 @@ requestIssue
 ------------
 
 A user opens an issue request to create a specific amount of PolkaBTC. The user also has to provide a small amount of collateral.
+When calling this function, a user provides her own parachain account identifier, the to be issued amount of PolkaBTC, and the vault she wants to use in this process (parachain account identifier). Further, she provides some (small) amount of DOT collateral (``griefingCollateral``) to prevent griefing.
 
 Specification
 .............
 
 *Function Signature*
 
-``requestIssue(requester, amount, vault, collateral)``
+``requestIssue(requester, amount, vault, griefingCollateral)``
 
 *Parameters*
 
 * ``requester``: The user's BTC Parachain account.
 * ``amount``: The amount of PolkaBTC to be issued.
 * ``vault``: The BTC Parachain address of the Vault involved in this issue request.
-* ``collateral``: The collateral amount provided by the user.
+* ``griefingCollateral``: The collateral amount provided by the user as griefing protection.
 
 *Returns*
 
@@ -139,11 +140,11 @@ Specification
 
 *Errors*
 
-* ``ERR_INSUFFICIENT_COLLATERAL``: The user did not provide enough collateral.
+* ``ERR_INSUFFICIENT_COLLATERAL``: The user did not provide enough griefing collateral.
 
 *Substrate* ::
 
-  fn requestIssue(origin, amount: U256, vault: AccountId, collateral: DOT) -> Result {...}
+  fn requestIssue(origin, amount: U256, vault: AccountId, griefingCollateral: DOT) -> Result {...}
 
 Preconditions
 .............
@@ -154,28 +155,26 @@ Function Sequence
 .................
 
 
-1. The user calls the ``requestIssue`` function and provides his own address, the amount, and the vault he wants to use. Further, he provides a small collateral to prevent griefing.
+1. Check if the ``griefingCollateral`` is greater or equal ``MinimumCollateral``. If this check fails, return ``ERR_INSUFFICIENT_COLLATERAL``.
 
-2. Checks if the user provided enough collateral by checking if the collateral is equal or greater than ``MinimumCollateral``. If not, throws ``ERR_INSUFFICIENT_COLLATERAL``.
+2. Lock the user's collateral by calling the :ref:`lockCollateral` function with the ``requester`` as the sender and the ``griefingCollateral`` as the amount.
 
-3. Lock the user's collateral by calling the :ref:`lockCollateral` function with the ``requester`` as the sender and the ``collateral`` as the amount.
+3. Call the VaultRegistry :ref:`lockVault` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. If the vault has not locked enough collateral, throws a ``ERR_EXCEEDING_VAULT_LIMIT`` error. This function returns a ``btcAddress`` that the user should send Bitcoin to.
 
-4. Call the VaultRegistry :ref:`lockVault` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. If the vault has not locked enough collateral, throws a ``ERR_EXCEEDING_VAULT_LIMIT`` error. This function returns a ``btcAddress`` that the user should send Bitcoin to.
+4. Generate an ``issueId`` by hashing a random seed, a nonce from the security module, and the address of the user.
 
-5. Generate an ``issueId`` by hashing a random seed, a nonce from the security module, and the address of the user.
-
-6. Store a new ``Issue`` struct in the ``IssueRequests`` mapping as ``IssueRequests[issueId] = issue``, where ``issue`` is the ``Issue`` struct as:
+5. Store a new ``Issue`` struct in the ``IssueRequests`` mapping as ``IssueRequests[issueId] = issue``, where ``issue`` is the ``Issue`` struct as:
 
     - ``issue.vault`` is the ``vault``
     - ``issue.opentime`` is the current block number
-    - ``issue.collateral`` is the collateral provided by the user
+    - ``issue.griefingCollateral`` is the griefing collateral provided by the user
     - ``issue.amount`` is the ``amount`` provided as input
     - ``issue.requester`` is the user's account
     - ``issue.btcAddress`` the Bitcoin address of the Vault as returned in step 3
 
-7. Issue the ``RequestIssue`` event with the ``issueId``, the ``requester`` account, ``amount``, ``vault``, and ``btcAddress``.
+6. Issue the ``RequestIssue`` event with the ``issueId``, the ``requester`` account, ``amount``, ``vault``, and ``btcAddress``.
 
-8. Return the ``issueId``. The user stores this for future reference and the next steps, locally.
+7. Return the ``issueId``. The user stores this for future reference and the next steps, locally.
 
 
 .. lock
@@ -353,7 +352,7 @@ Function Sequence
 
 4. Call the :ref:`releaseVault` function in the VaultRegistry with the ``issue.vault`` and the ``issue.amount`` to release the vault's collateral.
 
-5. Call the :ref:`slashCollateral` function to transfer the griefing collateral of the user requesting the issue to the vault assigned to this issue request with the ``issue.requester`` as sender, the ``issue.vault`` as receiver, and ``issue.collateral`` as amount.
+5. Call the :ref:`slashCollateral` function to transfer the ``griefingCollateral`` of the user requesting the issue to the vault assigned to this issue request with the ``issue.requester`` as sender, the ``issue.vault`` as receiver, and ``issue.griefingCollateral`` as amount.
 
 6. Emit the ``CancelIssue`` event with the ``issueId``.
 
@@ -438,7 +437,7 @@ Error Codes
 
 * **Message**: "User provided collateral below limit."
 * **Function**: :ref:`requestIssue`
-* **Cause**: User provided collateral below the ``MinimumCollateral``.
+* **Cause**: User provided griefingCollateral below ``IssueGriefingCollateral``.
 
 ``ERR_UNAUTHORIZED_USER``
 
