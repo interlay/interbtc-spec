@@ -61,6 +61,7 @@ Parameter           Type        Description
 ``vault``           Account     The BTC Parachain address of the Vault responsible for this redeem request.
 ``opentime``        u256        Block height of opening the request.
 ``amount``          BTC         Amount of BTC to be redeemed.
+``redeemer``        Account     The BTC Parachain address of the user requesting the redeem.
 ``btcAddress``      bytes[20]   Base58 encoded Bitcoin public key of the User.  
 ``completed``       bool        Indicates if the redeem has been completed.
 ==================  ==========  =======================================================
@@ -75,9 +76,13 @@ Parameter           Type        Description
         vault: AccountId,
         opentime: BlockNumber,
         amount: Balance,
+        redeemer: AccountId,
         btcAddress: H160,
         completed: bool
   }
+
+Functions
+~~~~~~~~~
 
 .. _requestRedeem:
 
@@ -214,13 +219,13 @@ Function Sequence
 2. Checks if the ``vault`` is the ``redeem.vault``. Throws ``ERR_UNAUTHORIZED`` if called by any account other than the associated ``redeem.vault``.
 3. Checks if the ``redeemId`` exists. Throws ``ERR_REDEEM_ID_NOT_FOUND`` if not found.
 4. Checks if the current block height minus the ``RedeemPeriod`` is smaller than the ``opentime`` specified in the ``Redeem`` struct. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``.
-
 5. Verify the transaction.
+
     - Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
     - Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-redeemed BTC (``redeem.amount``), the ``redeemer``'s Bitcoin address (``redeem.btcAddress``), and the ``redeemId`` as parameters. If this call returns an error, abort and return the received error. 
 
-6. Burn the ``redeem.amount`` of PolkaBTC for the user with the ``burn`` function in the Treasury.
-7. Release the vault's collateral by calling ``releaseVault`` in the VaultRegistry with the ``redeem.vault`` and the ``redeem.amount``.
+6. Call the :ref:`burn` function in the Treasury to burn the ``redeem.amount`` of PolkaBTC of the user.
+7. Call :ref:`releaseVault` in the VaultRegistry to release the Vault's collateral with the ``redeem.vault`` and the ``redeem.amount``.
 8. Set the ``redeem.completed`` field to true.
 9. Send an ``ExecuteRedeem`` event with the user's address, the redeemId, the amount, and the Vault's address.
 10. Return.
@@ -231,6 +236,7 @@ cancelRedeem
 ------------
 
 If a redeem request is not completed on time, the redeem request can be cancelled.
+The user that initially requested the redeem process calls this function to obtain the Vault's collateral as compensation for not refunding the BTC back to his address.
 
 Specification
 .............
@@ -277,11 +283,13 @@ Function Sequence
 
 3. Check if the ``redeem.completed`` field is set to true. If yes, throw ``ERR_REDEEM_COMPLETED``.
 
-4. Slash the vault by calling ``slashVault`` in the VaultRegistry with the ``redeem.amount`` and the ``redeem.vault`` parameters.
+4. Call the :ref:`slashVault` function in the VaultRegistry to transfer the Vault's collateral to the user with the ``redeem.vault``, ``redeem.user``, and ``redeem.amount`` parameters.
 
-5. Transfer the slashed collateral of the vault to the ``redeem.redeemer``.
+5. Call the :ref:`burn` function in the Treasury to burn the ``redeem.amount`` of PolkaBTC of the user.
+   
+6. Set the ``redeem.completed`` field to true.
 
-6. Send the ``CancelRedeem`` event with the ``redeemId``.
+7. Send the ``CancelRedeem`` event with the ``redeemId``.
 
-7. Return.
+8. Return.
 
