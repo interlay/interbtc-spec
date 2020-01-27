@@ -45,11 +45,11 @@ Data Model
 ~~~~~~~~~~
 
 
-Scalars
---------
+Constants
+---------
 
-stakedRelayerVoteThreshold
-............................
+STAKED_RELAYER_VOTE_THRESHOLD
+...............................
 
 Integer denoting the percentage of Staked Relayer signatures/votes necessary to alter the state of the BTC Parachain (``NO_DATA_BTC_RELAY`` and ``INVALID_BTC_RELAY`` error codes).
 
@@ -58,32 +58,52 @@ Integer denoting the percentage of Staked Relayer signatures/votes necessary to 
 
 *Substrate* ::
 
-  stakedRelayerVoteThreshold: U256;
+  STAKED_RELAYER_VOTE_THRESHOLD: U256;
 
 
-stakedRelayerStake
-...................
+STAKED_RELAYER_STAKE
+......................
 
 Integer denoting the minimum DOT stake which Staked Relayers must provide when registering. 
 
 
-Status
-.......
+*Substrate* ::
 
-Integer/Enum (see StatusCode below). Defines the current state of BTC-Relay. 
+  STAKED_RELAYER_STAKE: U256;
 
-StatusLog
-..........
 
-Array of ``StatusUpdate`` structs, providing a history of status changes of BTC-Relay.
+Scalars
+--------
 
-.. note:: If pruning is implemented for ``BlockHeaders`` and ``Chains`` as performance optimization, ``StatusLog`` entries referencing pruned blocks should be deleted as well. 
+ParachainStatus
+.................
+
+Integer/Enum (see ``StatusCode`` below). Defines the current state of BTC-Relay. 
+
+*Substrate* ::
+
+  ParachainStatus: T::StatusCode;
+
+
+ErrorStatus
+-----------
+
+List of error codes (``ErrorCode`` enums), indicating the reason for the error. The ``ErrorCode`` entries included in this list specify how to react to the failure (e.g. shutdown transaction verification in :ref:`btc-relay`).
 
 
 *Substrate* ::
 
-  StatusLog: Vec<StatusUpdate>;
+  ErrorStatus: Vec<T::ErrorCode>;
 
+
+StatusLog
+..........
+
+Array of ``StatusUpdate`` structs, providing a history of status changes of the BTC Parachain. 
+
+*Substrate* ::
+
+  StatusLog: Vec<StatusUpdate>;
 
 
 Nonce
@@ -102,16 +122,11 @@ Enums
 StatusCode
 ...........
 
-* ``RUNNING: 0`` - BTC-Relay fully operational
+* ``RUNNING: 0`` - BTC Parachain fully operational
 
-* ``PARTIAL : 1`` - ``NO_DATA_BTC_RELAY`` detected or manual intervention. Transaction verification disabled for latest blocks.
+* ``ERROR: 1``- an error was detected in the BTC Parachain. See ``ErrorStatus`` for more details, i.e., the specific error codes (these determine how to react).
 
-.. note:: The exact threshold (in terms of block height) for disabling the verification of transactions in the ``PARTIAL`` state must be defined upon deployment. A possible approach is to keep intact transaction inclusion verification for blocks with a height lower than the height of the first ``NO_DATA_BTC_RELAY`` rblock.
-
-
-* ``HALTED: 2`` - ``INVALID_BTC_RELAY`` detected or manual intervention. Transaction verification fully suspended.
-
-* ``SHUTDOWN: 3`` - Manual intervention (``UNEXPECTED``). BTC-Relay operation fully suspended.
+* ``SHUTDOWN: 2`` - Manual intervention (``UNEXPECTED`` error code). BTC Parachain operation fully suspended.
 
 *Substrate* 
 
@@ -119,8 +134,7 @@ StatusCode
 
   enum StatusCode {
         RUNNING = 0,
-        PARTIAL = 1,
-        HALTED = 2,
+        ERROR = 1,
         SHUTDOWN = 3,
   }
 
@@ -134,10 +148,14 @@ Enum specifying reasons for error leading to a status update.
 
 * ``INVALID_BTC_RELAY : 1`` - an invalid transaction was detected in a block header submitted to :ref:`btc-relay`. 
 
-* ``NO_EXCHANGE_RATE : 2`` - the :ref:`exchangeRateOracle` experienced a liveness failure (no up-to-date exchange rate available).
+* ``ORACLE_OFFLINE : 2`` - the :ref:`exchangeRateOracle` experienced a liveness failure (no up-to-date exchange rate available).
 
-* ``UNEXPECTED: 2`` - unexpected error occurred, potentially manual intervention from Governance Mechanism. See  ``msg`` for reason.
 
+* ``MANUAL_RESET: 3`` - manual reset to a new status (by Governance Mechanism).
+
+* ``DATA_AVAILABLE: 4`` - previously unavailable data for a Bitcoin block header in :ref:`btc-relay` has become available again.
+
+* ``VALID_FORK: 5`` - a chain reorganization occurred, excluding the block(s) marked as ``INVALID`` from the longest chain in :ref:`btc-relay`.
 
 *Substrate*
 
@@ -146,9 +164,18 @@ Enum specifying reasons for error leading to a status update.
   enum ErrorCode {
         NO_DATA_BTC_RELAY = 0,
         INVALID_BTC_RELAY = 1,
-        UNEXPECTED = 2,
+        ORACLE_OFFLINE = 2,
+        //recovery codes
+        MANUAL_RESET = 3,
+        DATA_AVAILABLE = 4,
+        VALID_FORK = 5
   }
 
+
+.. todo:: Decide how to best separate codes for errors (necessary for checks from specific functions) and information on why a status was recovered from. 
+
+
+.. todo:: Remove ``UNEXPECTED`` flag. If the BTC Parachain is shutdown, it is clear what happened (or a message is given in ``msg``).
 
 Structs
 --------
@@ -158,14 +185,15 @@ StatusUpdate
 
 Struct providing information for an occurred halting of BTC-Relay. Contains the following fields.
 
-======================  =============  ============================================
-Parameter               Type           Description
-======================  =============  ============================================
-``satusCode``           Status         New status code.
-``blockHash``           H256           Block hash of the block header in ``_blockHeaders`` which caused the status change.  
-``errorCode``           ErrorCode      Error code specifying the reason for the status change.          
-``msg``                 String         [Optional] message providing more details on the change of status (error message or recovery). 
-======================  =============  ============================================
+======================  ==============  ============================================
+Parameter               Type            Description
+======================  ==============  ============================================
+``statusCode``          Status          New status code.
+``blockHash``           H256            Block hash of the block header in ``_blockHeaders`` which caused the status change.  
+``errorCode``           ErrorCode       Error code specifying the reason for the status change.          
+``msg``                 String          [Optional] message providing more details on the change of status (error message or recovery). 
+``votes``               Vec<AccountId>  List of accounts which have voted for this status update. This can be either Staked Relayers or the Governance Mechanism. Checks are performed depending on the type of status change.
+======================  ==============  ============================================
 
 *Substrate* 
 
@@ -173,11 +201,12 @@ Parameter               Type           Description
 
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct StatusUpdate<Status, H256, ErrorCode> {
+  pub struct StatusUpdate<Status, H256, ErrorCode, AccountId> {
         statusCode: Status,
         blockHash: H256,
         errorCode: ErrorCode,
-        msg: String
+        msg: String,
+        votes: Vec<AccountId>
   }
 
 
@@ -201,11 +230,11 @@ Parameter                  Type       Description
 
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct StatusUpdate<DOT> {
+  pub struct StatusUpdate<Balance> {
         stake: Balance
   }
 
-.. note:: Struct used here in case more information needs to be stored for Staked Relayers
+.. note:: Struct used here in case more information needs to be stored for Staked Relayers, e.g. SLA (votes cast vs. votes missed).
 
 Maps
 ----
@@ -217,12 +246,14 @@ Mapping from accounts of StakedRelayers to their struct. ``<Account, StakedRelay
 
 *Substrate* ::
 
-    StakedRelayers map T::AccountId => StakedRelayer<>
+    StakedRelayers map T::AccountId => StakedRelayer<Balance>
 
 
 
 Functions
 ~~~~~~~~~
+
+.. todo:: Add functions for (i) registering, de-registering and slashing of Staked Relayers, (ii) casting votes on status updates. 
 
 .. _statusUpdate:
 
