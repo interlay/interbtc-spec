@@ -15,11 +15,11 @@ There are four main participant roles in the system. A detailed overview of all 
   - **Sender**: A user that sends PolkaBTC to a Receiver on the BTC Parachain. Interacts with the *Treasury* component. 
   - **Receiver**: A user that receives PolkaBTC on the BTC Parachain. Interacts with the *Treasury* component. 
   - **Redeemer**: A user that destroys PolkaBTC on the BTC Parachain to receive the corresponding amount of BTC on the Bitcoin blockchain from a Vault. Interacts with the *Redeem* component. 
-- **Staked Relayers**:  Collateralized intermediaries which run Bitcoin full nodes and (i) monitor validity and availability of transactional data for Bitcoin blocks submitted to BTC-Relay, (ii) monitor that Vaults do not move locked BTC on Bitcoin without prior authorization by the BTC Parachain (i.e., through one of the Issue, Redeem or Replace protocols). In case either of the above errors was detected, staked relayers report this to the BTC Parachain. Interact with the *BTC-Relay*, *StakedRelayers*, and *VaultRegistry* components. 
+- **Staked Relayers**:  Collateralized intermediaries which run Bitcoin full nodes and (i) monitor validity and availability of transactional data for Bitcoin blocks submitted to BTC-Relay, (ii) monitor that Vaults do not move locked BTC on Bitcoin without prior authorization by the BTC Parachain (i.e., through one of the Issue, Redeem or Replace protocols). In case either of the above errors was detected, Staked Relayers report this to the BTC Parachain. Interact with the *BTC-Relay*, *StakedRelayers*, and *VaultRegistry* components. 
 
-.. todo:: The exact composition of staked relayers (static vs dynamic committee) and the internal agreement mechanism needs to be defined. Do staked relayers run a BFT protocol to create a threshold signature when reporting an error / updating the state of BTC-Relay? Who can join this committee?
+.. todo:: The exact composition of Staked Relayers (static vs dynamic committee) and the internal agreement mechanism needs to be defined. Do Staked Relayers run a BFT protocol to create a threshold signature when reporting an error / updating the state of BTC-Relay? Who can join this committee?
 
-- **Governance Mechanism**: The Parachain Governance Mechanism monitors the correct operation of the BTC Parachain, as well as the correct behaviour of staked relayers (and other participants if necessary). Interacts with the *RelayerCollateral* component when staked relayers misbehave and can manually interfere with the operation and parameterization of all components of the BTC Parachain.
+- **Governance Mechanism**: The Parachain Governance Mechanism monitors the correct operation of the BTC Parachain, as well as the correct behaviour of Staked Relayers (and other participants if necessary). Interacts with the *RelayerCollateral* component when Staked Relayers misbehave and can manually interfere with the operation and parameterization of all components of the BTC Parachain.
 
 .. note:: The exact composition of the Governance Mechanism is to be defined by Polkadot.  
 
@@ -43,7 +43,7 @@ The Oracle module maintains the ``ExchangeRate`` value between the asset that is
 In the proof-of-concept the Oracle is operated by a trusted third party to feed the current exchange rates into the system.
 
 .. note:: The exchange rate oracle implementation is not part of this specification. PolkaBTC simply expects a continuous input of exchange rate data and assumes the oracle operates correctly.
-.. .. todo:: Check with Web3 on how they plan to implement this. Probably, governance mechanism will provide this service, or intervene in case of failures.
+.. .. todo:: Check with Web3 on how they plan to implement this. Probably, Governance Mechanism will provide this service, or intervene in case of failures.
 
 
 Treasury

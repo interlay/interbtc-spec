@@ -3,10 +3,9 @@
 Security
 ========================
 
-.. todo:: Update text: no longer BTC-Relay only, but entire Parachain, incl. exchange rate oracle.  
-
-The BTC-Relay provides additional methods for failure handling, e.g. in case an attack on the Parachain or Bitcoin itself is detected. 
-**Please first see** `Failure Modes: Halting and Recovery <security_performance/security.html#security-parameter-k>`_ for an explanation of how BTC-Relay can handle and recover from failures.
+The Security module is responsible for failure handling in the BTC Parachain, such as liveness and safety failures of :ref:`btc-relay` or crashes of the :ref:`exchange-rate-oracle`.
+Specifically, this module provides a central interface for all other modules to check whether specific features should be disabled to prevent financial damage to users (e.g. stop :ref:`issue` if no reliable price data is available).
+In addition, the Security module provides functions to handle security critical operations, such as generating secure identifiers for replay protection in :ref:`issue:`, :ref:`redeem`, and :ref:`replace`. 
 
 
 Overview
@@ -15,14 +14,16 @@ Overview
 Failure Modes
 --------------
 
-BTC-Relay can enter into different failure modes, depending on the occurred error.
-See figure below. 
-
+The BTC Parachain can enter into different failure modes, depending on the occurred error.
+An overview is provided in the figure below.
 
 .. figure:: ../figures/failureModes.png
     :alt: State machine showing BTC-Relay failure modes
 
     State machine showing the operational and failure modes of BTC-Relay, and how to recover from or flag failures.
+
+
+More details on the exact failure states and error codes are provided in the Specification part of this module description.
 
 Roles
 -----
@@ -35,9 +36,9 @@ We differentiate between:
     1. Transactional data is available for submitted Bitcoin block headers (``NO_DATA_BTC_RELAY: 0`` code)
     2. Submitted blocks are valid under Bitcoin's consensus rules  (``INVALID_BTC_RELAY: 1`` code).
 
- If one of the above failures is detected, staked relayers can (*TODO: together or individually?*) halt BTC-Relay, providing information about the cause. 
+ If one of the above failures is detected, Staked Relayers can halt BTC-Relay, providing information about the cause. Thereby, the Parachain acts as bulleting board and requires a pre-defined number / percentage of signatures of Staked Relayers.
 
-* **Governance Mechanism** - Parachain governance mechanism, voting on critical changes to the architecture or unexpected failures, e.g. hard forks or detected 51% attacks (if a fork exceeds the specified security parameter *k*, see `Security Parameter k <security_performance/security.html#security-parameter-k>`_.). A manual intervention can be indicated via the ``UNEXPECTED: 2`` halting code. 
+* **Governance Mechanism** - Parachain Governance Mechanism, voting on critical changes to the architecture or unexpected failures, e.g. hard forks or detected 51% attacks (if a fork exceeds the specified security parameter *k*, see `Security Parameter k <security_performance/security.html#security-parameter-k>`_.). A manual intervention can be indicated via the ``UNEXPECTED: 2`` halting code. 
 
 
 Data Model
@@ -47,10 +48,29 @@ Data Model
 Scalars
 --------
 
+stakedRelayerVoteThreshold
+............................
+
+Integer denoting the percentage of Staked Relayer signatures/votes necessary to alter the state of the BTC Parachain (``NO_DATA_BTC_RELAY`` and ``INVALID_BTC_RELAY`` error codes).
+
+.. note:: Must be a number between 0 and 100.
+
+
+*Substrate* ::
+
+  stakedRelayerVoteThreshold: U256;
+
+
+stakedRelayerStake
+...................
+
+Integer denoting the minimum DOT stake which Staked Relayers must provide when registering. 
+
+
 Status
 .......
 
-Integer/Enum (see StatusCode below). Defines the curret state of BTC-Relay. 
+Integer/Enum (see StatusCode below). Defines the current state of BTC-Relay. 
 
 StatusLog
 ..........
@@ -86,7 +106,7 @@ StatusCode
 
 * ``PARTIAL : 1`` - ``NO_DATA_BTC_RELAY`` detected or manual intervention. Transaction verification disabled for latest blocks.
 
-.. note:: The exact threshold (in terms of block height) for disabling the verification of transactions in the ``PARTIAL`` state must be defined upon deployment. A possible approach is to keep intact transaction inclusion verification for blocks with a height lower than the height of the first ``NO_DATA_BTC_RELAY`` block.
+.. note:: The exact threshold (in terms of block height) for disabling the verification of transactions in the ``PARTIAL`` state must be defined upon deployment. A possible approach is to keep intact transaction inclusion verification for blocks with a height lower than the height of the first ``NO_DATA_BTC_RELAY`` rblock.
 
 
 * ``HALTED: 2`` - ``INVALID_BTC_RELAY`` detected or manual intervention. Transaction verification fully suspended.
@@ -116,7 +136,7 @@ Enum specifying reasons for error leading to a status update.
 
 * ``NO_EXCHANGE_RATE : 2`` - the :ref:`exchangeRateOracle` experienced a liveness failure (no up-to-date exchange rate available).
 
-* ``UNEXPECTED: 2`` - unexpected error occurred, potentially manual intervention from governance mechanism. See  ``msg`` for reason.
+* ``UNEXPECTED: 2`` - unexpected error occurred, potentially manual intervention from Governance Mechanism. See  ``msg`` for reason.
 
 
 *Substrate*
@@ -131,10 +151,10 @@ Enum specifying reasons for error leading to a status update.
 
 
 Structs
-~~~~~~~
+--------
 
 StatusUpdate
-------------
+.............
 
 Struct providing information for an occurred halting of BTC-Relay. Contains the following fields.
 
@@ -160,6 +180,44 @@ Parameter               Type           Description
         msg: String
   }
 
+
+
+StakedRelayer
+..............
+
+Stores the information of a Staked Relayer.
+
+.. tabularcolumns:: |l|l|L|
+
+=========================  =========  ========================================================
+Parameter                  Type       Description
+=========================  =========  ======================================================== 
+``stake``                  DOT        Total amount of collateral/stake provided by this Staked Relayer.
+=========================  =========  ========================================================
+
+*Substrate* 
+
+::
+
+  #[derive(Encode, Decode, Default, Clone, PartialEq)]
+  #[cfg_attr(feature = "std", derive(Debug))]
+  pub struct StatusUpdate<DOT> {
+        stake: Balance
+  }
+
+.. note:: Struct used here in case more information needs to be stored for Staked Relayers
+
+Maps
+----
+
+StakedRelayers
+...............
+
+Mapping from accounts of StakedRelayers to their struct. ``<Account, StakedRelayer>``.
+
+*Substrate* ::
+
+    StakedRelayers map T::AccountId => StakedRelayer<>
 
 
 

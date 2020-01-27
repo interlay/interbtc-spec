@@ -19,13 +19,13 @@ BTC-Relay differentiates between the following actors:
 
 * **Users** - BTC Parachain users which interact with the BTC-Relay directly or with other modules which make calls to BTC-Relay.
 
-* **Staked Relayers** - staked relayers lock up collateral in the BTC Parachain and are responsible for running Bitcoin `full nodes <https://bitcoin.org/en/full-node>`_ and verify that blocks submitted to BTC-Relay are valid (and that transactional data for these blocks is available). Staked relayers can halt BTC-Relay in case a failure is detected. See :ref:`security` for more details. 
+* **Staked Relayers** - Staked Relayers lock up collateral in the BTC Parachain and are responsible for running Bitcoin `full nodes <https://bitcoin.org/en/full-node>`_ and verify that blocks submitted to BTC-Relay are valid (and that transactional data for these blocks is available). Staked relayers can halt BTC-Relay in case a failure is detected. See :ref:`security` for more details. 
 
-.. note:: While any user can submit block headers to BTC-Relay, this role can be assigned to staked relayers, given these participants already run Bitcoin full nodes and check validity of stored blocks.
+.. note:: While any user can submit block headers to BTC-Relay, this role can be assigned to Staked Relayers, given these participants already run Bitcoin full nodes and check validity of stored blocks.
 
-* **(Parachain) Governance Mechanism** - the correct operation of the BTC Parachain, and hence of BTC-Relay, is overseen by the Parachain's governance mechanism (e.g. committee of consensus participants and other key actors of the BTC Parachain). 
+* **(Parachain) Governance Mechanism** - the correct operation of the BTC Parachain, and hence of BTC-Relay, is overseen by the Parachain's Governance Mechanism (e.g. committee of consensus participants and other key actors of the BTC Parachain). 
 
-.. note:: At the time of writing, the exact composition of the governance mechanism / commitee is not fully defined in Polkadot. This specification assumes the existence and correct operation of this mechanism - although modifications may be necessary to accomodate complexities and additional functional requirements, once the governance mechanism is fully specified.
+.. note:: At the time of writing, the exact composition of the Governance Mechanism / commitee is not fully defined in Polkadot. This specification assumes the existence and correct operation of this mechanism - although modifications may be necessary to accomodate complexities and additional functional requirements, once the Governance Mechanism is fully specified.
 
 
 

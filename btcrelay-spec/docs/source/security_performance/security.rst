@@ -35,7 +35,7 @@ The correct operation of BTC-Relay relies on receiving a steady stream of Bitcoi
 A high delay between block generation in Bitcoin and submission to BTC-Relay yields the system susceptible to attacks: an adversary can attempt to *poison* the relay by submitting a fork, even if the fork was not submitted to Bitcoin itself (see :ref:`relay-poisoning` below).
 
 While by design, any user can submit Bitcoin block headers to BTC-Relay, it is recommended to introduce an explicit set of participants for this task.
-These can be *staked relayers*, which already run Bitcoin full nodes for validation purposes, or *Vaults* which are used for the creation of Bitcoin-backed assets in the PolkaBTC component.
+These can be *Staked Relayers*, which already run Bitcoin full nodes for validation purposes, or *Vaults* which are used for the creation of Bitcoin-backed assets in the PolkaBTC component.
 
 
 Safety Failures
@@ -50,12 +50,12 @@ One of the major questions that arises in cross-chain communication is: what to 
 In the case of BTC-Relay, a major chain reorganization in Bitcoin would be accepted, if the new chain exceeds the tracked ``Chains`` in BTC-Relay.
 If the length of the fork exceeds the security parameter *k* relied upon by applications using BTC-Relay, this can have sever impacts, beyond that of users loosing BTC. 
 
-However, as BTC-Relay acts only as mirror of the Bitcoin blockchain, the only possible mitigation of a 51% attack on Bitcoin **halting BTC-Relay** via manual intervention of *staked relayers* or the *governance mechanism*.
+However, as BTC-Relay acts only as mirror of the Bitcoin blockchain, the only possible mitigation of a 51% attack on Bitcoin **halting BTC-Relay** via manual intervention of *Staked Relayers* or the *Governance Mechanism*.
 See **Failure Handling** for more details on BTC-Relay failure modes and recovery procedures.
 
 .. todo:: Add reference to Failure Handling spec, once deployed.
 
-A major challenge thereby is to ensure the potential financial loss of *staked relayers* and/or participants of the *governance mechanism* exceeds the potential gains from colluding with an adversary on Bitcoin. 
+A major challenge thereby is to ensure the potential financial loss of *Staked Relayers* and/or participants of the *Governance Mechanism* exceeds the potential gains from colluding with an adversary on Bitcoin. 
 
 .. _relay-poisoning: 
 
@@ -63,7 +63,7 @@ Relay Poisoning
 ~~~~~~~~~~~~~~~
 
 BTC-Relay poisoning is a more subtle way of interfering with correct operation of the system: an adversary submits a Bitcoin fork to BTC-Relay, but does not broadcast it to the actual Bitcoin network. 
-If Liveness of BTC-Relay is breached, e.g. *staked relayers* are unavailable, BTC-Relay can be tricked into accepting an alternate ``Chains`` than actually maintained in Bitcoin.
+If Liveness of BTC-Relay is breached, e.g. *Staked Relayers* are unavailable, BTC-Relay can be tricked into accepting an alternate ``Chains`` than actually maintained in Bitcoin.
 
 However, as long as a single honest participant is online and capable of submitting Bitcoin block headers from the Bitcoin main chain to BTC-Relay within *k* blocks, poisoning attacks can be mitigated. 
 
@@ -83,7 +83,7 @@ As a result, multiple instances of the same blockchain are created, e.g. as in t
 
 BTC-Relay by default will follow the old consensus rules, and must be updated accordingly if it is to follow the new version of the system.
 
-Thereby, is it for the *governance mechanism* to determine (i) whether an update will be executed and (ii) if two parallel blockchains result from the hard fork, whether an additional new instance of BTC-Relay is to be deployed (and how). 
+Thereby, is it for the *Governance Mechanism* to determine (i) whether an update will be executed and (ii) if two parallel blockchains result from the hard fork, whether an additional new instance of BTC-Relay is to be deployed (and how). 
 
 
 Note: to differentiate between the two resulting chains after a hard fork, replay protection is necessary for secure operation. 

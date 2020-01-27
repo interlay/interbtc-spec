@@ -157,7 +157,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Function**: :ref:`verifyTransactionInclusion` | :ref:`storeForkBlockHeader` | :ref:`storeBlockHeader`
 
-* **Cause**: The BTC Parachain has been shutdown by a manual intervention of the governance mechanism.
+* **Cause**: The BTC Parachain has been shutdown by a manual intervention of the Governance Mechanism.
 
 
 
