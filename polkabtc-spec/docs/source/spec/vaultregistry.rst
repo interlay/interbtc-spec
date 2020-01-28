@@ -6,6 +6,20 @@ Vault Registry
 
 .. note:: We recommend implementing getter functions for (i) the total collateral locked through by active PolkaBTC tokens, (ii) the total collateral reserved in pending issue requests, (iii) the total collateral reserved in pending replace requests, and (iv) the total free collateral (not locked / reserved) for compliance and transparency purposes.
 
+Overview
+~~~~~~~~
+
+The vault registry is the central place to manage vaults. Vaults can register themselves here, update their collateral, or can be liquidated.
+Similarly, the issue, redeem, and replace protocols call this module to assign vaults during issue, redeem, and replace procedures.
+
+Step-by-step
+------------
+
+.. todo:: Insert figure of interactions with a vault.
+
+
+
+
 Data Model
 ~~~~~~~~~~
 
@@ -105,8 +119,9 @@ Stores the information of a Vault.
 =========================  =========  ========================================================
 Parameter                  Type       Description
 =========================  =========  ========================================================
+``toBeIssuedTokens``       PolkaBTC   Number of PolkaBTC tokens currently requested as part of an uncompleted issue request.
 ``issuedTokens``           PolkaBTC   Number of PolkaBTC tokens actively issued by this Vault.
-``reservedTokens``         DOT        Number of PolkaBTC tokens reserved by pending :ref:`issue` and :ref:`replace` requests. 
+``toBeRedeemedTokens``     PolkaBTC   Number of PolkaBTC tokens reserved by pending redeem and replace requests. 
 ``collateral``             DOT        Total amount of collateral provided by this Vault (note: "free" collateral is calculated on the fly and updated each time new exchange rate data is received).
 ``btcAddress``             bytes[20]  Bitcoin address of this Vault, to be used for issuing of PolkaBTC tokens.
 =========================  =========  ========================================================
@@ -122,9 +137,11 @@ Parameter                  Type       Description
   #[cfg_attr(feature = "std", derive(Debug))]
   pub struct Vault<AccountId, Balance> {
         vault: AccountId,
+        toBeIssuedTokens: Balance,
         issuedTokens: Balance,
+        toBeRedeemedTokens: Balance,
         collateral: Balance,
-        btcAddress: [u8; 20]
+        btcAddress: H160
   }
 
 
@@ -158,7 +175,7 @@ Functions
 
 
 registerVault
---------------------
+-------------
 
 Initiates the registration procedure for a new Vault. The Vault provides its BTC address and locks up DOT collateral, which is to be used to the issuing process. 
 
@@ -395,24 +412,23 @@ Function Sequence
 
 .. END COMMENT
 
-.. _lockVault:
+.. _increaseToBeIssuedTokens:
 
-reserveTokens
--------------
+increaseToBeIssuedTokens
+------------------------
 
-Reserves a given amount of PolkaBTC tokens, i.e., the corresponding DOT collateral amount, calculated via :ref:`getExchangeRate`, is marked as "not free".
-This function is called from the :ref:`requestIssue` and :ref:`requrestReplace` protocols and is necessary to prevent race conditions (multiple requests trying to use the same amount of collateral). 
+.. Reserves a given amount of PolkaBTC tokens, i.e., the corresponding DOT collateral amount, calculated via :ref:`getExchangeRate`, is marked as "not free".
+.. This function is called from the :ref:`requestIssue` function and is necessary to prevent race conditions (multiple requests trying to use the same amount of collateral). 
 
-.. 
-   During an issue request function (:ref:`requestIssue`), a user must be able to assign a Vault to the issue request. As a Vault can be assigned to multiple issue requests, race conditions may occur. To prevent race conditions, a Vault's collateral is *reserved* when an ``IssueRequest`` is created - ``reservedTokens`` specifies how much PolkaBTC is to be issued (and the reserved collateral is then calculated based on :ref:`getExchangeRate`).
-   This function further calculates the amount of collateral that will be assigned to the issue request.
+During an issue request function (:ref:`requestIssue`), a user must be able to assign a Vault to the issue request. As a Vault can be assigned to multiple issue requests, race conditions may occur. To prevent race conditions, a Vault's collateral is *reserved* when an ``IssueRequest`` is created - ``toBeIssuedTokens`` specifies how much PolkaBTC is to be issued (and the reserved collateral is then calculated based on :ref:`getExchangeRate`).
+This function further calculates the amount of collateral that will be assigned to the issue request.
 
 Specification
 .............
 
 *Function Signature*
 
-``reserveTokens(vault, tokens)``
+``increaseToBeIssuedTokens(vault, tokens)``
 
 *Parameters*
 
@@ -425,7 +441,7 @@ Specification
 
 *Events*
 
-* ``ReserveTokens(vaultId, issuedTokens)``
+* ``ToBeIssuedTokens(vaultId, tokens)``
 
 *Errors*
 
@@ -433,7 +449,7 @@ Specification
 
 *Substrate* ::
 
-  fn reserveTokens(vault: AccountId, tokens: U256) -> Result {...}
+  fn increaseToBeIssuedTokens(vault: AccountId, tokens: U256) -> Result {...}
 
 Preconditions
 .............
@@ -443,30 +459,28 @@ Preconditions
 Function Sequence
 .................
 
-1.  Checks if the selected vault has locked enough collateral to cover the amount of PolkaBTC ``tokens`` to be issued. Throws and error if this checks fails. Otherwise, assigns the tokens to the vault.
+1.  Checks if the selected vault has locked enough collateral to cover the amount of PolkaBTC ``tokens`` to be issued. Throws an error if this checks fails. Otherwise, assigns the tokens to the vault.
 
-    - Select the ``vault`` from the registry and get the ``vault.issuedTokens`` and ``vault.collateral``. 
-    - Calculate how many tokens can be issued by multiplying the ``vault.collateral`` with the ``ExchangeRate`` (from the :ref:`oracle`) considering the ``GRANULARITY`` (from the :ref:`oracle`) and subtract the ``vault.issuedTokens``. Memorize the result as ``available_tokens``. 
-    - Check if the ``available_tokens`` is greater than ``tokens``. If not enough ``available_tokens`` is free, throw ``ERR_EXCEEDING_VAULT_LIMIT``. Else, add ``tokens`` to ``vault.issuedTokens``.
+    - Select the ``vault`` from the registry and get the ``vault.toBeIssuedTokens``, ``vault.issuedTokens`` and ``vault.collateral``. 
+    - Calculate how many tokens can be issued by multiplying the ``vault.collateral`` with the ``ExchangeRate`` (from the :ref:`oracle`) considering the ``GRANULARITY`` (from the :ref:`oracle`) and subtract the ``vault.issuedTokens`` and the ``vault.toBeIssuedTokens``. Memorize the result as ``available_tokens``. 
+    - Check if the ``available_tokens`` is equal or greater than ``tokens``. If not enough ``available_tokens`` is free, throw ``ERR_EXCEEDING_VAULT_LIMIT``. Else, add ``tokens`` to ``vault.toBeIssuedTokens``.
 
 2. Get the Bitcoin address of the vault as ``btcAddress``.
 3. Return the ``btcAddress``.
 
-.. _releaseVault:
+.. _decreaseToBeIssuedTokens:
 
-unreserveTokens
----------------
+decreaseToBeIssuedTokens
+------------------------
 
-.. todo:: add reference to replace function.
-
-A Vault's committed tokens are unreserved when either an issue (:ref:`cancelIssue`) or redeem (:ref:`cancelRedeem`) request is cancelled due to a timeout (failure!).
+A Vault's committed tokens are unreserved when an issue request (:ref:`cancelIssue`) is cancelled due to a timeout (failure!).
 
 Specification
 .............
 
 *Function Signature*
 
-``unreserveTokens(vault, tokens)``
+``decreaseToBeIssuedTokens(vault, tokens)``
 
 *Parameters*
 
@@ -479,15 +493,15 @@ Specification
 
 *Events*
 
-* ``UnreserveTokens(vault, tokens)``
+* ``DecreaseToBeIssuedTokens(vault, tokens)``
 
 *Errors*
 
-* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``issuedTokens`` by this vault.
+* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``toBeIssuedTokens`` by this vault.
 
 *Substrate* ::
 
-  fn unreserveTokens(vault: AccountId, tokens: U256) -> Result {...}
+  fn decreaseToBeIssuedTokens(vault: AccountId, tokens: U256) -> Result {...}
 
 Preconditions
 .............
@@ -504,11 +518,66 @@ Preconditions
 Function Sequence
 .................
 
-1. Checks if the amount of ``tokens`` to be released is less or equal to the amount of ``vault.issuedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+1. Checks if the amount of ``tokens`` to be released is less or equal to the amount of ``vault.toBeIssuedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
 
-2. Subtracts ``tokens`` from ``vault.issuedTokens``.
+2. Subtracts ``tokens`` from ``vault.toBeIssuedTokens``.
 
 3. Returns.
+
+
+.. _issueTokens:
+
+issueTokens
+-----------
+
+The issue process completes when a user calls the :ref:`executesIssue` function and provides a valid proof for sending BTC to the vault. At this point, the ``toBeIssuedTokens`` assigned to a vault are decreased and the ``issuedTokens`` balance is increased by the ``amount`` of issued tokens.
+
+Specification
+.............
+
+*Function Signature*
+
+``issueTokens(vault, amount)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC that were just issued.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``IssueTokens(vault, tokens)``
+
+*Errors*
+
+* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``toBeIssuedTokens`` by this vault.
+
+*Substrate* ::
+
+  fn IssuedTokens(vault: AccountId, tokens: U256) -> Result {...}
+
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+
+Function Sequence
+.................
+
+1. Checks if the amount of ``tokens`` to be released is less or equal to the amount of ``vault.toBeIssuedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+
+2. Subtracts ``tokens`` from ``vault.toBeIssuedTokens``.
+
+3. Add ``tokens`` to ``vault.issuedTokens``.
+
+4. Returns.
+
+
+
 
 Events
 ~~~~~~
