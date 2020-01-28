@@ -1,4 +1,3 @@
-
 .. _issue-protocol:
 
 Issue
@@ -464,11 +463,9 @@ Error Codes
 * **Cause**: Raises an error if the time limit to call ``executeIssue`` has not yet passed.
 
 
-``ERR_ISSUE_COMPLETED``:
+``ERR_ISSUE_COMPLETED``
 
 * **Message**: "Issue completed and cannot be cancelled."
 * **Function**: :ref:`cancelIssue`
 * **Cause**: Raises an error if the issue is already completed.
-
-
 

@@ -221,13 +221,15 @@ Function Sequence
 
 The ``registerVault`` function takes as input a Parachain AccountID, a Bitcoin address and DOT collateral, and registers a new Vault in the system.
 
-1) Check that ``collateral > MinimumCollateralVault`` holds, i.e., the Vault provided sufficient collateral (above the spam protection threshold).
+1. Check that ``collateral > MinimumCollateralVault`` holds, i.e., the Vault provided sufficient collateral (above the spam protection threshold).
 
   a. Raise ``ERR_MIN_AMOUNT`` error if this check fails.
 
-2) Store the provided data as a new ``Vault``.
+2. Store the provided data as a new ``Vault``.
 
-3) **[Optional]**: generate a ``registrationID`` which the vault must be include in the OP_RETURN of a new BTC transaction spending BTC from the specified ``btcAddress``. This can be stored in a ``RegisterRequest`` struct, alongside the AccountID (``vault``) and a time limit.
+3. **[Optional]**: generate a ``registrationID`` which the vault must be include in the OP_RETURN of a new BTC transaction spending BTC from the specified ``btcAddress``. This can be stored in a ``RegisterRequest`` struct, alongside the AccoundID (``vault``) and a timelimit in seconds.
+
+4. Return.
 
 proveValidBTCAddress (Optional)
 -------------------------------
@@ -308,8 +310,7 @@ Specification
 
 *Returns*
 
-* ``True``: If the locking has completed successfully.
-* ``False``: Otherwise.
+* ``None``: If the locking has completed successfully.
 
 *Events*
 
@@ -362,7 +363,7 @@ Specification
 * ``True``: If sufficient free collateral is available and the withdrawal was successful.
 * ``False`` (or throws exception): Otherwise.
 
-*Events*
+* ``None``: If sufficient free collateral is available and the withdrawal was successful.
 
 * ``WithdrawCollateral(Vault, withdrawAmount, totalCollateral)``: emit an event stating how much collateral was withdrawn by the Vault and total collateral a Vault has left.
 
@@ -405,9 +406,11 @@ Function Sequence
 
 5) Release the requested ``withdrawAmount`` of DOT collateral to the specified Vault's account (``vault`` AccountId) and deduct the collateral tracked for the Vault in ``Vaults``: ``Vault.collateral - withdrawAmount``, 
 
-6) Emit ``WithdrawCollateral`` event and return ``True``.
+5. Release the requested ``withdrawAmount`` of DOT collateral to the specified Vault's account (``vault`` AccountId) and deduct the collateral tracked for the Vault in ``Vaults``: ``Vault.collateral - withdrawAmount``, 
 
- END COMMENT
+6. Emit ``WithdrawCollateral`` event
+
+7. Return.
 
 .. _increaseToBeIssuedTokens:
 

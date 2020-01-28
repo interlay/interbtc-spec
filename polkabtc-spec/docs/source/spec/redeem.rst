@@ -6,16 +6,16 @@ Redeem
 Overview
 ~~~~~~~~
 
-The redeem module allows a user to receive BTC on the Bitcoin chain in return for destroying an equivalent amount of PolkaBTC on the BTC Parachain. The process is initiated by a user requesting a redeem procedure by selecting a vault. The vault then needs to send BTC to the user within a given time limit. Next, the vault has to finalize the process by providing a proof to the BTC Parachain that he has send the right amount of BTC to the user. If the vault fails to deliver a valid proof, the user can claim an equivalent amount of DOT from the vault's locked collateral to reimburse him for his loss in BTC.
+The redeem module allows a user to receive BTC on the Bitcoin chain in return for destroying an equivalent amount of PolkaBTC on the BTC Parachain. The process is initiated by a user requesting a redeem with a vault. The vault then needs to send BTC to the user within a given time limit. Next, the vault has to finalize the process by providing a proof to the BTC Parachain that he has send the right amount of BTC to the user. If the vault fails to deliver a valid proof within the time limit, the user can claim an equivalent amount of DOT from the vault's locked collateral to reimburse him for his loss in BTC.
 
 Step-by-step
 ------------
 
 1. Precondition: A user owns PolkaBTC.
-2. A user locks an amount of PolkaBTC by calling the ``lock`` function. Further, the user selects a vault to execute the redeem request from the list of vaults. The function creates a redeem request with a unique hash.
-3. The selected vault listens for the ``Lock`` event redeemd by the user. The vault then proceeds to transfer BTC to the address specified by the user in the ``lock`` function including a unique hash in the ``OP_RETURN`` of one output.
-4. The vault executes the ``redeem`` function by providing the Bitcoin transaction from step 3 together with the redeem request identifier within the time limit. If the function completes successfully, the locked PolkaBTC are destroyed and the user received its BTC. If the function is not successful, a user executes step 5.
-5. If step 4 completed unsuccessfully, the user calls ``slash`` after the redeem time limit. The user is then refunded with the DOT collateral the vault provided.
+2. A user locks an amount of PolkaBTC by calling the ``requestRedeem`` function. In this function call, the user selects a vault to execute the redeem request from the list of vaults. The function creates a redeem request with a unique hash.
+3. The selected vault listens for the ``RequestRedeem`` event emitted by the user. The vault then proceeds to transfer BTC to the address specified by the user in the ``requestRedeem`` function including a unique hash in the ``OP_RETURN`` of one output.
+4. The vault executes the ``executeRedeem`` function by providing the Bitcoin transaction from step 3 together with the redeem request identifier within the time limit. If the function completes successfully, the locked PolkaBTC are destroyed and the user received its BTC.
+5. Optional: If the user could not receive BTC within the given time (as required in step 4), the user calls ``cancelRedeem`` after the redeem time limit. The user is then refunded with the DOT collateral the vault provided.
 
 Data Model
 ~~~~~~~~~~
@@ -61,6 +61,7 @@ Parameter           Type        Description
 ``vault``           Account     The BTC Parachain address of the Vault responsible for this redeem request.
 ``opentime``        u256        Block height of opening the request.
 ``amount``          BTC         Amount of BTC to be redeemed.
+``redeemer``        Account     The BTC Parachain address of the user requesting the redeem.
 ``btcAddress``      bytes[20]   Base58 encoded Bitcoin public key of the User.  
 ``completed``       bool        Indicates if the redeem has been completed.
 ==================  ==========  =======================================================
@@ -75,10 +76,10 @@ Parameter           Type        Description
         vault: AccountId,
         opentime: BlockNumber,
         amount: Balance,
+        redeemer: AccountId,
         btcAddress: H160,
         completed: bool
   }
-
 
 Functions
 ~~~~~~~~~
@@ -110,7 +111,7 @@ Specification
 
 *Events*
 
-* ``RequestRedeem(redeemer, amount, vault, redeemId)``
+* ``RequestRedeem(redeemId, redeemer, amount, vault, btcAddress)``
 
 *Errors*
 
@@ -131,19 +132,29 @@ Preconditions
 Function Sequence
 .................
 
-1. The user call the function with the parameters described above.
+.. todo:: Handling of concurrent redeem procedures: we need to make sure that a vault cannot be used in multiple redeem requests in parallel if that would exceed his amount of locked BTC. **Example**: If the vault has 5 BTC locked and receives two redeem requests for 5 PolkaBTC/BTC, he can only fulfil one and would lose his collateral with the other!
+
+.. todo:: Handling of concurrent issue and redeem procedures: a vault can be used in parallel for issue and redeem requests. In the issue procedure, the vault's ``committedTokens`` are already increased when the issue request is created. However, this is before (!) the BTC is sent to the vault. If we used these ``committedTokens`` as a basis for redeem requests, we might end up in a case where the vault does not have enough BTC. **Example**: The vault already has 3 BTC in custody from previous successful issue procedures. A user creates an issue request for 2 PolkaBTC. At this point, the ``committedTokens`` by this vault are 5. However, his BTC balance is only 3. Now, a user could create a redeem request of 5 PolkaBTC and the vault would have to fulfill those. The user could then cancel the issue request over 2 PolkaBTC. The vault could only send 3 BTC to the user and would lose his deposit. Or the vault just loses his deposit without sending any BTC. 
+
+1. The user calls the function with the parameters described above.
 
 2. Checks if the ``amount`` is less or equal to the user's balance in the treasury. Throws ``ERR_AMOUNT_EXCEEDS_USER_BALANCE`` if this check is false.
 
 3. Checks if the ``amount`` is less or equal to the ``issuedTokens`` by the selected vault in the VaultRegistry. Throws ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE`` if this check is false.
 
-4. Generate an ``redeemId`` by hashing a random seed, a nonce from the security module, and the address of the user.
+4. Call the :ref:`lock` function in the Treasury to lock the PolkaBTC ``amount`` of the user.
 
-5. Store a new ``Redeem`` struct in the ``RedeemRequests`` mapping. The ``redeemId`` refers to the ``Redeem``. Fill the ``vault`` with the requested ``vault``, the ``opentime`` with the current block number, ``amount`` with the ``amount`` provided as input, ``redeemer`` the redeemer account, and ``btcAddress`` the Bitcoin address of the user.
+5. Generate an ``redeemId`` by hashing a random seed, a nonce from the security module, and the address of the user.
 
-6. Lock the ``amount`` of the user's PolkaBTC in the Treasury with the ``lock`` function.
+6. Store a new ``Redeem`` struct in the ``RedeemRequests`` mapping as ``RedeemRequests[redeemId] = redeem``, where:
+    
+    - ``redeem.vault`` is the requested ``vault``
+    - ``redeem.opentime`` is the current block number
+    - ``redeem.amount`` is the ``amount`` provided as input
+    - ``redeem.redeemer`` is the redeemer account
+    - ``redeem.btcAddress`` the Bitcoin address of the user.
 
-7. Send the ``RequestRedeem`` event with the ``redeemer`` account, ``amount``, ``vault``, and ``redeemId``.
+7. Emit the ``RequestRedeem`` event with the ``redeemId``, ``redeemer`` account, ``amount``, ``vault``, and ``btcAddress``.
 
 8. Return the ``redeemId``. The user stores this for future reference locally.
 
@@ -208,13 +219,13 @@ Function Sequence
 2. Checks if the ``vault`` is the ``redeem.vault``. Throws ``ERR_UNAUTHORIZED`` if called by any account other than the associated ``redeem.vault``.
 3. Checks if the ``redeemId`` exists. Throws ``ERR_REDEEM_ID_NOT_FOUND`` if not found.
 4. Checks if the current block height minus the ``RedeemPeriod`` is smaller than the ``opentime`` specified in the ``Redeem`` struct. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``.
-
 5. Verify the transaction.
+
     - Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
     - Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-redeemed BTC (``redeem.amount``), the ``redeemer``'s Bitcoin address (``redeem.btcAddress``), and the ``redeemId`` as parameters. If this call returns an error, abort and return the received error. 
 
-6. Burn the ``redeem.amount`` of PolkaBTC for the user with the ``burn`` function in the Treasury.
-7. Release the vault's collateral by calling ``unreserveTokens`` in the VaultRegistry with the ``redeem.vault`` and the ``redeem.amount``.
+6. Call the :ref:`burn` function in the Treasury to burn the ``redeem.amount`` of PolkaBTC of the user.
+7. Call :ref:`releaseVault` in the VaultRegistry to release the Vault's collateral with the ``redeem.vault`` and the ``redeem.amount``.
 8. Set the ``redeem.completed`` field to true.
 9. Send an ``ExecuteRedeem`` event with the user's address, the redeemId, the amount, and the Vault's address.
 10. Return.
@@ -225,6 +236,7 @@ cancelRedeem
 ------------
 
 If a redeem request is not completed on time, the redeem request can be cancelled.
+The user that initially requested the redeem process calls this function to obtain the Vault's collateral as compensation for not refunding the BTC back to his address.
 
 Specification
 .............
@@ -271,13 +283,15 @@ Function Sequence
 
 3. Check if the ``redeem.completed`` field is set to true. If yes, throw ``ERR_REDEEM_COMPLETED``.
 
-4. Slash the vault by calling ``slashVault`` in the VaultRegistry with the ``redeem.amount`` and the ``redeem.vault`` parameters.
+4. Call the :ref:`slashVault` function in the VaultRegistry to transfer the Vault's collateral to the user with the ``redeem.vault``, ``redeem.user``, and ``redeem.amount`` parameters.
 
-5. Transfer the slashed collateral of the vault to the ``redeem.redeemer``.
+5. Call the :ref:`burn` function in the Treasury to burn the ``redeem.amount`` of PolkaBTC of the user.
+   
+6. Set the ``redeem.completed`` field to true.
 
-6. Send the ``CancelRedeem`` event with the ``redeemId``.
+7. Send the ``CancelRedeem`` event with the ``redeemId``.
 
-7. Return.
+8. Return.
 
 
 
