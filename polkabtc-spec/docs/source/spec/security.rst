@@ -121,6 +121,7 @@ Enums
 
 StatusCode
 ...........
+Indicated ths status of the BTC Parachain.
 
 * ``RUNNING: 0`` - BTC Parachain fully operational
 
@@ -177,6 +178,29 @@ Enum specifying reasons for error leading to a status update.
 
 .. todo:: Remove ``UNEXPECTED`` flag. If the BTC Parachain is shutdown, it is clear what happened (or a message is given in ``msg``).
 
+
+ProposalStatus
+...............
+
+Indicated the state of a proposed ``StatusUpdate``.
+
+* ``PENDING: 0`` - this ``StatusUpdate`` is current under review and is being voted upon.
+
+* ``ACCEPTED: 1``- this ``StatusUpdate`` has been accepted.
+
+* ``REJECTED: 2`` -this ``StatusUpdate`` has been accepted.
+
+*Substrate* 
+
+::
+
+  enum StatusCode {
+        RUNNING = 0,
+        ERROR = 1,
+        SHUTDOWN = 3,
+  }
+
+
 Structs
 --------
 
@@ -189,11 +213,15 @@ Struct providing information for an occurred halting of BTC-Relay. Contains the 
 Parameter               Type            Description
 ======================  ==============  ============================================
 ``statusCode``          Status          New status code.
-``blockHash``           H256            Block hash of the block header in ``_blockHeaders`` which caused the status change.  
+``time``                U256            Parachain block number at which this status update was suggested.
+``proposalStatus``      ProposalStatus  Status of the proposed status update. See ``ProposalStatus``.
 ``errorCode``           ErrorCode       Error code specifying the reason for the status change.          
 ``msg``                 String          [Optional] message providing more details on the change of status (error message or recovery). 
-``votes``               Vec<AccountId>  List of accounts which have voted for this status update. This can be either Staked Relayers or the Governance Mechanism. Checks are performed depending on the type of status change.
+``votesYes``            Vec<AccountId>  List of accounts which have voted FOT this status update. This can be either Staked Relayers or the Governance Mechanism. Checks are performed depending on the type of status change. Should maintain insertion order to allow checking who proposed this update (at index ``0``).
+``votesNo``             Vec<AccountId>  List of accounts which have voted AGAINST this status update. 
 ======================  ==============  ============================================
+
+.. note:: ``StatusUpdates`` executed by the Governance Mechanism are not voted upon by Staked Relayers (hence ``votesNo`` will be empty).
 
 *Substrate* 
 
@@ -255,12 +283,205 @@ Functions
 
 .. todo:: Add functions for (i) registering, de-registering and slashing of Staked Relayers, (ii) casting votes on status updates. 
 
-.. _statusUpdate:
 
-statusUpdate
-------------
+.. _registerStakedRelayer:
+
+registerStakedRelayer
+----------------------
+
+Registers a new Staked Relayer, locking the provided collateral, which must exceed ``STAKED_RELAYER_STAKE``.
+
+Specification
+.............
+
+*Function Signature*
+
+``registerStakedRelayer(stakedRelayer, stake)``
+
+*Parameters*
+
+* ``stakedRelayer``: The account of the Staked Relayer to be registered.
+* ``stake``: to-be-locked collateral/stake in DOT.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``RegisterStakedRelayer(StakedRelayer, collateral)``: emit an event stating that a new Staked Relayer (``stakedRelayer``) was registered and provide information on the Staked Relayer's stake (``stake``). 
+
+*Errors*
+
+* ``ERR_ALREADY_REGISTERED = This AccountId is already registered as a Staked Relayer.``: The given account identifier is already registered. 
+* ``ERR_INSUFFICIENT_STAKE = Insufficient stake provided.``: The provided stake was insufficient - it must be above ``STAKED_RELAYER_STAKE``.
+  
+*Substrate* ::
+
+  fn registerStakedRelayer(origin, amount: Balance) -> Result {...}
+
+Preconditions
+.............
+
+Function Sequence
+.................
+
+The ``registerStakedRelayer`` function takes as input a Parachain AccountID, and DOT collateral (to be used as stake), and registers a new Staked Relayer in the system.
+
+1) Check that the Staked Relayer has not already registered. 
+
+2) Check that ``stake > STAKED_RELAYER_STAKE`` holds, i.e., the Staked Relayer provided sufficient collateral. Return ``ERR_INSUFFICIENT_STAKE`` error if this check fails.
+
+3) Store the provided information (amount of ``stake``) in a new ``StakedRelayer`` and insert it into the ``StakedRelayers`` mapping using the ``stakedRelayer`` AccountId as key.
+
+4) Emit a ``RegisterStakedRelayer(StakedRelayer, collateral)`` event. 
+
+5) Return.
+
+
+.. _suggestStatusUpdate: 
+
+suggestStatusUpdate
+----------------------
+
+Suggest a new status update and opens it up for voting.
+
+.. warning:: This function can only be called by Staked Relayers.
+
+
+.. todo:: TODO
+
+Specification
+.............
+
+*Function Signature*
+
+``registerStakedRelayer(stakedRelayer, stake)``
+
+*Parameters*
+
+* ``stakedRelayer``: The account of the Staked Relayer to be registered.
+* ``stake``: to-be-locked collateral/stake in DOT.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+*Errors*
+
+  
+*Substrate* ::
+
+  fn registerStakedRelayer(origin, amount: Balance) -> Result {...}
+
+Preconditions
+.............
+
+Function Sequence
+.................
+
+.. _voteOnStatusUpdate: 
+
+voteOnStatusUpdate
+----------------------
+
+A Staked Relayer casts a vote on a suggested ``StatusUpdate``.
+Checks the threshold of votes and executes / cancels a StatusUpdate depending on the threshold reached.
+ 
+.. warning:: This function can only be called by Staked Relayers.
+
+
+.. todo:: TODO
+
+Specification
+.............
+
+*Function Signature*
+
+``voteOnStatusUpdate(stakedRelayer, vote)``
+
+*Parameters*
+
+* ``stakedRelayer``: The account of the voting Staked Relayer.
+* ``vote``: ``True`` or ``False``, depending on whether the Staked Relayer agrees or disagrees with the suggested suggestStatusUpdate.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``RegisterStakedRelayer(StakedRelayer, collateral)``: emit an event stating that a new Staked Relayer (``stakedRelayer``) was registered and provide information on the Staked Relayer's stake (``stake``). 
+
+*Errors*
+
+
+  
+*Substrate* ::
+
+  fn registerStakedRelayer(origin, amount: Balance) -> Result {...}
+
+Preconditions
+.............
+
+Function Sequence
+.................
+
+.. _slashStakedRelayer: 
+
+slashStakedRelayer
+----------------------
+
+Slashes the stake/collateral of a Staked Relayer and removed them from the Staked Relayer list (mapping).
+
+.. warning:: This function can only be called by the Governance Mechanism.
+
+
+.. todo:: TODO
+
+Specification
+.............
+
+*Function Signature*
+
+``slashStakedRelayer(stakedRelayer)``
+
+*Parameters*
+
+* ``stakedRelayer``: The account of the Staked Relayer to be slashed.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+*Errors*
+
+
+  
+*Substrate* ::
+
+  fn stakedRelayer(stakedRelayer: AccountId) -> Result {...}
+
+Preconditions
+.............
+
+Function Sequence
+.................
+
+
+
+.. _executeStatusUpdate:
+
+executeStatusUpdate
+--------------------
 
 The ``statusUpdate`` function updates the status of BTC-Relay, e.g. restricting operation or recovering from a failure. 
+
+.. warning:: This function can only be called (a) internally if a ``StatusUpdate`` has received more votes than required by ``STAKED_RELAYER_VOTE_THRESHOLD`` (b) by the Governance Mechanism.
 
 
 Specification
@@ -306,7 +527,62 @@ Function Sequence
 2. Emit ``StatusUpdate(update.statusCode, update.block, update.reason, update.msg)`` event 
 
 
+.. _rejectStatusUpdate:
 
+rejectStatusUpdate
+--------------------
+
+Rejects a suggested ``StatusUpdate``. 
+
+.. note:: This function DOES NOT slash Staked Relayers who have lost the vote on this ``StatusUpdate``. Slashing is executed solely by the Governance Mechanism.
+
+
+..todo:: TODO
+
+Specification
+..............
+
+*Function Signature*
+
+``statusUpdate(update)``
+
+*Parameters*
+
+* ``update``: StatusUpdate struct specifying the type and reason for the status change.
+
+
+*Returns*
+
+* ``True``: if the block header passes all checks.
+* ``False`` (or throws exception): otherwise.
+
+*Errors*
+
+* (Currently not in use) ``ERR_INVALID_STATUS_UPDATE`` = "Requested status update is not allowed.": raise an exception when a status update is requested, which is not allowed. 
+
+*Events*
+
+* ``StatusUpdate(newStatus, block, errorCode, msg)`` - emits an event indicating the status change, with ``newStatus`` being the new ``StatusCode``, ``block`` is the block hash of the block which caused the status change, ``errorCode`` the ``ErrorCode`` specifying the reason for the status change, and ``msg`` the detailed message provided by the function caller. 
+
+*Substrate*
+
+::
+
+  fn statusUpdate(origin, update: StatusUpdate) -> Result {...}
+
+
+Precondition
+..............
+
+
+Function Sequence
+...................
+
+1. Set ``Status``  to ``update.statusCode`` 
+2. Emit ``StatusUpdate(update.statusCode, update.block, update.reason, update.msg)`` event 
+
+
+.. _generateSecureId:
 
 generateSecureId
 ----------------
