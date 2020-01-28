@@ -342,8 +342,7 @@ Function Sequence
 withdrawCollateral
 -------------------
 
-A Vault can withdraw its *free* collateral at any time, as long as there remains more collateral (*free or used in backing issued PolkaBTC*) than ``MinimumCollateralVault``. Collateral that is currently being used to back issued PolkaBTC remains locked until the Vault is used for a redeem request (full release can take multiple redeem requests).
-
+A Vault can withdraw its *free* collateral at any time, as long as there remains more collateral (*free or used in backing issued PolkaBTC*) than ``MinimumCollateralVault`` and above the ``SecureCollateralRate``. Collateral that is currently being used to back issued PolkaBTC remains locked until the Vault is used for a redeem request (full release can take multiple redeem requests).
 
 
 Specification
@@ -573,6 +572,180 @@ Function Sequence
 3. Add ``tokens`` to ``vault.issuedTokens``.
 
 4. Returns.
+
+
+.. _increaseToBeRedeemedTokens:
+
+increaseToBeRedeemedTokens
+--------------------------
+
+Add an amount tokens to the ``toBeRedeemedTokens`` balance of a vault. This function serves as a prevention against race conditions in the redeem and replace procedures.
+If, for example, a vault would receive two redeem requests at the same time that have a higher amount of tokens to be issued than his ``issuedTokens`` balance, one of the two redeem requests should be rejected.
+
+Specification
+.............
+
+*Function Signature*
+
+``increaseToBeRedeemedTokens(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC to be redeemed.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``IncreaseToBeRedeemedTokens(vault, tokens)``
+
+*Errors*
+
+* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``IssuedTokens`` by this vault.
+
+*Substrate* ::
+
+  fn increaseToBeRedeemedTokens(vault: AccountId, tokens: U256) -> Result {...}
+
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+
+Function Sequence
+.................
+
+1. Checks if the amount of ``tokens`` to be redeemed is less or equal to the amount of ``vault.IssuedTokens`` minus the ``vault.toBeRedeemedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+
+2. Add ``tokens`` to ``vault.toBeRedeemedTokens``.
+
+3. Returns.
+
+.. _decreaseTokens:
+
+decreaseTokens
+--------------------------
+
+If a redeem request is not fulfilled, the amount of tokens assigned to the ``toBeRedeemedTokens`` must be removed.
+
+Specification
+.............
+
+*Function Signature*
+
+``decreaseTokens(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``user``: The BTC Parachain address of the user that made the redeem request.
+* ``tokens``: The amount of PolkaBTC that were not redeemed.
+* ``collateral``: The amount of collateral assigned to this request.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``DecreaseTokens(vault, tokens)``
+
+*Errors*
+
+* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``toBeRedeemedTokens`` by this vault.
+
+*Substrate* ::
+
+  fn decreaseTokens(vault: AccountId, tokens: U256) -> Result {...}
+
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+
+Function Sequence
+.................
+
+.. note:: We don't punish the vault be removing his whole collateral, but "just" the value (valued at the current exchange rate) plus a punishment value.
+
+.. todo:: I think we don't need to check if the vault is under the SecureCollateralRate at this point. If the punishment payment is anyway not "only" the current exchange rate plus some minor mark-up, the collateralization ratio will actually *increase* by this.
+
+1. Checks if the amount of ``tokens`` is less or equal to the amount of ``vault.toBeRedeemedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+
+2. Subtract ``tokens`` from ``vault.toBeRedeemedTokens``.
+
+3. Subtract ``tokens`` from ``vault.issuedTokens``.
+
+4. Punish the vault for not fulfilling the request to redeem tokens.
+
+    - Call the :ref:`getExchangeRate`` function to obtain the current exchange rate. 
+    - Calculate the current value of ``tokens`` in collateral with the exchange rate.
+    - Add a punishment percentage on top of the ``token`` value expressed as collateral and store the punishment payment as ``payment``.
+    - Check if the vault is above the ``SecureCollateralRate`` when we remove ``payment`` from ``vault.collateral``. Call the :ref:`slashCollateral`` function with the ``vault`` as ``sender``, ``user`` as ``receiver``, and ``payment`` as ``amount``.
+    - Reduce the ``vault.collateral`` by ``payment``.
+
+5. Returns.
+
+
+.. _redeemTokens:
+
+redeemTokens
+------------
+
+When a redeem request successfully completes, the ``toBeRedeemedToken`` and the ``issuedToken`` balance must be reduced to reflect that removal of PolkaBTC.
+
+Specification
+.............
+
+*Function Signature*
+
+``redeemTokens(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC redeemed.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``RedeemTokens(vault, tokens)``
+
+*Errors*
+
+* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``issuedTokens`` or ``toBeRedeemedTokens`` by this vault.
+
+*Substrate* ::
+
+  fn increaseToBeRedeemedTokens(vault: AccountId, tokens: U256) -> Result {...}
+
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+
+Function Sequence
+.................
+
+1. Checks if the amount of ``tokens`` to be redeemed is less or equal to the amount of ``vault.issuedTokens`` and the ``vault.toBeRedeemedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+
+2. Subtract ``tokens`` from ``vault.toBeRedeemedTokens``.
+
+3. Subtract ``tokens`` from ``vault.issuedTokens``.
+
+4. Returns.
+
+
+.. todo:: auction function: a vault can be enforced to be replaced when his collateral rate falls below ``AuctionCollateralRate``. Any other vault can then call this function to enforce a replace of this vault by providing sufficient collateral.
+
+.. todo:: liquidate function: a vault can be liquidated by enforcing the redeem procedure. The vault then has to react on the redeem request and has to pay an additional punishment fee.
+
 
 
 
