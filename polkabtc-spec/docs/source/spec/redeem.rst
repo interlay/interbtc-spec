@@ -126,7 +126,7 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 
 Function Sequence
@@ -140,7 +140,7 @@ Function Sequence
 
 2. Checks if the ``amount`` is less or equal to the user's balance in the treasury. Throws ``ERR_AMOUNT_EXCEEDS_USER_BALANCE`` if this check is false.
 
-3. Checks if the ``amount`` is less or equal to the ``committedTokens`` by the selected vault in the VaultRegistry. Throws ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE`` if this check is false.
+3. Checks if the ``amount`` is less or equal to the ``issuedTokens`` by the selected vault in the VaultRegistry. Throws ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE`` if this check is false.
 
 4. Call the :ref:`lock` function in the Treasury to lock the PolkaBTC ``amount`` of the user.
 
@@ -204,7 +204,7 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 Function Sequence
 .................
@@ -292,4 +292,15 @@ Function Sequence
 7. Send the ``CancelRedeem`` event with the ``redeemId``.
 
 8. Return.
+
+
+
+Events
+~~~~~~~
+
+Error Codes
+~~~~~~~~~~~
+
+
+
 

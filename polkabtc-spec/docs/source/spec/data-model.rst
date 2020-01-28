@@ -80,14 +80,14 @@ The minimum collateral (DOT) a vault needs to provide to participate in the issu
 
 *Substrate*: ``MinimumCollateralVault: Balance;``
 
-MinimumCollateralUser
+IssueGriefingCollateral
 .....................
 
 The minimum collateral (DOT) a user needs to provide.
 
 .. note:: Prevent grieving attacks against vaults.
 
-*Substrate*: ``MinimumCollateralUser: Balance;``
+*Substrate*: ``IssueGriefingCollateral: Balance;``
 
 
 SecureOperationLimit
@@ -142,7 +142,7 @@ Stores the information of a vault.
 Parameter            Type       Description
 ===================  =========  ========================================================
 ``vault``            Account    Account ID of the vault.
-``committedTokens``  PolkaBTC   Number of tokens committed and issued to CbA Requesters (DOT).
+``issuedTokens``  PolkaBTC   Number of tokens committed and issued to CbA Requesters (DOT).
 ``collateral``       DOT        Amount of backing collateral (DOT).
 ``replacement``      Account    Account ID of replacement vault.
 ``replace``          bool       True if vault wants to be replaced.
@@ -157,7 +157,7 @@ Parameter            Type       Description
   #[cfg_attr(feature = "std", derive(Debug))]
   pub struct Vault<AccountId, Balance, DateTime> {
         vault: AccountId,
-        committedTokens: Balance,
+        issuedTokens: Balance,
         collateral: Balance,
         replacement: AccountId,
         replace: bool,

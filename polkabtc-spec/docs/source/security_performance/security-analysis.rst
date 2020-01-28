@@ -1,7 +1,7 @@
-.. _security:
+.. _security-analysis:
 
-Security
-========
+Security Analysis
+==================
 
 Collateral
 ~~~~~~~~~~

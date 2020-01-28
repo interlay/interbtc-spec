@@ -24,14 +24,14 @@ Welcome to PolkaBTC's documentation!
    spec/replace
    spec/oracle
    spec/btc-relay
-   spec/failure-handling
+   spec/security
    spec/helpers
 
 .. toctree::
    :maxdepth: 2
    :caption: Security and Performance
 
-   security_performance/security
+   security_performance/security-analysis
    security_performance/performance
 
 .. toctree::
