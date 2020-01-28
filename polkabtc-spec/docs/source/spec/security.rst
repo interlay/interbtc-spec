@@ -58,7 +58,7 @@ Integer denoting the percentage of Staked Relayer signatures/votes necessary to 
 
 *Substrate* ::
 
-  STAKED_RELAYER_VOTE_THRESHOLD: U256;
+  STAKED_RELAYER_VOTE_THRESHOLD: U8;
 
 
 STAKED_RELAYER_STAKE
@@ -69,7 +69,7 @@ Integer denoting the minimum DOT stake which Staked Relayers must provide when r
 
 *Substrate* ::
 
-  STAKED_RELAYER_STAKE: U256;
+  STAKED_RELAYER_STAKE: Balance;
 
 
 Scalars
@@ -136,7 +136,7 @@ Indicated ths status of the BTC Parachain.
   enum StatusCode {
         RUNNING = 0,
         ERROR = 1,
-        SHUTDOWN = 3,
+        SHUTDOWN = 2,
   }
 
 ErrorCode
