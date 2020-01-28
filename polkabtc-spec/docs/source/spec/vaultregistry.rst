@@ -158,7 +158,7 @@ Functions
 
 
 registerVault
---------------------
+-------------
 
 Initiates the registration procedure for a new Vault. The Vault provides its BTC address and locks up DOT collateral, which is to be used to the issuing process. 
 
@@ -204,13 +204,15 @@ Function Sequence
 
 The ``registerVault`` function takes as input a Parachain AccountID, a Bitcoin address and DOT collateral, and registers a new Vault in the system.
 
-1) Check that ``collateral > MinimumCollateralVault`` holds, i.e., the Vault provided sufficient collateral (above the spam protection threshold).
+1. Check that ``collateral > MinimumCollateralVault`` holds, i.e., the Vault provided sufficient collateral (above the spam protection threshold).
 
   a. Raise ``ERR_MIN_AMOUNT`` error if this check fails.
 
-2) Store the provided data as a new ``Vault``.
+2. Store the provided data as a new ``Vault``.
 
-3) **[Optional]**: generate a ``registrationID`` which the vault must be include in the OP_RETURN of a new BTC transaction spending BTC from the specified ``btcAddress``. This can be stored in a ``RegisterRequest`` struct, alongside the AccountID (``vault``) and a time limit.
+3. **[Optional]**: generate a ``registrationID`` which the vault must be include in the OP_RETURN of a new BTC transaction spending BTC from the specified ``btcAddress``. This can be stored in a ``RegisterRequest`` struct, alongside the AccoundID (``vault``) and a timelimit in seconds.
+
+4. Return.
 
 proveValidBTCAddress (Optional)
 -------------------------------
@@ -296,7 +298,7 @@ Function Sequence
   * ``True``: If the locking has completed successfully.
   * ``False``: Otherwise.
 
-  *Events*
+* ``None``: If the locking has completed successfully.
 
   * ``LockCollateral(Vault, newCollateral, totalCollateral, freeCollateral)``: emit an event stating how much new (``newCollateral``), total collateral (``totalCollateral``) and freely available collateral (``freeCollateral``) the Vault calling this function has locked.
 
@@ -348,7 +350,7 @@ Function Sequence
   * ``True``: If sufficient free collateral is available and the withdrawal was successful.
   * ``False`` (or throws exception): Otherwise.
 
-  *Events*
+* ``None``: If sufficient free collateral is available and the withdrawal was successful.
 
   * ``WithdrawCollateral(Vault, withdrawAmount, totalCollateral)``: emit an event stating how much collateral was withdrawn by the Vault and total collateral a Vault has left.
 
@@ -391,9 +393,11 @@ Function Sequence
 
   5) Release the requested ``withdrawAmount`` of DOT collateral to the specified Vault's account (``vault`` AccountId) and deduct the collateral tracked for the Vault in ``Vaults``: ``Vault.collateral - withdrawAmount``, 
 
-  6) Emit ``WithdrawCollateral`` event and return ``True``.
+5. Release the requested ``withdrawAmount`` of DOT collateral to the specified Vault's account (``vault`` AccountId) and deduct the collateral tracked for the Vault in ``Vaults``: ``Vault.collateral - withdrawAmount``, 
 
-.. END COMMENT
+6. Emit ``WithdrawCollateral`` event
+
+7. Return.
 
 .. _lockVault:
 
@@ -509,6 +513,48 @@ Function Sequence
 2. Subtracts ``tokens`` from ``vault.issuedTokens``.
 
 3. Returns.
+
+slashVault
+----------
+
+If a vault does not redeem a user's PolkaBTC within the given time limit, his collateral for that specific request should be taken away and transferred to the user as reimbursement.
+
+Specification
+.............
+
+*Function Signature*
+
+``slashVault(vault, user, amount)``
+
+*Parameters*
+
+* ``vault``: 
+* ``user``:
+
+*Returns*
+
+* ``None``:
+
+*Events*
+
+* ``SlashVault``:
+
+*Errors*
+
+* ````:
+
+*Substrate* ::
+
+  fn slashVault(vault: AccountId, user: AccountId, amount: Balance) -> Result {...}
+
+Precondition
+............
+
+
+Function Sequence
+.................
+
+
 
 Events
 ~~~~~~
