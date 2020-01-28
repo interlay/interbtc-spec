@@ -6,6 +6,20 @@ Vault Registry
 
 .. note:: We recommend implementing getter functions for (i) the total collateral locked through by active PolkaBTC tokens, (ii) the total collateral reserved in pending issue requests, (iii) the total collateral reserved in pending replace requests, and (iv) the total free collateral (not locked / reserved) for compliance and transparency purposes.
 
+Overview
+~~~~~~~~
+
+The vault registry is the central place to manage vaults. Vaults can register themselves here, update their collateral, or can be liquidated.
+Similarly, the issue, redeem, and replace protocols call this module to assign vaults during issue, redeem, and replace procedures.
+
+Step-by-step
+------------
+
+.. todo:: Insert figure of interactions with a vault.
+
+
+
+
 Data Model
 ~~~~~~~~~~
 
@@ -105,8 +119,9 @@ Stores the information of a Vault.
 =========================  =========  ========================================================
 Parameter                  Type       Description
 =========================  =========  ========================================================
+``toBeIssuedTokens``       PolkaBTC   Number of PolkaBTC tokens currently requested as part of an uncompleted issue request.
 ``issuedTokens``           PolkaBTC   Number of PolkaBTC tokens actively issued by this Vault.
-``reservedTokens``         DOT        Number of PolkaBTC tokens reserved by pending :ref:`issue` and :ref:`replace` requests. 
+``toBeRedeemedTokens``     PolkaBTC   Number of PolkaBTC tokens reserved by pending redeem and replace requests. 
 ``collateral``             DOT        Total amount of collateral provided by this Vault (note: "free" collateral is calculated on the fly and updated each time new exchange rate data is received).
 ``btcAddress``             bytes[20]  Bitcoin address of this Vault, to be used for issuing of PolkaBTC tokens.
 =========================  =========  ========================================================
@@ -122,9 +137,11 @@ Parameter                  Type       Description
   #[cfg_attr(feature = "std", derive(Debug))]
   pub struct Vault<AccountId, Balance> {
         vault: AccountId,
+        toBeIssuedTokens: Balance,
         issuedTokens: Balance,
+        toBeRedeemedTokens: Balance,
         collateral: Balance,
-        btcAddress: [u8; 20]
+        btcAddress: H160
   }
 
 
@@ -158,7 +175,7 @@ Functions
 
 
 registerVault
---------------------
+-------------
 
 Initiates the registration procedure for a new Vault. The Vault provides its BTC address and locks up DOT collateral, which is to be used to the issuing process. 
 
@@ -204,13 +221,15 @@ Function Sequence
 
 The ``registerVault`` function takes as input a Parachain AccountID, a Bitcoin address and DOT collateral, and registers a new Vault in the system.
 
-1) Check that ``collateral > MinimumCollateralVault`` holds, i.e., the Vault provided sufficient collateral (above the spam protection threshold).
+1. Check that ``collateral > MinimumCollateralVault`` holds, i.e., the Vault provided sufficient collateral (above the spam protection threshold).
 
   a. Raise ``ERR_MIN_AMOUNT`` error if this check fails.
 
-2) Store the provided data as a new ``Vault``.
+2. Store the provided data as a new ``Vault``.
 
-3) **[Optional]**: generate a ``registrationID`` which the vault must be include in the OP_RETURN of a new BTC transaction spending BTC from the specified ``btcAddress``. This can be stored in a ``RegisterRequest`` struct, alongside the AccountID (``vault``) and a time limit.
+3. **[Optional]**: generate a ``registrationID`` which the vault must be include in the OP_RETURN of a new BTC transaction spending BTC from the specified ``btcAddress``. This can be stored in a ``RegisterRequest`` struct, alongside the AccoundID (``vault``) and a timelimit in seconds.
+
+4. Return.
 
 proveValidBTCAddress (Optional)
 -------------------------------
@@ -271,148 +290,145 @@ Function Sequence
 5. Emit a ``ProveValidBTCAddress`` event, setting the ``vault`` account identifier and the vault's Bitcoin address (``Vault.btcAddress``) as parameters. 
 
 
-.. BEGIN COMMENT
 
-.. 
-  lockCollateral
-  --------------
+lockCollateral
+--------------
 
-  The Vault locks an amount of collateral as a security against stealing the Bitcoin locked with it. 
-
-  Specification
-  .............
-
-  *Function Signature*
-
-  ``lockCollateral(Vault, collateral)``
-
-  *Parameters*
-
-  * ``Vault``: The account of the Vault locking collateral.
-  * ``collateral``: to-be-locked collateral in DOT.
-
-  *Returns*
-
-  * ``True``: If the locking has completed successfully.
-  * ``False``: Otherwise.
-
-  *Events*
-
-  * ``LockCollateral(Vault, newCollateral, totalCollateral, freeCollateral)``: emit an event stating how much new (``newCollateral``), total collateral (``totalCollateral``) and freely available collateral (``freeCollateral``) the Vault calling this function has locked.
-
-  *Errors*
-
-  * ``ERR_UNKOWN_VAULT``: The specified Vault does not exist. 
-
-  *Substrate* ::
-
-    fn lockCollateral(origin, amount: Balance) -> Result {...}
-
-  User Story
-  ..........
-
-  An existing Vault calls ``lockCollateral`` to increase its DOT collateral in the system.
-
-
-  Function Sequence
-  .................
-
-  1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccoundId (``vault``).
-
-    a) Raise ``ERR_UNKOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
-
-  2) Increase the ``collateral`` of the ``Vault``. 
-
-
-  withdrawCollateral
-  -------------------
-
-  A Vault can withdraw its *free* collateral at any time, as long as there remains more collateral (*free or used in backing issued PolkaBTC*) than ``MinimumCollateralVault``. Collateral that is currently being used to back issued PolkaBTC remains locked until the Vault is used for a redeem request (full release can take multiple redeem requests).
-
-
-
-  Specification
-  .............
-
-  *Function Signature*
-
-  ``withdrawCollateral(vault, withdrawAmount)``
-
-  *Parameters*
-
-  * ``vault``: The account of the Vault withdrawing collateral.
-  * ``withdrawAmount``: To-be-withdrawn collateral in DOT.
-
-  *Returns*
-
-  * ``True``: If sufficient free collateral is available and the withdrawal was successful.
-  * ``False`` (or throws exception): Otherwise.
-
-  *Events*
-
-  * ``WithdrawCollateral(Vault, withdrawAmount, totalCollateral)``: emit an event stating how much collateral was withdrawn by the Vault and total collateral a Vault has left.
-
-  *Errors*
-
-  * ``ERR_UNKOWN_VAULT``: The specified Vault does not exist. 
-  * ``ERR_INSUFFICIENT_FREE_COLLATERAL``: The Vault is trying to withdraw more collateral than is currently free. 
-  * ``ERR_MIN_AMOUNT``: The amount of locked collateral (free + used) needs to be above ``MinimumCollateralVault``.
-  * ``ERR_UNAUTHRORIZED``: The caller of the withdrawal is not the specified Vault, and hence not authorized to withdraw funds.
-    
-  *Substrate* ::
-
-    fn withdrawCollateral(origin, amount: Balance) -> Result {...}
-
-  Preconditions
-  .............
-
-  .. todo:: Check security module status
-
-  A Vault calls ``withdrawCollateral`` to withdraw some of its ``free`` collateral, i.e., not used to back issued PolkaBTC tokens. 
-
-  Function Sequence
-  .................
-
-  1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccoundId (``vault``).
-
-    a) Raise ``ERR_UNKOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
-
-  2) Check that the caller of this function is indeed the specified ``Vault`` (AccoundId ``vault``). 
-
-    a) Raise ``ERR_UNAUTHRORIZED`` error is the caller of this function is not the Vault specified for withdrawal.
-
-  3) Check that ``Vault`` has sufficient free collateral: ``withdrawAmount <= (Vault.collateral - Vault.issuedTokens * SecureCollateralRate)``
-
-    a) Raise ``ERR_INSUFFICIENT_FREE_COLLATERAL`` error if this check fails.
-
-  4) Check that the remaining **total** (``free` + used) collateral is greated than ``MinimumCollateralVault`` (``Vault.collateral - withdrawAmount >= MinimumCollateralVault``)
-
-    a) Raise ``ERR_MIN_AMOUNT`` if this check fails. The Vault must close its account if it wishes to withdraw collateral below the ``MinimumCollateralVault`` threshold, or request a Replace if some of the collateral is already used for issued PolkaBTC.
-
-  5) Release the requested ``withdrawAmount`` of DOT collateral to the specified Vault's account (``vault`` AccountId) and deduct the collateral tracked for the Vault in ``Vaults``: ``Vault.collateral - withdrawAmount``, 
-
-  6) Emit ``WithdrawCollateral`` event and return ``True``.
-
-.. END COMMENT
-
-.. _lockVault:
-
-reserveTokens
--------------
-
-Reserves a given amount of PolkaBTC tokens, i.e., the corresponding DOT collateral amount, calculated via :ref:`getExchangeRate`, is marked as "not free".
-This function is called from the :ref:`requestIssue` and :ref:`requrestReplace` protocols and is necessary to prevent race conditions (multiple requests trying to use the same amount of collateral). 
-
-.. 
-   During an issue request function (:ref:`requestIssue`), a user must be able to assign a Vault to the issue request. As a Vault can be assigned to multiple issue requests, race conditions may occur. To prevent race conditions, a Vault's collateral is *reserved* when an ``IssueRequest`` is created - ``reservedTokens`` specifies how much PolkaBTC is to be issued (and the reserved collateral is then calculated based on :ref:`getExchangeRate`).
-   This function further calculates the amount of collateral that will be assigned to the issue request.
+The Vault locks an amount of collateral as a security against stealing the Bitcoin locked with it. 
 
 Specification
 .............
 
 *Function Signature*
 
-``reserveTokens(vault, tokens)``
+``lockCollateral(Vault, collateral)``
+
+*Parameters*
+
+* ``Vault``: The account of the Vault locking collateral.
+* ``collateral``: to-be-locked collateral in DOT.
+
+*Returns*
+
+* ``None``: If the locking has completed successfully.
+
+*Events*
+
+* ``LockCollateral(Vault, newCollateral, totalCollateral, freeCollateral)``: emit an event stating how much new (``newCollateral``), total collateral (``totalCollateral``) and freely available collateral (``freeCollateral``) the Vault calling this function has locked.
+
+*Errors*
+
+* ``ERR_UNKOWN_VAULT``: The specified Vault does not exist. 
+
+*Substrate* ::
+
+  fn lockCollateral(origin, amount: Balance) -> Result {...}
+
+User Story
+..........
+
+An existing Vault calls ``lockCollateral`` to increase its DOT collateral in the system.
+
+
+Function Sequence
+.................
+
+1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccoundId (``vault``).
+
+  a) Raise ``ERR_UNKOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
+
+2) Increase the ``collateral`` of the ``Vault``. 
+
+
+withdrawCollateral
+-------------------
+
+A Vault can withdraw its *free* collateral at any time, as long as there remains more collateral (*free or used in backing issued PolkaBTC*) than ``MinimumCollateralVault`` and above the ``SecureCollateralRate``. Collateral that is currently being used to back issued PolkaBTC remains locked until the Vault is used for a redeem request (full release can take multiple redeem requests).
+
+
+Specification
+.............
+
+*Function Signature*
+
+``withdrawCollateral(vault, withdrawAmount)``
+
+*Parameters*
+
+* ``vault``: The account of the Vault withdrawing collateral.
+* ``withdrawAmount``: To-be-withdrawn collateral in DOT.
+
+*Returns*
+
+* ``True``: If sufficient free collateral is available and the withdrawal was successful.
+* ``False`` (or throws exception): Otherwise.
+
+* ``None``: If sufficient free collateral is available and the withdrawal was successful.
+
+* ``WithdrawCollateral(Vault, withdrawAmount, totalCollateral)``: emit an event stating how much collateral was withdrawn by the Vault and total collateral a Vault has left.
+
+*Errors*
+
+* ``ERR_UNKOWN_VAULT``: The specified Vault does not exist. 
+* ``ERR_INSUFFICIENT_FREE_COLLATERAL``: The Vault is trying to withdraw more collateral than is currently free. 
+* ``ERR_MIN_AMOUNT``: The amount of locked collateral (free + used) needs to be above ``MinimumCollateralVault``.
+* ``ERR_UNAUTHRORIZED``: The caller of the withdrawal is not the specified Vault, and hence not authorized to withdraw funds.
+  
+*Substrate* ::
+
+  fn withdrawCollateral(origin, amount: Balance) -> Result {...}
+
+Preconditions
+.............
+
+.. todo:: Check security module status
+
+A Vault calls ``withdrawCollateral`` to withdraw some of its ``free`` collateral, i.e., not used to back issued PolkaBTC tokens. 
+
+Function Sequence
+.................
+
+1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccoundId (``vault``).
+
+  a) Raise ``ERR_UNKOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
+
+2) Check that the caller of this function is indeed the specified ``Vault`` (AccoundId ``vault``). 
+
+  a) Raise ``ERR_UNAUTHRORIZED`` error is the caller of this function is not the Vault specified for withdrawal.
+
+3) Check that ``Vault`` has sufficient free collateral: ``withdrawAmount <= (Vault.collateral - Vault.issuedTokens * SecureCollateralRate)``
+
+  a) Raise ``ERR_INSUFFICIENT_FREE_COLLATERAL`` error if this check fails.
+
+4) Check that the remaining **total** (``free` + used) collateral is greated than ``MinimumCollateralVault`` (``Vault.collateral - withdrawAmount >= MinimumCollateralVault``)
+
+  a) Raise ``ERR_MIN_AMOUNT`` if this check fails. The Vault must close its account if it wishes to withdraw collateral below the ``MinimumCollateralVault`` threshold, or request a Replace if some of the collateral is already used for issued PolkaBTC.
+
+5) Release the requested ``withdrawAmount`` of DOT collateral to the specified Vault's account (``vault`` AccountId) and deduct the collateral tracked for the Vault in ``Vaults``: ``Vault.collateral - withdrawAmount``, 
+
+5. Release the requested ``withdrawAmount`` of DOT collateral to the specified Vault's account (``vault`` AccountId) and deduct the collateral tracked for the Vault in ``Vaults``: ``Vault.collateral - withdrawAmount``, 
+
+6. Emit ``WithdrawCollateral`` event
+
+7. Return.
+
+.. _increaseToBeIssuedTokens:
+
+increaseToBeIssuedTokens
+------------------------
+
+.. Reserves a given amount of PolkaBTC tokens, i.e., the corresponding DOT collateral amount, calculated via :ref:`getExchangeRate`, is marked as "not free".
+.. This function is called from the :ref:`requestIssue` function and is necessary to prevent race conditions (multiple requests trying to use the same amount of collateral). 
+
+During an issue request function (:ref:`requestIssue`), a user must be able to assign a Vault to the issue request. As a Vault can be assigned to multiple issue requests, race conditions may occur. To prevent race conditions, a Vault's collateral is *reserved* when an ``IssueRequest`` is created - ``toBeIssuedTokens`` specifies how much PolkaBTC is to be issued (and the reserved collateral is then calculated based on :ref:`getExchangeRate`).
+This function further calculates the amount of collateral that will be assigned to the issue request.
+
+Specification
+.............
+
+*Function Signature*
+
+``increaseToBeIssuedTokens(vault, tokens)``
 
 *Parameters*
 
@@ -425,7 +441,7 @@ Specification
 
 *Events*
 
-* ``ReserveTokens(vaultId, issuedTokens)``
+* ``ToBeIssuedTokens(vaultId, tokens)``
 
 *Errors*
 
@@ -433,7 +449,7 @@ Specification
 
 *Substrate* ::
 
-  fn reserveTokens(vault: AccountId, tokens: U256) -> Result {...}
+  fn increaseToBeIssuedTokens(vault: AccountId, tokens: U256) -> Result {...}
 
 Preconditions
 .............
@@ -443,30 +459,28 @@ Preconditions
 Function Sequence
 .................
 
-1.  Checks if the selected vault has locked enough collateral to cover the amount of PolkaBTC ``tokens`` to be issued. Throws and error if this checks fails. Otherwise, assigns the tokens to the vault.
+1.  Checks if the selected vault has locked enough collateral to cover the amount of PolkaBTC ``tokens`` to be issued. Throws an error if this checks fails. Otherwise, assigns the tokens to the vault.
 
-    - Select the ``vault`` from the registry and get the ``vault.issuedTokens`` and ``vault.collateral``. 
-    - Calculate how many tokens can be issued by multiplying the ``vault.collateral`` with the ``ExchangeRate`` (from the :ref:`oracle`) considering the ``GRANULARITY`` (from the :ref:`oracle`) and subtract the ``vault.issuedTokens``. Memorize the result as ``available_tokens``. 
-    - Check if the ``available_tokens`` is greater than ``tokens``. If not enough ``available_tokens`` is free, throw ``ERR_EXCEEDING_VAULT_LIMIT``. Else, add ``tokens`` to ``vault.issuedTokens``.
+    - Select the ``vault`` from the registry and get the ``vault.toBeIssuedTokens``, ``vault.issuedTokens`` and ``vault.collateral``. 
+    - Calculate how many tokens can be issued by multiplying the ``vault.collateral`` with the ``ExchangeRate`` (from the :ref:`oracle`) considering the ``GRANULARITY`` (from the :ref:`oracle`) and subtract the ``vault.issuedTokens`` and the ``vault.toBeIssuedTokens``. Memorize the result as ``available_tokens``. 
+    - Check if the ``available_tokens`` is equal or greater than ``tokens``. If not enough ``available_tokens`` is free, throw ``ERR_EXCEEDING_VAULT_LIMIT``. Else, add ``tokens`` to ``vault.toBeIssuedTokens``.
 
 2. Get the Bitcoin address of the vault as ``btcAddress``.
 3. Return the ``btcAddress``.
 
-.. _releaseVault:
+.. _decreaseToBeIssuedTokens:
 
-unreserveTokens
----------------
+decreaseToBeIssuedTokens
+------------------------
 
-.. todo:: add reference to replace function.
-
-A Vault's committed tokens are unreserved when either an issue (:ref:`cancelIssue`) or redeem (:ref:`cancelRedeem`) request is cancelled due to a timeout (failure!).
+A Vault's committed tokens are unreserved when an issue request (:ref:`cancelIssue`) is cancelled due to a timeout (failure!).
 
 Specification
 .............
 
 *Function Signature*
 
-``unreserveTokens(vault, tokens)``
+``decreaseToBeIssuedTokens(vault, tokens)``
 
 *Parameters*
 
@@ -479,15 +493,15 @@ Specification
 
 *Events*
 
-* ``UnreserveTokens(vault, tokens)``
+* ``DecreaseToBeIssuedTokens(vault, tokens)``
 
 *Errors*
 
-* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``issuedTokens`` by this vault.
+* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``toBeIssuedTokens`` by this vault.
 
 *Substrate* ::
 
-  fn unreserveTokens(vault: AccountId, tokens: U256) -> Result {...}
+  fn decreaseToBeIssuedTokens(vault: AccountId, tokens: U256) -> Result {...}
 
 Preconditions
 .............
@@ -504,11 +518,240 @@ Preconditions
 Function Sequence
 .................
 
-1. Checks if the amount of ``tokens`` to be released is less or equal to the amount of ``vault.issuedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+1. Checks if the amount of ``tokens`` to be released is less or equal to the amount of ``vault.toBeIssuedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
 
-2. Subtracts ``tokens`` from ``vault.issuedTokens``.
+2. Subtracts ``tokens`` from ``vault.toBeIssuedTokens``.
 
 3. Returns.
+
+
+.. _issueTokens:
+
+issueTokens
+-----------
+
+The issue process completes when a user calls the :ref:`executesIssue` function and provides a valid proof for sending BTC to the vault. At this point, the ``toBeIssuedTokens`` assigned to a vault are decreased and the ``issuedTokens`` balance is increased by the ``amount`` of issued tokens.
+
+Specification
+.............
+
+*Function Signature*
+
+``issueTokens(vault, amount)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC that were just issued.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``IssueTokens(vault, tokens)``
+
+*Errors*
+
+* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``toBeIssuedTokens`` by this vault.
+
+*Substrate* ::
+
+  fn IssuedTokens(vault: AccountId, tokens: U256) -> Result {...}
+
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+
+Function Sequence
+.................
+
+1. Checks if the amount of ``tokens`` to be released is less or equal to the amount of ``vault.toBeIssuedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+
+2. Subtracts ``tokens`` from ``vault.toBeIssuedTokens``.
+
+3. Add ``tokens`` to ``vault.issuedTokens``.
+
+4. Returns.
+
+
+.. _increaseToBeRedeemedTokens:
+
+increaseToBeRedeemedTokens
+--------------------------
+
+Add an amount tokens to the ``toBeRedeemedTokens`` balance of a vault. This function serves as a prevention against race conditions in the redeem and replace procedures.
+If, for example, a vault would receive two redeem requests at the same time that have a higher amount of tokens to be issued than his ``issuedTokens`` balance, one of the two redeem requests should be rejected.
+
+Specification
+.............
+
+*Function Signature*
+
+``increaseToBeRedeemedTokens(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC to be redeemed.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``IncreaseToBeRedeemedTokens(vault, tokens)``
+
+*Errors*
+
+* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``IssuedTokens`` by this vault.
+
+*Substrate* ::
+
+  fn increaseToBeRedeemedTokens(vault: AccountId, tokens: U256) -> Result {...}
+
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+
+Function Sequence
+.................
+
+1. Checks if the amount of ``tokens`` to be redeemed is less or equal to the amount of ``vault.IssuedTokens`` minus the ``vault.toBeRedeemedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+
+2. Add ``tokens`` to ``vault.toBeRedeemedTokens``.
+
+3. Returns.
+
+.. _decreaseTokens:
+
+decreaseTokens
+--------------------------
+
+If a redeem request is not fulfilled, the amount of tokens assigned to the ``toBeRedeemedTokens`` must be removed.
+
+Specification
+.............
+
+*Function Signature*
+
+``decreaseTokens(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``user``: The BTC Parachain address of the user that made the redeem request.
+* ``tokens``: The amount of PolkaBTC that were not redeemed.
+* ``collateral``: The amount of collateral assigned to this request.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``DecreaseTokens(vault, tokens)``
+
+*Errors*
+
+* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``toBeRedeemedTokens`` by this vault.
+
+*Substrate* ::
+
+  fn decreaseTokens(vault: AccountId, tokens: U256) -> Result {...}
+
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+
+Function Sequence
+.................
+
+.. note:: We don't punish the vault be removing his whole collateral, but "just" the value (valued at the current exchange rate) plus a punishment value.
+
+.. todo:: I think we don't need to check if the vault is under the SecureCollateralRate at this point. If the punishment payment is anyway not "only" the current exchange rate plus some minor mark-up, the collateralization ratio will actually *increase* by this.
+
+1. Checks if the amount of ``tokens`` is less or equal to the amount of ``vault.toBeRedeemedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+
+2. Subtract ``tokens`` from ``vault.toBeRedeemedTokens``.
+
+3. Subtract ``tokens`` from ``vault.issuedTokens``.
+
+4. Punish the vault for not fulfilling the request to redeem tokens.
+
+    - Call the :ref:`getExchangeRate`` function to obtain the current exchange rate. 
+    - Calculate the current value of ``tokens`` in collateral with the exchange rate.
+    - Add a punishment percentage on top of the ``token`` value expressed as collateral and store the punishment payment as ``payment``.
+    - Check if the vault is above the ``SecureCollateralRate`` when we remove ``payment`` from ``vault.collateral``. Call the :ref:`slashCollateral`` function with the ``vault`` as ``sender``, ``user`` as ``receiver``, and ``payment`` as ``amount``.
+    - Reduce the ``vault.collateral`` by ``payment``.
+
+5. Returns.
+
+
+.. _redeemTokens:
+
+redeemTokens
+------------
+
+When a redeem request successfully completes, the ``toBeRedeemedToken`` and the ``issuedToken`` balance must be reduced to reflect that removal of PolkaBTC.
+
+Specification
+.............
+
+*Function Signature*
+
+``redeemTokens(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC redeemed.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``RedeemTokens(vault, tokens)``
+
+*Errors*
+
+* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``issuedTokens`` or ``toBeRedeemedTokens`` by this vault.
+
+*Substrate* ::
+
+  fn increaseToBeRedeemedTokens(vault: AccountId, tokens: U256) -> Result {...}
+
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+
+Function Sequence
+.................
+
+1. Checks if the amount of ``tokens`` to be redeemed is less or equal to the amount of ``vault.issuedTokens`` and the ``vault.toBeRedeemedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+
+2. Subtract ``tokens`` from ``vault.toBeRedeemedTokens``.
+
+3. Subtract ``tokens`` from ``vault.issuedTokens``.
+
+4. Returns.
+
+
+.. todo:: auction function: a vault can be enforced to be replaced when his collateral rate falls below ``AuctionCollateralRate``. Any other vault can then call this function to enforce a replace of this vault by providing sufficient collateral.
+
+.. todo:: liquidate function: a vault can be liquidated by enforcing the redeem procedure. The vault then has to react on the redeem request and has to pay an additional punishment fee.
+
+
+
+
 
 Events
 ~~~~~~
