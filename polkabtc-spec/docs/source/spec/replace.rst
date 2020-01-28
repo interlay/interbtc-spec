@@ -210,6 +210,8 @@ withdrawReplaceRequest
 
 The *OldVault* withdraws an existing ReplaceRequest that is made.
 
+.. todo:: Check that vault is not under auction collateralization rate. This way, a vault cannot choose to stop his replace.
+
 
 Specification
 .............
