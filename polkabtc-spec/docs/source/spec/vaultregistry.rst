@@ -318,7 +318,7 @@ Specification
 
 *Errors*
 
-* ``ERR_UNKOWN_VAULT``: The specified Vault does not exist. 
+* ``ERR_UNKNOWN_VAULT``: The specified Vault does not exist. 
 
 *Substrate* ::
 
@@ -335,7 +335,7 @@ Function Sequence
 
 1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccoundId (``vault``).
 
-  a) Raise ``ERR_UNKOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
+  a) Raise ``ERR_UNKNOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
 
 2) Increase the ``collateral`` of the ``Vault``. 
 
@@ -369,7 +369,7 @@ Specification
 
 *Errors*
 
-* ``ERR_UNKOWN_VAULT``: The specified Vault does not exist. 
+* ``ERR_UNKNOWN_VAULT``: The specified Vault does not exist. 
 * ``ERR_INSUFFICIENT_FREE_COLLATERAL``: The Vault is trying to withdraw more collateral than is currently free. 
 * ``ERR_MIN_AMOUNT``: The amount of locked collateral (free + used) needs to be above ``MinimumCollateralVault``.
 * ``ERR_UNAUTHRORIZED``: The caller of the withdrawal is not the specified Vault, and hence not authorized to withdraw funds.
@@ -390,7 +390,7 @@ Function Sequence
 
 1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccoundId (``vault``).
 
-  a) Raise ``ERR_UNKOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
+  a) Raise ``ERR_UNKNOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
 
 2) Check that the caller of this function is indeed the specified ``Vault`` (AccoundId ``vault``). 
 
