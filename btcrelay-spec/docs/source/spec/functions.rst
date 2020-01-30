@@ -432,7 +432,7 @@ See the `raw Transaction Format section in the Bitcoin Developer Reference <http
 
 1. Check that the double SHA256 hash of ``rawTx`` (use :ref:`sha256d`) equals to the ``txid``. Return ``ERR_INVALID_TXID`` if this check fails. 
 
-2. Extract the ``outputs`` from ``rawTx`` using :ref:`exractOutputs`.
+2. Extract the ``outputs`` from ``rawTx`` using :ref:`extractOutputs`.
 
   a. Check that the transaction (``rawTx``) has at least 2 outputs. The first output (*Payment UTXO*) must be a `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_ or `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_ output. The second output (*Data UTXO*) must be an `OP_RETURN <https://bitcoin.org/en/transactions-guide#term-null-data>`_ output. Raise ``ERR_TX_FORMAT`` if this check fails. 
 
