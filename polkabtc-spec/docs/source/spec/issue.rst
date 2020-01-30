@@ -12,10 +12,10 @@ Step-by-step
 ------------
 
 1. Precondition: a vault has locked collateral as described in the :ref:`Vault-registry`.
-2. A user executes the ``requestIssue`` function to open an issue request on the BTC Parachain. The issue request includes the amount of PolkaBTC the user wants to issue, the selected vault, and a small collateral to prevent :ref:`griefing`.
+2. A user executes the :ref:`requestIssue` function to open an issue request on the BTC Parachain. The issue request includes the amount of PolkaBTC the user wants to issue, the selected vault, and a small collateral to prevent :ref:`griefing`.
 3. A user sends the equivalent amount of BTC that he wants to issue as PolkaBTC to the vault on the Bitcoin blockchain. The user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain.
-4. The user executes the ``executeIssue`` function on the BTC Parachain. The issue function requires a reference to the previous issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of PolkaBTC into his account.
-5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``IssuePeriod``), the vault is able to call the ``cancelIssue`` function to cancel the issue request.
+4. The user executes the :ref:`executeIssue` function on the BTC Parachain. The issue function requires a reference to the previous issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of PolkaBTC into his account.
+5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``IssuePeriod``), the vault is able to call the :ref:`cancelIssue` function to cancel the issue request.
 
 Data Model
 ~~~~~~~~~~
@@ -154,11 +154,11 @@ Function Sequence
 .................
 
 
-1. Check if the ``griefingCollateral`` is greater or equal ``MinimumCollateral``. If this check fails, return ``ERR_INSUFFICIENT_COLLATERAL``.
+1. Check if the ``griefingCollateral`` is greater or equal ``IssueGriefingCollateral``. If this check fails, return ``ERR_INSUFFICIENT_COLLATERAL``.
 
 2. Lock the user's griefing collateral by calling the :ref:`lockCollateral` function with the ``requester`` as the sender and the ``griefingCollateral`` as the amount.
 
-3. Call the VaultRegistry :ref:`reserveTokens` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. If the vault has not locked enough collateral, throws a ``ERR_EXCEEDING_VAULT_LIMIT`` error. This function returns a ``btcAddress`` that the user should send Bitcoin to.
+3. Call the VaultRegistry :ref:`increaseToBeIssuedTokens` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. If the vault has not locked enough collateral, throws a ``ERR_EXCEEDING_VAULT_LIMIT`` error. This function returns a ``btcAddress`` that the user should send Bitcoin to.
 
 4. Generate an ``issueId`` by hashing a random seed, a nonce from the security module, and the address of the user.
 
@@ -272,10 +272,9 @@ Preconditions
 Function Sequence
 .................
 
-.. todo:: Insert link to BTC-Relay to get Bitcoin data.
+.. note:: The accepted Bitcoin transaction format for this function is specified in the BTC-Relay specification and can be found at `https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/intro/accepted-format.html <https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/intro/accepted-format.html>`_.
 
-.. todo:: What happens if the Vault goes into buffered collateral/liquidation at this point?
-
+.. warning:: Ideally the ``SecureCollateralRate`` in the VaultRegistry should be high enough to prevent the Vault from entering into the liquidation or auction state.
 
 1. The user prepares the inputs and calls the ``executeIssue`` function.
     
@@ -289,13 +288,14 @@ Function Sequence
 
 5. Verify the transaction.
 
-    - Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
-    - Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-issued BTC (``issue.amount``), the ``vault``'s Bitcoin address (``issue.btcAddress``), and the ``issueId`` as parameters. If this call returns an error, abort and return the received error. 
+    a. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
+    b. Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-issued BTC (``issue.amount``), the ``vault``'s Bitcoin address (``issue.btcAddress``), and the ``issueId`` as parameters. If this call returns an error, abort and return the received error. 
 
-6. Call the :ref:`mint` function in the Treasury with the ``amount`` and the user's address as the ``receiver``.
-7. Set the ``issue.completed`` field to true.
-8. Emit an ``ExecuteIssue`` event with the user's address, the issueId, the amount, and the Vault's address.
-9. Return.
+6. Call the :ref:`issueTokens` with the ``issue.vault`` and the ``amount`` to decrease the ``toBeIssuedTokens`` and increase the ``issuedTokens``.
+7. Call the :ref:`mint` function in the Treasury with the ``amount`` and the user's address as the ``receiver``.
+8. Set the ``issue.completed`` field to true.
+9. Emit an ``ExecuteIssue`` event with the user's address, the issueId, the amount, and the Vault's address.
+10. Return.
 
 .. _cancelIssue:
 
@@ -349,7 +349,7 @@ Function Sequence
 
 3. Check if the ``issue.completed`` field is set to true. If yes, throw ``ERR_ISSUE_COMPLETED``.
 
-4. Call the :ref:`unreserveTokens` function in the VaultRegistry with the ``issue.vault`` and the ``issue.amount`` to release the vault's collateral.
+4. Call the :ref:`decreaseToBeIssuedTokens` function in the VaultRegistry with the ``issue.vault`` and the ``issue.amount`` to release the vault's collateral.
 
 5. Call the :ref:`slashCollateral` function to transfer the ``griefingCollateral`` of the user requesting the issue to the vault assigned to this issue request with the ``issue.requester`` as sender, the ``issue.vault`` as receiver, and ``issue.griefingCollateral`` as amount.
 
