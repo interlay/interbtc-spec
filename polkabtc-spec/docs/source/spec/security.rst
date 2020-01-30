@@ -162,6 +162,7 @@ Enum specifying reasons for error leading to a status update.
 
 * ``ORACLE_OFFLINE : 3`` - the :ref:`exchangeRateOracle` experienced a liveness failure (no up-to-date exchange rate available).
 
+* ``LIQUIDATION : 4`` - at least one Vault is either below the ``LiquidationCollateralRate`` or has been reported to have stolen BTC. This status implies that any :ref:`redeem` request will be executed partially in BTC and partially in DOT, until the system is rebalanced (1:1 backing between PolkaBTC and BTC). 
 
 *Substrate*
 
@@ -171,7 +172,8 @@ Enum specifying reasons for error leading to a status update.
         NONE = 0
         NO_DATA_BTC_RELAY = 1,
         INVALID_BTC_RELAY = 2,
-        ORACLE_OFFLINE = 3
+        ORACLE_OFFLINE = 3,
+        LIQUIDATION = 4
   }
 
 

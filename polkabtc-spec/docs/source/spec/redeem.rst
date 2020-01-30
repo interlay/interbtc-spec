@@ -128,6 +128,7 @@ Preconditions
 
 * The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
+.. todo:: If the Parachain status is ``ERROR: LIQUIDATION``, any :ref:`redeem` request will be executed partially in BTC and partially in DOT. TODO: calculate the percentage of PolkaBTC being redeemed in BTC vs DOT (and give the user DOT straight away? or wait until the Vault finalized the Redeem with the partial BTC amount?)
 
 Function Sequence
 .................
