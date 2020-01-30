@@ -278,6 +278,10 @@ Preconditions
 
 * The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
+.. todo:: REJECT any Issue request where the sender BTC address belongs to an existing Vault.
+
+
+
 Function Sequence
 .................
 

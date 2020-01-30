@@ -344,7 +344,7 @@ Specification
 
 *Errors*
 
-* ``ERR_UNKOWN_VAULT``: The specified Vault does not exist. 
+* ``ERR_UNKNOWN_VAULT``: The specified Vault does not exist. 
 
 *Substrate* ::
 
@@ -395,7 +395,7 @@ Specification
 
 *Errors*
 
-* ``ERR_UNKOWN_VAULT``: The specified Vault does not exist. 
+* ``ERR_UNKNOWN_VAULT``: The specified Vault does not exist. 
 * ``ERR_INSUFFICIENT_FREE_COLLATERAL``: The Vault is trying to withdraw more collateral than is currently free. 
 * ``ERR_MIN_AMOUNT``: The amount of locked collateral (free + used) needs to be above ``MinimumCollateralVault``.
 * ``ERR_UNAUTHRORIZED``: The caller of the withdrawal is not the specified Vault, and hence not authorized to withdraw funds.
