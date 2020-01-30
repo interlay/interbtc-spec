@@ -473,7 +473,7 @@ Specification
 
 *Substrate* ::
 
-  fn increaseToBeIssuedTokens(vault: AccountId, tokens: U256) -> Result {...}
+  fn increaseToBeIssuedTokens(vault: AccountId, tokens: Balance) -> Result {...}
 
 Preconditions
 .............
@@ -525,7 +525,7 @@ Specification
 
 *Substrate* ::
 
-  fn decreaseToBeIssuedTokens(vault: AccountId, tokens: U256) -> Result {...}
+  fn decreaseToBeIssuedTokens(vault: AccountId, tokens: Balance) -> Result {...}
 
 Preconditions
 .............
@@ -582,7 +582,7 @@ Specification
 
 *Substrate* ::
 
-  fn IssuedTokens(vault: AccountId, tokens: U256) -> Result {...}
+  fn IssuedTokens(vault: AccountId, tokens: Balance) -> Result {...}
 
 Preconditions
 .............
@@ -635,7 +635,7 @@ Specification
 
 *Substrate* ::
 
-  fn increaseToBeRedeemedTokens(vault: AccountId, tokens: U256) -> Result {...}
+  fn increaseToBeRedeemedTokens(vault: AccountId, tokens: Balance) -> Result {...}
 
 Preconditions
 .............
@@ -650,6 +650,56 @@ Function Sequence
 2. Add ``tokens`` to ``vault.toBeRedeemedTokens``.
 
 3. Returns.
+
+.. _decreaseToBeRedeemedTokens:
+
+decreaseToBeRedeemedTokens
+--------------------------
+
+Subtract an amount tokens from the ``toBeRedeemedTokens`` balance of a vault.
+
+Specification
+.............
+
+*Function Signature*
+
+``decreaseToBeRedeemedTokens(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC not to be replaced.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``DecreaseToBeRedeemedTokens(vault, tokens)``
+
+*Errors*
+
+* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``toBeRedeemedTokens`` by this vault.
+
+*Substrate* ::
+
+  fn decreaseToBeRedeemedTokens(vault: AccountId, tokens: Balance) -> Result {...}
+
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+
+Function Sequence
+.................
+
+1. Checks if the amount of ``tokens`` less or equal to the amount of ``vault.toBeRedeemedTokens`` tokens. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+
+2. Subtract ``tokens`` from ``vault.toBeRedeemedTokens``.
+
+3. Returns.
+
 
 .. _decreaseTokens:
 
@@ -686,7 +736,7 @@ Specification
 
 *Substrate* ::
 
-  fn decreaseTokens(vault: AccountId, tokens: U256) -> Result {...}
+  fn decreaseTokens(vault: AccountId, tokens: Balance) -> Result {...}
 
 Preconditions
 .............
@@ -747,7 +797,7 @@ Specification
 
 *Substrate* ::
 
-  fn increaseToBeRedeemedTokens(vault: AccountId, tokens: U256) -> Result {...}
+  fn redeemTokens(vault: AccountId, tokens: Balance) -> Result {...}
 
 Preconditions
 .............
@@ -772,6 +822,62 @@ Function Sequence
 .. todo:: liquidate function: a vault can be liquidated by enforcing the redeem procedure. The vault then has to react on the redeem request and has to pay an additional punishment fee.
 
 
+.. _replaceTokens:
+
+replaceTokens
+-------------
+
+When a replace request successfully completes, the ``toBeRedeemedTokens`` and the ``issuedToken`` balance must be reduced to reflect that removal of PolkaBTC from the ``oldVault``.Consequently, the ``issuedTokens`` of the ``newVault`` need to be increased by the same amount.
+
+Specification
+.............
+
+*Function Signature*
+
+``replaceTokens(oldVault, newVault, tokens, collateral)``
+
+*Parameters*
+
+* ``oldVault``: Account identifier of the Vault to be replaced.
+* ``newVault``: Account identifier of the Vault accepting the replace request.
+* ``tokens``: The amount of PolkaBTC replaced.
+* ``collateral``: The collateral provided by the new vault. 
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``ReplaceTokens(oldVault, newVault, tokens, collateral)``
+
+*Errors*
+
+* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``issuedTokens`` or ``toBeReplaceedTokens`` by this vault.
+
+*Substrate* ::
+
+  fn replaceTokens(oldVault: AccountId, newVault: AccountId, tokens: Balance, collateral: Balance) -> Result {...}
+
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+
+Function Sequence
+.................
+
+1. Checks if the amount of ``tokens`` to be replaced is less or equal to the amount of ``oldVault.issuedTokens`` and the ``oldVault.toBeReplaceedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+
+2. Subtract ``tokens`` from ``oldVault.toBeReplaceedTokens``.
+
+3. Subtract ``tokens`` from ``oldVault.issuedTokens``.
+
+4. Add ``tokens`` to ``newVault.issuedTokens``.
+
+5. Add ``collateral`` to the ``newVault.collateral``.
+
+6. Return.
 
 
 
