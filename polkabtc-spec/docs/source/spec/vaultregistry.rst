@@ -765,7 +765,7 @@ Function Sequence
 
 4. Punish the vault for not fulfilling the request to redeem tokens.
 
-    - Call the :ref:`getExchangeRate`` function to obtain the current exchange rate. 
+    - Call the :ref:`getExchangeRate` function to obtain the current exchange rate. 
     - Calculate the current value of ``tokens`` in collateral with the exchange rate.
     - Add a punishment percentage on top of the ``token`` value expressed as collateral from the ``PunishmentFee`` and store the punishment payment as ``payment``.
     - Check if the vault is above the ``SecureCollateralRate`` when we remove ``payment`` from ``vault.collateral``. If the vault falls under the ``SecureCollateralRate``, reduce the ``payment`` so that the vault is exactly on the ``SecureCollateralRate``. 
