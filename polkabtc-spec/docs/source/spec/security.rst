@@ -33,10 +33,12 @@ We differentiate between:
 
 * **Staked Relayers** - collateralized Parachain participants, whose main role it is to Bitcoin full nodes and check that:
     
-    1. Transactional data is available for submitted Bitcoin block headers (``NO_DATA_BTC_RELAY: 0`` code)
+    1. Transactional data is available for submitted Bitcoin block headers (``NO_DATA_BTC_RELAY: 0`` code).
     2. Submitted blocks are valid under Bitcoin's consensus rules  (``INVALID_BTC_RELAY: 1`` code).
+    3. Vaults do not move BTC to another Bitcoin address, unless expressly during :ref:`redeem` pr :ref:`replace`.
+    4. If a Vault is undercollateralized, i.e., the collateral rate has fallen below ``LiquidationCollateralRate``, as defined in :ref:`vault-registry`. 
 
- If one of the above failures is detected, Staked Relayers can halt BTC-Relay, providing information about the cause. Thereby, the Parachain acts as bulleting board and requires a pre-defined number / percentage of signatures of Staked Relayers.
+ If one of the above failures is detected, Staked Relayers file a report with the :ref:`security` module. In cases (1) and (2), a vote is initiated, whereby this module acts as bulleting board and collects Staked Relayer signatures - if a majority is reached, as defined by ``STAKED_RELAYER_VOTE_THRESHOLD``, the state of the BTC Parachain is updated. In cases (3) and (4) a single Staked Relayer report suffices - the Security module checks if the accusation against the Vault is correct, and if yes updates the BTC Parachain state and flags the Vault according to the reported failure.
 
 * **Governance Mechanism** - Parachain Governance Mechanism, voting on critical changes to the architecture or unexpected failures, e.g. hard forks or detected 51% attacks (if a fork exceeds the specified security parameter *k*, see `Security Parameter k <security_performance/security.html#security-parameter-k>`_.). 
 
@@ -292,13 +294,18 @@ Map of ``StatusUpdates``, identified by an integer key. ``<U256, StatusUpdate>``
 TheftReports
 .............
 
-Mapping of Bitcoin transaction identifiers (SHA256 hashes) to account identifiers of Staked Relayer who have been caught stealing Bitcoin. ``<H256, AccountId>``.
+Mapping of Bitcoin transaction identifiers (SHA256 hashes) to account identifiers of Vaults who have been caught stealing Bitcoin.
+Per Bitcoin transaction, multiple Vaults can be accused (multiple inputs can come from multiple Vaults). 
+This mapping is necessary to prevent duplicate theft reports.
+``<H256, Set<AccountId>>``.
+
+*Substrate* ::
+
+    TheftReports map H256 => HashSet<AccountId>
+
 
 Functions
 ~~~~~~~~~
-
-.. todo:: Add functions for (i) registering, de-registering and slashing of Staked Relayers, (ii) casting votes on status updates. 
-
 
 .. _registerStakedRelayer:
 
@@ -802,6 +809,7 @@ reportVaultTheft
 A Staked Relayer reports misbehavior by a Vault, providing a fraud proof (malicious Bitcoin transaction and the corresponding transaction inclusion proof). 
 
 A Vault is not allowed to move BTC from its Bitcoin address (as specified by ``Vault.btcAddress``, except in the following three cases:
+
    1) The Vault is executing a :ref:`redeem`. In this case, we can link the transaction to a ``RedeemRequest`` and check the correct recipient. 
    2) The Vault is executing a :ref:`replace`. In this case, we can link the transaction to a ``ReplaceRequest`` and check the correct recipient. 
    3) [Optional] The Vault is "merging" multiple UTXOs it controls into a single / multiple UTXOs it controls, e.g. for maintenance. In this case, the recipient address of all outputs (``P2PKH`` / ``P2WPKH``) must be the same Vault. 
@@ -810,18 +818,79 @@ In all other cases, the Vault is considered to have stolen the BTC.
 
 This function checks if the Vault actually misbehaved (i.e., makes sure that the provided transaction is not one of the above valid cases) and automatically liquidates the Vault (i.e., triggers :ref:`redeem`).
 
+Specification
+.............
+
+*Function Signature*
+
+``reportVaultTheft(vault, txId, txBlockHeight, txIndex, merkleProof, rawTx)``
+
+
+*Parameters*
+
+* ``vault``: the account of the accused Vault.
+* ``txId``: The hash of the Bitcoin transaction.
+* ``txBlockHeight``: Bitcoin block height at which the transaction is supposedly included.
+* ``txIndex``: Index of transaction in the Bitcoin block’s transaction Merkle tree.
+* ``MerkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
+* ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``ReportVaultTheft(vault)`` - emits an event indicating that a Vault (``vault``) has been caught displacing BTC without permission.
+
+*Errors*
+
+* ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
+* ``ERR_ALREADY_REPORTED = "This txId has already been logged as a theft by the given Vault"``: This transaction / Vault combination has already been reported.
+* ``ERR_UNKNOWN_VAULT = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
+* ``ERR_ALREADY_LIQUIDATED = "This Vault is already being liquidated``: The specified Vault is already being liquidated.
+* ``ERR_VALID_REDEEM_OR_REPLACE = "The given transaction is a valid Redeem or Replace execution by the accused Vault"``: The given transaction is associated with a valid :ref:`redeem` or :ref:`replace`.
+* ``ERR_VALID_MERGE_TRANSACTION = "The given transaction is a valid 'UTXO merge' transaction by the accused Vault"``: The given transaction represents an allowed "merging" of UTXOs by the accused Vault (no BTC was displaced).
+
+
+*Substrate* ::
+
+  fn reportVaultTheft(vault: AccountId, txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: Bytes, rawTx: Bytes) -> T::H256 {...}
 
 Function Sequence
 .................
 
-.. todo:: TODO
+1. Check that the caller of this function is indeed a Staked Relayer. Return ``ERR_STAKED_RELAYERS_ONLY`` if this check fails.
 
-1. Parse tx, checking OP_RETURN or all same Vault output.
+2. Check if the specified ``vault`` exists in ``Vaults`` in :ref:`vault-registry`. Return ``ERR_UNKNOWN_VAULT`` if there is no Vault with the specified account identifier.
 
+3. Check if this ``vault`` is already being liquidated, i.e., is in the ``LiquidationList``. If this is the case, return ``ERR_ALREADY_LIQUIDATED`` (no point in duplicate reporting).
 
-2. If OP_RETURN ok, check identifier against existing Replace and Redeem requests with of this Vault. Return false accusation error if found.
+4. Check if the given Bitcoin transaction is already associated with an entry in ``TheftReports`` (use ``txId`` as key for lookup). If yes, check if the specified ``vault`` is already listed in the associated set of Vaults. If the Vault is already in the set, return ``ERR_ALREADY_REPORTED``. 
 
-3. The Vault misbehaved and must be slashed:
+5. Extract the ``outputs`` from ``rawTx`` using :ref:`extractOutputs`.
+
+6. Check if the transaction is a "migration" of UTXOs to the same Vault. For each output, in the extracted ``outputs``, extract the recipient Bitcoin address (using :ref:`extractOutputAddress`). 
+
+   a) If one of the extracted Bitcoin addresses does not match the Bitcoin address of the accused ``vault`` (``Vault.btcAddress``) **continue to step 7**. 
+
+   b) If all extracted addresses match the Bitcoin address of the accused ``vault`` (``Vault.btcAddress``), abort and return ``ERR_VALID_MERGE_TRANSACTION``.
+
+7. Check if the transaction is part of a valid :ref:`redeem` or :ref:`replace` process. 
+
+  a) Extract the OP_RETURN value from the (second) output (``outputs[1]``) using :ref:`extractOPRETURN`. If this call returns an error (not a valid OP_RETURN output, hence not valid :ref:`redeem` or :ref:`replace` process), **continue to step 8**. 
+
+  c) Check if the extracted OP_RETURN value matches any ``redeemId`` in ``RedeemRequest`` (in ``RedeemRequests`` in :ref:`redeem`) or any ``replaceId`` in ``ReplaceRequest`` (in ``RedeemRequests`` in :ref:`redeem`) entries *associated with this Vault*. If no match is found, **continue to step 8**.
+
+  d) Otherwise, if an associated ``RedeemRequest``  or ``ReplaceRequest`` was found: extract the value (using :ref:`extractOutputValue`) and recipient Bitcoin address (using :ref:`extractOutputAddress`) from the first output (``outputs[0]``). Next, check 
+     
+     i ) if the value is it is equal (or greater) than ``paymentValue`` in the ``RedeemRequest``  or ``ReplaceRequest``. 
+     
+     ii ) if the recipient Bitcoin address matches the recipient specified in the ``RedeemRequest``  or ``ReplaceRequest``.
+
+    If both checks are successful, abort and return ``ERR_VALID_REDEEM_OR_REPLACE``. Otherwise, **continue to step 8**.
+
+8. The Vault misbehaved (displaced BTC). 
 
     a) add ``vault`` to the ``LiquidationList`` in :ref:`vault-registry`,
 
@@ -830,6 +899,7 @@ Function Sequence
     c) emit ``ExecuteStatusUpdate(ParachainStatus, Errors,`` ``"Vault 'vault' displaced BTC and is being liquidated")``
   
 5. Return
+
 
 .. _reportVaultUndercollateralized:
 
@@ -864,7 +934,7 @@ Specification
 
 * ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
 * ``ERR_COLLATERAL_OK = "The accused Vault's collateral rate is above the liquidation threshold"``: The accused Vault's collateral rate is  above ``LiquidationCollateralRate``.
-* ``ERR_UNKNOWN_VAULT``: The specified Vault does not exist. 
+* ``ERR_UNKNOWN_VAULT = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
 
 *Substrate* ::
 

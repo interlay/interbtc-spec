@@ -104,7 +104,18 @@ Mapping from registerIDs of RegisterRequest to their structs. ``<U256, RegisterR
     RegisterRequests map T::U256 => Vault<T::AccountId, T::DateTime>
 
 
+Lists
+-----
 
+LiquidationList
+...............
+
+Set of Vault account identifiers, indicating which Vaults are currently being liquidated.
+This list is used to access the collateral of misbehaving (liquidated) Vaults to reimburse users when recovering from a ``LIQUIDATION`` error state (see :ref:`security`). 
+
+*Substrate* :: 
+
+    LiquidationList HashSet<AccountId>
 
 Structs
 -------
@@ -333,7 +344,7 @@ An existing Vault calls ``lockCollateral`` to increase its DOT collateral in the
 Function Sequence
 .................
 
-1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccoundId (``vault``).
+1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccountId (``vault``).
 
   a) Raise ``ERR_UNKNOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
 
@@ -369,10 +380,10 @@ Specification
 
 *Errors*
 
-* ``ERR_UNKNOWN_VAULT``: The specified Vault does not exist. 
+* ``ERR_UNKNOWN_VAULT = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
 * ``ERR_INSUFFICIENT_FREE_COLLATERAL``: The Vault is trying to withdraw more collateral than is currently free. 
 * ``ERR_MIN_AMOUNT``: The amount of locked collateral (free + used) needs to be above ``MinimumCollateralVault``.
-* ``ERR_UNAUTHRORIZED``: The caller of the withdrawal is not the specified Vault, and hence not authorized to withdraw funds.
+* ``ERR_UNAUTHORIZED``: The caller of the withdrawal is not the specified Vault, and hence not authorized to withdraw funds.
   
 *Substrate* ::
 
@@ -388,13 +399,13 @@ A Vault calls ``withdrawCollateral`` to withdraw some of its ``free`` collateral
 Function Sequence
 .................
 
-1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccoundId (``vault``).
+1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccountId (``vault``).
 
   a) Raise ``ERR_UNKNOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
 
-2) Check that the caller of this function is indeed the specified ``Vault`` (AccoundId ``vault``). 
+2) Check that the caller of this function is indeed the specified ``Vault`` (AccountId ``vault``). 
 
-  a) Raise ``ERR_UNAUTHRORIZED`` error is the caller of this function is not the Vault specified for withdrawal.
+  a) Raise ``ERR_UNAUTHORIZED`` error is the caller of this function is not the Vault specified for withdrawal.
 
 3) Check that ``Vault`` has sufficient free collateral: ``withdrawAmount <= (Vault.collateral - Vault.issuedTokens * SecureCollateralRate)``
 
