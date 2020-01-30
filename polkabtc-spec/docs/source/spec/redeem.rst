@@ -17,6 +17,17 @@ Step-by-step
 4. The vault executes the :ref:`executeRedeem` function by providing the Bitcoin transaction from step 3 together with the redeem request identifier within the time limit. If the function completes successfully, the locked PolkaBTC are destroyed and the user received its BTC.
 5. Optional: If the user could not receive BTC within the given time (as required in step 4), the user calls :ref:`cancelRedeem` after the redeem time limit. The user is then refunded with the DOT collateral the vault provided.
 
+
+VaultRegistry
+-------------
+
+The data access and state changes to the vault registry are documented in the figure below.
+
+.. figure:: ../figures/VaultRegistry-Redeem.png
+    :alt: vault-registry-redeem
+
+
+
 Data Model
 ~~~~~~~~~~
 

@@ -17,6 +17,15 @@ Step-by-step
 4. The user executes the :ref:`executeIssue` function on the BTC Parachain. The issue function requires a reference to the previous issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of PolkaBTC into his account.
 5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``IssuePeriod``), the vault is able to call the :ref:`cancelIssue` function to cancel the issue request.
 
+VaultRegistry
+-------------
+
+The data access and state changes to the vault registry are documented in the figure below.
+
+.. figure:: ../figures/VaultRegistry-Issue.png
+    :alt: vault-registry-issue
+
+
 Data Model
 ~~~~~~~~~~
 
@@ -76,17 +85,17 @@ Stores the status and information about a single issue request.
 
 .. tabularcolumns:: |l|l|L|
 
-==================  ==========  =======================================================	
-Parameter           Type        Description                                            
-==================  ==========  =======================================================
-``vault``           Account     The BTC Parachain address of the Vault responsible for this commit request.
-``opentime``        u256        Block height of opening the request.
-``griefingCollateral``      DOT         Collateral provided by a user.
-``amount``          PolkaBTC    Amount of PolkaBTC to be issued.
-``requester``       Account     User account receiving PolkaBTC upon successful issuing.
-``btcAddress``      bytes[20]   Base58 encoded Bitcoin public key of the Vault.  
-``completed``       bool        Indicates if the issue has been completed.
-==================  ==========  =======================================================
+======================  ==========  =======================================================	
+Parameter               Type        Description                                            
+======================  ==========  =======================================================
+``vault``               Account     The BTC Parachain address of the Vault responsible for this commit request.
+``opentime``            u256        Block height of opening the request.
+``griefingCollateral``  DOT         Collateral provided by a user.
+``amount``              PolkaBTC    Amount of PolkaBTC to be issued.
+``requester``           Account     User account receiving PolkaBTC upon successful issuing.
+``btcAddress``          bytes[20]   Base58 encoded Bitcoin public key of the Vault.  
+``completed``           bool        Indicates if the issue has been completed.
+======================  ==========  =======================================================
 
 *Substrate*
 
