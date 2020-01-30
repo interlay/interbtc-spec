@@ -20,7 +20,7 @@ An overview is provided in the figure below.
 .. figure:: ../figures/failureModes.png
     :alt: State machine showing BTC-Relay failure modes
 
-    State machine showing the operational and failure modes of BTC-Relay, and how to recover from or flag failures.
+    (Informal) State machine showing the operational and failure modes of BTC-Relay, and how to recover from or flag failures. Note: within the ``ERROR`` state, ``ErrorCode`` states are only exclusive within a single module (i.e., BTC-Relay ``NO_DATA_BTC_RELAY`` and ``INVALID_BTC_RELAY`` are exclusive, but there can be an ``ORACLE_OFFLINE`` or ``LIQUIDATION`` error in parallel).
 
 
 More details on the exact failure states and error codes are provided in the Specification part of this module description.
@@ -810,28 +810,46 @@ In all other cases, the Vault is considered to have stolen the BTC.
 
 This function checks if the Vault actually misbehaved (i.e., makes sure that the provided transaction is not one of the above valid cases) and automatically liquidates the Vault (i.e., triggers :ref:`redeem`).
 
-.. todo:: What do we do if we detect theft? Who redeems? An option is to halt the Parachain and ask users to redeem - thereby exchanging PolkaBTC against DOT at a beneficial rate. Or, we slash the Vault and the Governance Mechanism acquires new BTC using the slashed collateral and locks it with a new Vault, to balance the system.
 
-.. note:: A possible idea is to wait until a Vault has no more pending Redeem or Replace requests (either failed or successful). Avoids Staked Relayers submitting valid transactions as fraud proofs and simplifies verification effort on the development side.
+Function Sequence
+.................
 
 .. todo:: TODO
+
+1. Parse tx, checking OP_RETURN or all same Vault output.
+
+
+2. If OP_RETURN ok, check identifier against existing Replace and Redeem requests with of this Vault. Return false accusation error if found.
+
+3. The Vault misbehaved and must be slashed:
+
+    a) add ``vault`` to the ``LiquidationList`` in :ref:`vault-registry`,
+
+    b) set ``ParachainStatus = ERROR`` and add ``LIQUIDATION`` to ``Errors``,
+
+    c) emit ``ExecuteStatusUpdate(ParachainStatus, Errors,`` ``"Vault 'vault' displaced BTC and is being liquidated")``
+  
+5. Return
+
+.. _reportVaultUndercollateralized:
+
+reportVaultUndercollateralized
+-------------------------------
+
+A Staked Relayer reports that a Vault is undercollateralized, i.e., below the ``LiquidationCollateralRate`` as defined in :ref:`vault-registry`. This function checks if the Vault's collateral is indeed below this rate and if yes, flags the Vault for liquidation and updates the ``ParachainStatus`` to ``ERROR`` and adding ``LIQUIDATION`` to ``Errors``.
+
 
 Specification
 .............
 
 *Function Signature*
 
-``reportVaultTheft(vault, txId, txBlockHeight, txIndex, merkleProof, rawTx)``
+``reportVaultUndercollateralized(vault)``
 
 
 *Parameters*
 
 * ``vault``: the account of the accused Vault.
-* ``txId``: The hash of the Bitcoin transaction.
-* ``txBlockHeight``: Bitcoin block height at which the transaction is supposedly included.
-* ``txIndex``: Index of transaction in the Bitcoin block’s transaction Merkle tree.
-* ``merkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
-* ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
 
 *Returns*
@@ -840,29 +858,36 @@ Specification
 
 *Events*
 
+* ``ExecuteStatusUpdate(newStatusCode, errors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``errors`` the set of ``ErrorCode`` entries specifying the reason for the status change if ``StatusCode == ERROR``, and ``msg`` the detailed reason for the status update. 
+
 *Errors*
 
 * ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
-
+* ``ERR_COLLATERAL_OK = "The accused Vault's collateral rate is above the liquidation threshold"``: The accused Vault's collateral rate is  above ``LiquidationCollateralRate``.
+* ``ERR_UNKNOWN_VAULT``: The specified Vault does not exist. 
 
 *Substrate* ::
 
-  fn reportVaultTheft(vault: AccountId, txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: Bytes, rawTx: Bytes) -> T::H256 {...}
+  fn reportVaultUndercollateralized(vault: AccountId) -> T::H256 {...}
 
 Function Sequence
 .................
 
 1. Check that the caller of this function is indeed a Staked Relayer. Return ``ERR_STAKED_RELAYERS_ONLY`` if this check fails.
 
-2. Call *verifyTransaction* in :ref:`btc-relay` passing ``txId``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the error.
+2. Retrieve the Vault from ``Vaults`` in :ref:`vault-registry` using ``vault``. Return ``ERR_UNKNOWN_VAULT`` if there is no Vault with the specified account identifier.
 
+3. Check if the Vault's collateralization rate is below ``LiquidationCollateralRate`` as defined in :ref:`vault-registry`.  That is, check ``Vault.collateral`` against ``Vault.issuedTokens``. If the Vault's collateral rate is above ``LiquidationCollateralRate``, return ``ERR_COLLATERAL_OK``
 
-.. todo:: TODO: decide how to best handle this.
+4. Otherwise, if the Vault is undercollateralized:
 
-3. Try to parse the ``rawTx`` expecting the transaction format as defined in :ref:`btc-relay`. 
+    a) add ``vault`` to the ``LiquidationList`` in :ref:`vault-registry`,
 
-  a. [Optional]: also accept transactions, which match the format for point (3) above, i.e., all outputs have the same (accused) Vault as recipient.
+    b) set ``ParachainStatus = ERROR`` and add ``LIQUIDATION`` to ``Errors``,
 
+    c) emit ``ExecuteStatusUpdate(ParachainStatus, Errors,`` ``"Undercollateralized Vault 'vault' is being liquidated")``
+  
+5. Return
 
 .. _generateSecureId:
 
