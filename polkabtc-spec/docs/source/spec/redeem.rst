@@ -264,7 +264,7 @@ Function Sequence
    a. If ``True``, call :ref:`redeemTokensPremium` in the VaultRegistry to release the Vault's collateral with the ``redeem.vault`` and the ``redeem.amount``, and ``redeemer`` and ``premiumDOT`` to allocate the DOT premium to the redeemer using the Vault's released collateral.
    b. Else call :ref:`redeemTokens` function in the VaultRegistry to release the Vault's collateral with the ``redeem.vault`` and the ``redeem.amount``.
 
-7. Set the ``redeem.completed`` field to true.
+7. Remove ``redeem`` from ``RedeemRequests``.
 8. Emit an ``ExecuteRedeem`` event with the user's address, the redeemId, the amount, and the Vault's address.
 9. Return.
 
@@ -325,9 +325,9 @@ Function Sequence
 
 5. Call the :ref:`burn` function in the Treasury to burn the ``redeem.amount`` of PolkaBTC of the user.
    
-6. Set the ``redeem.completed`` field to true.
+6. Remove ``redeem`` from ``RedeemRequests``.
 
-7. Send the ``CancelRedeem`` event with the ``redeemId``.
+7. Emit a ``CancelRedeem`` event with the ``redeemId``.
 
 8. Return.
 

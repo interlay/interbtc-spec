@@ -480,7 +480,7 @@ Function Sequence
 
 8. Emit the ``ExecuteReplace(oldVault, newVault, replaceId)`` event.
 
-9. Remove the replace request with the ``replaceId`` id.
+9. Remove the ``ReplaceRequest`` from ``ReplaceRequests``.
 
 10. Return.
 

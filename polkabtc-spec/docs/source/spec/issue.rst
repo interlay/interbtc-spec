@@ -306,7 +306,7 @@ Function Sequence
 
 6. Call the :ref:`issueTokens` with the ``issue.vault`` and the ``amount`` to decrease the ``toBeIssuedTokens`` and increase the ``issuedTokens``.
 7. Call the :ref:`mint` function in the Treasury with the ``amount`` and the user's address as the ``receiver``.
-8. Set the ``issue.completed`` field to true.
+8. Remove the ``IssueRequest`` from ``IssueRequests``.
 9. Emit an ``ExecuteIssue`` event with the user's address, the issueId, the amount, and the Vault's address.
 10. Return.
 
@@ -366,9 +366,11 @@ Function Sequence
 
 5. Call the :ref:`slashCollateral` function to transfer the ``griefingCollateral`` of the user requesting the issue to the vault assigned to this issue request with the ``issue.requester`` as sender, the ``issue.vault`` as receiver, and ``issue.griefingCollateral`` as amount.
 
-6. Emit the ``CancelIssue`` event with the ``issueId``.
+6. Remove the ``IssueRequest`` from ``IssueRequests``.
 
-7. Return.
+8. Emit a ``CancelIssue`` event with the ``issueId``.
+
+9. Return.
 
 
 Events
