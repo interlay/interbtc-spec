@@ -168,6 +168,7 @@ Function Sequence
 
 9. Return the ``redeemId``. The user stores this for future reference locally.
 
+.. _executeRedeem:
 
 executeRedeem
 -------------

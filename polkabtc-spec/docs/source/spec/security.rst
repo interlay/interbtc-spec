@@ -1,11 +1,11 @@
 .. _security:
 
 Security
-========================
+========
 
 The Security module is responsible for failure handling in the BTC Parachain, such as liveness and safety failures of :ref:`btc-relay` or crashes of the :ref:`exchange-rate-oracle`.
-Specifically, this module provides a central interface for all other modules to check whether specific features should be disabled to prevent financial damage to users (e.g. stop :ref:`issue` if no reliable price data is available).
-In addition, the Security module provides functions to handle security critical operations, such as generating secure identifiers for replay protection in :ref:`issue:`, :ref:`redeem`, and :ref:`replace`. 
+Specifically, this module provides a central interface for all other modules to check whether specific features should be disabled to prevent financial damage to users (e.g. stop :ref:`issue-protocol` if no reliable price data is available).
+In addition, the Security module provides functions to handle security critical operations, such as generating secure identifiers for replay protection in :ref:`issue-protocol`, :ref:`redeem-protocol`, and :ref:`replace-protocol`. 
 
 
 Overview
@@ -31,16 +31,16 @@ Roles
 Failure handling methods calls are **restricted**, i.e., can only be called by pre-determined roles.
 We differentiate between:
 
-* **Staked Relayers** - collateralized Parachain participants, whose main role it is to Bitcoin full nodes and check that:
+* **Staked Relayers** - collateralized Parachain participants, whose main role it is to run Bitcoin full nodes and check that:
     
     1. Transactional data is available for submitted Bitcoin block headers (``NO_DATA_BTC_RELAY: 0`` code).
     2. Submitted blocks are valid under Bitcoin's consensus rules  (``INVALID_BTC_RELAY: 1`` code).
-    3. Vaults do not move BTC to another Bitcoin address, unless expressly during :ref:`redeem` pr :ref:`replace`.
-    4. If a Vault is undercollateralized, i.e., the collateral rate has fallen below ``LiquidationCollateralRate``, as defined in :ref:`vault-registry`. 
+    3. Vaults do not move BTC to another Bitcoin address, unless expressly requested during :ref:`redeem-protocol` or :ref:`replace-protocol`.
+    4. If a Vault is under-collateralized, i.e., the collateral rate has fallen below ``LiquidationCollateralRate``, as defined in :ref:`vault-registry`. 
 
  If one of the above failures is detected, Staked Relayers file a report with the :ref:`security` module. In cases (1) and (2), a vote is initiated, whereby this module acts as bulleting board and collects Staked Relayer signatures - if a majority is reached, as defined by ``STAKED_RELAYER_VOTE_THRESHOLD``, the state of the BTC Parachain is updated. In cases (3) and (4) a single Staked Relayer report suffices - the Security module checks if the accusation against the Vault is correct, and if yes updates the BTC Parachain state and flags the Vault according to the reported failure.
 
-* **Governance Mechanism** - Parachain Governance Mechanism, voting on critical changes to the architecture or unexpected failures, e.g. hard forks or detected 51% attacks (if a fork exceeds the specified security parameter *k*, see `Security Parameter k <security_performance/security.html#security-parameter-k>`_.). 
+* **Governance Mechanism** - Parachain Governance Mechanism, voting on critical changes to the architecture or unexpected failures, e.g. hard forks or detected 51% attacks (if a fork exceeds the specified security parameter *k*, see `Security Parameter k <https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/security_performance/security.html#security-parameter-k>`_.). 
 
 
 Data Model
@@ -164,7 +164,7 @@ Enum specifying reasons for error leading to a status update.
 
 * ``ORACLE_OFFLINE : 3`` - the :ref:`exchangeRateOracle` experienced a liveness failure (no up-to-date exchange rate available).
 
-* ``LIQUIDATION : 4`` - at least one Vault is either below the ``LiquidationCollateralRate`` or has been reported to have stolen BTC. This status implies that any :ref:`redeem` request will be executed partially in BTC and partially in DOT, until the system is rebalanced (1:1 backing between PolkaBTC and BTC). 
+* ``LIQUIDATION : 4`` - at least one Vault is either below the ``LiquidationCollateralRate`` or has been reported to have stolen BTC. This status implies that any :ref:`redeem-protocol` request will be executed partially in BTC and partially in DOT, until the system is rebalanced (1:1 backing between PolkaBTC and BTC). 
 
 *Substrate*
 
@@ -188,16 +188,16 @@ Indicated the state of a proposed ``StatusUpdate``.
 
 * ``ACCEPTED: 1``- this ``StatusUpdate`` has been accepted.
 
-* ``REJECTED: 2`` -this ``StatusUpdate`` has been accepted.
+* ``REJECTED: 2`` -this ``StatusUpdate`` has been rejected.
 
 *Substrate* 
 
 ::
 
-  enum StatusCode {
-        RUNNING = 0,
-        ERROR = 1,
-        SHUTDOWN = 3,
+  enum ProposalStatus {
+        PENDING = 0,
+        ACCEPTED = 1,
+        REJECTED = 2,
   }
 
 
@@ -810,13 +810,13 @@ A Staked Relayer reports misbehavior by a Vault, providing a fraud proof (malici
 
 A Vault is not allowed to move BTC from its Bitcoin address (as specified by ``Vault.btcAddress``, except in the following three cases:
 
-   1) The Vault is executing a :ref:`redeem`. In this case, we can link the transaction to a ``RedeemRequest`` and check the correct recipient. 
-   2) The Vault is executing a :ref:`replace`. In this case, we can link the transaction to a ``ReplaceRequest`` and check the correct recipient. 
+   1) The Vault is executing a :ref:`redeem-protocol`. In this case, we can link the transaction to a ``RedeemRequest`` and check the correct recipient. 
+   2) The Vault is executing a :ref:`replace-protocol`. In this case, we can link the transaction to a ``ReplaceRequest`` and check the correct recipient. 
    3) [Optional] The Vault is "merging" multiple UTXOs it controls into a single / multiple UTXOs it controls, e.g. for maintenance. In this case, the recipient address of all outputs (``P2PKH`` / ``P2WPKH``) must be the same Vault. 
 
 In all other cases, the Vault is considered to have stolen the BTC.
 
-This function checks if the Vault actually misbehaved (i.e., makes sure that the provided transaction is not one of the above valid cases) and automatically liquidates the Vault (i.e., triggers :ref:`redeem`).
+This function checks if the Vault actually misbehaved (i.e., makes sure that the provided transaction is not one of the above valid cases) and automatically liquidates the Vault (i.e., triggers :ref:`redeem-protocol`).
 
 Specification
 .............
@@ -849,7 +849,7 @@ Specification
 * ``ERR_ALREADY_REPORTED = "This txId has already been logged as a theft by the given Vault"``: This transaction / Vault combination has already been reported.
 * ``ERR_UNKNOWN_VAULT = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
 * ``ERR_ALREADY_LIQUIDATED = "This Vault is already being liquidated``: The specified Vault is already being liquidated.
-* ``ERR_VALID_REDEEM_OR_REPLACE = "The given transaction is a valid Redeem or Replace execution by the accused Vault"``: The given transaction is associated with a valid :ref:`redeem` or :ref:`replace`.
+* ``ERR_VALID_REDEEM_OR_REPLACE = "The given transaction is a valid Redeem or Replace execution by the accused Vault"``: The given transaction is associated with a valid :ref:`redeem-protocol` or :ref:`replace-protocol`.
 * ``ERR_VALID_MERGE_TRANSACTION = "The given transaction is a valid 'UTXO merge' transaction by the accused Vault"``: The given transaction represents an allowed "merging" of UTXOs by the accused Vault (no BTC was displaced).
 
 
@@ -876,11 +876,11 @@ Function Sequence
 
    b) If all extracted addresses match the Bitcoin address of the accused ``vault`` (``Vault.btcAddress``), abort and return ``ERR_VALID_MERGE_TRANSACTION``.
 
-7. Check if the transaction is part of a valid :ref:`redeem` or :ref:`replace` process. 
+7. Check if the transaction is part of a valid :ref:`redeem-protocol` or :ref:`replace-protocol` process. 
 
-  a) Extract the OP_RETURN value from the (second) output (``outputs[1]``) using :ref:`extractOPRETURN`. If this call returns an error (not a valid OP_RETURN output, hence not valid :ref:`redeem` or :ref:`replace` process), **continue to step 8**. 
+  a) Extract the OP_RETURN value from the (second) output (``outputs[1]``) using :ref:`extractOPRETURN`. If this call returns an error (not a valid OP_RETURN output, hence not valid :ref:`redeem-protocol` or :ref:`replace-protocol` process), **continue to step 8**. 
 
-  c) Check if the extracted OP_RETURN value matches any ``redeemId`` in ``RedeemRequest`` (in ``RedeemRequests`` in :ref:`redeem`) or any ``replaceId`` in ``ReplaceRequest`` (in ``RedeemRequests`` in :ref:`redeem`) entries *associated with this Vault*. If no match is found, **continue to step 8**.
+  c) Check if the extracted OP_RETURN value matches any ``redeemId`` in ``RedeemRequest`` (in ``RedeemRequests`` in :ref:`redeem-protocol`) or any ``replaceId`` in ``ReplaceRequest`` (in ``RedeemRequests`` in :ref:`redeem-protocol`) entries *associated with this Vault*. If no match is found, **continue to step 8**.
 
   d) Otherwise, if an associated ``RedeemRequest``  or ``ReplaceRequest`` was found: extract the value (using :ref:`extractOutputValue`) and recipient Bitcoin address (using :ref:`extractOutputAddress`) from the first output (``outputs[0]``). Next, check 
      
