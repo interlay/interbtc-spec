@@ -206,7 +206,7 @@ Precondition
 Function Sequence
 .................
 
-1. Checks if the user has a balance higher than or equal to the requested amount, i.e. ``Balances[redeemer] >= amount``. Throws ``ERR_INSUFFICIENT_FUNDS`` if the user's balance is too low.
+1. Checks if the user has a balance higher than or equal to the requested amount, i.e. ``Balances[redeemer] >= amount``. Return ``ERR_INSUFFICIENT_FUNDS`` if the user's balance is too low.
 2. Decreases the user's token balance by the amount and increases the locked tokens balance by amount, i.e. ``Balances[redeemer] -= amount`` and ``LockedBalances[redeemer] += amount``.
 3. Emit the ``Lock`` event.
 4. Return.

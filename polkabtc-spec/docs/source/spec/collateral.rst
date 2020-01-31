@@ -141,7 +141,7 @@ Specification
 
 *Errors*
 
-* ``ERR_INSUFFICIENT_COLLATERAL_AVAILABLE``: Throws if the ``sender`` has less collateral stored than the requested ``amount``.
+* ``ERR_INSUFFICIENT_COLLATERAL_AVAILABLE``: The ``sender`` has less collateral stored than the requested ``amount``.
 
 *Substrate* ::
 
@@ -196,7 +196,7 @@ Specification
 
 *Errors*
 
-* ``ERR_INSUFFICIENT_COLLATERAL_AVAILABLE``: Throws if the ``sender`` has less collateral stored than the requested ``amount``.
+* ``ERR_INSUFFICIENT_COLLATERAL_AVAILABLE``: The ``sender`` has less collateral stored than the requested ``amount``.
 
 *Substrate* ::
 
@@ -267,7 +267,7 @@ Emit a ``ReleaseCollateral`` event when a sender releases collateral.
   ReleaseCollateral(AccountId, Balance);
 
 SlashCollateral
---------------
+----------------
 
 Emit a ``SlashCollateral`` event when a sender's collateral is slashed and transferred to the receiver.
 
@@ -296,4 +296,4 @@ Errors
 
 * **Message**: "The sender's collateral balance is below the requested amount."
 * **Function**: :ref:`releaseCollateral` | :ref:`slashCollateral`
-* **Cause**: Throws if the ``sender`` has less collateral stored than the requested ``amount``.
+* **Cause**: he ``sender`` has less collateral stored than the requested ``amount``.

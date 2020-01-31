@@ -264,8 +264,8 @@ Specification
 
 *Errors*
 
-* ``ERR_ISSUE_ID_NOT_FOUND``: Throws if the ``issueId`` cannot be found.
-* ``ERR_COMMIT_PERIOD_EXPIRED``: Throws if the time limit as defined by the ``IssuePeriod`` is not met.
+* ``ERR_ISSUE_ID_NOT_FOUND``: The ``issueId`` cannot be found.
+* ``ERR_COMMIT_PERIOD_EXPIRED``: The time limit as defined by the ``IssuePeriod`` is not met.
 * ``ERR_UNAUTHORIZED_USER = Unauthorized: Caller must be associated user``: The caller of this function is not the associated user, and hence not authorized to take this action.
 
 
@@ -287,7 +287,7 @@ Function Sequence
 
 .. note:: The accepted Bitcoin transaction format for this function is specified in the BTC-Relay specification and can be found at `https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/intro/accepted-format.html <https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/intro/accepted-format.html>`_.
 
-.. warning:: Ideally the ``SecureCollateralRate`` in the VaultRegistry should be high enough to prevent the Vault from entering into the liquidation or auction state.
+.. warning:: Ideally the ``SecureCollateralThreshold`` in the VaultRegistry should be high enough to prevent the Vault from entering into the liquidation or auction state.
 
 1. The user prepares the inputs and calls the ``executeIssue`` function.
     
@@ -295,8 +295,8 @@ Function Sequence
     b. ``issueId``: The unique hash received in the ``requestIssue`` function.
     c. ``txId``: the hash of the Bitcoin transaction to the Vault. With the ``txId`` the user can get the remainder of the Bitcoin transaction data including ``txBlockHeight``, ``txIndex``, ``MerkleProof``, and ``rawTx``. See BTC-Relay documentation for details.
 
-2. Checks if the ``issueId`` exists. Throws ``ERR_ISSUE_ID_NOT_FOUND`` if not found. Else, loads the according issue request struct as ``issue``.
-3. Checks if the ``requester`` is the ``issue.requester``. Throws ``ERR_UNAUTHORIZED_USER`` if called by any account other than the associated ``issue.requester``.
+2. Checks if the ``issueId`` exists. Return ``ERR_ISSUE_ID_NOT_FOUND`` if not found. Else, loads the according issue request struct as ``issue``.
+3. Checks if the ``requester`` is the ``issue.requester``. Return ``ERR_UNAUTHORIZED_USER`` if called by any account other than the associated ``issue.requester``.
 4. Checks if the current block height minus the ``IssuePeriod`` is smaller than the ``issue.opentime``. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``.
 
 5. Verify the transaction.
@@ -339,7 +339,7 @@ Specification
 
 *Errors*
 
-* ``ERR_ISSUE_ID_NOT_FOUND``: Throws if the ``issueId`` cannot be found.
+* ``ERR_ISSUE_ID_NOT_FOUND``: The ``issueId`` cannot be found.
 * ``ERR_TIME_NOT_EXPIRED``: Raises an error if the time limit to call ``executeIssue`` has not yet passed.
 * ``ERR_ISSUE_COMPLETED``: Raises an error if the issue is already completed.
 

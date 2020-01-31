@@ -6,10 +6,13 @@ Security Analysis
 Collateral
 ~~~~~~~~~~
 
-Add operation modes for each Vault
-* Secure Operation
-* Buffered Collateral
+Collateral thresholds>
+* Secure
+* Auction
+* PremiumRedeem
 * Liquidation
+
+.. not:: PolkaBTC can never be force-liquidated from users. Reason: the tokens could be used in other applications and replacing these with DOT could have negative side-effects. An alternative is to define a new token standard for this (future work).
 
 .. _griefing:
 

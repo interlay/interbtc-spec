@@ -21,7 +21,7 @@ Constants
 GRANULARITY
 ...........
 
-The granularity of the ``SecureCollateralRate``, ``AuctionCollateralRate``, ``LiquidationCollateralRate``, and ``PunishmentFee``.
+The granularity of the ``SecureCollateralThreshold``, ``AuctionCollateralThreshold``, ``LiquidationCollateralThreshold``, and ``PunishmentFee``.
 
 *Substrate* ::
 
@@ -54,48 +54,66 @@ For example, if the ``PunishmentFee`` is set to 50000, it is equivalent to 50%.
 
   PunishmentFee: u128;
 
-SecureCollateralRate
-....................
+RedeemPremiumFee
+.................
+
+If a Vault is running low on collateral and falls below ``PremiumRedeemThreshold``, users are allocated a premium in DOT when redeeming with the Vault - as defined by this parameter.
+For example, if the ``RedeemPremiumFee`` is set to 5000, it is equivalent to 5%.
+
+*Substrate* ::
+
+  RedeemPremiumFee: u128;
+
+SecureCollateralThreshold
+..........................
 
 Determines the over-collareralization rate for DOT collateral locked by Vaults, necessary for issuing PolkaBTC. 
-Must to be strictly greater than ``100000`` and ``LiquidationCollateralRate``.
+Must to be strictly greater than ``100000`` and ``LiquidationCollateralThreshold``.
 
-The Vault can take on issue requests depending on the collateral it provides and under consideration of the ``SecureCollateralRate``.
+The Vault can take on issue requests depending on the collateral it provides and under consideration of the ``SecureCollateralThreshold``.
 The maximum amount of PolkaBTC a Vault is able to support during the issue process is based on the following equation:
-:math:`\text{max(PolkaBTC)} = \text{collateral} * \text{ExchangeRate} / \text{SecureCollateralRate}`.
+:math:`\text{max(PolkaBTC)} = \text{collateral} * \text{ExchangeRate} / \text{SecureCollateralThreshold}`.
 
-.. note:: As an example, assume we use ``DOT`` as collateral, we issue ``PolkaBTC`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureCollateralRate`` is 200%, i.e. a Vault has to provide two-times the amount of collateral to back an issue request. Now let's say the Vault deposits 400 ``DOT`` as collateral. Then this Vault can back at most 2.5 PolkaBTC as: :math:`400 * (1/80) / 2 = 2.5`.
+.. note:: As an example, assume we use ``DOT`` as collateral, we issue ``PolkaBTC`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureCollateralThreshold`` is 200%, i.e. a Vault has to provide two-times the amount of collateral to back an issue request. Now let's say the Vault deposits 400 ``DOT`` as collateral. Then this Vault can back at most 2.5 PolkaBTC as: :math:`400 * (1/80) / 2 = 2.5`.
 
-.. todo:: Insert link to security model.
 
 *Substrate* :: 
     
-    SecureCollateralRate: u128;
+    SecureCollateralThreshold: u128;
 
-AuctionCollateralRate
-......................
+AuctionCollateralThreshold
+..........................
 
 Determines the rate for the collateral rate of Vaults, at which the BTC backed by the Vault are opened up for auction to other Vaults. 
 That is, if the Vault does not increase its collateral rate, it can be forced to execute the Replace protocol with another Vault, which bids sufficient DOT collateral to cover the issued PolkaBTC tokens.
-Must to be strictly greater than ``100000`` and ``LiquidationCollateralRate``.
-
-.. todo:: Insert link to security model.
+Must to be strictly greater than ``100000``, ``PremiumRedeemThreshold``, and ``LiquidationCollateralThreshold``.
 
 *Substrate* :: 
     
-    AuctionCollateralRate: u128;
+    AuctionCollateralThreshold: u128;
 
 
-LiquidationCollateralRate
-.........................
+PremiumRedeemThreshold
+......................
+
+Determines the rate for the collateral rate of Vaults, at which users receive a premium in DOT, allocated from the Vault's collateral, when performing a :ref:`redeem` with this Vault. 
+Must to be strictly greater than ``100000`` and ``LiquidationCollateralThreshold``.
+
+*Substrate* :: 
+    
+    PremiumRedeemThreshold: u128;
+
+LiquidationCollateralThreshold
+..............................
 
 Determines the lower bound for the collateral rate in PolkaBTC. Must be strictly greater than ``100000``. If a Vault's collateral rate drops below this, automatic liquidation (forced Redeem) is triggered. 
 
-.. todo:: Insert link to security model.
 
 *Substrate* :: 
     
-    LiquidationCollateralRate: u128;
+    LiquidationCollateralThreshold: u128;
+
+
 
 
 Maps
@@ -364,7 +382,7 @@ Function Sequence
 
 1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccountId (``vault``).
 
-  a. Raise ``ERR_UNKOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
+  a. Raise ``ERR_UNKNOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
 
 2. Increase the ``collateral`` of the ``Vault``. 
 
@@ -373,7 +391,7 @@ Function Sequence
 withdrawCollateral
 -------------------
 
-A Vault can withdraw its *free* collateral at any time, as long as there remains more collateral (*free or used in backing issued PolkaBTC*) than ``MinimumCollateralVault`` and above the ``SecureCollateralRate``. Collateral that is currently being used to back issued PolkaBTC remains locked until the Vault is used for a redeem request (full release can take multiple redeem requests).
+A Vault can withdraw its *free* collateral at any time, as long as there remains more collateral (*free or used in backing issued PolkaBTC*) than ``MinimumCollateralVault`` and above the ``SecureCollateralThreshold``. Collateral that is currently being used to back issued PolkaBTC remains locked until the Vault is used for a redeem request (full release can take multiple redeem requests).
 
 
 Specification
@@ -417,13 +435,13 @@ Function Sequence
 
 1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccountId (``vault``).
 
-  a. Raise ``ERR_UNKOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
+  a. Raise ``ERR_UNKNOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
 
 2) Check that the caller of this function is indeed the specified ``Vault`` (AccountId ``vault``). 
 
   a) Raise ``ERR_UNAUTHORIZED`` error is the caller of this function is not the Vault specified for withdrawal.
 
-3. Check that ``Vault`` has sufficient free collateral: ``withdrawAmount <= (Vault.collateral - Vault.issuedTokens * SecureCollateralRate)``
+3. Check that ``Vault`` has sufficient free collateral: ``withdrawAmount <= (Vault.collateral - Vault.issuedTokens * SecureCollateralThreshold)``
 
   a. Raise ``ERR_INSUFFICIENT_FREE_COLLATERAL`` error if this check fails.
 
@@ -484,10 +502,10 @@ Preconditions
 Function Sequence
 .................
 
-1.  Checks if the selected vault has locked enough collateral to cover the amount of PolkaBTC ``tokens`` to be issued. Throws an error if this checks fails. Otherwise, assigns the tokens to the vault.
+1.  Checks if the selected vault has locked enough collateral to cover the amount of PolkaBTC ``tokens`` to be issued. Return ``ERR_EXCEEDING_VAULT_LIMIT`` error if this checks fails. Otherwise, assign the tokens to the vault.
 
     - Select the ``vault`` from the registry and get the ``vault.toBeIssuedTokens``, ``vault.issuedTokens`` and ``vault.collateral``. 
-    - Calculate how many tokens can be issued by multiplying the ``vault.collateral`` with the ``ExchangeRate`` (from the :ref:`oracle`) and the ``SecureCollateralRate`` considering the ``GRANULARITY`` and subtract the ``vault.issuedTokens`` and the ``vault.toBeIssuedTokens``. Memorize the result as ``available_tokens``. 
+    - Calculate how many tokens can be issued by multiplying the ``vault.collateral`` with the ``ExchangeRate`` (from the :ref:`oracle`) and the ``SecureCollateralThreshold`` considering the ``GRANULARITY`` and subtract the ``vault.issuedTokens`` and the ``vault.toBeIssuedTokens``. Memorize the result as ``available_tokens``. 
     - Check if the ``available_tokens`` is equal or greater than ``tokens``. If not enough ``available_tokens`` is free, throw ``ERR_EXCEEDING_VAULT_LIMIT``. Else, add ``tokens`` to ``vault.toBeIssuedTokens``.
 
 2. Get the Bitcoin address of the vault as ``btcAddress``.
@@ -522,7 +540,7 @@ Specification
 
 *Errors*
 
-* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``toBeIssuedTokens`` by this vault.
+* ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: The requested amount of ``tokens`` exceeds the ``toBeIssuedTokens`` by this vault.
 
 *Substrate* ::
 
@@ -546,7 +564,7 @@ Preconditions
 Function Sequence
 .................
 
-1. Checks if the amount of ``tokens`` to be released is less or equal to the amount of ``vault.toBeIssuedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+1. Checks if the amount of ``tokens`` to be released is less or equal to the amount of ``vault.toBeIssuedTokens``. If not, throws ``ERR_INSUFFICIENT_TOKENS_COMMITTED``.
 
 2. Subtracts ``tokens`` from ``vault.toBeIssuedTokens``.
 
@@ -582,7 +600,7 @@ Specification
 
 *Errors*
 
-* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``toBeIssuedTokens`` by this vault.
+* ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: Return if the requested amount of ``tokens`` exceeds the ``toBeIssuedTokens`` by this vault.
 
 *Substrate* ::
 
@@ -599,7 +617,7 @@ Preconditions
 Function Sequence
 .................
 
-1. Checks if the amount of ``tokens`` to be released is less or equal to the amount of ``vault.toBeIssuedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+1. Checks if the amount of ``tokens`` to be released is less or equal to the amount of ``vault.toBeIssuedTokens``. If not, throws ``ERR_INSUFFICIENT_TOKENS_COMMITTED``.
 
 2. Subtracts ``tokens`` from ``vault.toBeIssuedTokens``.
 
@@ -638,7 +656,7 @@ Specification
 
 *Errors*
 
-* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``IssuedTokens`` by this vault.
+* ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: The requested amount of ``tokens`` exceeds the ``IssuedTokens`` by this vault.
 
 *Substrate* ::
 
@@ -656,7 +674,7 @@ Preconditions
 Function Sequence
 .................
 
-1. Checks if the amount of ``tokens`` to be redeemed is less or equal to the amount of ``vault.IssuedTokens`` minus the ``vault.toBeRedeemedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+1. Checks if the amount of ``tokens`` to be redeemed is less or equal to the amount of ``vault.IssuedTokens`` minus the ``vault.toBeRedeemedTokens``. If not, throws ``ERR_INSUFFICIENT_TOKENS_COMMITTED``.
 
 2. Add ``tokens`` to ``vault.toBeRedeemedTokens``.
 
@@ -691,7 +709,7 @@ Specification
 
 *Errors*
 
-* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``toBeRedeemedTokens`` by this vault.
+* ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: The requested amount of ``tokens`` exceeds the ``toBeRedeemedTokens`` by this vault.
 
 *Substrate* ::
 
@@ -706,7 +724,7 @@ Preconditions
 Function Sequence
 .................
 
-1. Checks if the amount of ``tokens`` less or equal to the amount of ``vault.toBeRedeemedTokens`` tokens. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+1. Checks if the amount of ``tokens`` less or equal to the amount of ``vault.toBeRedeemedTokens`` tokens. If not, throws ``ERR_INSUFFICIENT_TOKENS_COMMITTED``.
 
 2. Subtract ``tokens`` from ``vault.toBeRedeemedTokens``.
 
@@ -744,7 +762,7 @@ Specification
 
 *Errors*
 
-* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``toBeRedeemedTokens`` by this vault.
+* ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: The requested amount of ``tokens`` exceeds the ``toBeRedeemedTokens`` by this vault.
 
 *Substrate* ::
 
@@ -759,7 +777,7 @@ Preconditions
 Function Sequence
 .................
 
-1. Checks if the amount of ``tokens`` is less or equal to the amount of ``vault.toBeRedeemedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+1. Checks if the amount of ``tokens`` is less or equal to the amount of ``vault.toBeRedeemedTokens``. If not, throws ``ERR_INSUFFICIENT_TOKENS_COMMITTED``.
 
 2. Subtract ``tokens`` from ``vault.toBeRedeemedTokens``.
 
@@ -770,8 +788,8 @@ Function Sequence
     - Call the :ref:`getExchangeRate` function to obtain the current exchange rate. 
     - Calculate the current value of ``tokens`` in collateral with the exchange rate.
     - Add a punishment percentage on top of the ``token`` value expressed as collateral from the ``PunishmentFee`` and store the punishment payment as ``payment``.
-    - Check if the vault is above the ``SecureCollateralRate`` when we remove ``payment`` from ``vault.collateral``. If the vault falls under the ``SecureCollateralRate``, reduce the ``payment`` so that the vault is exactly on the ``SecureCollateralRate``. 
-    - Call the :ref:`slashCollateral`` function with the ``vault`` as ``sender``, ``user`` as ``receiver``, and ``payment`` as ``amount``.
+    - Check if the vault is above the ``SecureCollateralThreshold`` when we remove ``payment`` from ``vault.collateral``. If the vault falls under the ``SecureCollateralThreshold``, reduce the ``payment`` so that the vault is exactly on the ``SecureCollateralThreshold``. 
+    - Call the :ref:`slashCollateral` function with the ``vault`` as ``sender``, ``user`` as ``receiver``, and ``payment`` as ``amount``.
     - Reduce the ``vault.collateral`` by ``payment``.
 
 5. Return.
@@ -806,7 +824,7 @@ Specification
 
 *Errors*
 
-* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``issuedTokens`` or ``toBeRedeemedTokens`` by this vault.
+* ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: Return if the requested amount of ``tokens`` exceeds the ``issuedTokens`` or ``toBeRedeemedTokens`` by this vault.
 
 *Substrate* ::
 
@@ -821,7 +839,7 @@ Preconditions
 Function Sequence
 .................
 
-1. Checks if the amount of ``tokens`` to be redeemed is less or equal to the amount of ``vault.issuedTokens`` and the ``vault.toBeRedeemedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+1. Checks if the amount of ``tokens`` to be redeemed is less or equal to the amount of ``vault.issuedTokens`` and the ``vault.toBeRedeemedTokens``. If not, throws ``ERR_INSUFFICIENT_TOKENS_COMMITTED``.
 
 2. Subtract ``tokens`` from ``vault.toBeRedeemedTokens``.
 
@@ -830,11 +848,72 @@ Function Sequence
 4. Returns.
 
 
-.. todo:: auction function: a vault can be enforced to be replaced when his collateral rate falls below ``AuctionCollateralRate``. Any other vault can then call this function to enforce a replace of this vault by providing sufficient collateral.
+.. todo:: auction function: a vault can be enforced to be replaced when his collateral rate falls below ``AuctionCollateralThreshold``. Any other vault can then call this function to enforce a replace of this vault by providing sufficient collateral.
 
 
 .. todo:: liquidate function: a vault can be liquidated by enforcing the redeem procedure. The vault then has to react on the redeem request and has to pay an additional punishment fee.
 
+
+.. _redeemTokensLiquidation:
+
+redeemTokensLiquidation
+------------------------
+
+Handles redeem requests which are executed during a ``LIQUIDATION`` recover (see :ref:`security`).
+Reduces the ``toBeRedeemedToken`` and the ``issuedToken`` balances of the given Vault for the BTC fraction of the redeem, and reduces the ``issuedToken`` of the ``LiquidationVault`` and "slashes" the corresponding amount of DOT collateral.
+
+Specification
+.............
+
+*Function Signature*
+
+``redeemTokensLiquidation(vault, redeemBTC, redeemDOTinBTC)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``redeemBTC``: The amount of PolkaBTC to be redeemed in Bitcoin with the specified Vault.
+* ``redeemDOTinBTC``: The amount of PolkaBTC to be redeemed in DOT with a Vault from the ``LiquidationList``, denominated in BTC.
+
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``RedeemTokensLiquidation(vault, redeemBTC, redeemDOTinBTC)``
+
+*Errors*
+
+* ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: Return if the requested amount of ``tokens`` exceeds the ``issuedTokens`` or ``toBeRedeemedTokens`` by this vault.
+
+*Substrate* ::
+
+  fn redeemTokens(vault: AccountId, tokens: Balance) -> Result {...}
+
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
+* If the BTC Parachain status in the :ref:`security` component is set to ``ERROR: 1``, it must not include the error codes ``INVALID_BTC_RELAY: 2`` or ``ORACLE_OFFLINE: 3``.
+
+Function Sequence
+.................
+
+1. Checks if the amount of ``tokens`` to be redeemed is less or equal to the amount of ``vault.issuedTokens`` and the ``vault.toBeRedeemedTokens``. If not, throws ``ERR_INSUFFICIENT_TOKENS_COMMITTED``.
+
+2. Subtract ``tokens`` from ``vault.toBeRedeemedTokens``.
+
+3. Subtract ``tokens`` from ``vault.issuedTokens``.
+
+4. Returns.
+
+
+.. todo:: auction function: a vault can be enforced to be replaced when his collateral rate falls below ``AuctionCollateralThreshold``. Any other vault can then call this function to enforce a replace of this vault by providing sufficient collateral.
+
+
+.. todo:: liquidate function: a vault can be liquidated by enforcing the redeem procedure. The vault then has to react on the redeem request and has to pay an additional punishment fee.
 
 .. _replaceTokens:
 
@@ -867,7 +946,7 @@ Specification
 
 *Errors*
 
-* ``ERR_LESS_TOKENS_COMMITTED``: Throws if the requested amount of ``tokens`` exceed the ``issuedTokens`` or ``toBeReplaceedTokens`` by this vault.
+* ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: The requested amount of ``tokens`` exceeds the ``issuedTokens`` or ``toBeReplaceedTokens`` by this vault.
 
 *Substrate* ::
 
@@ -882,7 +961,7 @@ Preconditions
 Function Sequence
 .................
 
-1. Checks if the amount of ``tokens`` to be replaced is less or equal to the amount of ``oldVault.issuedTokens`` and the ``oldVault.toBeReplaceedTokens``. If not, throws ``ERR_LESS_TOKENS_COMMITTED``.
+1. Checks if the amount of ``tokens`` to be replaced is less or equal to the amount of ``oldVault.issuedTokens`` and the ``oldVault.toBeReplaceedTokens``. If not, throws ``ERR_INSUFFICIENT_TOKENS_COMMITTED``.
 
 2. Subtract ``tokens`` from ``oldVault.toBeReplaceedTokens``.
 

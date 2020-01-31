@@ -36,7 +36,7 @@ We differentiate between:
     1. Transactional data is available for submitted Bitcoin block headers (``NO_DATA_BTC_RELAY: 0`` code).
     2. Submitted blocks are valid under Bitcoin's consensus rules  (``INVALID_BTC_RELAY: 1`` code).
     3. Vaults do not move BTC to another Bitcoin address, unless expressly requested during :ref:`redeem-protocol` or :ref:`replace-protocol`.
-    4. If a Vault is under-collateralized, i.e., the collateral rate has fallen below ``LiquidationCollateralRate``, as defined in :ref:`vault-registry`. 
+    4. If a Vault is under-collateralized, i.e., the collateral rate has fallen below ``LiquidationCollateralThreshold``, as defined in :ref:`vault-registry`. 
 
  If one of the above failures is detected, Staked Relayers file a report with the :ref:`security` module. In cases (1) and (2), a vote is initiated, whereby this module acts as bulleting board and collects Staked Relayer signatures - if a majority is reached, as defined by ``STAKED_RELAYER_VOTE_THRESHOLD``, the state of the BTC Parachain is updated. In cases (3) and (4) a single Staked Relayer report suffices - the Security module checks if the accusation against the Vault is correct, and if yes updates the BTC Parachain state and flags the Vault according to the reported failure.
 
@@ -164,7 +164,7 @@ Enum specifying reasons for error leading to a status update.
 
 * ``ORACLE_OFFLINE : 3`` - the :ref:`exchangeRateOracle` experienced a liveness failure (no up-to-date exchange rate available).
 
-* ``LIQUIDATION : 4`` - at least one Vault is either below the ``LiquidationCollateralRate`` or has been reported to have stolen BTC. This status implies that any :ref:`redeem-protocol` request will be executed partially in BTC and partially in DOT, until the system is rebalanced (1:1 backing between PolkaBTC and BTC). 
+* ``LIQUIDATION : 4`` - at least one Vault is either below the ``LiquidationCollateralThreshold`` or has been reported to have stolen BTC. This status implies that any :ref:`redeem-protocol` request will be executed partially in BTC and partially in DOT, until the system is rebalanced (1:1 backing between PolkaBTC and BTC). 
 
 *Substrate*
 
@@ -906,7 +906,7 @@ Function Sequence
 reportVaultUndercollateralized
 -------------------------------
 
-A Staked Relayer reports that a Vault is undercollateralized, i.e., below the ``LiquidationCollateralRate`` as defined in :ref:`vault-registry`. This function checks if the Vault's collateral is indeed below this rate and if yes, flags the Vault for liquidation and updates the ``ParachainStatus`` to ``ERROR`` and adding ``LIQUIDATION`` to ``Errors``.
+A Staked Relayer reports that a Vault is undercollateralized, i.e., below the ``LiquidationCollateralThreshold`` as defined in :ref:`vault-registry`. This function checks if the Vault's collateral is indeed below this rate and if yes, flags the Vault for liquidation and updates the ``ParachainStatus`` to ``ERROR`` and adding ``LIQUIDATION`` to ``Errors``.
 
 
 Specification
@@ -933,7 +933,7 @@ Specification
 *Errors*
 
 * ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
-* ``ERR_COLLATERAL_OK = "The accused Vault's collateral rate is above the liquidation threshold"``: The accused Vault's collateral rate is  above ``LiquidationCollateralRate``.
+* ``ERR_COLLATERAL_OK = "The accused Vault's collateral rate is above the liquidation threshold"``: The accused Vault's collateral rate is  above ``LiquidationCollateralThreshold``.
 * ``ERR_UNKNOWN_VAULT = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
 
 *Substrate* ::
@@ -947,7 +947,7 @@ Function Sequence
 
 2. Retrieve the Vault from ``Vaults`` in :ref:`vault-registry` using ``vault``. Return ``ERR_UNKNOWN_VAULT`` if there is no Vault with the specified account identifier.
 
-3. Check if the Vault's collateralization rate is below ``LiquidationCollateralRate`` as defined in :ref:`vault-registry`.  That is, check ``Vault.collateral`` against ``Vault.issuedTokens``. If the Vault's collateral rate is above ``LiquidationCollateralRate``, return ``ERR_COLLATERAL_OK``
+3. Check if the Vault's collateralization rate is below ``LiquidationCollateralThreshold`` as defined in :ref:`vault-registry`.  That is, check ``Vault.collateral`` against ``Vault.issuedTokens``. If the Vault's collateral rate is above ``LiquidationCollateralThreshold``, return ``ERR_COLLATERAL_OK``
 
 4. Otherwise, if the Vault is undercollateralized:
 

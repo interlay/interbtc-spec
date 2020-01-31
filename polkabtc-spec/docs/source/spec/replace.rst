@@ -21,7 +21,7 @@ Step-by-Step
 
 3. Optional: If an *OldVault* has changed its mind or can't find a *NewVault* to replace it, it can call the :ref:`withdrawReplaceRequest` function to invalidate its request. If the request is already accepted (step 4), then this function cannot be invoked.
 
-4. A new candidate Vault (*NewVault*), commits to executing the replacement by locking up the necessary DOT collateral to back the to-be-transferred BTC (according to the ``SecureCollateralRate``) by calling the :ref:`acceptReplace` function.. 
+4. A new candidate Vault (*NewVault*), commits to executing the replacement by locking up the necessary DOT collateral to back the to-be-transferred BTC (according to the ``SecureCollateralThreshold``) by calling the :ref:`acceptReplace` function.. 
 
 5. Within a pre-defined delay, *OldVault* must release the BTC on Bitcoin to *NewVault*'s BTC address, and submit a valid transaction inclusion proof by calling the :ref:`executeReplace` function (call to ``verifyTransactionInclusion`` in :ref:`btc-relay`). If *OldVault* releases the BTC to *NewVault* correctly and submits the transaction inclusion proof to Replace module on time, *OldVault*'s DOT collateral is released - *NewVault* has now replaced *OldVault*.
 
@@ -147,8 +147,6 @@ Specification
 * ``timeout``: Time in blocks after which this request expires.
 * ``griefingCollateral``: collateral locked by the ``oldVault`` as griefing protection
 
-.. todo:: Handle Griefing collateral (how do we check that a transaction correctly transferred DOT to the Parachain?)
-
 *Returns*
 
 * ``replaceID``: A unique hash identifying the replace request. 
@@ -159,7 +157,7 @@ Specification
 
 *Errors*
 
-
+* ``ERR_UNKNOWN_VAULT = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
 * ``ERR_MIN_AMOUNT``: The remaining DOT collateral (converted from the requested BTC replacement value given the current exchange rate) would be below the ``MinimumCollateralVault`` as defined in ``VaultRegistry``.
 * ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated Vault``: The caller of this function is not the associated Vault, and hence not authorized to take this action.
 
@@ -167,8 +165,6 @@ Specification
 
   fn requestReplace(origin, amount: U256, timeout: BlockNumber) -> Result {...}
 
-
-.. todo:: Check how to attach DOT value to transactions.
 
 Preconditions
 ...............
@@ -180,7 +176,7 @@ Function Sequence
 
 1. Check that caller of the function is indeed the to-be-replaced Vault. Return ``ERR_UNAUTHORIZED`` error if this check fails.
 
-2. Retrieve the ``vault`` as per the ``oldVault`` account identifier from ``Vaults`` in the ``VaultRegistry``.
+2. Retrieve the ``vault`` as per the ``oldVault`` account identifier from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_UNKNOWN_VAULT`` if no Vault can be found.
 
 3. Check that the requested ``btcAmount`` is equal to or lower than ``vault.issuedTokens`` mins the ``vault.toBeRedeemedTokens``.
 
@@ -214,7 +210,7 @@ withdrawReplaceRequest
 
 The *OldVault* withdraws an existing ReplaceRequest that is made.
 
-.. note:: If a Vault is under the ``AuctionCollateralRate``, the Vault cannot withdraw a replace request. 
+.. note:: If a Vault is under the ``AuctionCollateralThreshold``, the Vault cannot withdraw a replace request. 
 
 
 Specification
@@ -257,7 +253,7 @@ Function Sequence
 
 2. Check that caller of the function is indeed the to-be-replaced Vault as specified in the ``ReplaceRequest``. Return ``ERR_UNAUTHORIZED`` error if this check fails.
 
-3. Check that the collateral rate of the vault is not under the ``AuctionCollateralRate`` as defined in the VaultRegistry. If it is under the ``AuctionCollateralRate`` return ``ERR_UNAUTHORIZED``. 
+3. Check that the collateral rate of the vault is not under the ``AuctionCollateralThreshold`` as defined in the VaultRegistry. If it is under the ``AuctionCollateralThreshold`` return ``ERR_UNAUTHORIZED``. 
    
 4. Check that the ``ReplaceRequest`` was not yet accepted by another Vault. Return ``ERR_CANCEL_ACCEPTED_REQUEST`` error if this check fails.
 
@@ -278,7 +274,7 @@ acceptReplace
 
 A *NewVault* accepts an existing replace request, locking the necessary DOT collateral.
 
-.. note:: When issuing tokens, we increase the ``toBeIssuedTokens`` by a vault. Also, when a vault locks collateral via the ``registerVault`` and ``lockCollateral`` function in the VaultRegistry, we would add collateral to the ``collateral`` field of a vault. However, we are *not* updating the ``collateral`` and ``toBeIssuedTokens`` tokens here. if a vault decides to provide a very high collateral rate, way over the ``SecureCollateralRate`` and wants to back the replace with that, we are not interferring with this. If we would lock his collateral in the ``collateral`` field in the VaultRegistry, as user could block part of this collateral with an issue request.
+.. note:: When issuing tokens, we increase the ``toBeIssuedTokens`` by a vault. Also, when a vault locks collateral via the ``registerVault`` and ``lockCollateral`` function in the VaultRegistry, we would add collateral to the ``collateral`` field of a vault. However, we are *not* updating the ``collateral`` and ``toBeIssuedTokens`` tokens here. if a vault decides to provide a very high collateral rate, way over the ``SecureCollateralThreshold`` and wants to back the replace with that, we are not interferring with this. If we would lock his collateral in the ``collateral`` field in the VaultRegistry, as user could block part of this collateral with an issue request.
 
 
 Specification
@@ -323,7 +319,7 @@ Function Sequence
 
 2. Retrieve the ``vault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such Vault can be found.
 
-3. Check that the provided ``collateral`` exceeds the necessary amount, i.e., ``collateral >= SecureCollateralRate * Replace.btcAmount``. Return ``ERR_INSUFFICIENT_COLLATERAL`` error if this check fails.
+3. Check that the provided ``collateral`` exceeds the necessary amount, i.e., ``collateral >= SecureCollateralThreshold * Replace.btcAmount``. Return ``ERR_INSUFFICIENT_COLLATERAL`` error if this check fails.
 
 4. Lock the *newVault*'s collateral by calling :ref:`lockCollateral` and providing ``newVault`` and ``collateral`` as parameters.
 
@@ -342,9 +338,9 @@ Function Sequence
 auctionReplace
 --------------
 
-A *NewVault* enforces the replace of an *oldVault*. This is possible when the *oldVault* is below the ``AuctionCollateralRate``. The function creates a replace request that cannot be withdrawn by the *oldVault*.
+A *NewVault* enforces the replace of an *oldVault*. This is possible when the *oldVault* is below the ``AuctionCollateralThreshold``. The function creates a replace request that cannot be withdrawn by the *oldVault*.
 
-.. note:: When issuing tokens, we increase the ``toBeIssuedTokens`` by a vault. Also, when a vault locks collateral via the ``registerVault`` and ``lockCollateral`` function in the VaultRegistry, we would add collateral to the ``collateral`` field of a vault. However, we are *not* updating the ``collateral`` and ``toBeIssuedTokens`` tokens here. if a vault decides to provide a very high collateral rate, way over the ``SecureCollateralRate`` and wants to back the replace with that, we are not interferring with this. If we would lock his collateral in the ``collateral`` field in the VaultRegistry, as user could block part of this collateral with an issue request.
+.. note:: When issuing tokens, we increase the ``toBeIssuedTokens`` by a vault. Also, when a vault locks collateral via the ``registerVault`` and ``lockCollateral`` function in the VaultRegistry, we would add collateral to the ``collateral`` field of a vault. However, we are *not* updating the ``collateral`` and ``toBeIssuedTokens`` tokens here. if a vault decides to provide a very high collateral rate, way over the ``SecureCollateralThreshold`` and wants to back the replace with that, we are not interferring with this. If we would lock his collateral in the ``collateral`` field in the VaultRegistry, as user could block part of this collateral with an issue request.
 
 
 Specification
@@ -368,7 +364,7 @@ Specification
 
 *Errors*
 
-* ``ERR_SUFFICIENT_COLLTERAL_RATE``: The *oldVault* is not below the ``AuctionCollateralRate``.
+* ``ERR_SUFFICIENT_COLLTERAL_RATE``: The *oldVault* is not below the ``AuctionCollateralThreshold``.
 * ``ERR_INSUFFICIENT_COLLATERAL``: The provided collateral is insufficient to match the replace request. 
 * ``ERR_VAULT_NOT_FOUND``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
 
@@ -389,9 +385,9 @@ Function Sequence
 
 2. Retrieve the ``oldVault`` as per the ``oldVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such Vault can be found.
 
-3. Check that the ``oldVault`` is below the ``AuctionCollateralRate`` by calculating his current ``oldVault.issuedTokens`` and the ``oldVault.collateral``. If not throw ``ERR_SUFFICIENT_COLLATERAL_RATE``.
+3. Check that the ``oldVault`` is below the ``AuctionCollateralThreshold`` by calculating his current ``oldVault.issuedTokens`` and the ``oldVault.collateral``. If not throw ``ERR_SUFFICIENT_COLLATERAL_RATE``.
 
-4. Check that the provided ``collateral`` exceeds the necessary amount, i.e., ``collateral >= SecureCollateralRate * btcAmount``. Return ``ERR_INSUFFICIENT_COLLATERAL`` error if this check fails.
+4. Check that the provided ``collateral`` exceeds the necessary amount, i.e., ``collateral >= SecureCollateralThreshold * btcAmount``. Return ``ERR_INSUFFICIENT_COLLATERAL`` error if this check fails.
 
 5. Lock the *newVault*'s collateral by calling :ref:`lockCollateral` and providing ``newVault`` and ``collateral`` as parameters.
 
