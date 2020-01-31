@@ -799,12 +799,13 @@ Specification
 
 *Function Signature*
 
-``redeemTokens(vault, tokens)``
+``redeemTokens(vault, tokens, )``
 
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
 * ``tokens``: The amount of PolkaBTC redeemed.
+* ``premiumDOT``: The amount of DOT to be paid to the user as a premium using the Vault's released collateral.
 
 *Returns*
 
@@ -840,33 +841,25 @@ Function Sequence
 4. Returns.
 
 
-.. todo:: auction function: a vault can be enforced to be replaced when his collateral rate falls below ``AuctionCollateralThreshold``. Any other vault can then call this function to enforce a replace of this vault by providing sufficient collateral.
+.. _redeemTokensPremium:
 
+redeemTokensPremium
+---------------------
 
-.. todo:: liquidate function: a vault can be liquidated by enforcing the redeem procedure. The vault then has to react on the redeem request and has to pay an additional punishment fee.
-
-
-.. _redeemTokensLiquidation:
-
-redeemTokensLiquidation
-------------------------
-
-Handles redeem requests which are executed during a ``LIQUIDATION`` recover (see :ref:`security`).
-Reduces the ``toBeRedeemedToken`` and the ``issuedToken`` balances of the given Vault for the BTC fraction of the redeem, and reduces the ``issuedToken`` of the ``LiquidationVault`` and "slashes" the corresponding amount of DOT collateral.
+Handles a redeem request, where a user is paid a premium in DOT. Calls :ref:`redeemTokens` and then allocates the corresponding amount of DOT to the ``redeemer`` using the Vault's free collateral.
 
 Specification
 .............
 
 *Function Signature*
 
-``redeemTokensLiquidation(vault, redeemBTC, redeemDOTinBTC)``
+``redeemTokens(vault, tokens, premiumDOT, redeemer)``
 
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``redeemBTC``: The amount of PolkaBTC to be redeemed in Bitcoin with the specified Vault.
-* ``redeemDOTinBTC``: The amount of PolkaBTC to be redeemed in DOT with a Vault from the ``LiquidationList``, denominated in BTC.
-
+* ``tokens``: The amount of PolkaBTC redeemed.
+* ``premiumDOT``: The amount of DOT to be paid to the user as a premium using the Vault's released collateral.
 
 *Returns*
 
@@ -874,7 +867,7 @@ Specification
 
 *Events*
 
-* ``RedeemTokensLiquidation(vault, redeemBTC, redeemDOTinBTC)``
+* ``RedeemTokensPremium(vault, tokens, premiumDOT, redeemer)``
 
 *Errors*
 
@@ -882,7 +875,7 @@ Specification
 
 *Substrate* ::
 
-  fn redeemTokens(vault: AccountId, tokens: Balance) -> Result {...}
+  fn redeemTokensPremium(vault: AccountId, tokens: Balance) -> Result {...}
 
 Preconditions
 .............
@@ -893,19 +886,71 @@ Preconditions
 Function Sequence
 .................
 
-1. Checks if the amount of ``tokens`` to be redeemed is less or equal to the amount of ``vault.issuedTokens`` and the ``vault.toBeRedeemedTokens``. If not, throws ``ERR_INSUFFICIENT_TOKENS_COMMITTED``.
+1. Call :ref:`redeemTokens` passing ``vault`` and ``tokens`` as parameters.
 
-2. Subtract ``tokens`` from ``vault.toBeRedeemedTokens``.
+2. If ``premiumDOT > 0``:
 
-3. Subtract ``tokens`` from ``vault.issuedTokens``.
+   a. Transfer the corresponding amount of Vault's collateral to ``LiquidationVault`` by calling :ref:`slashCollateral` and passing ``vault`` and ``LiquidationVault`` as parameters.
 
-4. Returns.
+   b. Emit ``RedeemTokensPremium(vault, tokens, premiumDOT, redeemer)`` event.
+
+3. Return.
+
+.. _redeemTokensLiquidation:
+
+redeemTokensLiquidation
+------------------------
+
+Handles redeem requests which are executed during a ``LIQUIDATION`` recover (see :ref:`security`).
+Reduces the ``issuedToken`` of the ``LiquidationVault`` and "slashes" the corresponding amount of DOT collateral. 
+Once ``LiquidationVault`` has not more ``issuedToken``left, removes the ``LIQUIDATION`` error from the BTC Parachain status.
+
+Specification
+.............
+
+*Function Signature*
+
+``redeemTokensLiquidation(redeemer, redeemDOTinBTC)``
+
+*Parameters*
+
+* ``redeemer`` : The account of the user redeeming polkaBTC.
+* ``redeemDOTinBTC``: The amount of PolkaBTC to be redeemed in DOT with the ``LiquidationVault``, denominated in BTC.
 
 
-.. todo:: auction function: a vault can be enforced to be replaced when his collateral rate falls below ``AuctionCollateralThreshold``. Any other vault can then call this function to enforce a replace of this vault by providing sufficient collateral.
+*Returns*
 
+* ``None``
 
-.. todo:: liquidate function: a vault can be liquidated by enforcing the redeem procedure. The vault then has to react on the redeem request and has to pay an additional punishment fee.
+*Events*
+
+* ``RedeemTokensLiquidation(redeemer, redeemDOTinBTC)``
+
+*Errors*
+
+* ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: Return if the requested amount of ``redeemDOTinBTC`` exceeds the ``issuedTokens`` or by this vault.
+
+*Substrate* ::
+
+  fn redeemTokens(redeemDOTinBTC: Balance) -> Result {...}
+
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
+
+Function Sequence
+.................
+
+1. Check if ``LiquidationVault.issuedTokens >= redeemDOTinBTC``. Return ``ERR_INSUFFICIENT_TOKENS_COMMITTED`` if this check fails.
+
+2. Subtract ``redeemDOTinBTC`` from ``vault.issuedTokens``.
+
+3. Transfer the ``LiquidationVault``'s DOT collateral to the ``redeemer`` by calling :ref:`slashCollateral` and passing ``LiquidationVault``, ``redeemer`` and ``redeemDOTinBTC *`` :ref:`getExchangeRate` as parameters.
+
+5. Emit ``RedeemTokensLiquidation(redeemer, redeemDOTinBTC)`` event.
+
+4. Return.
 
 .. _replaceTokens:
 

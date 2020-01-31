@@ -170,13 +170,15 @@ Function Sequence
 
    b. Otherwise, set ``amountBTC = amount``, ``amountDOT = 0``.
 
-5. Call the VaultRegistry :ref:`increaseToBeRedeemedTokens` function with the ``amountBTC`` of tokens to be redeemed and the ``vault`` identified by its address.
+5. Call the :ref:`vault-registry` :ref:`increaseToBeRedeemedTokens` function with the ``amountBTC`` of tokens to be redeemed and the ``vault`` identified by its address.
 
-6. Call the :ref:`lock` function in the Treasury to lock the PolkaBTC ``amount`` of the user.
+6. If ``amountDOT > 0``, call :ref:`redeemTokensLiquidation` in :ref:`vault-registry`. This allocates the user ``amountDOT`` using the ``LiquidationVault``'s collateral and updates the ``LiquidationVault``'s polkaBTC balances. 
 
-7. Generate a ``redeemId`` using :ref:`generateSecureId`, passing ``redeemer`` as parameter.
+7. Call the :ref:`lock` function in the Treasury to lock the PolkaBTC ``amount`` of the user.
 
-8. Check if the Vault's collateral rate is below ``PremiumRedeemThreshold``. If this is the case, set ``premiumDOT = RedeemPremiumFee`` (as per :ref:`vault-registry`). Otherwise set ``premiumDOT = 0``.
+8. Generate a ``redeemId`` using :ref:`generateSecureId`, passing ``redeemer`` as parameter.
+
+9. Check if the Vault's collateral rate is below ``PremiumRedeemThreshold``. If this is the case, set ``premiumDOT = RedeemPremiumFee`` (as per :ref:`vault-registry`). Otherwise set ``premiumDOT = 0``.
 
 9. Store a new ``Redeem`` struct in the ``RedeemRequests`` mapping as ``RedeemRequests[redeemId] = redeem``, where:
     
@@ -256,9 +258,14 @@ Function Sequence
     - Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-redeemed BTC (``redeem.amount``), the ``redeemer``'s Bitcoin address (``redeem.btcAddress``), and the ``redeemId`` as parameters. If this call returns an error, abort and return the received error. 
 
 5. Call the :ref:`burn` function in the Treasury to burn the ``redeem.amount`` of PolkaBTC of the user.
-6. Call :ref:`redeemTokens` function in the VaultRegistry to release the Vault's collateral with the ``redeem.vault`` and the ``redeem.amount``.
+
+6. Check ``redeem.premiumDOT > 0``:
+   
+   a. If ``True``, call :ref:`redeemTokensPremium` in the VaultRegistry to release the Vault's collateral with the ``redeem.vault`` and the ``redeem.amount``, and ``redeemer`` and ``premiumDOT`` to allocate the DOT premium to the redeemer using the Vault's released collateral.
+   b. Else call :ref:`redeemTokens` function in the VaultRegistry to release the Vault's collateral with the ``redeem.vault`` and the ``redeem.amount``.
+
 7. Set the ``redeem.completed`` field to true.
-8. Send an ``ExecuteRedeem`` event with the user's address, the redeemId, the amount, and the Vault's address.
+8. Emit an ``ExecuteRedeem`` event with the user's address, the redeemId, the amount, and the Vault's address.
 9. Return.
 
 .. _cancelRedeem:
