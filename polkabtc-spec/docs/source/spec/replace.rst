@@ -192,7 +192,7 @@ Function Sequence
 
 6. Lock the *oldVault*'s griefing collateral by calling :ref:`lockCollateral` and passing ``oldVault`` and ``griefingCollateral`` as parameters.
 
-7. Call the :ref:`increaseToBeRedeemedTokens`` with the ``oldVault`` and the ``amount`` to ensure that the oldVault's tokens cannot be redeemed when a replace procedure is happening.
+7. Call the :ref:`increaseToBeRedeemedTokens` function with the ``oldVault`` and the ``btcAmount`` to ensure that the oldVault's tokens cannot be redeemed when a replace procedure is happening.
 
 8. Generate a ``replaceId`` by hashing a random seed, a nonce, and the address of the Requester.
 
@@ -336,6 +336,85 @@ Function Sequence
 
 6. Emit a ``AcceptReplace(newVault, replaceId, collateral)`` event.
 
+
+.. _auctionReplace:
+
+auctionReplace
+--------------
+
+A *NewVault* enforces the replace of an *oldVault*. This is possible when the *oldVault* is below the ``AuctionCollateralRate``. The function creates a replace request that cannot be withdrawn by the *oldVault*.
+
+.. note:: When issuing tokens, we increase the ``toBeIssuedTokens`` by a vault. Also, when a vault locks collateral via the ``registerVault`` and ``lockCollateral`` function in the VaultRegistry, we would add collateral to the ``collateral`` field of a vault. However, we are *not* updating the ``collateral`` and ``toBeIssuedTokens`` tokens here. if a vault decides to provide a very high collateral rate, way over the ``SecureCollateralRate`` and wants to back the replace with that, we are not interferring with this. If we would lock his collateral in the ``collateral`` field in the VaultRegistry, as user could block part of this collateral with an issue request.
+
+
+Specification
+.............
+
+*Function Signature*
+
+``auctionReplace(newVault, oldVault, btcAmount, collateral)``
+
+*Parameters*
+
+* ``newVault``: Account identifier of the Vault auctioning the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``oldVault``: Account identifier of the Vault to be replaced (as tracked in Vaults in :ref:`vault-registry`).
+* ``btcAmount``: Integer amount of BTC / PolkaBTC to be replaced.
+* ``collateral``: DOT collateral provided to match the replace request (i.e., for backing the locked BTC). Can be more than the necessary amount.
+
+*Events*
+
+* ``ReplaceRequested(oldVault, btcAmount, timeout, replaceId)``
+* ``AuctionReplace(newVault, replaceId, collateral)``: emits an event stating which Vault (``newVault``) has auctioned the ``ReplaceRequest`` request (``requestId``), and how much collateral in DOT it provided (``collateral``).
+
+*Errors*
+
+* ``ERR_SUFFICIENT_COLLTERAL_RATE``: The *oldVault* is not below the ``AuctionCollateralRate``.
+* ``ERR_INSUFFICIENT_COLLATERAL``: The provided collateral is insufficient to match the replace request. 
+* ``ERR_VAULT_NOT_FOUND``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
+
+*Substrate* ::
+
+  fn auctionReplace(origin, replaceId: H256, collateral: Balance) -> Result {...}
+
+Preconditions
+...............
+
+The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+
+
+Function Sequence
+..................
+
+1. Retrieve the ``newVault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such Vault can be found.
+
+2. Retrieve the ``oldVault`` as per the ``oldVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such Vault can be found.
+
+3. Check that the ``oldVault`` is below the ``AuctionCollateralRate`` by calculating his current ``oldVault.issuedTokens`` and the ``oldVault.collateral``. If not throw ``ERR_SUFFICIENT_COLLATERAL_RATE``.
+
+4. Check that the provided ``collateral`` exceeds the necessary amount, i.e., ``collateral >= SecureCollateralRate * btcAmount``. Return ``ERR_INSUFFICIENT_COLLATERAL`` error if this check fails.
+
+5. Lock the *newVault*'s collateral by calling :ref:`lockCollateral` and providing ``newVault`` and ``collateral`` as parameters.
+
+6. Call the :ref:`increaseToBeRedeemedTokens` function with the ``oldVault`` and the ``btcAmount`` to ensure that the oldVault’s tokens cannot be redeemed when a replace procedure is happening.
+
+7. Generate a ``replaceId`` by hashing a random seed, a nonce, and the address of the ``newVault``.
+
+8. Create a new ``ReplaceRequest`` named ``replace`` entry:
+
+  * ``replace.newVault = newVault``,
+  * ``replace.oldVault = oldVault``,
+  * ``replace.openTime`` = current Parachain time, 
+  * ``replace.acceptTime`` = current Parachain time,
+  * ``replace.amount = btcAmount``,
+  * ``replace.griefingCollateral = 0``,
+  * ``replace.btcAddress = newVault.btcAddress`` (new Vault's BTC address),
+  * ``replace.collateral = collateral`` (DOT collateral locked by new Vault).
+
+9. Emit a ``AuctionReplace(newVault, replaceId, collateral)`` event.
+
+10. Emit a ``ReplaceRequested(oldVault, btcAmount, timeout, replaceId)`` event.
+
+11. Return.
 
 .. _executeReplace: 
 
