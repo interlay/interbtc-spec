@@ -892,7 +892,7 @@ Function Sequence
 
 8. The Vault misbehaved (displaced BTC). 
 
-    a) add ``vault`` to the ``LiquidationList`` in :ref:`vault-registry`,
+    a) Call :ref:`liquidateVault`, liquidating the Vault and transferring all of its balances and DOT collateral to th ``LiquidationVault`` for failure and reimbursement handling;
 
     b) set ``ParachainStatus = ERROR`` and add ``LIQUIDATION`` to ``Errors``,
 
@@ -951,7 +951,7 @@ Function Sequence
 
 4. Otherwise, if the Vault is undercollateralized:
 
-    a) add ``vault`` to the ``LiquidationList`` in :ref:`vault-registry`,
+    a) Call :ref:`liquidateVault`, liquidating the Vault and transferring all of its balances and DOT collateral to th ``LiquidationVault`` for failure and reimbursement handling;
 
     b) set ``ParachainStatus = ERROR`` and add ``LIQUIDATION`` to ``Errors``,
 

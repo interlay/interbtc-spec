@@ -114,7 +114,12 @@ Determines the lower bound for the collateral rate in PolkaBTC. Must be strictly
     LiquidationCollateralThreshold: u128;
 
 
+LiquidationVault
+.................
+Account identifier of an artificial Vault maintained by the VaultRegistry to handle polkaBTC balances and DOT collateral of liquidated Vaults. That is, when a Vault is liquidated, its balances are transferred to ``LiquidationVault`` and claims are later handled via the ``LiquidationVault``.
 
+
+.. note:: A Vault's token balances and DOT collateral are transferred to the ``LiquidationVault`` as a result of :ref:`reportVaultUndercollateralized` and :ref:`reportVaultTheft`.
 
 Maps
 ----
@@ -139,19 +144,6 @@ Mapping from registerIDs of RegisterRequest to their structs. ``<U256, RegisterR
 
     RegisterRequests map T::U256 => Vault<T::AccountId, T::DateTime>
 
-
-Lists
------
-
-LiquidationList
-...............
-
-Set of Vault account identifiers, indicating which Vaults are currently being liquidated.
-This list is used to access the collateral of misbehaving (liquidated) Vaults to reimburse users when recovering from a ``LIQUIDATION`` error state (see :ref:`security`). 
-
-*Substrate* :: 
-
-    LiquidationList HashSet<AccountId>
 
 Structs
 -------
@@ -972,6 +964,61 @@ Function Sequence
 5. Add ``collateral`` to the ``newVault.collateral``.
 
 6. Return.
+
+
+.. _liquidateVault:
+
+liquidateVault
+--------------
+
+Liquidates a Vault, transferring all of its token balances to the ``LiquidationVault``, as well as the DOT collateral.
+
+.. todo:: Update all pending Issue, Redeem and Replace requests with this Vault to point to the ``LiquidationVault`` for handling of slashed collateral.
+
+Specification
+.............
+
+*Function Signature*
+
+``liquidateVault(vault)``
+
+*Parameters*
+
+* ``vault``: Account identifier of the Vault to be liquidated.
+
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``LiquidateVault(vault)``: emits an event indicating that the Vault with ``vault`` account identifier has been liquidated.
+
+*Errors*
+
+* ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: The requested amount of ``tokens`` exceeds the ``issuedTokens`` or ``toBeReplaceedTokens`` by this vault.
+
+*Substrate* ::
+
+  fn replaceTokens(oldVault: AccountId, newVault: AccountId, tokens: Balance, collateral: Balance) -> Result {...}
+
+
+Function Sequence
+.................
+
+1. Set ``LiquidationVault.toBeIssuedTokens = vault.toBeIssuedTokens``
+
+2. Set ``LiquidationVault.issuedTokens = vault.issuedTokens``
+
+3. Set ``LiquidationVault.toBeRedeemedToken= vault.toBeRedeemedToken``
+
+4. Transfer the liquidated Vault's collateral to ``LiquidationVault`` by calling :ref:`slashCollateral` and passing ``vault`` and ``LiquidationVault`` as parameters.
+
+5. Remove ``vault`` from ``Vaults``
+
+6. Emit ``LiquidateVault(vault)`` event.
+
 
 
 Events
