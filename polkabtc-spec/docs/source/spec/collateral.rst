@@ -23,8 +23,6 @@ The protocol has three different "sub-protocols".
 Data Model
 ~~~~~~~~~~
 
-.. todo:: Do we want to move all the collateral requirements into this module?
-
 Scalars
 -------
 

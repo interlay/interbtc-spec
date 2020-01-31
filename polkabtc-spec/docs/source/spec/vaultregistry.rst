@@ -12,14 +12,6 @@ Overview
 The vault registry is the central place to manage vaults. Vaults can register themselves here, update their collateral, or can be liquidated.
 Similarly, the issue, redeem, and replace protocols call this module to assign vaults during issue, redeem, and replace procedures.
 
-Step-by-step
-------------
-
-.. todo:: Insert figure of interactions with a vault.
-
-
-
-
 Data Model
 ~~~~~~~~~~
 
@@ -326,12 +318,12 @@ Function Sequence
 
 5. Emit a ``ProveValidBTCAddress`` event, setting the ``vault`` account identifier and the vault's Bitcoin address (``Vault.btcAddress``) as parameters. 
 
+.. _lockAdditionalCollateral:
 
+lockAdditionalCollateral
+------------------------
 
-lockCollateral
---------------
-
-The Vault locks an amount of collateral as a security against stealing the Bitcoin locked with it. 
+The Vault locks additional collateral as a security against stealing the Bitcoin locked with it. 
 
 Specification
 .............
@@ -361,11 +353,11 @@ Specification
 
   fn lockCollateral(origin, amount: Balance) -> Result {...}
 
-User Story
-..........
+Precondition
+............
 
-An existing Vault calls ``lockCollateral`` to increase its DOT collateral in the system.
-
+* The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
+* If the BTC Parachain status in the :ref:`security` component is set to ``ERROR: 1``, it must not include the error code ``ORACLE_OFFLINE: 3``.
 
 Function Sequence
 .................
@@ -418,9 +410,7 @@ Specification
 Preconditions
 .............
 
-.. todo:: Check security module status
-
-A Vault calls ``withdrawCollateral`` to withdraw some of its ``free`` collateral, i.e., not used to back issued PolkaBTC tokens. 
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 Function Sequence
 .................
@@ -541,13 +531,16 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
+* If the BTC Parachain status in the :ref:`security` component is set to ``ERROR: 1``, it must not include the error codes ``INVALID_BTC_RELAY: 2``, ``ORACLE_OFFLINE: 3``, or ``LIQUIDATION: 4``.
 
-.. todo:: Exclude a crashed exchange rate oracle failure from this - this call should be allowed even if we have no exchange rate, as it is only used in failed Issue and Replace, or in successful Redeem and Replace. The check for an up-an-running exchange rate oracle is handled separately in each of these protocols, if necessary.
+.. note:: We allow to cancel pending requests. If the BTC Parachain is in status ``ERROR: 1`` with ``NO_DATA_BTC_RELAY: 1`` and the required BTC transaction is in a block not yet included in the BTC-Relay, the request will not be able to complete. In this case, this function will get called to cancel the request.
 
-.. todo:: I suppose it should always be possible to exit the system?
+.. .. todo:: Exclude a crashed exchange rate oracle failure from this - this call should be allowed even if we have no exchange rate, as it is only used in failed Issue and Replace, or in successful Redeem and Replace. The check for an up-an-running exchange rate oracle is handled separately in each of these protocols, if necessary.
 
-.. comment:: [Alexei] Unfortunately, not really. We need an up-and-running BTC-Relay to prevent Vaults from getting slashed when Redeem or Replace are triggered. 
+.. .. todo:: I suppose it should always be possible to exit the system?
+
+.. .. comment:: [Alexei] Unfortunately, not really. We need an up-and-running BTC-Relay to prevent Vaults from getting slashed when Redeem or Replace are triggered. 
 
 
 Function Sequence
@@ -598,7 +591,10 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
+* If the BTC Parachain status in the :ref:`security` component is set to ``ERROR: 1``, it must not include the error codes ``INVALID_BTC_RELAY: 2``, ``ORACLE_OFFLINE: 3``, or ``LIQUIDATION: 4``.
+
+.. note:: We allow to complete pending requests. If the BTC Parachain is in status ``ERROR: 1`` with ``NO_DATA_BTC_RELAY: 1`` and the required BTC transaction is in a block that is included before the affected block height in the BTC-Relay, the request will be able to complete. In this case, this function will get called to complete the request.
 
 Function Sequence
 .................
@@ -651,7 +647,11 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
+* If the BTC Parachain status in the :ref:`security` component is set to ``ERROR: 1``, it must not include the error codes ``NO_DATA_BTC_RELAY: 1``, ``INVALID_BTC_RELAY: 2``, or ``ORACLE_OFFLINE: 3``.
+
+.. note:: This function must still be available in case of liquidation of vaults.
+
 
 Function Sequence
 .................
@@ -700,7 +700,8 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
+* If the BTC Parachain status in the :ref:`security` component is set to ``ERROR: 1``, it must not include the error codes ``ORACLE_OFFLINE: 3`` or ``LIQUIDATION: 4``.
 
 Function Sequence
 .................
@@ -717,7 +718,7 @@ Function Sequence
 decreaseTokens
 --------------
 
-If a redeem request is not fulfilled, the amount of tokens assigned to the ``toBeRedeemedTokens`` must be removed.
+If a redeem request is not fulfilled, the amount of tokens assigned to the ``toBeRedeemedTokens`` must be removed. Also, we consider the tokens lost at this point and hence remove the ``issuedTokens`` from this vault and punish the vault for not redeeming the tokens.
 
 Specification
 .............
@@ -752,7 +753,8 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
+* If the BTC Parachain status in the :ref:`security` component is set to ``ERROR: 1``, it must not include the error codes ``INVALID_BTC_RELAY: 2`` or ``ORACLE_OFFLINE: 3``.
 
 Function Sequence
 .................
@@ -813,7 +815,8 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
+* If the BTC Parachain status in the :ref:`security` component is set to ``ERROR: 1``, it must not include the error codes ``INVALID_BTC_RELAY: 2`` or ``ORACLE_OFFLINE: 3``.
 
 Function Sequence
 .................
@@ -873,7 +876,8 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
+* If the BTC Parachain status in the :ref:`security` component is set to ``ERROR: 1``, it must not include the error codes ``INVALID_BTC_RELAY: 2`` or ``ORACLE_OFFLINE: 3``.
 
 Function Sequence
 .................
@@ -889,7 +893,6 @@ Function Sequence
 5. Add ``collateral`` to the ``newVault.collateral``.
 
 6. Return.
-
 
 
 Events
