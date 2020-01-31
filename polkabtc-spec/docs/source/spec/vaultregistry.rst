@@ -950,7 +950,9 @@ Function Sequence
 
 5. Emit ``RedeemTokensLiquidation(redeemer, redeemDOTinBTC)`` event.
 
-4. Return.
+6. If ``LiquidationVault.issuedTokens == 0`` (i.e., no more tokens need to be reimbursed in DOT for re-balancing), call :ref:`recoverFromLIQUIDATION` to recover the BTC Parachain from ``LIQUIDATION`` error.
+
+7. Return.
 
 .. _replaceTokens:
 

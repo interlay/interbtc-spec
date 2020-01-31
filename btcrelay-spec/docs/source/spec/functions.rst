@@ -58,7 +58,7 @@ The ``initialize`` function takes as input an 80 byte raw Bitcoin block header a
 
 2. Parse ``blockHeaderBytes``, extracting  the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` and :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash (``hashCurrentBlock``) using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
 
-3. Create new ``Blockchain`` entry in ``Chains``, setting ``maxHeight = blockHeight`` and inserting ``hashCurrentBlock`` in the ``chain`` mapping using ``blockHeight`` as key. 
+3. Create new ``Blockchain`` entry in ``Chains``, setting ``chainId =``:ref:`getChainsCounter` ``maxHeight = blockHeight``, ``noData = False``, ``invalid = False``, and inserting ``hashCurrentBlock`` in the ``chain`` mapping using ``blockHeight`` as key. Insert a pointer to ``Blockchain`` into ``ChainsIndex`` using  ``chainId`` as key.
 
 4.Store a new ``BlockHeader`` struct containing ``merkleRoot``, ``blockHeight``, ``timestamp``, ``target``, and a pointer (``chainRef``) to the ``BlockChain`` struct - as associated with this block header - in ``BlockHeaders``, using ``hashCurrentBlock`` as key. 
 
@@ -199,9 +199,11 @@ Function Sequence
    
    b. Else if the "next-highest" entry has a lower ``maxHeight``, switch position - continue, until reaching the "top" of the data structure or a ``BlockChain`` entry with a higher ``maxHeight``. 
 
-2. If ordering was updated, check if the top-level element in the ``Chains`` data structure changed. 
+2. If ordering was updated, check if the top-level element in the ``Chains`` data structure changed. If yes, emit a ``ChainReorg(hashCurrentBlock, blockHeight, forkDepth)``, where ``forkDepth`` is the size of the ``chain`` mapping in the new top-level ``BlockChain`` (new *main chain*) entry.
 
-   a. If yes, emit a ``ChainReorg(hashCurrentBlock, blockHeight, forkDepth)``, where ``forkDepth`` is the size of the ``chain`` mapping in the new top-level ``BlockChain`` (new *main chain*) entry.
+3. Check that ``noData`` or ``invalid`` are both set to ``False`` for this  ``BlockChain`` entry. If this is the case, check if we need to update the BTC Parachain state.
+
+   a. If ``Errors`` in :ref:`security` contains ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY`` call :ref:`recoverFromLIQUIDATION` to recover the BTC Parachain from ``LIQUIDATION`` error.
 
 3. Return.
 

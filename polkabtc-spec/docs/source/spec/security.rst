@@ -604,6 +604,8 @@ Function Sequence
 
 4. If ``newStatusCode == Error``,  set ``Errors = StatusUpdate.errors``.
 
+.. todo:: Flag ``NO_DATA_BTC_RELAY`` and/or ``INVALID_BTC_RELAY`` in the respective ``BlockChain`` entry in ``Chains``! This is needed for automatic recovery (otherwise, a chain reorg. with by a NO_DATA or INVALID chain would require repeated reporting by Staked Relayers),
+
 5. Set ``StatusUpdate.proposalStatus`` to ``ProposalStatus.ACCEPTED``.
 
 6. Emit ``StatusUpdateExecuted(StatusUpdate.statusCode, StatusUpdate.errors, StatusUpdate.msg)`` event.
@@ -958,6 +960,111 @@ Function Sequence
     c) emit ``ExecuteStatusUpdate(ParachainStatus, Errors,`` ``"Undercollateralized Vault 'vault' is being liquidated")``
   
 5. Return
+
+
+
+.. _recoverFromLIQUIDATION:
+
+recoverFromLIQUIDATION
+----------------------
+
+Internal function. Recovers the BTC Parachain state from a ``LIQUIDATION`` error and sets ``ParachainStatus`` to ``RUNNING`` if there are no other errors.
+
+.. attention:: Can only be called from :ref:`vault-registry` (:ref:`redeemTokensLiquidation` function).
+
+Specification
+.............
+
+*Function Signature*
+
+``recoverFromLIQUIDATION()``
+
+*Events*
+
+* ``ExecuteStatusUpdate(newStatusCode, errors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``errors`` the set of ``ErrorCode`` entries specifying the reason for the status change if ``StatusCode == ERROR``, and ``msg`` the detailed reason for the status update. 
+
+*Substrate* ::
+
+  fn recoverFromLIQUIDATE() -> Result {...}
+
+Function Sequence
+.................
+
+1. Remove ``LIQUIDATION`` from ``Errors``
+
+2. If ``Errors`` is empty, set ``ParachainStatus`` to ``RUNNING``
+
+3. Emit ``ExecuteStatusUpdate(ParachainStatus, Errors, "Recovered from LIQUIDATION error.")`` event.
+
+
+.. _recoverFromORACLEOFFLINE:
+
+recoverFromORACLEOFFLINE
+-------------------------
+
+Internal function. Recovers the BTC Parachain state from a ``ORACLE_OFFLINE`` error and sets ``ParachainStatus`` to ``RUNNING`` if there are no other errors.
+
+.. attention:: Can only be called from :ref:`oracle`.
+
+Specification
+.............
+
+*Function Signature*
+
+``recoverFromORACLEOFFLINE()``
+
+*Events*
+
+* ``ExecuteStatusUpdate(newStatusCode, errors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``errors`` the set of ``ErrorCode`` entries specifying the reason for the status change if ``StatusCode == ERROR``, and ``msg`` the detailed reason for the status update. 
+
+*Substrate* ::
+
+  fn recoverFromORACLEOFFLINE() -> Result {...}
+
+Function Sequence
+.................
+
+1. Remove ``ORACLE_OFFLINE`` from ``Errors``
+
+2. If ``Errors`` is empty, set ``ParachainStatus`` to ``RUNNING``
+
+3. Emit ``ExecuteStatusUpdate(ParachainStatus, Errors, "Recovered from ORACLE_OFFLINE error.")`` event.
+
+
+.. _recoverFromBTCRelayFailure:
+
+recoverFromBTCRelayFailure
+---------------------------
+
+Internal function. Recovers the BTC Parachain state from a ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY`` error (when a chain reorganization occurs and the new main chain has no errors) and sets ``ParachainStatus`` to ``RUNNING`` if there are no other errors.
+
+.. attention:: Can only be called from :ref:`btc-relay`.
+
+Specification
+.............
+
+*Function Signature*
+
+``recoverFromBTCRelayFailure()``
+
+*Events*
+
+* ``ExecuteStatusUpdate(newStatusCode, errors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``errors`` the set of ``ErrorCode`` entries specifying the reason for the status change if ``StatusCode == ERROR``, and ``msg`` the detailed reason for the status update. 
+
+*Substrate* ::
+
+  fn recoverFromBTCRelayFailure() -> Result {...}
+
+Function Sequence
+.................
+
+1. Remove ``NO_DATA_BTC_RELAY`` and ``INVALID_BTC_RELAY`` from ``Errors``
+
+2. If ``Errors`` is empty, set ``ParachainStatus`` to ``RUNNING``
+
+3. Emit ``ExecuteStatusUpdate(ParachainStatus, Errors, "Recovered from BTC Relay error due to new main chain (reorganization).")`` event.
+
+
 
 .. _generateSecureId:
 

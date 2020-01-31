@@ -105,8 +105,11 @@ Representation of a Bitcoin blockchain.
 ======================  ==============  ========================================================================
 Parameter               Type            Description
 ======================  ==============  ========================================================================
+``chainId``             U256            Unique identifier for faster lookup in ``ChainsIndex``
 ``chain``               Map<u256,H256>  Mapping of ``blockHeight`` to ``blockHash``, which points to a ``BlockHeader`` entry in ``BlockHeaders``.
 ``maxHeight``           U256            Max. block height in the ``chain`` mapping. Used for ordering in the ``Chains`` priority queue.
+``noData``              bool            Indicates that this blockchain was flagged with a ``NO_DATA_BTC_RELAY`` error by Staked Relayers.
+``invalid``             bool            Indicates that this blockchain was flagged with a ``INVALID_BTC_RELAY`` error by Staked Relayers.
 ======================  ==============  ========================================================================
 
 
@@ -163,6 +166,16 @@ The exact choice of data structure is left to the developer. We recommend to use
 
 .. attention:: ``PriorityQueue`` is **currently not** natively supported in Substrate. A Rust implementation can be found `here <https://docs.rs/priority-queue/0.7.0/priority_queue/>`_, which has O(1) lookup and O(log(n)) re-balancing. This functionality can be emulated using a ``LinkedList`` by maintaining ordering upon insertion (worst case O(n), but will be O(1) is most cases as explained above). In theory, this can also be implemented using a ``BinaryHeap`` by deleting and re-inserting ``BlockChain`` entries when necessary.
 
+
+ChainsIndex
+............
+
+Auxiliary mapping of ``BlockChain`` structs to unique identifiers, for faster read access / lookup ``<U256, BlockChain>``, 
+
+*Substrate* ::
+
+  ChainsIndex: map U256 => BlockChain<T::H256>;
+
 BestBlock
 .........
 
@@ -183,6 +196,16 @@ Integer representing the maximum block height (``height``) in the ``Chains`` pri
 *Substrate* ::
 
   BestBlockHeight: U256;
+
+
+ChainCounter
+.................
+
+Integer increment-only counter used to track existing BlockChain entries.
+
+*Substrate* ::
+
+  ChainCounter: U256;
 
 
 

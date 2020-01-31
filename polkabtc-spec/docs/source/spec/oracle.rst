@@ -12,6 +12,9 @@ The Exchange Rate Oracle receives a continuous data feed on the exchange rate be
 
 The implementation of the oracle **is not part of this specification**. PolkaBTC assumes the oracle operates correctly and that the received data is reliable. 
 
+
+.. todo:: Update BTC Parachain status to ``ORACLE_OFFLINE`` if oracle stops receiving sending price data, and recover (using :ref:`recoverFromORACLEOFFLINE`) when data becomes available again.
+
 Data Model
 ~~~~~~~~~~
 
@@ -154,7 +157,7 @@ Events
 ~~~~~~~~~~~~
 
 SetExchangeRate
-...............
+--------------
 
 Emits the new exchange rate when it is updated by the oracle.
 

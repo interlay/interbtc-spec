@@ -373,4 +373,32 @@ Function Sequence
 2. Return ``ERR_FORK_ID_NOT_FOUND`` otherwise.
 
 
+.. _getChainsCounter:
+
+getChainsCounter
+----------------
+
+Increments the current ``ChainsCounter`` and returns the new value.
+
+Specification
+~~~~~~~~~~~~~~
+
+*Function Signature*
+
+``getChainsCounter()``
+
+
+*Returns*
+
+* ``U256``: the new value of the ``ChainsCounter``.
+
+*Substrate* ::
+
+  fn getChainsCounter() -> U256 {...}
+
+Function Sequence
+~~~~~~~~~~~~~~~~~
+
+1. ``ChainsCounter++``
+2. Return ``ChainsCounter``
 
