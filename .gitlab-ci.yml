@@ -52,12 +52,12 @@ pages:
     - mv build/html/ ../../public/btcrelay-spec/
     - mv build/latex/BTCRelay.pdf ../../public/btcrelay-spec.pdf
     - cd ../..
-      #- cd polkabtc-spec/docs
-      #- make html
-      #- sphinx-build -b latex source build/latex
-      #- make -C build/latex
-      #- mv build/html/* ../../public/
-      #- mv build/latex/PolkaBTC.pdf ../../public/polkabtc-spec.pdf
+    - cd polkabtc-spec/docs
+    - make html
+    - sphinx-build -b latex source build/latex
+    - make -C build/latex
+    - mv build/html/* ../../public/
+    - mv build/latex/PolkaBTC.pdf ../../public/polkabtc-spec.pdf
     artifacts:
         paths:
         - public

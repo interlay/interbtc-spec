@@ -3,6 +3,20 @@
 Treasury
 ========
 
+Overview
+~~~~~~~~
+
+The treasury serves as the central storage for all PolkaBTC.
+It exposes the :ref:`transfer` function to any user. With the transfer functions users can send PolkaBTC to and from each other.
+Further, the treasury exposes three internal functions for the :ref:`issue-protocol` and the :ref:`redeem-protocol`. 
+
+Step-by-step
+------------
+
+* **Transfer**: A user sends an amount of PolkaBTC to another user by calling the :ref:`transfer` function.
+* **Issue**: The issue module calls into the treasury when an issue request is completed and the user has provided a valid proof that he transferred the required amount of BTC to the correct vault. The issue module calls the :ref:`mint` function to grant the user the PolkaBTC token.
+* **Redeem**: The redeem protocol requires two calls to the treasury module. First, a user requests a redeem via the :ref:`requestRedeem` function. This invokes a call to the :ref:`lock` function that locks the requested amount of tokens for this user. Second, when a redeem request is completed and the vault has provided a valid proof that it transferred the required amount of BTC to the correct user, the redeem module calls the :ref:`burn` function to destroy the previously locked PolkaBTC.
+
 Data Model
 ~~~~~~~~~~
 
@@ -20,7 +34,9 @@ TotalSupply
 
 The total supply of PolkaBTC.
 
-*Substrate*: ``TotalSupply: Balance;``
+*Substrate* :: 
+
+    TotalSupply: Balance;
 
 Maps
 ----
@@ -28,12 +44,28 @@ Maps
 Balances
 ........
 
-Mapping from accounts to their balance. ``<Account, Balance>``.
+Mapping from accounts to their balance.
 
-*Substrate*: ``Balances: map T::AccountId => Balance;``
+*Substrate* :: 
+    
+    Balances: map T::AccountId => Balance;
+
+Locked Balances
+..............
+
+Mapping from accounts to their balance of locked tokens. Locked tokens serve two purposes:
+
+1. Locked tokens cannot be transferred. Once a user locks the token, the token needs to be unlocked to become spendable.
+2. Locked tokens are the only tokens that can be burned in the redeem procedure.
+
+*Substrate* ::
+
+  LockedBalances: map T::AccountId => Balance;
 
 Functions
 ~~~~~~~~~
+
+.. _transfer:
 
 transfer
 --------
@@ -55,8 +87,7 @@ Specification
 
 *Returns*
 
-* ``True``: If the sender has enough funds, the sender's balance is reduced by ``amount`` and the receivers balance increased by ``amount``.
-* ``False``: Otherwise.
+* ``None``
 
 *Events*
 
@@ -70,33 +101,27 @@ Specification
 
 ``fn transfer(origin, receiver: AccountId, amount: Balance) -> Result {...}``
 
-User Story
-..........
-
-Any user that owns PolkaBTC can act as a Sender. The Sender transfers an amount of PolkaBTC to a Receiver. This is the standard interface to change ownership of PolkaBTC.
-
 Function Sequence
 .................
 
 The ``transfer`` function takes as input the sender, the receiver, and an amount. The function executes the following steps:
 
-1. Verify that the ``sender`` is authorised to send the transaction by verifying the signature attached to the transaction.
-2. Verify that the ``sender``'s balance is above the ``amount``.
-
-    a. If ``balance(sender) < amount`` (in Substrate ``free_balance``), raise ``ERR_INSUFFICIENT_FUNDS`` and return ``False``.
-    b. Else, continue.
+1. Check that the ``sender`` is authorised to send the transaction by verifying the signature attached to the transaction.
+2. Check that the ``sender``'s balance is above the ``amount``. If ``Balances[sender] < amount`` (in Substrate ``free_balance``), raise ``ERR_INSUFFICIENT_FUNDS``.
         
-3. Subtract the Sender's balance by ``amount`` and add ``amount`` to the Receiver's balance.
+3. Subtract the sender's balance by ``amount``, i.e. ``Balances[sender] -= amount`` and add ``amount`` to the receiver's balance, i.e. ``Balances[receiver] += amount``.
 
-4. Issue ``Transfer(sender, receiver, amount)`` event.
+4. Emit the ``Transfer(sender, receiver, amount)`` event.
 
-5. Return ``True``.
+5. Return.
+
+.. _mint:
 
 mint
 ----
 
-In the BTC Parachain new PolkaBTC can be created by leveraging the :ref:`Issue Protocol <issue-protocol>`.
-However. to separate concerns and access to data, the Issue module has to call the ``mint`` function to complete the issue process in the PolkaBTC component.
+In the BTC Parachain new PolkaBTC can be created by leveraging the :ref:`issue-protocol`.
+However, to separate concerns and access to data, the Issue module has to call the ``mint`` function to complete the issue process in the PolkaBTC component.
 The function increases the ``totalSupply`` of PolkaBTC.
 
 .. warning:: This function can *only* be called from the Issue module.
@@ -115,8 +140,7 @@ Specification
 
 *Returns*
 
-* ``True``: If the balance of the ``requester`` is increased by the ``amount``.
-* ``False``: Otherwise.
+* ``None``
 
 *Events*
 
@@ -124,25 +148,75 @@ Specification
 
 *Substrate*
 
-``fn mint(requester: AccountId, amount: Balance) -> Bool {...}``
+``fn mint(requester: AccountId, amount: Balance) -> Result {...}``
 
 
-User Story
-..........
+Preconditions
+.............
 
 This is an internal function and can only be called by the :ref:`Issue module <issue-protocol>`.
 
 Function Sequence
 .................
 
-1. Increase the ``requester`` balance by ``amount``.
-2. Issue the ``Mint(requester, amount)`` event.
-3. Return ``True``.
+1. Increase the ``requester`` Balance by ``amount``, i.e. ``Balances[requester] += amount``.
+2. Emit the ``Mint(requester, amount)`` event.
+3. Return.
+
+.. _lock:
+
+lock
+----
+
+During the redeem process, a user needs to be able to lock PolkaBTC. Locking transfers coins from the ``Balances`` mapping to the ``LockedBalances`` mapping to prevent users from transferring the coins.
+
+Specification
+.............
+
+*Function Signature*
+
+``lock(redeemer, amount)``
+
+*Parameters*
+
+* ``redeemer``: The Redeemer wishing to lock a certain amount of PolkaBTC.
+* ``amount``: The amount of PolkaBTC that should be locked.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``Lock(redeemer, amount)``: Emits newly locked amount of PolkaBTC by a user.
+
+*Errors*
+
+* ``ERR_INSUFFICIENT_FUNDS``: User has not enough PolkaBTC to lock coins.
+
+*Substrate* ::
+
+  fn lock(redeemer: AccountId, amount: Balance) -> Result {...}
+
+Precondition
+............
+
+* Can only be called by the redeem module.
+
+Function Sequence
+.................
+
+1. Checks if the user has a balance higher than or equal to the requested amount, i.e. ``Balances[redeemer] >= amount``. Return ``ERR_INSUFFICIENT_FUNDS`` if the user's balance is too low.
+2. Decreases the user's token balance by the amount and increases the locked tokens balance by amount, i.e. ``Balances[redeemer] -= amount`` and ``LockedBalances[redeemer] += amount``.
+3. Emit the ``Lock`` event.
+4. Return.
+
+.. _burn:
 
 burn
 ----
 
-During the :ref:`Redeem protocol <redeem-protocol>`, so-called Redeemers first lock and then destroy or burn their PolkaBTC to receive BTC. This function reflects this in their balance. 
+During the :ref:`redeem-protocol`, users first lock and then "burn" (i.e. destroy) their PolkaBTC to receive BTC. Users can only burn tokens once they are locked to prevent transaction ordering dependencies. This means a user first needs to move his tokens from the ``Balances`` to the ``LockedBalances`` mapping via the :ref:`lock` function.
 
 .. warning:: This function is only internally callable by the Redeem module.
 
@@ -160,8 +234,7 @@ Specification
 
 *Returns*
 
-* ``True``: If the Redeemer has sufficient funds and the balance of the Redeemer is reduced by the ``amount``.
-* ``False``: Otherwise.
+* ``None``
 
 *Events*
 
@@ -169,83 +242,130 @@ Specification
 
 *Errors*
 
-* ``ERR_INSUFFICIENT_FUNDS``: If the Redeemer has insufficient funds, i.e. her balance is lower than the amount.
+* ``ERR_INSUFFICIENT_LOCKED_FUNDS``: If the user has insufficient funds locked, i.e. her locked balance is lower than the amount.
 
 *Substrate*
 
-``fn burn(redeemer: AccountId, amount: Balance) -> Bool {...}``
+``fn burn(redeemer: AccountId, amount: Balance) -> Result {...}``
 
-User Story
-..........
+Preconditions
+.............
 
 This is an internal function and can only be called by the :ref:`Redeem module <redeem-protocol>`.
 
 Function Sequence
 .................
 
-1. Verify that the ``redeemer``'s balance is above the ``amount``.
-
-    a. If ``balance(redeemer) < amount`` (in Substrate ``free_balance``), raise ``ERR_INSUFFICIENT_FUNDS`` and return ``False``.
-    b. Else, continue.
-        
-3. Subtract the Redeemer's balance by ``amount``. 
-4. Issue ``Burn(redeemer, amount)`` event.
-5. Return ``True``.
-
-lock
-----
-
-During the redeem process, Redeemers need to be able to lock PolkaBTC.
-
-.. warning:: Can only be called by the Redeem module.
-
-Specification
-.............
-
-*Function Signature*
-
-``lock(redeemer, amount)``
-
-*Parameters*
-
-* ``redeemer``: The Redeemer wishing to lock a certain amount of PolkaBTC.
-* ``amount``: The amount of PolkaBTC that should be locked.
-
-*Returns*
-
-* ``True``: If the Redeemer has enough funds to lock and they are locked.
-* ``False``: Otherwise.
-
-*Events*
-
-* ``Lock(redeemer, amount, totalAmount)``: newly locked and totally locked amount of PolkaBTC by a redeemer.
-
-*Errors*
-
-* ``ERR_INSUFFICIENT_FUNDS``: Redeemer has not enough PolkaBTC to lock coins.
-
-*Substrate* ::
-
-  fn lock(origin, ) -> Result {...}
-
-User Story
-..........
-
-
-Function Sequence
-.................
+1. Check that the ``redeemer``'s locked balance is above the ``amount``. If ``LockedBalance[redeemer] < amount`` (in Substrate ``free_balance``), raise ``ERR_INSUFFICIENT_LOCKED_FUNDS``.
+3. Subtract the Redeemer's locked balance by ``amount``, i.e. ``LockedBalances[redeemer] -= amount``. 
+4. Emit the ``Burn(redeemer, amount)`` event.
+5. Return.
 
 
 
 Events
 ~~~~~~
 
-* ``Transfer(sender, receiver, amount)``: Issues an event when a transfer of funds was successful.
-* ``Mint(requester, amount)``: Issue an event when new PolkaBTC are minted.
-* ``Burn(redeemer, amount)``: Issue an event when the amount of PolkaBTC is successfully destroyed.
+Transfer
+--------
+Issues an event when a transfer of funds was successful.
+
+*Event Signature*
+
+``Transfer(sender, receiver, amount)``
+
+*Parameters*
+
+* ``sender``: An account with enough funds to send the ``amount`` of PolkaBTC to the ``receiver``.
+* ``receiver``: Account receiving an amount of PolkaBTC.
+* ``amount``: The number of PolkaBTC being sent in the transaction.
+
+*Function*
+
+* :ref:`transfer`
+
+*Substrate* ::
+
+  Transfer(AccountId, AccountId, Balance);
+
+Mint
+----
+  
+Issue an event when new PolkaBTC are minted.
+
+*Event Signature*
+
+``Mint(requester, amount)``
+
+*Parameters*
+
+* ``requester``: The account of the requester of PolkaBTC.
+* ``amount``: The amount of PolkaBTC to be added to an account.
+
+*Function*
+
+* :ref:`mint`
+
+*Substrate* ::
+
+  Mint(AccountId, Balance);
+
+Lock
+----
+
+Emits newly locked amount of PolkaBTC by a user.
+
+*Event Signature*
+
+``Lock(redeemer, amount)``
+
+*Parameters*
+
+* ``redeemer``: The Redeemer wishing to lock a certain amount of PolkaBTC.
+* ``amount``: The amount of PolkaBTC that should be locked.
+
+*Function*
+
+* :ref:`lock`
+
+*Substrate* ::
+
+  Lock(AccountId, Balance);
+
+Burn
+----
+
+Issue an event when the amount of PolkaBTC is successfully destroyed.
+
+*Event Signature*
+
+``Burn(redeemer, amount)``
+
+*Parameters*
+
+* ``redeemer``: The Redeemer wishing to burn a certain amount of PolkaBTC.
+* ``amount``: The amount of PolkaBTC that should be burned.
+
+*Function*
+
+* :ref:`burn`
+
+*Substrate* ::
+
+  Burn(AccountId, Balance);
 
 Errors
 ~~~~~~
 
-* ``ERR_INSUFFICIENT_FUNDS``: ``The balance of this account is insufficient to complete the transaction``. 
+``ERR_INSUFFICIENT_FUNDS`` 
+
+* **Message**: "The balance of this account is insufficient to complete the transaction." 
+* **Functions**: :ref:`transfer` | :ref:`lock` 
+* **Cause**: The balance of the user of available tokens (i.e. ``Balances``) is below a certain amount to either transfer or lock tokens.
+
+``ERR_INSUFFICIENT_LOCKED_FUNDS`` 
+
+* **Message**: "The locked token balance of this account is insufficient to burn the tokens."
+* **Function**: :ref:`burn`
+* **Cause**: The user has locked too little tokens in the ``LockedBalances`` to execute the burn function.
 

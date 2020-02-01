@@ -6,16 +6,25 @@ Issue
 Overview
 ~~~~~~~~
 
-The issue module allows as user to create new PolkaBTC tokens. The user needs to request PolkaBTC through the :ref:`requestIssue` function, then send BTC to a Vault, and finally complete the issuing of PolkaBTC by calling the :ref:`executeIssue` function. Below is a high-level step-by-step description of the protocol and a figure explaining the steps.
+The Issue module allows as user to create new PolkaBTC tokens. The user needs to request PolkaBTC through the :ref:`requestIssue` function, then send BTC to a Vault, and finally complete the issuing of PolkaBTC by calling the :ref:`executeIssue` function. If the user does not complete the process in time, the vault can cancel the issue request and receive a griefing collateral from the user by invoking the :ref:`cancelIssue` function. Below is a high-level step-by-step description of the protocol.
 
 Step-by-step
 ------------
 
-1. Precondition: a Vault has locked collateral as described in the `Vault registry <vault-registry>`_.
-2. A user executes the ``requestIssue`` function to open an issue request on the BTC Parachain. The issue request includes the amount of PolkaBTC the user wants to have, which Vault the user uses, and a small collateral to prevent `griefing <griefing>`_.
-3. A user sends the equivalent amount of BTC that he wants to issue as PolkaBTC to the Vault on the Bitcoin blockchain with the ``lockBTC`` function. The user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain.
-4. The user executes the ``executeIssue`` function on the BTC Parachain. The issue function requires a reference to the previous issue request and the transaction inclusion proof of the ``lockBTC`` transaction. If the function completes successfully, the user receives the requested amount of PolkaBTC into his account.
-5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``IssuePeriod``), anyone is able to call the ``abort`` function to cancel the issue request.
+1. Precondition: a vault has locked collateral as described in the :ref:`Vault-registry`.
+2. A user executes the :ref:`requestIssue` function to open an issue request on the BTC Parachain. The issue request includes the amount of PolkaBTC the user wants to issue, the selected vault, and a small collateral to prevent :ref:`griefing`.
+3. A user sends the equivalent amount of BTC that he wants to issue as PolkaBTC to the vault on the Bitcoin blockchain. The user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain.
+4. The user executes the :ref:`executeIssue` function on the BTC Parachain. The issue function requires a reference to the previous issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of PolkaBTC into his account.
+5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``IssuePeriod``), the vault is able to call the :ref:`cancelIssue` function to cancel the issue request.
+
+VaultRegistry
+-------------
+
+The data access and state changes to the vault registry are documented in the figure below.
+
+.. figure:: ../figures/VaultRegistry-Issue.png
+    :alt: vault-registry-issue
+
 
 Data Model
 ~~~~~~~~~~
@@ -30,17 +39,17 @@ Data Model
 Scalars
 -------
 
-.. todo:: Move this to the new collateral module?
 
-
-MinimumCollateralUser
-.....................
+IssueGriefingCollateral
+........................
 
 The minimum collateral (DOT) a user needs to provide as griefing protection. 
 
-.. note:: Serves to disincentivize griefing attacks against vault, where users create issue requests, temporarily locking a Vault's collateral, but never execute the issue process.
+.. note:: Serves as a measurement to disincentivize griefing attacks against a vault. A user could otherwise create an issue request, temporarily locking a vault's collateral and never execute the issue process.
 
-*Substrate*: ``MinimumCollateralUser: Balance;``
+*Substrate* ::
+    
+    IssueGriefingCollateral: Balance;
 
 
 
@@ -74,17 +83,19 @@ Issue
 
 Stores the status and information about a single issue request.
 
-==================  ==========  =======================================================	
-Parameter           Type        Description                                            
-==================  ==========  =======================================================
-``vault``           Account     The BTC Parachain address of the Vault responsible for this commit request.
-``opentime``        u256        Block height of opening the request.
-``collateral``      DOT         Collateral provided by a user.
-``amount``          PolkaBTC    Amount of PolkaBTC to be issued.
-``requester``       Account     User account receiving PolkaBTC upon successful issuing.
-``btcAddress``      bytes[20]   Base58 encoded Bitcoin public key of the Vault.  
-``completed``       bool        Indicates if the issue has been completed.
-==================  ==========  =======================================================
+.. tabularcolumns:: |l|l|L|
+
+======================  ==========  =======================================================	
+Parameter               Type        Description                                            
+======================  ==========  =======================================================
+``vault``               Account     The BTC Parachain address of the Vault responsible for this commit request.
+``opentime``            u256        Block height of opening the request.
+``griefingCollateral``  DOT         Collateral provided by a user.
+``amount``              PolkaBTC    Amount of PolkaBTC to be issued.
+``requester``           Account     User account receiving PolkaBTC upon successful issuing.
+``btcAddress``          bytes[20]   Base58 encoded Bitcoin public key of the Vault.  
+``completed``           bool        Indicates if the issue has been completed.
+======================  ==========  =======================================================
 
 *Substrate*
 
@@ -95,7 +106,7 @@ Parameter           Type        Description
   pub struct Issue<AccountId, BlockNumber, Balance> {
         vault: AccountId,
         opentime: BlockNumber,
-        collateral: Balance,
+        griefingCollateral: Balance,
         amount: Balance,
         requester: AccountId,
         btcAddress: H160,
@@ -110,21 +121,22 @@ Functions
 requestIssue
 ------------
 
-A user opens an issue request by providing a small amount of collateral.
+A user opens an issue request to create a specific amount of PolkaBTC. The user also has to provide a small amount of collateral.
+When calling this function, a user provides her own parachain account identifier, the to be issued amount of PolkaBTC, and the vault she wants to use in this process (parachain account identifier). Further, she provides some (small) amount of DOT collateral (``griefingCollateral``) to prevent griefing.
 
 Specification
 .............
 
 *Function Signature*
 
-``requestIssue(requester, amount, vault)``
+``requestIssue(requester, amount, vault, griefingCollateral)``
 
 *Parameters*
 
 * ``requester``: The user's BTC Parachain account.
 * ``amount``: The amount of PolkaBTC to be issued.
 * ``vault``: The BTC Parachain address of the Vault involved in this issue request.
-* ``collateral``: The collateral amount provided by the user.
+* ``griefingCollateral``: The collateral amount provided by the user as griefing protection.
 
 *Returns*
 
@@ -132,37 +144,43 @@ Specification
 
 *Events*
 
-* ``RequestIssue(requester, amount, vault, issueId)``
+* ``RequestIssue(issueId, requester, amount, vault, btcAddress)``
 
 *Errors*
 
-* ``ERR_INSUFFICIENT_COLLATERAL``: The user did not provide enough collateral.
-* ``ERR_VAULT_COLLATERAL_RATIO``: The selected vault is below the collateral safety ratio.
+* ``ERR_INSUFFICIENT_COLLATERAL``: The user did not provide enough griefing collateral.
 
 *Substrate* ::
 
-  fn requestIssue(origin, amount: U256, vault: AccountId) -> Result {...}
+  fn requestIssue(origin, amount: U256, vault: AccountId, griefingCollateral: DOT) -> Result {...}
 
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
 
 Function Sequence
 .................
 
 
-1. The user calls the ``requestIssue`` function and provides his own address, the amount, and the vault he wants to use. Further, he provides a small collateral to prevent griefing.
+1. Check if the ``griefingCollateral`` is greater or equal ``IssueGriefingCollateral``. If this check fails, return ``ERR_INSUFFICIENT_COLLATERAL``.
 
-2. Checks if the user provided enough collateral by checking if the collateral is equal or greater than ``MinimumCollateral``. If not, throws ``ERR_INSUFFICIENT_COLLATERAL``.
+2. Lock the user's griefing collateral by calling the :ref:`lockCollateral` function with the ``requester`` as the sender and the ``griefingCollateral`` as the amount.
 
-3. Call the VaultRegistry ``lockVault`` function with the ``amount`` of tokens to be issue, the ``collateral`` that should be reserved for the issue request, and the ``vault`` identified by its address.
+3. Call the VaultRegistry :ref:`increaseToBeIssuedTokens` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. If the vault has not locked enough collateral, throws a ``ERR_EXCEEDING_VAULT_LIMIT`` error. This function returns a ``btcAddress`` that the user should send Bitcoin to.
 
 4. Generate an ``issueId`` by hashing a random seed, a nonce from the security module, and the address of the user.
 
-5. Store a new ``Issue`` struct in the ``IssueRequests`` mapping. The ``issueId`` refers to the ``Issue``. Fill the ``vault`` with the requested ``vault``, the ``opentime`` with the current block number, the ``collateral`` with the collateral provided by the user, ``amount`` with the ``amount`` provided as input, ``requester`` the requester account, and ``btcAddress`` the Bitcoin address of the Vault.
+5. Store a new ``Issue`` struct in the ``IssueRequests`` mapping as ``IssueRequests[issueId] = issue``, where ``issue`` is the ``Issue`` struct as:
 
-6. Issue the ``RequestIssue`` event with the ``requester`` account, ``amount``, ``vault``, and ``issueId``.
+    - ``issue.vault`` is the ``vault``
+    - ``issue.opentime`` is the current block number
+    - ``issue.griefingCollateral`` is the griefing collateral provided by the user
+    - ``issue.amount`` is the ``amount`` provided as input
+    - ``issue.requester`` is the user's account
+    - ``issue.btcAddress`` the Bitcoin address of the Vault as returned in step 3
+
+6. Issue the ``RequestIssue`` event with the ``issueId``, the ``requester`` account, ``amount``, ``vault``, and ``btcAddress``.
 
 7. Return the ``issueId``. The user stores this for future reference and the next steps, locally.
 
@@ -242,12 +260,12 @@ Specification
 
 *Events*
 
-* ``ExecuteIssue(requester, issueId, amount, vault)``:
+* ``ExecuteIssue(issueId, requester, amount, vault)``: Emits an event with the information about the completed issue request.
 
 *Errors*
 
-* ``ERR_ISSUE_ID_NOT_FOUND``: Throws if the ``issueId`` cannot be found.
-* ``ERR_COMMIT_PERIOD_EXPIRED``: Throws if the time limit as defined by the ``IssuePeriod`` is not met.
+* ``ERR_ISSUE_ID_NOT_FOUND``: The ``issueId`` cannot be found.
+* ``ERR_COMMIT_PERIOD_EXPIRED``: The time limit as defined by the ``IssuePeriod`` is not met.
 * ``ERR_UNAUTHORIZED_USER = Unauthorized: Caller must be associated user``: The caller of this function is not the associated user, and hence not authorized to take this action.
 
 
@@ -258,15 +276,18 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`failure-handling` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+
+.. todo:: REJECT any Issue request where the sender BTC address belongs to an existing Vault.
+
+
 
 Function Sequence
 .................
 
-.. todo:: Insert link to BTC-Relay to get Bitcoin data.
+.. note:: The accepted Bitcoin transaction format for this function is specified in the BTC-Relay specification and can be found at `https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/intro/accepted-format.html <https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/intro/accepted-format.html>`_.
 
-.. todo:: What happens if the Vault goes into buffered collateral/liquidation at this point?
-
+.. warning:: Ideally the ``SecureCollateralThreshold`` in the VaultRegistry should be high enough to prevent the Vault from entering into the liquidation or auction state.
 
 1. The user prepares the inputs and calls the ``executeIssue`` function.
     
@@ -274,18 +295,20 @@ Function Sequence
     b. ``issueId``: The unique hash received in the ``requestIssue`` function.
     c. ``txId``: the hash of the Bitcoin transaction to the Vault. With the ``txId`` the user can get the remainder of the Bitcoin transaction data including ``txBlockHeight``, ``txIndex``, ``MerkleProof``, and ``rawTx``. See BTC-Relay documentation for details.
 
-2. Checks if the ``requester`` is the ``issue.requester``. Throws ``ERR_UNAUTHORIZED_USER`` if called by any account other than the associated ``issue.requester``.
-3. Checks if the ``issueId`` exists. Throws ``ERR_ISSUE_ID_NOT_FOUND`` if not found.
-4. Checks if the current block height minus the ``IssuePeriod`` is smaller than the ``opentime`` specified in the ``Issue`` struct. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``.
+2. Checks if the ``issueId`` exists. Return ``ERR_ISSUE_ID_NOT_FOUND`` if not found. Else, loads the according issue request struct as ``issue``.
+3. Checks if the ``requester`` is the ``issue.requester``. Return ``ERR_UNAUTHORIZED_USER`` if called by any account other than the associated ``issue.requester``.
+4. Checks if the current block height minus the ``IssuePeriod`` is smaller than the ``issue.opentime``. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``.
 
-5. Verify the transaction. If any of the two calls throws an error, execute ``free`` in the VaultRegistry to release the locked collateral for this issue request for the vault.
-    - Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
-    - Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-issued BTC (``Issue.amount``), the ``vault``'s Bitcoin address (``Issue.btcAddress``), and the ``issueId`` as parameters. If this call returns an error, abort and return the received error. 
+5. Verify the transaction.
 
-6. Call the ``mint`` function in the Treasury with the ``amount`` and the user's address as the ``receiver``.
-7. Set the ``issue.completed`` filed to true.
-8. Issue an ``ExecuteIssue`` event with the user's address, the issueId, the amount, and the Vault's address.
-9. Return.
+    a. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
+    b. Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-issued BTC (``issue.amount``), the ``vault``'s Bitcoin address (``issue.btcAddress``), and the ``issueId`` as parameters. If this call returns an error, abort and return the received error. 
+
+6. Call the :ref:`issueTokens` with the ``issue.vault`` and the ``amount`` to decrease the ``toBeIssuedTokens`` and increase the ``issuedTokens``.
+7. Call the :ref:`mint` function in the Treasury with the ``amount`` and the user's address as the ``receiver``.
+8. Remove the ``IssueRequest`` from ``IssueRequests``.
+9. Emit an ``ExecuteIssue`` event with the user's address, the issueId, the amount, and the Vault's address.
+10. Return.
 
 .. _cancelIssue:
 
@@ -316,7 +339,7 @@ Specification
 
 *Errors*
 
-* ``ERR_ISSUE_ID_NOT_FOUND``: Throws if the ``issueId`` cannot be found.
+* ``ERR_ISSUE_ID_NOT_FOUND``: The ``issueId`` cannot be found.
 * ``ERR_TIME_NOT_EXPIRED``: Raises an error if the time limit to call ``executeIssue`` has not yet passed.
 * ``ERR_ISSUE_COMPLETED``: Raises an error if the issue is already completed.
 
@@ -333,19 +356,21 @@ Preconditions
 Function Sequence
 .................
 
-1. Check if an issue with id ``issueId`` exists. If not, throw ``ERR_ISSUE_ID_NOT_FOUND``. Otherwise, load the issue request ``issue = IssueRequests[issueId]``.
+1. Check if an issue with id ``issueId`` exists. If not, throw ``ERR_ISSUE_ID_NOT_FOUND``. Otherwise, load the issue request  as ``issue``.
 
 2. Check if the expiry time of the issue request is up, i.e ``issue.opentime + IssuePeriod < now``. If the time is not up, throw ``ERR_TIME_NOT_EXPIRED``.
 
 3. Check if the ``issue.completed`` field is set to true. If yes, throw ``ERR_ISSUE_COMPLETED``.
 
-4. Release the vault's collateral by calling ``releaseVault`` in the VaultRegistry with the ``issue.vault`` and the ``issue.amount``.
+4. Call the :ref:`decreaseToBeIssuedTokens` function in the VaultRegistry with the ``issue.vault`` and the ``issue.amount`` to release the vault's collateral.
 
-5. Transfer the griefing collateral of the user requesting the issue to the vault assigned to this issue request.
+5. Call the :ref:`slashCollateral` function to transfer the ``griefingCollateral`` of the user requesting the issue to the vault assigned to this issue request with the ``issue.requester`` as sender, the ``issue.vault`` as receiver, and ``issue.griefingCollateral`` as amount.
 
-6. Issue the ``CancelIssue`` event with the ``issueId``.
+6. Remove the ``IssueRequest`` from ``IssueRequests``.
 
-7. Return.
+8. Emit a ``CancelIssue`` event with the ``issueId``.
+
+9. Return.
 
 
 Events
@@ -358,15 +383,16 @@ Emit a ``RequestIssue`` event if a user successfully open a issue request.
 
 *Event Signature*
 
-``RequestIssue(requester, amount, vault, issueId)``
+``RequestIssue(issueId, requester, amount, vault, btcAddress)``
 
 *Parameters*
 
 
+* ``issueId``: A unique hash identifying the issue request. 
 * ``requester``: The user's BTC Parachain account.
 * ``amount``: The amount of PolkaBTC to be issued.
 * ``vault``: The BTC Parachain address of the Vault involved in this issue request.
-* ``issueId``: A unique hash identifying the issue request. 
+* ``btcAddress``: The Bitcoin address of the vault.
 
 *Functions*
 
@@ -374,19 +400,19 @@ Emit a ``RequestIssue`` event if a user successfully open a issue request.
 
 *Substrate* ::
 
-  RequestIssue(AccountId, U256, AccountId, H256);
+  RequestIssue(H256, AccountId, U256, AccountId, H160);
 
 ExecuteIssue
 ------------
 
 *Event Signature*
 
-``ExecuteIssue(requester, issueId, amount, vault)``
+``ExecuteIssue(issueId, requester, amount, vault)``
 
 *Parameters*
 
-* ``requester``: The user's BTC Parachain account.
 * ``issueId``: A unique hash identifying the issue request. 
+* ``requester``: The user's BTC Parachain account.
 * ``amount``: The amount of PolkaBTC to be issued.
 * ``vault``: The BTC Parachain address of the Vault involved in this issue request.
 
@@ -396,19 +422,19 @@ ExecuteIssue
 
 *Substrate* ::
 
-  ExecuteIssue(AccountId, H256, U256, AccountId);
+  ExecuteIssue(H256, AccountId, U256, AccountId);
 
 CancelIssue
 -----------
 
 *Event Signature*
 
-``CancelIssue(sender, issueId)``
+``CancelIssue(issueId, sender)``
 
 *Parameters*
 
-* ``sender``: The sender of the cancel transaction.
 * ``issueId``: the unique hash of the issue request.
+* ``sender``: The sender of the cancel transaction.
 
 *Functions*
 
@@ -416,22 +442,16 @@ CancelIssue
 
 *Substrate* ::
   
-    CancelIssue(AccountId, H256);
+    CancelIssue(H256, AccountId);
 
 Error Codes
 ~~~~~~~~~~~
 
 ``ERR_INSUFFICIENT_COLLATERAL``
 
-* **Message**: "Provided collateral below limit."
+* **Message**: "User provided collateral below limit."
 * **Function**: :ref:`requestIssue`
-* **Cause**: User provided collateral below the ``MinimumCollateral``.
-
-``ERR_VAULT_COLLATERAL_RATIO``
-
-* **Message**: "The vault collateral rate is below the safety limit."
-* **Function**: :ref:`requestIssue`
-* **Cause**: The vault's collateral needs to be greater than the already issued PolkaBTC under consideration of the safety limit. If the vault's collateral ratio falls below the safety rate, this vault cannot issue new tokens.
+* **Cause**: User provided griefingCollateral below ``IssueGriefingCollateral``.
 
 ``ERR_UNAUTHORIZED_USER``
 
@@ -458,11 +478,9 @@ Error Codes
 * **Cause**: Raises an error if the time limit to call ``executeIssue`` has not yet passed.
 
 
-``ERR_ISSUE_COMPLETED``:
+``ERR_ISSUE_COMPLETED``
 
 * **Message**: "Issue completed and cannot be cancelled."
 * **Function**: :ref:`cancelIssue`
 * **Cause**: Raises an error if the issue is already completed.
-
-
 

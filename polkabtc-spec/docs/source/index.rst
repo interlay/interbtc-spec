@@ -16,7 +16,6 @@ Welcome to PolkaBTC's documentation!
    :maxdepth: 2
    :caption: Specification
 
-   spec/data-model
    spec/treasury
    spec/vaultregistry
    spec/collateral
@@ -25,16 +24,14 @@ Welcome to PolkaBTC's documentation!
    spec/replace
    spec/oracle
    spec/btc-relay
-   spec/failure-handling
+   spec/security
    spec/helpers
-   spec/events
-   spec/errors
 
 .. toctree::
    :maxdepth: 2
    :caption: Security and Performance
 
-   security_performance/security
+   security_performance/security-analysis
    security_performance/performance
 
 .. toctree::
