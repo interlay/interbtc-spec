@@ -980,6 +980,58 @@ Function Sequence
 5. Return
 
 
+.. _reportOracleOffline:
+
+reportOracleOffline
+--------------------
+
+A Staked Relayer reports that the :ref:`oracle` is offline. This function checks if the last exchange rate data in the Exchange Rate Oracle is indeed older than the indicated threshold. 
+
+.. note:: Status updates triggered by this function require no Staked Relayer vote, as the report can be programmatically verified by the BTC Parachain.
+
+Specification
+.............
+
+*Function Signature*
+
+``reportOracleOffline()``
+
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, and ``msg`` the detailed reason for the status update. 
+
+*Errors*
+
+* ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
+* ``ERR_ORACLE_ONLINE = "The exchange rate oracle shows up-to-date data"``: The :ref:`oracle` does not appear to be offline. 
+
+*Substrate* ::
+
+  fn reportOracleOffline() -> Result {...}
+
+Function Sequence
+.................
+
+1. Check that the caller of this function is indeed a Staked Relayer. Return ``ERR_STAKED_RELAYERS_ONLY`` if this check fails.
+
+2. Retrieve the UNIX timestamp of the last exchange rate data submission to :ref:`oracle` via :ref:`getLastExchangeRateTime`.
+
+3. If the current (UNIX) time minus ``LastExchangeRateTime`` is below ``MaxDelay``, return ``ERR_ORACLE_ONLINE`` error.
+
+4. Otherwise, the :ref:`oracle` appears to be offline.
+
+    a) set ``ParachainStatus = ERROR`` and add ``ORACLE_OFFLINE`` to ``Errors``,
+
+    b) emit ``ExecuteStatusUpdate(ParachainStatus, [ORACLE_OFFLINE], [],`` ``"Exchange Rate Oracle is missing up to date data.")``
+  
+5. Return
+
+
 .. _recoverFromLIQUIDATION:
 
 recoverFromLIQUIDATION
