@@ -390,7 +390,7 @@ Specification
 
 *Returns*
 
-* ``U256``: the new value of the ``ChainsCounter``.
+* ``chainsCounter``: the new integer value of the ``ChainsCounter``.
 
 *Substrate* ::
 
@@ -402,3 +402,49 @@ Function Sequence
 1. ``ChainsCounter++``
 2. Return ``ChainsCounter``
 
+
+
+.. _checkChainErrorStatus:
+
+checkChainErrorStatus
+----------------------
+
+For a given ``BlockChain`` entry, checks any of the contained blocks are flagged with the given error. If none are flagged, returns ``False``.
+
+Specification
+~~~~~~~~~~~~~~
+
+*Function Signature*
+
+``checkChainErrorStatus(chainId, errorCode)``
+
+
+*Returns*
+
+* ``hasError``: ``True`` if any of the ``BlockHeader`` entries in the given ``BlockChain``'s ``chain`` mapping are flagged with the given error. ``False`` if the error was not found.
+
+*Errors*
+
+* ``ERR_UNKNOWN_ERRORCODE = "The reported error code is unknown"``: The reported ``ErrorCode`` can only be ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY``.
+* ``ERR_INVALID_CHAINID = "No BlockChain entry with the given 'chainId' found!``: there exists no ``BlockChain`` with the given ``chainId``.
+
+*Substrate* ::
+
+  fn checkChainErrorStatus() -> bool {...}
+
+Function Sequence
+~~~~~~~~~~~~~~~~~
+
+1. Check if ``errorCode`` is equal to ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY``. Return ``ERR_UNKNOWN_ERRORCODE`` if neither match.
+
+2. Retrieve the ``BlockChain`` entry with the given ``chainId`` from ``ChainsIndex``. If no such entry is found, return ``ERR_INVALID_CHAINID``.
+
+3. Initialize ``hasError`` with ``False``.
+
+4. For each ``blockHash`` value in the ``chains`` mapping:
+
+  a. If ``errorCode == NO_DATA_BTC_RELAY``,  set ``hasError = hasError && BlockHeaders[blockHash].noData``.
+
+  b. Otherwise, if  ``errorCode == INVALID_BTC_RELAY``,  set ``hasError = hasError && BlockHeaders[blockHash].invalid``.
+
+5. Return ``hasError``.

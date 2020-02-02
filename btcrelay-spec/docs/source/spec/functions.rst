@@ -314,7 +314,6 @@ Specification
 
 *Errors*
 
-* ``ERR_PARTIAL = "BTC Parachain partially deactivated"``: the BTC Parachain has been partially deactivated since a specific block height.
 * ``ERR_INVALID = "BTC-Relay has detected an invalid block in the current main chain, and has been halted"``: the BTC Parachain has been halted because Staked Relayers reported an invalid block.
 * ``ERR_NO_DATA = "BTC-Relay has a NO_DATA failure and the requested block cannot be verified reliably": the ``txBlockHeight`` is greater or equal to the hight of a ``BlockHeader`` which is flagged with ``NO_DATA_BTC_RELAY``.
 * ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the Governance Mechanism.
@@ -359,7 +358,7 @@ The ``verifyTransactionInclusion`` function follows the function sequence below:
 
 7. Check that the current ``BestBlockHeight`` exceeds ``txBlockHeight`` by the specified number of ``confirmations``. Return ``ERR_CONFIRMATIONS`` if this check fails. 
 
-8. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``Chains`` at the passed ``txBlockHeight``.    
+8. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``Chains`` at the passed ``txBlockHeight``.  
 
 9. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Return ``ERR_INVALID_MERKLE_PROOF`` if one of these checks fails.
 
@@ -464,5 +463,129 @@ See the `raw Transaction Format section in the Bitcoin Developer Reference <http
 8. Return ``True``.
 
 
-.. todo:: Decide how to best react if more BTC was sent, than expected. Different handling of this may be necessary, depending on the protocol (Issue, Redeem, Replace). Returning an error aborts the program flow, which may be unwanted in some cases. 
+.. _flagBlockError:
 
+flagBlockError
+----------------
+
+Flags tracked Bitcoin block headers when Staked Relayers report and agree on a ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY`` failure.
+
+.. attention:: This function **does not** validate the Staked Relayers accusation. Instead, it is put up to a majority vote among all Staked Relayers in the form of a  
+
+.. note:: This function can only be called from the *Security* module of PolkaBTC, after Staked Relayers have achieved a majority vote on a BTC Parachain status update indicating a BTC-Relay failure.
+
+Specification
+~~~~~~~~~~~~~~
+
+*Function Signature*
+
+``flagBlockError(blockHash, errors)``
+
+
+*Parameters*
+
+* ``blockHash``: SHA256 block hash of the block containing the error. 
+* ``errors``: list of ``ErrorCode`` entries which are to be flagged for the block with the given blockHash. Can be "NO_DATA_BTC_RELAY" or "INVALID_BTC_RELAY".
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``FlagBTCBlockError(blockHash, chainId, errors)`` - emits an event indicating that a Bitcoin block hash (identified ``blockHash``) in a ``BlockChain`` entry (``chainId``) was flagged with errors (``errors`` list of ``ErrorCode`` entries).
+
+*Errors*
+
+* ``ERR_UNKNOWN_ERRORCODE = "The reported error code is unknown"``: The reported ``ErrorCode`` can only be ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY``.
+* ``ERR_BLOCK_NOT_FOUND  = "No Bitcoin block header found with the given block hash"``: No ``BlockHeader`` entry exists with the given block hash.
+* ``ERR_ALREADY_REPORTED = "This error has already been reported for the given block hash and is pending confirmation"``: The error reported for the given block hash is currently pending a vote by Staked Relayers.
+
+*Substrate* ::
+
+  fn reportBTCRelayFailure(chainId: U256, errorCode: ErrorCode) -> Result {...}
+
+Function Sequence
+.................
+
+1. Check if ``errors`` contains  ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY``. If neither match, return ``ERR_UNKNOWN_ERRORCODE``.
+
+2. Retrieve the ``BlockHeader`` entry from ``BlockHeaders`` using ``blockHash``. Return ``ERR_BLOCK_NOT_FOUND`` if no block header can be found.
+
+3. Set error code of the ``BlockHeader``.
+
+   a. If ``errors`` contains ``NO_DATA_BTC_RELAY``, set ``BlockHeader.noData = True`` and set ``BlockChain.noData = True`` accordingly (as per the ``BlockHeader.chainRef``).
+
+   b. If ``errors`` contains ``INVALID_BTC_RELAY``, set ``BlockHeader.invalid = True`` and set ``BlockChain.noData = True`` accordingly (as per the ``BlockHeader.chainRef``).
+
+4. Emit ``FlagBTCBlockError(blockHash, chainId, errors)`` event, with the given ``blockHash``, the ``chainId`` of the flagged ``BlockChain`` entry and the given ``errors`` as parameters.
+
+5. Return
+
+
+
+.. _clearBlockError:
+
+clearBlockError
+------------------
+
+Clears ``ErrorCode`` entries given as parameters from the status of a ``BlockHeader``.  Can be ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY`` failure.
+
+.. note:: This function can only be called from the *Security* module of PolkaBTC, after Staked Relayers have achieved a majority vote on a BTC Parachain status update indicating that a ``BlockHeader`` entry no longer has the specified errors.
+
+
+Specification
+~~~~~~~~~~~~~~
+
+*Function Signature*
+
+``flagBlockError(blockHash, errors)``
+
+
+*Parameters*
+
+* ``blockHash``: SHA256 block hash of the block containing the error. 
+* ``errors``: list of ``ErrorCode`` entries which are to be **cleared** from the block with the given blockHash. Can be ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY``.
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``ClearBlockError(blockHash, chainId, errors)`` - emits an event indicating that a Bitcoin block hash (identified ``blockHash``) in a ``BlockChain`` entry (``chainId``) was cleared from the given errors (``errors`` list of ``ErrorCode`` entries).
+
+*Errors*
+
+* ``ERR_UNKNOWN_ERRORCODE = "The reported error code is unknown"``: The reported ``ErrorCode`` can only be ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY``.
+* ``ERR_BLOCK_NOT_FOUND  = "No Bitcoin block header found with the given block hash"``: No ``BlockHeader`` entry exists with the given block hash.
+* ``ERR_ALREADY_REPORTED = "This error has already been reported for the given block hash and is pending confirmation"``: The error reported for the given block hash is currently pending a vote by Staked Relayers.
+
+*Substrate* ::
+
+  fn reportBTCRelayFailure(chainId: U256, errors: Vec<ErrorCode>) -> Result {...}
+
+Function Sequence
+.................
+
+1. Check if ``errors`` contains  ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY``. If neither match, return ``ERR_UNKNOWN_ERRORCODE``.
+
+2. Retrieve the ``BlockHeader`` entry from ``BlockHeaders`` using ``blockHash``. Return ``ERR_BLOCK_NOT_FOUND`` if no block header can be found.
+
+3. Un-flag error codes in the ``BlockHeader``.
+
+   a. If ``errors`` contains ``NO_DATA_BTC_RELAY``:
+   
+     i ) Set ``BlockHeader.noData = False``.
+     
+     ii )Call :ref:`checkChainErrorStatus` passing ``NO_DATA_BTC_RELAY`` as parameter. If the call returns ``False``, set ``BlockChain.noData = False`` (no more ``NO_DATA_BTC_RELAY`` errors in this ``BlockChain``).
+
+   a. If ``errors`` contains ``INVALID_BTC_RELAY``:
+   
+     i ) Set ``BlockHeader.invalid = False``.
+     
+     ii ) Call :ref:`checkChainErrorStatus` passing ``INVALID_BTC_RELAY`` as parameter. If the call returns ``False``, set ``BlockChain.invalid = False`` (no more ``INVALID_BTC_RELAY`` errors in this ``BlockChain``).
+
+4. Emit ``ClearBlockError(blockHash, chainId, errors)`` event, with the given ``blockHash``, the ``chainId`` of the flagged ``BlockChain`` entry and the given ``errors`` as parameters.
+
+5. Return
