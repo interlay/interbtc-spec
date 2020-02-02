@@ -1,7 +1,7 @@
 .. _security:
 
 Security
-========
+======== 
 
 The Security module is responsible for failure handling in the BTC Parachain, such as liveness and safety failures of :ref:`btc-relay` or crashes of the :ref:`exchange-rate-oracle`.
 Specifically, this module provides a central interface for all other modules to check whether specific features should be disabled to prevent financial damage to users (e.g. stop :ref:`issue-protocol` if no reliable price data is available).
@@ -214,10 +214,12 @@ Parameter               Type            Description
 ======================  ==============  ============================================
 ``newStatusCode``       StatusCode      New status of the BTC Parachain.
 ``oldStatusCode``       StatusCode      Previous status of the BTC Parachain.
-``errors``              Set<ErrorCode>  If ``newStatusCode`` is ``Error``, specifies the errors.           
+``addErrors``           Set<ErrorCode>  If ``newStatusCode`` is ``Error``, specifies which errors are to be added to the BTC Parachain``Errors``.         
+``removeErrors``        Set<ErrorCode>  Indicates which ``ErrorCode`` entries are to be removed from ``Errors`` (recovery).           
 ``time``                U256            Parachain block number at which this status update was suggested.
 ``proposalStatus``      ProposalStatus  Status of the proposed status update. See ``ProposalStatus``.
 ``msg``                 String          Message providing more details on the change of status (detailed error message or recovery reason). 
+``btcBlockHash``        H256            Block hash of the Bitcoin block where the error was detected, if related to BTC-Relay.
 ``votesYes``            Set<AccountId>  Set of accounts which have voted FOR this status update. This can be either Staked Relayers or the Governance Mechanism. Checks are performed depending on the type of status change. Should maintain insertion order to allow checking who proposed this update (at index ``0``). 
 ``votesNo``             Set<AccountId>  Set of accounts which have voted AGAINST this status update. 
 ======================  ==============  ============================================
@@ -233,7 +235,8 @@ Parameter               Type            Description
   pub struct StatusUpdate<StatusCode, ErrorCode, BlockNumber, AccountId> {
         newStatusCode: StatusCode,
         oldStatusCode: StatusCode,
-        errors: HashSet<ErrorCode>,
+        addErrors: HashSet<ErrorCode>,
+        removeErrors: HashSet<ErrorCode>,
         time: BlockNumber,
         msg: String,
         votesYes: HashSet<AccountId>,
@@ -430,13 +433,15 @@ Specification
 
 *Function Signature*
 
-``suggestStatusUpdate(stakedRelayer, newStatusCode, errors, msg)``
+``suggestStatusUpdate(stakedRelayer, newStatusCode, addErrors, removeErrors, blockHash, msg)``
 
 *Parameters*
 
 * ``stakedRelayer``: The AccountId of the Staked Relayer suggesting the status change.
 * ``newStatusCode``: Suggested BTC Parachain status (``StatusCode`` enum).
-* ``errors``: If the suggested status is ``Error``, this set of ``ErrorCodes`` lists the the occurred errors.
+* ``addErrors``: If the suggested status is ``Error``, this set of ``ErrorCodes`` indicates which errors are to be added to the ``Errors`` mapping.
+* ``removeErrors``: Set of ``ErrorCodes`` to be removed from the ``Errors`` list.
+* ``blockHash``: [Optional] When reporting an error related to BTC-Relay, this field indicates the affected Bitcoin block (header).
 * ``msg`` : String message providing the detailed reason for the suggested status change. 
 
 *Returns*
@@ -445,7 +450,7 @@ Specification
 
 *Events*
 
-* ``StatusUpdateSuggested(newStatusCode, errors, msg, stakedRelayer)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``errors`` the set ``ErrorCode`` (if the new status is ``Error``), ``msg`` the detailed message provided by the function caller, and ``stakedRelayer`` the account identifier of the Staked Relayer suggesting the update.
+* ``StatusUpdateSuggested(newStatusCode, addErrors, removeErrors, msg, stakedRelayer)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, ``msg`` the detailed message provided by the function caller, and ``stakedRelayer`` the account identifier of the Staked Relayer suggesting the update.
 
 *Errors*
 
@@ -454,7 +459,7 @@ Specification
   
 *Substrate* ::
 
-  fn suggestStatusUpdate(origin, newStatusCode: StatusCode, errors: HashSet<ErrorCode>, msg: String) -> Result {...}
+  fn suggestStatusUpdate(origin, newStatusCode: StatusCode, addErrors: HashSet<ErrorCode>, removeErrors: HashSet<ErrorCode>, msg: String) -> Result {...}
 
 Preconditions
 .............
@@ -470,8 +475,10 @@ Function Sequence
 
    * ``StatusUpdate.newStatusCode = newStatusCode``,
    * ``StatusUpdate.oldStatusCode = ParachainStatus``,
-   * If ``newStatusCode == Error``, set  ``StatusUpdate.errors = errors``,
+   * Set ``StatusUpdate.addErrors = addErrors``,
+   * Set ``StatusUpdate.removeErrors = removeErrors``,
    * ``StatusUpdate.time =`` current Parachain block number,
+   * ``StatusUpdate.blockHash = blockHash``,
    * ``StatusUpdate.msg = msg``,
    * ``StatusUpdate.proposalStatus = ProposalStatus.PENDING``,
    * Initialize ``StatusUpdate.votesYes`` with a new Set (``HashSet``), and insert ``stakedRelayer`` (as the first vote),
@@ -479,7 +486,7 @@ Function Sequence
 
 4. Insert the new ``StatusUpdate`` into the ``StatusUpdates`` mapping, using :ref:`getStatusCounter` as key.
 
-4. Emit a ``StatusUpdateSuggested(newStatusCode, errors, msg, stakedRelayer)`` event.
+4. Emit a ``StatusUpdateSuggested(newStatusCode, addErrors, removeErrors, msg, stakedRelayer)`` event.
 
 5. Return.
 
@@ -557,6 +564,7 @@ Executes a ``StatusUpdate`` that has received sufficient "Yes" votes.
 
 .. warning:: This function can only be called internally if a ``StatusUpdate`` has received more votes than required by ``STAKED_RELAYER_VOTE_THRESHOLD``.
 
+.. note:: In case of BTC-Relay errors/recovery, this function calls into :ref:`btc-relay` to flag / un-flag the corresponding ``BlockHeader`` and ``BlockChain`` entries, as specified _recoverFromBTCRelayFailure ``blockHash``.
 
 Specification
 ..............
@@ -581,7 +589,7 @@ Specification
 
 *Events*
 
-* ``ExecuteStatusUpdate(newStatusCode, errors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``errors`` the set of ``ErrorCode`` entries specifying the reason for the status change if ``StatusCode == ERROR``, and ``msg`` the detailed reason for the status update. 
+* ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, and ``msg`` the detailed reason for the status update. 
 
 *Substrate*
 
@@ -602,15 +610,19 @@ Function Sequence
 
 3. Set ``ParachainStatus``  to ``StatusUpdate.statusCode``. 
 
-4. If ``newStatusCode == Error``,  set ``Errors = StatusUpdate.errors``.
+4. If ``newStatusCode == Error``, add ``addErrors`` to  ``Errors``,
 
-.. todo:: Flag ``NO_DATA_BTC_RELAY`` and/or ``INVALID_BTC_RELAY`` in the respective ``BlockChain`` entry in ``Chains``! This is needed for automatic recovery (otherwise, a chain reorg. with by a NO_DATA or INVALID chain would require repeated reporting by Staked Relayers),
+5. If ``addErrors`` contains ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY``, call *flagBlockError* in :ref:`btc-relay` passing ``addErrors`` and ``StatusUpdate.blockHash`` as parameters.
 
-5. Set ``StatusUpdate.proposalStatus`` to ``ProposalStatus.ACCEPTED``.
+6. If ``removeErrors`` contains ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY``, call *clearBlockError* in :ref:`btc-relay` passing ``removeErrors`` and ``StatusUpdate.blockHash`` as parameters.
 
-6. Emit ``StatusUpdateExecuted(StatusUpdate.statusCode, StatusUpdate.errors, StatusUpdate.msg)`` event.
+7. If ``oldStatusCode == Error``, subtract ``removeErrors`` from  ``Errors``, 
 
-7. Return.
+8. Set ``StatusUpdate.proposalStatus`` to ``ProposalStatus.ACCEPTED``.
+
+9. Emit ``StatusUpdateExecuted(StatusUpdate.statusCode, StatusUpdate.addErrors, StatusUpdate.removeErrors, StatusUpdate.msg)`` event.
+
+10. Return.
 
 
 .. _rejectStatusUpdate:
@@ -647,7 +659,7 @@ Specification
 
 *Events*
 
-* ``RejectStatusUpdate(newStatusCode, errors, msg)`` - emits an event indicating the rejected status change, with ``newStatusCode`` being the new ``StatusCode``, ``errors`` the set of ``ErrorCode`` entries specifying the reason for the status change if ``StatusCode == ERROR``, and ``msg`` the detailed reason for the status update. 
+* ``RejectStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the rejected status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, and ``msg`` the detailed reason for the status update. 
 
 *Substrate*
 
@@ -668,7 +680,7 @@ Function Sequence
 
 4. Set ``StatusUpdate.proposalStatus`` to ``ProposalStatus.REJECTED``.
 
-5. Emit ``RejectStatusUpdate(StatusUpdate.statusCode, StatusUpdate.errors, StatusUpdate.msg)`` event.
+5. Emit ``RejectStatusUpdate(StatusUpdate.statusCode, StatusUpdate.addErrors, StatusUpdate.removeErrors, StatusUpdate.msg)`` event.
 
 6. Return.
 
@@ -686,7 +698,7 @@ Specification
 
 *Function Signature*
 
-``forceStatusUpdate(governanceMechanism, newStatusCode, errors, msg)``
+``forceStatusUpdate(governanceMechanism, newStatusCode, addErrors, removeErrors, msg)``
 
 *Parameters*
 
@@ -701,7 +713,7 @@ Specification
 
 *Events*
 
-* ``ForceStatusUpdate(newStatusCode, errors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``errors`` the set of ``ErrorCode`` entries (if the new status is ``Error``), and ``msg`` the detailed message provided by the function caller.
+* ``ForceStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, and ``msg`` the detailed message provided by the function caller.
 
 *Errors*
 
@@ -711,7 +723,7 @@ Specification
 
 ::
 
-  fn forceStatusUpdate(origin, update: StatusUpdate) -> Result {...}
+  fn forceStatusUpdate(origin, newStatusCode: StatusCode, addErrors: HashSet<ErrorCode>, removeErrors: HashSet<ErrorCode>, msg, String) -> Result {...}
 
 
 Precondition
@@ -727,7 +739,8 @@ Function Sequence
 
    * ``StatusUpdate.newStatusCode = newStatusCode``,
    * ``StatusUpdate.oldStatusCode = ParachainStatus``,
-   * If ``newStatusCode == Error``, set  ``StatusUpdate.errors = errors``,
+   * Set  ``StatusUpdate.addErrors = addErrors``,
+   * Set  ``StatusUpdate.removeErrors = removeErrors``,
    * ``StatusUpdate.time =`` current Parachain block number,
    * ``StatusUpdate.msg = msg``,
    * ``StatusUpdate.proposalStatus = ProposalStatus.ACCEPTED``,
@@ -739,9 +752,11 @@ Function Sequence
 
 4. Set ``ParachainStatus``  to ``newStatusCode``.
 
-5. If ``newStatusCode == Error`` set ``Errors = StatusUpdate.errors``.
+5. If ``newStatusCode == Error`` add  ``StatusUpdate.addErrors`` to ``Errors``.
 
-6. Emit ``ForceStatusUpdate(newStatusCode, errors, msg)`` event 
+6. Subtract  ``StatusUpdate.removeErrors`` to ``Errors``.
+
+7. Emit ``ForceStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` event 
 
 
 .. _slashStakedRelayer: 
@@ -753,8 +768,6 @@ Slashes the stake/collateral of a Staked Relayer and removes them from the Stake
 
 .. warning:: This function can only be called by the Governance Mechanism.
 
-
-.. todo:: TODO
 
 Specification
 .............
@@ -820,6 +833,9 @@ In all other cases, the Vault is considered to have stolen the BTC.
 
 This function checks if the Vault actually misbehaved (i.e., makes sure that the provided transaction is not one of the above valid cases) and automatically liquidates the Vault (i.e., triggers :ref:`redeem-protocol`).
 
+.. note:: Status updates triggered by this function require no Staked Relayer vote, as the report can be programmatically verified by the BTC Parachain.
+
+
 Specification
 .............
 
@@ -844,6 +860,7 @@ Specification
 *Events*
 
 * ``ReportVaultTheft(vault)`` - emits an event indicating that a Vault (``vault``) has been caught displacing BTC without permission.
+* ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, and ``msg`` the detailed reason for the status update. 
 
 *Errors*
 
@@ -898,7 +915,7 @@ Function Sequence
 
     b) set ``ParachainStatus = ERROR`` and add ``LIQUIDATION`` to ``Errors``,
 
-    c) emit ``ExecuteStatusUpdate(ParachainStatus, Errors,`` ``"Vault 'vault' displaced BTC and is being liquidated")``
+    c) emit ``ExecuteStatusUpdate(ParachainStatus, [LIQUIDATION], [], "Vault 'vault' displaced BTC and is being liquidated")``
   
 5. Return
 
@@ -910,6 +927,7 @@ reportVaultUndercollateralized
 
 A Staked Relayer reports that a Vault is undercollateralized, i.e., below the ``LiquidationCollateralThreshold`` as defined in :ref:`vault-registry`. This function checks if the Vault's collateral is indeed below this rate and if yes, flags the Vault for liquidation and updates the ``ParachainStatus`` to ``ERROR`` and adding ``LIQUIDATION`` to ``Errors``.
 
+.. note:: Status updates triggered by this function require no Staked Relayer vote, as the report can be programmatically verified by the BTC Parachain.
 
 Specification
 .............
@@ -930,7 +948,7 @@ Specification
 
 *Events*
 
-* ``ExecuteStatusUpdate(newStatusCode, errors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``errors`` the set of ``ErrorCode`` entries specifying the reason for the status change if ``StatusCode == ERROR``, and ``msg`` the detailed reason for the status update. 
+* ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, and ``msg`` the detailed reason for the status update. 
 
 *Errors*
 
@@ -957,10 +975,61 @@ Function Sequence
 
     b) set ``ParachainStatus = ERROR`` and add ``LIQUIDATION`` to ``Errors``,
 
-    c) emit ``ExecuteStatusUpdate(ParachainStatus, Errors,`` ``"Undercollateralized Vault 'vault' is being liquidated")``
+    c) emit ``ExecuteStatusUpdate(ParachainStatus, [LIQUIDATION], [],`` ``"Undercollateralized Vault 'vault' is being liquidated")``
   
 5. Return
 
+
+.. _reportOracleOffline:
+
+reportOracleOffline
+--------------------
+
+A Staked Relayer reports that the :ref:`oracle` is offline. This function checks if the last exchange rate data in the Exchange Rate Oracle is indeed older than the indicated threshold. 
+
+.. note:: Status updates triggered by this function require no Staked Relayer vote, as the report can be programmatically verified by the BTC Parachain.
+
+Specification
+.............
+
+*Function Signature*
+
+``reportOracleOffline()``
+
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, and ``msg`` the detailed reason for the status update. 
+
+*Errors*
+
+* ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
+* ``ERR_ORACLE_ONLINE = "The exchange rate oracle shows up-to-date data"``: The :ref:`oracle` does not appear to be offline. 
+
+*Substrate* ::
+
+  fn reportOracleOffline() -> Result {...}
+
+Function Sequence
+.................
+
+1. Check that the caller of this function is indeed a Staked Relayer. Return ``ERR_STAKED_RELAYERS_ONLY`` if this check fails.
+
+2. Retrieve the UNIX timestamp of the last exchange rate data submission to :ref:`oracle` via :ref:`getLastExchangeRateTime`.
+
+3. If the current (UNIX) time minus ``LastExchangeRateTime`` is below ``MaxDelay``, return ``ERR_ORACLE_ONLINE`` error.
+
+4. Otherwise, the :ref:`oracle` appears to be offline.
+
+    a) set ``ParachainStatus = ERROR`` and add ``ORACLE_OFFLINE`` to ``Errors``,
+
+    b) emit ``ExecuteStatusUpdate(ParachainStatus, [ORACLE_OFFLINE], [],`` ``"Exchange Rate Oracle is missing up to date data.")``
+  
+5. Return
 
 
 .. _recoverFromLIQUIDATION:
@@ -981,7 +1050,7 @@ Specification
 
 *Events*
 
-* ``ExecuteStatusUpdate(newStatusCode, errors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``errors`` the set of ``ErrorCode`` entries specifying the reason for the status change if ``StatusCode == ERROR``, and ``msg`` the detailed reason for the status update. 
+* ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries,, and ``msg`` the detailed reason for the status update. 
 
 *Substrate* ::
 
@@ -994,7 +1063,7 @@ Function Sequence
 
 2. If ``Errors`` is empty, set ``ParachainStatus`` to ``RUNNING``
 
-3. Emit ``ExecuteStatusUpdate(ParachainStatus, Errors, "Recovered from LIQUIDATION error.")`` event.
+3. Emit ``ExecuteStatusUpdate(ParachainStatus, [], [LIQUIDATION], "Recovered from LIQUIDATION error.")`` event.
 
 
 .. _recoverFromORACLEOFFLINE:
@@ -1015,7 +1084,7 @@ Specification
 
 *Events*
 
-* ``ExecuteStatusUpdate(newStatusCode, errors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``errors`` the set of ``ErrorCode`` entries specifying the reason for the status change if ``StatusCode == ERROR``, and ``msg`` the detailed reason for the status update. 
+* ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries,, and ``msg`` the detailed reason for the status update. 
 
 *Substrate* ::
 
@@ -1028,7 +1097,7 @@ Function Sequence
 
 2. If ``Errors`` is empty, set ``ParachainStatus`` to ``RUNNING``
 
-3. Emit ``ExecuteStatusUpdate(ParachainStatus, Errors, "Recovered from ORACLE_OFFLINE error.")`` event.
+3. Emit ``ExecuteStatusUpdate(ParachainStatus, [], [ORACLE_OFFLINE], "Recovered from ORACLE_OFFLINE error.")`` event.
 
 
 .. _recoverFromBTCRelayFailure:
@@ -1049,7 +1118,7 @@ Specification
 
 *Events*
 
-* ``ExecuteStatusUpdate(newStatusCode, errors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``errors`` the set of ``ErrorCode`` entries specifying the reason for the status change if ``StatusCode == ERROR``, and ``msg`` the detailed reason for the status update. 
+* ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, and ``msg`` the detailed reason for the status update. 
 
 *Substrate* ::
 
@@ -1062,7 +1131,7 @@ Function Sequence
 
 2. If ``Errors`` is empty, set ``ParachainStatus`` to ``RUNNING``
 
-3. Emit ``ExecuteStatusUpdate(ParachainStatus, Errors, "Recovered from BTC Relay error due to new main chain (reorganization).")`` event.
+3. Emit ``ExecuteStatusUpdate(ParachainStatus, [], [INVALID_BTC_RELAY, NO_DATA_BTC_RELAY] "Recovered from BTC Relay error due to new main chain (reorganization).")`` event.
 
 
 

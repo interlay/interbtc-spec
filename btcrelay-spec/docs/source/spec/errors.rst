@@ -143,7 +143,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Cause**: The BTC Parachain has been partially deactivated since a specific block height.
 
-``ERR_HALTED``
+``ERR_INVALID``
 
 * **Message**: "BTC Parachain is halted"
 

@@ -547,7 +547,6 @@ Function Sequence
 7. Emit a ``CancelReplace(newVault, oldVault, replaceId)`` event.
  
 8. Return.
-4. 
 
 
 Events

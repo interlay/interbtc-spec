@@ -30,6 +30,7 @@ The granularity of the exchange rate. The granularity is set to :math:`10^{-5}`.
 
   GRANULARITY: u128 = 5;
 
+
 Scalars
 -------
 
@@ -59,6 +60,28 @@ The account of the oracle.
 *Substrate* ::
 
   AuthorizedOracle: AccountId;
+
+
+MaxDelay
+----------
+
+The maximum delay in seconds between incoming calls providing exchange rate data. If the Exchange Rate Oracle receives no data for more than this period, the BTC Parachain enters an ``Error`` state with a ``ORACLE_OFFLINE`` error cause.
+
+*Substrate* ::
+
+  MaxDelay: U128;
+
+
+LastExchangeRateTime
+---------------------
+
+UNIX timestamp indicating when the last exchange rate data was received. 
+
+
+*Substrate* ::
+
+  LastExchangeRateTime: U32;
+
 
 Functions
 ~~~~~~~~~
@@ -112,13 +135,16 @@ Function Sequence
 1. Check if the caller of the function is the ``AuthorizedOracle``. If not, throw ``ERR_INVALID_ORACLE_SOURCE``.
 2. Update the ``ExchangeRate`` with the ``rate``.
 3. Trigger the ``updateCollateralRates`` function in the :ref:`Vault-registry`.
-4. Emit the ``SetExchangeRate`` event.
-5. Return.
+4. If ``LastExchangeRateTime`` minus the current UNIX timestamp is greater or equal to ``MaxDelay``, call :ref:`recoverFromORACLEOFFLINE` to recover from an ``ORACLE_OFFLINE`` error (which was the case before this data submission).
+5. Set ``LastExchangeRateTime`` to the current UNIX timestamp.
+6. Emit the ``SetExchangeRate`` event.
+7. Return.
 
 .. _getExchangeRate:
 
 getExchangeRate
 ----------------
+
 
 Returns the latest BTC/DOT exchange rate, as received from the external data sources.
 
@@ -150,14 +176,48 @@ This function can be called by any participant to retrieve the BTC/DOT exchange 
 Function Sequence
 .................
 
-1. Return the ``ExchangeRate`` from storage.
+1. Check if the current (UNIX) time minus the ``LastExchangeRateTime`` exceeds ``MaxDelay``. If this is the case, return ``ERR_MISSING_EXCHANGE_RATE`` error. 
+
+2. Otherwise, return the ``ExchangeRate`` from storage.
+
+
+
+.. _getLastExchangeRateTime:
+
+getLastExchangeRateTime
+------------------------
+
+
+Returns the UNIX timestamp of when the last BTC/DOT exchange rate was received from the external data sources.
+
+Specification
+.............
+
+*Function Signature*
+
+``getLastExchangeRateTime()``
+
+*Returns*
+
+* `timestamp`: 32bit UNIX timestamp
+
+
+*Substrate*
+
+``fn getLastExchangeRateTime() -> U32 {...}``
+
+
+Function Sequence
+.................
+
+1. Return ``LastExchangeRateTime`` from storage.
 
 
 Events
 ~~~~~~~~~~~~
 
 SetExchangeRate
---------------
+----------------
 
 Emits the new exchange rate when it is updated by the oracle.
 
