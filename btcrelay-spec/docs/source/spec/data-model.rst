@@ -69,7 +69,9 @@ Parameter               Type       Description
 ``merkleRoot``          byte32     Root of the Merkle tree referencing transactions included in the block.
 ``target``              u256       Difficulty target of this block (converted from ``nBits``, see `Bitcoin documentation <https://bitcoin.org/en/developer-reference#target-nbits>`_.).
 ``timestamp``           timestamp  UNIX timestamp indicating when this block was mined in Bitcoin.
-``chainRef``               pointer    Pointer to the ``BlockChain`` struct in which this block header is contained.
+``chainRef``            pointer    Pointer to the ``BlockChain`` struct in which this block header is contained.
+``noData``              bool            Indicates that this block header was flagged with a ``NO_DATA_BTC_RELAY`` error by Staked Relayers.
+``invalid``             bool            Indicates that this block header was flagged with a ``INVALID_BTC_RELAY`` error by Staked Relayers.
 .                       .          .
 ``version``             u32        [Optional] Version of the submitted block.
 ``hashPrevBlock``       byte32     [Optional] Block hash of the predecessor of this block.
@@ -88,6 +90,8 @@ Parameter               Type       Description
         target: U256,
         timestamp: DateTime,
         chainRef: &Chain,
+        noData: bool, 
+        invalid: bool,
         // Optional fields
         version: U32, 
         hashPrevBlock: H256,

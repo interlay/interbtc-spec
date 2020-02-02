@@ -306,6 +306,18 @@ This mapping is necessary to prevent duplicate theft reports.
     TheftReports map H256 => HashSet<AccountId>
 
 
+PendingBTCRelayFailures
+.........................
+
+Mapping of Bitcoin block header PoW hashes to ``ErrorCode`` entries, as reported by Staked Relayers (but not yet voted upon).``<H256, ErrorCode``.
+
+.. note:: This mapping is used to store pending BTC-Relay failures. Once voted upon, the according boolean flag (``noData`` or ``invalid``) in the ``BlockChain`` entry. 
+
+*Substrate* ::
+
+    BTCRelayFailures map H256 => ErrorCode
+
+
 Functions
 ~~~~~~~~~
 
@@ -970,6 +982,56 @@ Function Sequence
     c) emit ``ExecuteStatusUpdate(ParachainStatus, [LIQUIDATION], [],`` ``"Undercollateralized Vault 'vault' is being liquidated")``
   
 5. Return
+
+
+
+.. _reportBTCRelayFailure:
+
+reportBTCRelayFailure
+----------------------
+
+A Staked Relayer reports that :ref:`btc-relay` has experienced a failure: either a ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY``.
+
+.. attention:: This function **does not** validate the Staked Relayers accusation. Instead, it is put up to a majority vote among all Staked Relayers in the form of a  
+
+This function checks if the Vault's collateral is indeed below this rate and if yes, flags the Vault for liquidation and updates the ``ParachainStatus`` to ``ERROR`` and adding ``LIQUIDATION`` to ``Errors``.
+
+
+.. todo:: Actually, we also need to flag the block. We do not yet have any info which BlockHeader is flagged as INVALID or NO_DATA.  In the latter case it is important, since we need to allow verification of TX **before** the flagged block.
+
+Specification
+.............
+
+*Function Signature*
+
+``reportBTCRelayFailure(chainId, errorCode)``
+
+
+*Parameters*
+
+* ``chainId``: identifier of the blockchain 
+* `` ``
+
+*Returns*
+
+* ``None``
+
+*Events*
+
+* ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, and ``msg`` the detailed reason for the status update. 
+
+*Errors*
+
+* ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
+
+*Substrate* ::
+
+  fn reportBTCRelayFailure(chainId: U256, errorCode: ErrorCode) -> Result {...}
+
+Function Sequence
+.................
+
+
 
 
 

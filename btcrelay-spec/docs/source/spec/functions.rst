@@ -105,7 +105,7 @@ Specification
 Preconditions
 ~~~~~~~~~~~~~
 
-* The failure handling state must not be set to ``SHUTDOWN: 3``.
+* The BTC Parachain status must not be set to ``SHUTDOWN: 3``.
 
 .. warning:: The BTC-Relay does not necessarily have the same view of the Bitcoin blockchain as the user's local Bitcoin client. This can happen if (i) the BTC-Relay is under attack, (ii) the BTC-Relay is out of sync, or, similarly, (iii) if the user's local Bitcoin client is under attack or out of sync (see :ref:`security`). 
 
@@ -117,7 +117,7 @@ Function sequence
 
 The ``storeBlockHeader`` function takes as input the 80 byte raw Bitcoin block header and follows the sequence below:
 
-1. Check if the failure handling state is set to ``SHUTDOWN``. If true, return ``ERR_SHUTDOWN``. 
+1. Check if the BTC Parachain status is set to ``SHUTDOWN``. If true, return ``ERR_SHUTDOWN``. 
 
 2. Call :ref:`verifyBlockHeader` passing ``blockHeaderBytes`` as function parameter. If this call **returns an error** , then abort and return the raised error. If successful, this call returns the hash of the previous block (``hashPrevBlock``), referenced in ``blockHeaderBytes``, as stored in ``BlockHeaders``.
 
@@ -315,11 +315,13 @@ Specification
 *Errors*
 
 * ``ERR_PARTIAL = "BTC Parachain partially deactivated"``: the BTC Parachain has been partially deactivated since a specific block height.
-* ``ERR_HALTED = "BTC Parachain is halted"``: the BTC Parachain has been halted.
+* ``ERR_INVALID = "BTC-Relay has detected an invalid block in the current main chain, and has been halted"``: the BTC Parachain has been halted because Staked Relayers reported an invalid block.
+* ``ERR_NO_DATA = "BTC-Relay has a NO_DATA failure and the requested block cannot be verified reliably": the ``txBlockHeight`` is greater or equal to the hight of a ``BlockHeader`` which is flagged with ``NO_DATA_BTC_RELAY``.
 * ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the Governance Mechanism.
 * ``ERR_MALFORMED_TXID = "Malformed transaction identifier"``: return error if the transaction identifier (``txId``) is malformed.
 * ``ERR_CONFIRMATIONS = "Transaction has less confirmations than requested"``: return error if the block in which the transaction specified by ``txId`` was included has less confirmations than requested.
 * ``ERR_INVALID_MERKLE_PROOF = "Invalid Merkle Proof"``: return error if the Merkle proof is malformed or fails verification (does not hash to Merkle root).
+
 
 *Substrate*
 
@@ -330,28 +332,38 @@ Specification
 Preconditions
 ~~~~~~~~~~~~~
 
-* If the failure handling status is set to ``PARTIAL: 1``, transaction verification is disabled for the latest blocks.
-* The failure handling status must not be set to ``HALTED: 2``. If ``HALTED`` is set, all transaction verification is disabled.
-* The failure handling status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN`` is set, all transaction verification is disabled.
+* If the BTC Parachain status is set to ``PARTIAL: 1``, transaction verification is disabled for the latest blocks.
+* The BTC Parachain status must not be set to ``HALTED: 2``. If ``HALTED`` is set, all transaction verification is disabled.
+* The BTC Parachain status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN`` is set, all transaction verification is disabled.
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
 The ``verifyTransactionInclusion`` function follows the function sequence below:
 
-1. Check if the failure handling state is set to ``HALTED`` or ``SHUTDOWN``. If true, return ``ERR_HALTED`` or ``ERR_SHUTDOWN`` and return. 
+1. Check if the BTC Parachain status is set to ``SHUTDOWN``. If true, return ``ERR_SHUTDOWN`` and return. 
 
-2. Check if the failure handling state is set to ``PARTIAL``. If true, check if the ``txBlockHeight`` is equal to or greater than the first ``NO_DATA_BTC_RELAY`` block. If false, return ``ERR_PARTIAL`` and return.
+2. Check if the BTC Parachain status is set to ``ERROR``. If yes, retrieve ``Errors`` from the *Security* module of PolkaBTC is set to ``INVALID_BTC_RELAY``.
 
-3. Check that ``txId`` is 32 bytes long. Return ``ERR_INVALID_FORK_ID`` error if this check fails. 
+3. If ``Errors`` contains ``INVALID_BTC_RELAY``, abort and return a ``ERR_INVALID`` error.
 
-4. Check that the current ``BestBlockHeight`` exceeds ``txBlockHeight`` by the specified number of ``confirmations``. Return ``ERR_CONFIRMATIONS`` if this check fails. 
+4. If ``Errors`` contains ``NO_DATA_BTC_RELAY``, the first ``NO_DATA_BTC_RELAY`` block (i.e., a block where ``BlockHeader.noData == True``). For this, 
 
-5. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``Chains`` at the passed ``txBlockHeight``.    
+  a. Retrieve the top-most ``BlockChain`` entry from ``Chains``,
+  b. Iterate over ``BlockChain.chain`` until a block header with ``BlockHeader.noData == True`` is found. 
+  c. If ``txBlockHeight`` is greater or equal to the block height of the found block, abort and return ``ERR_NO_DATA``.
 
-6. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Return ``ERR_INVALID_MERKLE_PROOF`` if one of these checks fails.
+5. Check if the BTC Parachain status is set to ``NO_DATA_BTC_RELAY``. If true, check if the ``txBlockHeight`` is equal to or greater than the first ``NO_DATA_BTC_RELAY`` block. If false, return ``ERR_PARTIAL`` and return.
 
-7. Call :ref:`computeMerkle` passing ``txId``, ``txIndex`` and ``merkleProof`` as parameters. 
+6. Check that ``txId`` is 32 bytes long. Return ``ERR_INVALID_FORK_ID`` error if this check fails. 
+
+7. Check that the current ``BestBlockHeight`` exceeds ``txBlockHeight`` by the specified number of ``confirmations``. Return ``ERR_CONFIRMATIONS`` if this check fails. 
+
+8. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``Chains`` at the passed ``txBlockHeight``.    
+
+9. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Return ``ERR_INVALID_MERKLE_PROOF`` if one of these checks fails.
+
+10. Call :ref:`computeMerkle` passing ``txId``, ``txIndex`` and ``merkleProof`` as parameters. 
 
   a. If this call returns the ``merkleRoot``, emit a ``VerifyTransaction(txId, txBlockHeight, confirmations)`` event and return ``True``.
   
@@ -410,6 +422,7 @@ Specification
 *Errors*
 
 * ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the Governance Mechanism.
+* ``ERR_INVALID = "BTC-Relay has detected an invalid block in the current main chain, and has been halted"``: the BTC Parachain has been halted because Staked Relayers reported an invalid block.
 * ``ERR_INVALID_TXID = "Transaction hash does not match given txid"``: return error if the transaction identifier (``txId``) does not match the actual hash of the transaction.
 * ``ERR_INSUFFICIENT_VALUE = "Value of payment below requested amount"``: return error the value of the (first) *Payment UTXO* is lower than ``paymentValue``.
 * ``ERR_TX_FORMAT = "Transaction has incorrect format"``: return error if the transaction has an incorrect format (see :ref:`accepted-tx-format`).
@@ -425,26 +438,30 @@ Specification
 Preconditions
 ~~~~~~~~~~~~~
 
-* The failure handling status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN`` is set, all transaction validation is disabled.
+* The BTC Parachain status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN`` is set, all transaction validation is disabled.
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
 See the `raw Transaction Format section in the Bitcoin Developer Reference <https://bitcoin.org/en/developer-reference#raw-transaction-format>`_ for a full specification of Bitcoin's transaction format (and how to extract inputs, outputs etc. from the raw transaction format). 
 
-1. Check that the double SHA256 hash of ``rawTx`` (use :ref:`sha256d`) equals to the ``txid``. Return ``ERR_INVALID_TXID`` if this check fails. 
+1. Check if the BTC Parachain status is set to ``SHUTDOWN``. If true, return ``ERR_SHUTDOWN`` and return. 
 
-2. Extract the ``outputs`` from ``rawTx`` using :ref:`extractOutputs`.
+2. Check if the BTC Parachain status is set to ``ERROR``. If yes, retrieve ``Errors`` from the *Security* module of PolkaBTC is set to ``INVALID_BTC_RELAY``. If ``Errors`` contains ``INVALID_BTC_RELAY``, abort and return a ``ERR_INVALID`` error.
+
+3. Check that the double SHA256 hash of ``rawTx`` (use :ref:`sha256d`) equals to the ``txid``. Return ``ERR_INVALID_TXID`` if this check fails. 
+
+4. Extract the ``outputs`` from ``rawTx`` using :ref:`extractOutputs`.
 
   a. Check that the transaction (``rawTx``) has at least 2 outputs. The first output (*Payment UTXO*) must be a `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_ or `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_ output. The second output (*Data UTXO*) must be an `OP_RETURN <https://bitcoin.org/en/transactions-guide#term-null-data>`_ output. Raise ``ERR_TX_FORMAT`` if this check fails. 
 
-3. Extract the value of the (first) *Payment UTXO* (``outputs[0]``) using :ref:`extractOutputValue` and check that it is equal (or greater) than ``paymentValue``. Return ``ERR_INSUFFICIENT_VALUE`` if this check fails. 
+5. Extract the value of the (first) *Payment UTXO* (``outputs[0]``) using :ref:`extractOutputValue` and check that it is equal (or greater) than ``paymentValue``. Return ``ERR_INSUFFICIENT_VALUE`` if this check fails. 
 
-4. Extract the Bitcoin address specified as recipient in the (first) *Payment UTXO* (``outputs[0]``)  using :ref:`extractOutputAddress`  and check that it matches ``recipientBtcAddress``. Return ``ERR_WRONG_RECIPIENT`` if this check fails, or the error returned by :ref:`extractOutputAddress` (if the output was malformed).
+6. Extract the Bitcoin address specified as recipient in the (first) *Payment UTXO* (``outputs[0]``)  using :ref:`extractOutputAddress`  and check that it matches ``recipientBtcAddress``. Return ``ERR_WRONG_RECIPIENT`` if this check fails, or the error returned by :ref:`extractOutputAddress` (if the output was malformed).
 
-5. Extract the OP_RETURN value from the (second) *Data UTXO* (``outputs[1]``) using :ref:`extractOPRETURN` and check that it matches ``opReturnId``. Return ``ERR_INVALID_OPRETURN`` error if this check fails, or the error returned by :ref:`extractOPRETURN` (if the output was malformed).
+7. Extract the OP_RETURN value from the (second) *Data UTXO* (``outputs[1]``) using :ref:`extractOPRETURN` and check that it matches ``opReturnId``. Return ``ERR_INVALID_OPRETURN`` error if this check fails, or the error returned by :ref:`extractOPRETURN` (if the output was malformed).
 
-6. Return ``True``.
+8. Return ``True``.
 
 
 .. todo:: Decide how to best react if more BTC was sent, than expected. Different handling of this may be necessary, depending on the protocol (Issue, Redeem, Replace). Returning an error aborts the program flow, which may be unwanted in some cases. 
