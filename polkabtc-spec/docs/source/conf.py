@@ -73,10 +73,15 @@ language = None
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = None
+pygments_style = 'colorful'
 
 # Highlight language for code
 highlight_language = 'rust'
+
+# Enumerating figures
+numfig = True
+
+numfig_secnum_depth = 1
 
 # -- Options for HTML output -------------------------------------------------
 
