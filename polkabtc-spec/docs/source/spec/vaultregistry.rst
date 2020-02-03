@@ -121,6 +121,10 @@ Account identifier of an artificial Vault maintained by the VaultRegistry to han
 
 .. note:: A Vault's token balances and DOT collateral are transferred to the ``LiquidationVault`` as a result of :ref:`reportVaultUndercollateralized` and :ref:`reportVaultTheft`.
 
+*Substrate* ::
+
+  LiquidationVault: AccountId;
+
 Maps
 ----
 
@@ -213,6 +217,8 @@ Functions
 ~~~~~~~~~
 
 
+.. _registerVault:
+
 registerVault
 -------------
 
@@ -270,6 +276,8 @@ The ``registerVault`` function takes as input a Parachain AccountID, a Bitcoin a
 
 4. Return.
 
+.. _proveValidBTCAddress:
+
 proveValidBTCAddress (Optional)
 -------------------------------
 
@@ -301,7 +309,7 @@ Specification
 
 *Errors*
 
-* ``ERR_INVALID_BTC_ADDRESS``: The provided collateral was insufficient - it must be above ``MinimumCollateralVault``.
+* ``ERR_INVALID_BTC_ADDRESS``: Not a valid BTC address.
 * see ``verifyTransactionInclusion`` in BTC-Relay.  
 
 *Substrate* ::
@@ -353,7 +361,7 @@ Specification
 
 *Events*
 
-* ``LockCollateral(Vault, newCollateral, totalCollateral, freeCollateral)``: emit an event stating how much new (``newCollateral``), total collateral (``totalCollateral``) and freely available collateral (``freeCollateral``) the Vault calling this function has locked.
+* ``LockAdditionalCollateral(Vault, newCollateral, totalCollateral, freeCollateral)``: emit an event stating how much new (``newCollateral``), total collateral (``totalCollateral``) and freely available collateral (``freeCollateral``) the Vault calling this function has locked.
 
 *Errors*
 
@@ -361,7 +369,7 @@ Specification
 
 *Substrate* ::
 
-  fn lockCollateral(origin, amount: Balance) -> Result {...}
+  fn lockAdditionalCollateral(origin, amount: Balance) -> Result {...}
 
 Precondition
 ............
@@ -380,8 +388,10 @@ Function Sequence
 
 3. Return.
 
+
+.. _withdrawCollateral:
 withdrawCollateral
--------------------
+------------------
 
 A Vault can withdraw its *free* collateral at any time, as long as there remains more collateral (*free or used in backing issued PolkaBTC*) than ``MinimumCollateralVault`` and above the ``SecureCollateralThreshold``. Collateral that is currently being used to back issued PolkaBTC remains locked until the Vault is used for a redeem request (full release can take multiple redeem requests).
 
@@ -404,7 +414,7 @@ Specification
 
 *Events*
 
-* ``WithdrawCollateral(Vault, withdrawAmount, totalCollateral)``: emit an event stating how much collateral was withdrawn by the Vault and total collateral a Vault has left.
+* ``WithdrawCollateral(Vault, withdrawAmount, totalCollateral)``: emit emit an event stating how much collateral was withdrawn by the Vault and total collateral a Vault has left.
 
 *Errors*
 
@@ -476,7 +486,7 @@ Specification
 
 *Events*
 
-* ``ToBeIssuedTokens(vaultId, tokens)``
+* ``IncreaseToBeIssuedTokens(vaultId, tokens)``
 
 *Errors*
 
@@ -588,7 +598,7 @@ Specification
 
 *Events*
 
-* ``IssueTokens(vault, tokens)``
+* ``IssueTokens(vault, tokens)``: Emit an event when an issue request is executed.
 
 *Errors*
 
@@ -644,7 +654,7 @@ Specification
 
 *Events*
 
-* ``IncreaseToBeRedeemedTokens(vault, tokens)``
+* ``IncreaseToBeRedeemedTokens(vault, tokens)``: Emit an event when a redeem request is requested.
 
 *Errors*
 
@@ -697,7 +707,8 @@ Specification
 
 *Events*
 
-* ``DecreaseToBeRedeemedTokens(vault, tokens)``
+* ``DecreaseToBeRedeemedTokens(vault, tokens)``: Emit an event when a replace request cannot be completed because the vault has too little tokens committed.
+
 
 *Errors*
 
@@ -735,7 +746,7 @@ Specification
 
 *Function Signature*
 
-``decreaseTokens(vault, tokens)``
+``decreaseTokens(vault, user, tokens, collateral)``
 
 *Parameters*
 
@@ -750,7 +761,7 @@ Specification
 
 *Events*
 
-* ``DecreaseTokens(vault, tokens)``
+* ``DecreaseTokens(vault, user, tokens, collateral)``: Emit an event if a redeem request cannot be fulfilled.
 
 *Errors*
 
@@ -758,7 +769,7 @@ Specification
 
 *Substrate* ::
 
-  fn decreaseTokens(vault: AccountId, tokens: Balance) -> Result {...}
+  fn decreaseTokens(vault: AccountId, user: AccountId, tokens: Balance, collateral: Balance) -> Result {...}
 
 Preconditions
 .............
@@ -799,13 +810,12 @@ Specification
 
 *Function Signature*
 
-``redeemTokens(vault, tokens, )``
+``redeemTokens(vault, tokens)``
 
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
 * ``tokens``: The amount of PolkaBTC redeemed.
-* ``premiumDOT``: The amount of DOT to be paid to the user as a premium using the Vault's released collateral.
 
 *Returns*
 
@@ -813,7 +823,7 @@ Specification
 
 *Events*
 
-* ``RedeemTokens(vault, tokens)``
+* ``RedeemTokens(vault, tokens)``: Emit an event when a redeem request successfully completes.
 
 *Errors*
 
@@ -844,7 +854,7 @@ Function Sequence
 .. _redeemTokensPremium:
 
 redeemTokensPremium
----------------------
+-------------------
 
 Handles a redeem request, where a user is paid a premium in DOT. Calls :ref:`redeemTokens` and then allocates the corresponding amount of DOT to the ``redeemer`` using the Vault's free collateral.
 
@@ -853,13 +863,14 @@ Specification
 
 *Function Signature*
 
-``redeemTokens(vault, tokens, premiumDOT, redeemer)``
+``redeemTokensPremium(vault, tokens, premiumDOT, redeemer)``
 
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
 * ``tokens``: The amount of PolkaBTC redeemed.
 * ``premiumDOT``: The amount of DOT to be paid to the user as a premium using the Vault's released collateral.
+* ``redeemer``: The user that redeems at a premium.
 
 *Returns*
 
@@ -867,7 +878,7 @@ Specification
 
 *Events*
 
-* ``RedeemTokensPremium(vault, tokens, premiumDOT, redeemer)``
+* ``RedeemTokensPremium(vault, tokens, premiumDOT, redeemer)``: Emit an event when a user is executing a redeem request that includes a premium.
 
 *Errors*
 
@@ -903,7 +914,7 @@ redeemTokensLiquidation
 
 Handles redeem requests which are executed during a ``LIQUIDATION`` recover (see :ref:`security`).
 Reduces the ``issuedToken`` of the ``LiquidationVault`` and "slashes" the corresponding amount of DOT collateral. 
-Once ``LiquidationVault`` has not more ``issuedToken``left, removes the ``LIQUIDATION`` error from the BTC Parachain status.
+Once ``LiquidationVault`` has not more ``issuedToken`` left, removes the ``LIQUIDATION`` error from the BTC Parachain status.
 
 Specification
 .............
@@ -924,7 +935,7 @@ Specification
 
 *Events*
 
-* ``RedeemTokensLiquidation(redeemer, redeemDOTinBTC)``
+* ``RedeemTokensLiquidation(redeemer, redeemDOTinBTC)``: Emit an event when a redeem is executed under the ``LIQUIDATION`` status..
 
 *Errors*
 
@@ -981,7 +992,7 @@ Specification
 
 *Events*
 
-* ``ReplaceTokens(oldVault, newVault, tokens, collateral)``
+* ``ReplaceTokens(oldVault, newVault, tokens, collateral)``: Emit an event when a replace requests is successfully executed.
 
 *Errors*
 
@@ -1040,7 +1051,7 @@ Specification
 
 *Events*
 
-* ``LiquidateVault(vault)``: emits an event indicating that the Vault with ``vault`` account identifier has been liquidated.
+* ``LiquidateVault(vault)``: Emit an event indicating that the Vault with ``vault`` account identifier has been liquidated.
 
 *Errors*
 
@@ -1070,14 +1081,402 @@ Function Sequence
 
 Events
 ~~~~~~
-Summary of events emitted by this component
+
+RegisterVault
+-------------
+
+Emit an event stating that a new Vault (``vault``) was registered and provide information on the Vault’s collateral (``collateral``).
+
+*Event Signature*
+
+``RegisterVault(vault, collateral)``
+
+*Parameters*
+
+* ``vault``: The account of the Vault to be registered.
+* ``collateral``: to-be-locked collateral in DOT.
+
+*Functions*
+
+* :ref:`registerVault`
+
+*Substrate* ::
+
+  RegisterVault(AccountId, Balance);
+
+.. _event_ProveValidBTCAddress:
+
+ProveValidBTCAddress
+--------------------
+
+Emit an event stating that a Vault (``vault``) submitted a proof that its BTC address is valid.
+
+*Event Signature*
+
+``ProveValidBTCAddress(vault, btcAddress)``
+
+*Parameters*
+
+* ``vault``: The account of the Vault to be registered.
+* ``btcAddress``: The BTC address of the vault.
+
+*Functions*
+
+* :ref:`proveValidBTCAddress`
+
+*Substrate* ::
+
+  ProveValidBTCAddress();
+
+
+.. _event_LockAdditionalCollateral:
+LockAdditionalCollateral
+------------------------
+
+Emit an event stating how much new (``newCollateral``), total collateral (``totalCollateral``) and freely available collateral (``freeCollateral``) the Vault calling this function has locked.
+
+*Event Signature*
+
+``LockAdditionalCollateral(Vault, newCollateral, totalCollateral, freeCollateral)``
+
+*Parameters*
+
+* ``Vault``: The account of the Vault locking collateral.
+* ``newCollateral``: to-be-locked collateral in DOT.
+* ``totalCollateral``: total collateral in DOT.
+* ``freeCollateral``: collateral not "occupied" with PolkaBTC in DOT.
+
+*Functions*
+
+* ref:`lockAdditionalCollateral`
+
+*Substrate* ::
+
+  LockAdditionalCollateral(AccountId, Balance, Balance, Balance);
+
+WithdrawCollateral
+------------------
+
+Emit emit an event stating how much collateral was withdrawn by the Vault and total collateral a Vault has left.
+
+*Event Signature*
+
+``WithdrawCollateral(Vault, withdrawAmount, totalCollateral)``
+
+*Parameters*
+
+* ``Vault``: The account of the Vault locking collateral.
+* ``withdrawAmount``: To-be-withdrawn collateral in DOT.
+* ``totalCollateral``: total collateral in DOT.
+
+*Functions*
+
+* ref:`withdrawCollateral`
+
+*Substrate* ::
+
+  WithdrawCollateral(AccountId, Balance, Balance);
+
+IncreaseToBeIssuedTokens
+------------------------
+
+Emit 
+
+*Event Signature*
+
+``IncreaseToBeIssuedTokens(vaultId, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC to be locked.
+
+
+*Functions*
+
+* ref:``increaseToBeIssuedTokens``
+
+*Substrate* ::
+
+  IncreaseToBeIssuedTokens(AccountId, Balance);
+
+DecreaseToBeIssuedTokens
+------------------------
+
+Emit 
+
+*Event Signature*
+
+``DecreaseToBeIssuedTokens(vaultId, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC to be unreserved.
+
+
+*Functions*
+
+* ref:``decreaseToBeIssuedTokens``
+
+*Substrate* ::
+
+  DecreaseToBeIssuedTokens(AccountId, Balance);
+
+
+IssueTokens
+-----------
+
+Emit an event when an issue request is executed.
+
+*Event Signature*
+
+``IssueTokens(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC that were just issued.
+
+*Functions*
+
+* ref:``issueTokens``
+
+*Substrate* ::
+
+  IssueTokens(AccountId, Balance);
+
+IncreaseToBeRedeemedTokens
+--------------------------
+
+Emit an event when a redeem request is requested.
+
+*Event Signature*
+
+``IncreaseToBeRedeemedTokens(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC to be redeemed.
+
+*Functions*
+
+* ref:``increaseToBeRedeemedTokens``
+
+*Substrate* ::
+
+  IncreaseToBeRedeemedTokens(AccountId, Balance);
+
+DecreaseToBeRedeemedTokens
+--------------------------
+
+Emit an event when a replace request cannot be completed because the vault has too little tokens committed.
+
+*Event Signature*
+
+``DecreaseToBeRedeemedTokens(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC not to be replaced.
+
+*Functions*
+
+* ref:``decreaseToBeRedeemedTokens``
+
+*Substrate* ::
+
+  DecreaseToBeRedeemedTokens(AccountId, Balance);
+
+
+DecreaseTokens
+--------------
+
+Emit an event if a redeem request cannot be fulfilled.
+
+*Event Signature*
+
+``DecreaseTokens(vault, user, tokens, collateral)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``user``: The BTC Parachain address of the user that made the redeem request.
+* ``tokens``: The amount of PolkaBTC that were not redeemed.
+* ``collateral``: The amount of collateral assigned to this request.
+
+*Functions*
+
+* ref:``decreaseTokens``
+
+*Substrate* ::
+
+  DecreaseTokens(AccountId, AccountId, Balance, Balance);
+
+
+RedeemTokens
+------------
+
+Emit an event when a redeem request successfully completes.
+
+*Event Signature*
+
+``RedeemTokens(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC redeemed.
+
+*Functions*
+
+* ref:``redeemTokens``
+
+*Substrate* ::
+
+  RedeemTokens(AccountId, Balance);
+
+
+RedeemTokensPremium
+-------------------
+
+Emit an event when a user is executing a redeem request that includes a premium.
+
+*Event Signature*
+
+``RedeemTokensPremium(vault, tokens, premiumDOT, redeemer)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of PolkaBTC redeemed.
+* ``premiumDOT``: The amount of DOT to be paid to the user as a premium using the Vault's released collateral.
+* ``redeemer``: The user that redeems at a premium.
+
+*Functions*
+
+* ref:``redeemTokensPremium``
+
+*Substrate* ::
+
+  RedeemTokensPremium(AccountId, Balance, Balance, AccountId);
+
+
+RedeemTokensLiquidation
+-----------------------
+
+Emit an event when a redeem is executed under the ``LIQUIDATION`` status.
+
+*Event Signature*
+
+``RedeemTokensLiquidation(redeemer, redeemDOTinBTC)``
+
+*Parameters*
+
+* ``redeemer`` : The account of the user redeeming polkaBTC.
+* ``redeemDOTinBTC``: The amount of PolkaBTC to be redeemed in DOT with the ``LiquidationVault``, denominated in BTC.
+
+*Functions*
+
+* ref:``redeemTokensLiquidation``
+
+*Substrate* ::
+
+  RedeemTokensLiquidation(AccountId, Balance);
+
+
+ReplaceTokens
+-------------
+
+Emit an event when a replace requests is successfully executed.
+
+*Event Signature*
+
+``ReplaceTokens(oldVault, newVault, tokens, collateral)``
+
+*Parameters*
+
+* ``oldVault``: Account identifier of the Vault to be replaced.
+* ``newVault``: Account identifier of the Vault accepting the replace request.
+* ``tokens``: The amount of PolkaBTC replaced.
+* ``collateral``: The collateral provided by the new vault. 
+
+*Functions*
+
+* ref:``replaceTokens``
+
+*Substrate* ::
+
+  ReplaceTokens(AccountId, AccountId, Balance, Balance);
+
+LiquidateVault
+--------------
+
+Emit an event indicating that the Vault with ``vault`` account identifier has been liquidated.
+
+*Event Signature*
+
+``LiquidateVault(vault)``
+
+*Parameters*
+
+* ``vault``: Account identifier of the Vault to be liquidated.
+
+*Functions*
+
+* ref:``liquidateVault``
+
+*Substrate* ::
+
+  LiquidateVault(AccountId);
+
 
 Error Codes
 ~~~~~~~~~~~
 
+``ERR_MIN_AMOUNT``
+
+* **Message**: "The provided collateral was insufficient - it must be above ``MinimumCollateralVault``."
+* **Function**: :ref:`registerVault` | :ref:`withdrawCollateral`
+* **Cause**: The vault provided too little collateral, i.e. below the MinimumCollateralVault limit.
+
+``ERR_INVALID_BTC_ADDRESS``
+
+* **Message**: "Not a valid BTC address."
+* **Function**: :ref:`proveValidBTCAddress`
+* **Cause**: BTC-Relay failed to verify the BTC address. See ``verifyTransactionInclusion`` in BTC-Relay. 
+
+
+``ERR_UNKNOWN_VAULT``
+
+* **Message**: "The specified Vault does not exist. ."
+* **Function**: :ref:`lockAdditionalCollateral`
+* **Cause**: Vault could not be found in ``Vaults`` mapping.
+
+``ERR_INSUFFICIENT_FREE_COLLATERAL``
+
+* **Message**: "Not enough free collateral available."
+* **Function**: :ref:`withdrawCollateral`
+* **Cause**: The Vault is trying to withdraw more collateral than is currently free. 
+
+
+``ERR_UNAUTHORIZED``
+
+* **Message**: "Origin of the call mismatches authorization."
+* **Function**: :ref:`withdrawCollateral`
+* **Cause**: The caller of the withdrawal is not the specified Vault, and hence not authorized to withdraw funds.
+
 ``ERR_EXCEEDING_VAULT_LIMIT``
 
 * **Message**: "Issue request exceeds vault collateral limit."
-* **Function**: :ref:`requestIssue`
+* **Function**: :ref:`increaseToBeIssuedTokens`
 * **Cause**: The collateral provided by the vault combined with the exchange rate forms an upper limit on how much PolkaBTC can be issued. The requested amount exceeds this limit.
 
+
+``ERR_INSUFFICIENT_TOKENS_COMMITTED``
+
+* **Message**: "The requested amount of ``tokens`` exceeds the amount by this vault."
+* **Function**: :ref:`decreaseToBeIssuedTokens` | :ref:`issueTokens` | :ref:`increaseToBeRedeemedTokens` | :ref:`decreaseToBeRedeemedTokens` | :ref:`decreaseTokens` | :ref:`redeemTokens` | :ref:`redeemTokensLiquidation` | :ref:`replaceTokens` | :ref:`liquidateVault`
+* **Cause**: A user tries to cancel/execute an issue request or create a replace request for a vault that has less than the reserved tokens committed.

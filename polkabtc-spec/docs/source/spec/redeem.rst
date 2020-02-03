@@ -360,9 +360,9 @@ Function Sequence
 
 1. Get the current exchange rate (``exchangeRate``) using :ref:`getExchangeRate`.
 
-2. Calculate ``totalLiquidationValue =``:math:`\sum_{v}^{LiquidationList} (\mathit{v.issuedTokens} \cdot \mathit{exchangeRate} - \mathit{v.collateral})`
+2. Calculate ``totalLiquidationValue =`` :math:`\sum_{v}^{LiquidationList} (\mathit{v.issuedTokens} \cdot \mathit{exchangeRate} - \mathit{v.collateral})`
 
-3. Retrieve the ``TotalSupply`` of PolkaBTC from :ref`treasury`.
+3. Retrieve the ``TotalSupply`` of PolkaBTC from :ref:`treasury`.
 
 4. Return ``totalLiquidationValue / TotalSupply``
 
