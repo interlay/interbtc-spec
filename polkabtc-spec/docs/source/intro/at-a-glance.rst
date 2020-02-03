@@ -30,12 +30,12 @@ Components
 
 The BTC Parachain makes use of two main components to achieve issuing and redeeming of PolkaBTC:
 
-+ **PolkaBTC**: The PolkaBTC module implements four protocols including issue, trade/swap, redeem, and replace. It maintains the PolkaBTC tokens, i.e. who owns how many tokens.
-+ **BTCRelay**: The BTCRelay component is used to verify that certain transactions have happened on the Bitcoin blockchain. For example, when a user issues a new PlokaBTC an equivalent amount of Bitcoins needs to be locked on the Bitcoin chain. The user can prove this to the PolkaBTC module by verifying his transaction in the BTCRelay module.
++ **PolkaBTC**: The PolkaBTC component implements four protocols including issue, transfer, redeem, and replace. It maintains the PolkaBTC tokens, i.e. who owns how many tokens and manages the vaults as well as the collateral in the system.
++ **BTC-Relay**: The BTC-Relay component is used to verify that certain transactions have happened on the Bitcoin blockchain. For example, when a user issues a new PolkaBTC an equivalent amount of Bitcoins needs to be locked on the Bitcoin chain. The user can prove this to the PolkaBTC component by verifying his transaction in the BTC-Relay component.
 
-The figure below describes the relationships between the components in a high level. Please note that we use a simplified model here, where users are the ones augmenting the issue and redeem process. In practice, this is executed by a collateralized third-party.
+The figure below describes the relationships between the components in a high level. Please note that we use a simplified model here, where users are the ones augmenting the issue and redeem process. In practice, this is executed by the collateralized vaults.
 
 .. figure:: ../figures/Overview-Components.png
       :alt: BTC Parachain components.
 
-      The BTC Parachain consists of two modules. The PolkaBTC module (in green) maintains the accounts that own PolkaBTC tokens. The BTCRelay (blue) is repsonible for verifying the Bitcoin state to verify transactions. Users (in purple) are able to create new PolkaBTC by locking BTC on the Bitcoin chain and redeeming BTC by burning PolkaBTC. Also, users can trade PolkaBTC on the BTC Parachain and in the wider Polkadot ecosystem.
+      The BTC Parachain consists of two logically different components. The PolkaBTC component (in green) maintains the accounts that own PolkaBTC tokens. The BTC-Relay (blue) is repsonible for verifying the Bitcoin state to verify transactions. Users (in purple) are able to create new PolkaBTC by locking BTC on the Bitcoin chain and redeeming BTC by burning PolkaBTC. Also, users can trade PolkaBTC on the BTC Parachain and in the wider Polkadot ecosystem.

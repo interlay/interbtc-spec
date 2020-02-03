@@ -1140,14 +1140,14 @@ Function Sequence
 generateSecureId
 ----------------
 
-Generates a unique ID using a the account identifier, the ``Nonce`` and a random seed.
+Generates a unique ID using an account identifier, the ``Nonce`` and a random seed.
 
 Specification
 .............
 
 *Function Signature*
 
-``generateId(account)``
+``generateSecureId(account)``
 
 *Parameters*
 
@@ -1155,21 +1155,19 @@ Specification
 
 *Returns*
 
-* ``hash``:
+* ``hash``: a cryptographic hash generated via a secure hash function.
 
 *Substrate* ::
 
-  fn generateId(account: AccountId) -> T::H256 {...}
+  fn generateSecureId(account: AccountId) -> T::H256 {...}
 
 Function Sequence
 .................
 
-1. Concatenate ``account``, ``Nonce``, and ``random_seed()``.
-2. SHA256 hash the result of step 1.
-3. Return the resulting hash.
-
-.. todo:: Reference the Substrate randomness module correctly.
-
+1. Increment the ``Nonce``.
+2. Concatenate ``account``, ``Nonce``, and ``random_seed()``.
+3. SHA256 hash the result of step 1.
+4. Return the resulting hash.
 
 .. _getStatusCounter:
 

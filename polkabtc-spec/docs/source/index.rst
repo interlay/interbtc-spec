@@ -25,7 +25,6 @@ Welcome to PolkaBTC's documentation!
    spec/oracle
    spec/btc-relay
    spec/security
-   spec/helpers
 
 .. toctree::
    :maxdepth: 2
