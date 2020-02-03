@@ -14,7 +14,7 @@ The specification consists of two parts:
 ### PolkaBTC
 
 - [Website](https://interlay.gitlab.io/polkabtc-spec)
-- [PDF]()
+- [PDF](https://interlay.gitlab.io/polkabtc-spec/polkabtc-spec.pdf)
 
 ### BTC-Relay
 
