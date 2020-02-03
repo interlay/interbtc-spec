@@ -71,7 +71,7 @@ Parameter           Type        Description
 ==================  ==========  =======================================================
 ``vault``           Account     The BTC Parachain address of the Vault responsible for this redeem request.
 ``opentime``        u256        Block height of opening the request.
-``amountpolkaBTC``  PolkaBTC    Amount of PolkaBTC the user requested to be redeemed.
+``amountPolkaBTC``  PolkaBTC    Amount of PolkaBTC the user requested to be redeemed.
 ``amountBTC``       BTC         Amount of BTC to be released to the user.
 ``amountDOT``       DOT         Amount of DOT to be paid to the user from liquidated Vaults' collateral (when ``LIQUIDATION`` error indicated in :ref:`security`). 
 ``premiumDOT``      DOT         Amount of DOT to be paid as a premium to this user (if the Vault's collateral rate was below ``PremiumRedeemThreshold`` at the time of redeeming).
@@ -116,12 +116,12 @@ Specification
 
 *Function Signature*
 
-``requestRedeem(redeemer, amountpolkaBTC, btcPublicKey, vault)``
+``requestRedeem(redeemer, amountPolkaBTC, btcPublicKey, vault)``
 
 *Parameters*
 
 * ``redeemer``: address of the user triggering the redeem.
-* ``amountpolkaBTC``: the amount of PolkaBTC to destroy and BTC to receive.
+* ``amountPolkaBTC``: the amount of PolkaBTC to destroy and BTC to receive.
 * ``btcAddress``: the address to receive BTC.
 * ``vault``: the vault selected for the redeem request.
 
@@ -152,19 +152,19 @@ Preconditions
 Function Sequence
 .................
 
-1. Check if the ``amountpolkaBTC`` is less or equal to the user's balance in the treasury. Return ``ERR_AMOUNT_EXCEEDS_USER_BALANCE`` if this check fails.
+1. Check if the ``amountPolkaBTC`` is less or equal to the user's balance in the treasury. Return ``ERR_AMOUNT_EXCEEDS_USER_BALANCE`` if this check fails.
 
 2. Retrieve the ``vault`` from :ref:`vault-registry`. Return ``ERR_UNKNOWN_VAULT`` if no Vault can be found.
 
-3. Check if the ``amountpolkaBTC`` is less or equal to the ``issuedTokens`` by the selected vault in the VaultRegistry. Return ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE`` if this check fails.
+3. Check if the ``amountPolkaBTC`` is less or equal to the ``issuedTokens`` by the selected vault in the VaultRegistry. Return ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE`` if this check fails.
 
 4. Check if ``ParachainState`` in :ref:`security` is ``ERROR`` with ``LIQUIDATION`` in ``Errors``. 
 
    a. If this is the case,
 
-      i ) set ``amountDOTinBTC = amountpolkaBTC * getPartialRedeemFactor() / 10000`` (note: this is due to the representation of fractions as integers between 0 and 10000).
+      i ) set ``amountDOTinBTC = amountPolkaBTC * getPartialRedeemFactor() / 10000`` (note: this is due to the representation of fractions as integers between 0 and 10000).
 
-      ii ) Set ``amountBTC = amountpolkaBTC - amountDOTinBTC``.
+      ii ) Set ``amountBTC = amountPolkaBTC - amountDOTinBTC``.
 
       iii ) Set ``amountDOT = amountDOTinBTC *`` :ref:`getExchangeRate`.
 
@@ -180,20 +180,20 @@ Function Sequence
 
 9. Check if the Vault's collateral rate is below ``PremiumRedeemThreshold``. If this is the case, set ``premiumDOT = RedeemPremiumFee`` (as per :ref:`vault-registry`). Otherwise set ``premiumDOT = 0``.
 
-9. Store a new ``Redeem`` struct in the ``RedeemRequests`` mapping as ``RedeemRequests[redeemId] = redeem``, where:
+10. Store a new ``Redeem`` struct in the ``RedeemRequests`` mapping as ``RedeemRequests[redeemId] = redeem``, where:
     
     - ``redeem.vault`` is the requested ``vault``
     - ``redeem.opentime`` is the current block number
-    - ``redeem.amountpolkaBTC`` is the ``amount`` provided as input
+    - ``redeem.amountPolkaBTC`` is the ``amount`` provided as input
     - ``redeem.amountBTC = amountBTC``
     - ``redeem.amountDOT = amountDOT``
     - ``redeem.premiumDOT = premiumDOT``
     - ``redeem.redeemer`` is the redeemer account
     - ``redeem.btcAddress`` the Bitcoin address of the user.
 
-8. Emit the ``RequestRedeem`` event with the ``redeemId``, ``redeemer`` account, ``amount``, ``vault``, and ``btcAddress``.
+11. Emit the ``RequestRedeem`` event with the ``redeemId``, ``redeemer`` account, ``amount``, ``vault``, and ``btcAddress``.
 
-9. Return the ``redeemId``. The user stores this for future reference locally.
+12. Return the ``redeemId``. The user stores this for future reference locally.
 
 .. _executeRedeem:
 
@@ -360,9 +360,9 @@ Function Sequence
 
 1. Get the current exchange rate (``exchangeRate``) using :ref:`getExchangeRate`.
 
-2. Calculate ``totalLiquidationValue =``:math:`\sum_{v}^{LiquidationList} (\mathit{v.issuedTokens} \cdot \mathit{exchangeRate} - \mathit{v.collateral})`
+2. Calculate ``totalLiquidationValue =`` :math:`\sum_{v}^{LiquidationList} (\mathit{v.issuedTokens} \cdot \mathit{exchangeRate} - \mathit{v.collateral})`
 
-3. Retrieve the ``TotalSupply`` of PolkaBTC from :ref`treasury`.
+3. Retrieve the ``TotalSupply`` of PolkaBTC from :ref:`treasury`.
 
 4. Return ``totalLiquidationValue / TotalSupply``
 
