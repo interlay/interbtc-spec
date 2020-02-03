@@ -257,9 +257,9 @@ Function Sequence
 .................
 
 1. Check that the ``redeemer``'s locked balance is above the ``amount``. If ``LockedBalance[redeemer] < amount`` (in Substrate ``free_balance``), raise ``ERR_INSUFFICIENT_LOCKED_FUNDS``.
-3. Subtract the Redeemer's locked balance by ``amount``, i.e. ``LockedBalances[redeemer] -= amount``. 
-4. Emit the ``Burn(redeemer, amount)`` event.
-5. Return.
+2. Subtract the Redeemer's locked balance by ``amount``, i.e. ``LockedBalances[redeemer] -= amount``. 
+3. Emit the ``Burn(redeemer, amount)`` event.
+4. Return.
 
 
 
