@@ -1,4 +1,4 @@
-.. collateral-module:
+.. _collateral-module:
 
 Collateral
 ==========

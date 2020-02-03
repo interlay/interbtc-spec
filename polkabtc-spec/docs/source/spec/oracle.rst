@@ -134,11 +134,10 @@ Function Sequence
 
 1. Check if the caller of the function is the ``AuthorizedOracle``. If not, throw ``ERR_INVALID_ORACLE_SOURCE``.
 2. Update the ``ExchangeRate`` with the ``rate``.
-3. Trigger the ``updateCollateralRates`` function in the :ref:`Vault-registry`.
-4. If ``LastExchangeRateTime`` minus the current UNIX timestamp is greater or equal to ``MaxDelay``, call :ref:`recoverFromORACLEOFFLINE` to recover from an ``ORACLE_OFFLINE`` error (which was the case before this data submission).
-5. Set ``LastExchangeRateTime`` to the current UNIX timestamp.
-6. Emit the ``SetExchangeRate`` event.
-7. Return.
+3. If ``LastExchangeRateTime`` minus the current UNIX timestamp is greater or equal to ``MaxDelay``, call :ref:`recoverFromORACLEOFFLINE` to recover from an ``ORACLE_OFFLINE`` error (which was the case before this data submission).
+4. Set ``LastExchangeRateTime`` to the current UNIX timestamp.
+5. Emit the ``SetExchangeRate`` event.
+6. Return.
 
 .. _getExchangeRate:
 
