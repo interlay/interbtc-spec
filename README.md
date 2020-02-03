@@ -1,4 +1,4 @@
-# PolkaBTC Specification
+# BTC Parachain Specification
 
 This repository includes the specification for a two-way bridge between Polkadot and Bitcoin.
 The bridge implements Bitcoin-backed tokens on a [Polkadot parachain](https://medium.com/polkadot-network/polkadot-the-parachain-3808040a769a).
@@ -6,7 +6,7 @@ The concept of Bitcoin-backed tokens is based on [Cryptocurrency-backed Assets](
 
 The specification consists of two parts:
 
-1. [Bitcoin-backed tokens](./polkabtc-spec): The protocols and functions required to issue and redeem tokens as well as management of vaults.
+1. [Bitcoin-backed tokens (PolkaBTC)](./polkabtc-spec): The protocols and functions required to issue and redeem tokens as well as management of vaults.
 2. [BTC-Relay](./btcrelay-spec/): The component that is used to verify Bitcoin transactions on the Polkadot parachain.
 
 ## Specification Documents
@@ -14,7 +14,7 @@ The specification consists of two parts:
 ### PolkaBTC
 
 - [Website](https://interlay.gitlab.io/polkabtc-spec)
-- [PDF]()
+- [PDF](https://interlay.gitlab.io/polkabtc-spec/polkabtc-spec.pdf)
 
 ### BTC-Relay
 
