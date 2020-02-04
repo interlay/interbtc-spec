@@ -33,11 +33,13 @@ Step-by-Step
 VaultRegistry
 -------------
 
-The data access and state changes to the vault registry are documented in the figure below.
+The data access and state changes to the vault registry are documented in :numref:`fig-vault-registry` below.
 
+.. _fig-vault-registry-replace:
 .. figure:: ../figures/VaultRegistry-Replace.png
     :alt: vault-registry-replace
-
+    
+    The replace module interacts with three functions in the vault registry to handle updating token balances of vaults.
 
 Data Model
 ~~~~~~~~~~
