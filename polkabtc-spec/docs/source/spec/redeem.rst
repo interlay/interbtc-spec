@@ -21,12 +21,13 @@ Step-by-step
 VaultRegistry
 -------------
 
-The data access and state changes to the vault registry are documented in the figure below.
+The data access and state changes to the vault registry are documented in :numref:`fig-vault-registry-redeem` below.
 
+.. _fig-vault-registry-redeem:
 .. figure:: ../figures/VaultRegistry-Redeem.png
     :alt: vault-registry-redeem
 
-
+    The redeem module interacts through three different functions with the vault registry.
 
 Data Model
 ~~~~~~~~~~
@@ -89,7 +90,10 @@ Parameter           Type        Description
   pub struct Redeem<AccountId, BlockNumber, Balance> {
         vault: AccountId,
         opentime: BlockNumber,
-        amount: Balance,
+        amountPolkaBTC: Balance,
+        amountBTC: Balance,
+        amountDOT: Balance,
+        premiumDOT: Balance,
         redeemer: AccountId,
         btcAddress: H160,
         completed: bool
@@ -231,7 +235,7 @@ Specification
 *Errors*
 
 * ``ERR_REDEEM_ID_NOT_FOUND``: The ``redeemId`` cannot be found.
-* ``ERR_COMMIT_PERIOD_EXPIRED``: The time limit as defined by the ``RedeemPeriod`` is not met.
+* ``ERR_REDEEM_PERIOD_EXPIRED``: The time limit as defined by the ``RedeemPeriod`` is not met.
 * ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated vault``: The caller of this function is not the associated vault, and hence not authorized to take this action.
 
 
@@ -251,7 +255,7 @@ Function Sequence
 
 1. Check if the ``vault`` is the ``redeem.vault``. Return ``ERR_UNAUTHORIZED`` if called by any account other than the associated ``redeem.vault``.
 2. Check if the ``redeemId`` exists. Return ``ERR_REDEEM_ID_NOT_FOUND`` if not found.
-3. Check if the current block height minus the ``RedeemPeriod`` is smaller than the ``opentime`` specified in the ``Redeem`` struct. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``.
+3. Check if the current block height minus the ``RedeemPeriod`` is smaller than the ``opentime`` specified in the ``Redeem`` struct. If this condition is false, throws ``ERR_REDEEM_PERIOD_EXPIRED``.
 4. Verify the transaction.
 
     - Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txId``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
@@ -281,25 +285,24 @@ Specification
 
 *Function Signature*
 
-``cancelRedeem(sender, redeemId)``
+``cancelRedeem(redeemId)``
 
 *Parameters*
 
-* ``redeemer``: The redeemer starting the redeem process.
 * ``redeemId``: the unique hash of the redeem request.
 
 *Returns*
 
-* ``None``: Does not return anything.
+* ``None``
 
 *Events*
 
-* ``CancelRedeem(redeemer, redeemId)``: Redeems an event with the ``redeemId`` that is cancelled.
+* ``CancelRedeem(redeemer, redeemId)``: Emits an event with the ``redeemId`` that is cancelled.
 
 *Errors*
 
 * ``ERR_REDEEM_ID_NOT_FOUND``: The ``redeemId`` cannot be found.
-* ``ERR_TIME_NOT_EXPIRED``: Raises an error if the time limit to call ``executeRedeem`` has not yet passed.
+* ``ERR_REDEEM_PERIOD_NOT_EXPIRED``: Raises an error if the time limit to call ``executeRedeem`` has not yet passed.
 * ``ERR_REDEEM_COMPLETED``: Raises an error if the redeem is already completed.
 
 *Substrate* ::
@@ -317,11 +320,11 @@ Function Sequence
 
 1. Check if an redeem with id ``redeemId`` exists. If not, throw ``ERR_REDEEM_ID_NOT_FOUND``. Otherwise, load the redeem request ``redeem = RedeemRequests[redeemId]``.
 
-2. Check if the expiry time of the redeem request is up, i.e ``redeem.opentime + RedeemPeriod < now``. If the time is not up, throw ``ERR_TIME_NOT_EXPIRED``.
+2. Check if the expiry time of the redeem request is up, i.e ``redeem.opentime + RedeemPeriod < now``. If the time is not up, throw ``ERR_REDEEM_PERIOD_NOT_EXPIRED``.
 
 3. Check if the ``redeem.completed`` field is set to true. If yes, throw ``ERR_REDEEM_COMPLETED``.
 
-4. Call the :ref:`decreaseTokens` function in the VaultRegistry to transfer (a part) of the Vault's collateral to the user with the ``redeem.vault``, ``redeem.user``, and ``redeem.amount`` parameters.
+4. Call the :ref:`decreaseTokens` function in the VaultRegistry to transfer (a part) of the Vault's collateral to the user with the ``redeem.vault``, ``redeem.redeemer``, and ``redeem.amount`` parameters.
 
 5. Call the :ref:`burn` function in the Treasury to burn the ``redeem.amount`` of PolkaBTC of the user.
    
@@ -370,9 +373,127 @@ Function Sequence
 Events
 ~~~~~~~
 
+RequestRedeem
+-------------
+
+Emit an event when a redeem request is created. This event needs to be monitored by the vault to start the redeem request.
+
+*Event Signature*
+
+``RequestRedeem(redeemId, redeemer, amountPolkaBTC, vault, btcAddress)``
+
+*Parameters*
+
+* ``redeemId``: The unique identifier of this redeem request.
+* ``redeemer``: address of the user triggering the redeem.
+* ``amountPolkaBTC``: the amount of PolkaBTC to destroy and BTC to receive.
+* ``btcAddress``: the address to receive BTC.
+* ``vault``: the vault selected for the redeem request.
+
+*Functions*
+
+* ref:`requestRedeem`
+
+*Substrate* ::
+
+  RequestRedeem(H256, AccountId, Balance, H160, AccountId);
+
+ExecuteRedeem
+-------------
+
+Emit an event when a redeem request is successfully executed by a vault.
+
+*Event Signature*
+
+``ExecuteRedeem(redeemer, redeemId, amountPolkaBTC, vault)``
+
+*Parameters*
+
+* ``redeemer``: address of the user triggering the redeem.
+* ``redeemId``: the unique hash created during the ``requestRedeem`` function,
+* ``amountPolkaBTC``: the amount of PolkaBTC to destroy and BTC to receive.
+* ``vault``: the vault responsible for executing this redeem request.
+
+
+*Functions*
+
+* ref:`executeRedeem`
+
+*Substrate* ::
+
+  ExecuteRedeem(AccountId, H256, Balance, AccountId);
+
+CancelRedeem
+------------
+
+Emit an event when a user cancels a redeem request that has not been fulfilled after the ``RedeemPeriod`` has passed.
+
+*Event Signature*
+
+``CancelRedeem(redeemer, redeemId)``
+
+*Parameters*
+
+* ``redeemer``: The redeemer starting the redeem process.
+* ``redeemId``: the unique hash of the redeem request.
+
+*Functions*
+
+* ref:`cancelRedeem`
+
+*Substrate* ::
+
+  CancelRedeem(AccountId, H256);
+
+
 Error Codes
 ~~~~~~~~~~~
 
+``ERR_UNKNOWN_VAULT``
+
+* **Message**: "There exists no Vault with the given account id."
+* **Function**: :ref:`requestRedeem`
+* **Cause**: The specified Vault does not exist.
+
+``ERR_AMOUNT_EXCEEDS_USER_BALANCE``
+
+* **Message**: "The requested amount exceeds the user's balance."
+* **Function**: :ref:`requestRedeem`
+* **Cause**: If the user is trying to redeem more BTC than his PolkaBTC balance.
 
 
+``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE``
 
+* **Message**: "The requested amount exceeds the vault's balance."
+* **Function**: :ref:`requestRedeem`
+* **Cause**: If the user is trying to redeem from a vault that has less BTC locked than requested for redeem.
+
+``ERR_REDEEM_ID_NOT_FOUND``
+
+* **Message**: "The ``redeemId`` cannot be found."
+* **Function**: :ref:`executeRedeem`
+* **Cause**: The ``redeemId`` in the ``RedeemRequests`` mapping returned ``None``.
+
+``ERR_REDEEM_PERIOD_EXPIRED``
+
+* **Message**: "The redeem period expired."
+* **Function**: :ref:`executeRedeem`
+* **Cause**: The time limit as defined by the ``RedeemPeriod`` is not met.
+
+``ERR_UNAUTHORIZED``
+
+* **Message**: "Unauthorized: Caller must be associated vault."
+* **Function**: :ref:`executeRedeem`
+* **Cause**: The caller of this function is not the associated vault, and hence not authorized to take this action.
+
+* ``ERR_REDEEM_PERIOD_NOT_EXPIRED``
+
+* **Message**: "The period to complete the redeem request is not yet expired."
+* **Function**: :ref:`cancelRedeem`
+* **Cause**:  Raises an error if the time limit to call ``executeRedeem`` has not yet passed.
+
+``ERR_REDEEM_COMPLETED``
+
+* **Message**: "The redeem request is already completed."
+* **Function**: :ref:`cancelRedeem` 
+* **Cause**: Raises an error if the redeem is already completed.
