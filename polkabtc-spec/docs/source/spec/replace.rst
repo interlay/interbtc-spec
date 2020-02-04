@@ -155,11 +155,11 @@ Specification
 
 *Events*
 
-* ``ReplaceRequested(oldVault, btcAmount, timeout, replaceId)``:
+* ``RequestReplace(oldVault, btcAmount, timeout, replaceId)``:
 
 *Errors*
 
-* ``ERR_UNKNOWN_VAULT = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
+* ``ERR_VAULT_NOT_FOUND = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
 * ``ERR_MIN_AMOUNT``: The remaining DOT collateral (converted from the requested BTC replacement value given the current exchange rate) would be below the ``MinimumCollateralVault`` as defined in ``VaultRegistry``.
 * ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated Vault``: The caller of this function is not the associated Vault, and hence not authorized to take this action.
 
@@ -178,7 +178,7 @@ Function Sequence
 
 1. Check that caller of the function is indeed the to-be-replaced Vault. Return ``ERR_UNAUTHORIZED`` error if this check fails.
 
-2. Retrieve the ``vault`` as per the ``oldVault`` account identifier from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_UNKNOWN_VAULT`` if no Vault can be found.
+2. Retrieve the ``vault`` as per the ``oldVault`` account identifier from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` if no Vault can be found.
 
 3. Check that the requested ``btcAmount`` is equal to or lower than ``vault.issuedTokens`` mins the ``vault.toBeRedeemedTokens``.
 
@@ -201,7 +201,7 @@ Function Sequence
    * ``Replace.amount = amount``,
    * ``Replace.griefingCollateral = griefingCollateral``.
    
-10. Emit ``ReplaceRequested(vault, btcAmount, timeout, replaceId)`` event.  
+10. Emit ``RequestReplace(vault, btcAmount, timeout, replaceId)`` event.  
 
 11. Return the ``replaceId``.
 
@@ -225,7 +225,7 @@ Specification
 *Parameters*
 
 * ``oldVault``: Account identifier of the Vault withdrawing it's replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
-* ``repalceId``: The identifier of the replace request in ``ReplaceRequests``.
+* ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
 
 *Events*
 
@@ -234,7 +234,7 @@ Specification
 *Errors*
 
 
-* ``ERR_INVALID_REPLACE_ID =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
+* ``ERR_REPLACE_ID_NOT_FOUND =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
 * ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated Vault``: The caller of this function is not the associated Vault, and hence not authorized to take this action.
 * ``ERR_CANCEL_ACCEPTED_REQUEST = Cannot cancel the ReplaceRequest as it was already accepted by a Vault``: The ``ReplaceRequest`` was already accepted by another Vault and can hence no longer be withdrawn.
 
@@ -251,7 +251,7 @@ The ReplaceRequest must have not yet been accepted by another Vault.
 Function Sequence
 ..................
 
-1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_INVALID_REPLACE_ID`` error if no such ``ReplaceRequest`` was found.
+1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_REPLACE_ID_NOT_FOUND`` error if no such ``ReplaceRequest`` was found.
 
 2. Check that caller of the function is indeed the to-be-replaced Vault as specified in the ``ReplaceRequest``. Return ``ERR_UNAUTHORIZED`` error if this check fails.
 
@@ -289,7 +289,7 @@ Specification
 *Parameters*
 
 * ``newVault``: Account identifier of the Vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
-* ``repalceId``: The identifier of the replace request in ``ReplaceRequests``.
+* ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
 * ``collateral``: DOT collateral provided to match the replace request (i.e., for backing the locked BTC). Can be more than the necessary amount.
 
 *Events*
@@ -299,7 +299,7 @@ Specification
 *Errors*
 
 
-* ``ERR_INVALID_REPLACE_ID =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
+* ``ERR_REPLACE_ID_NOT_FOUND =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
 * ``ERR_INSUFFICIENT_COLLATERAL``: The provided collateral is insufficient to match the replace request. 
 * ``ERR_VAULT_NOT_FOUND``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
 
@@ -317,7 +317,7 @@ Function Sequence
 ..................
 
 
-1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from  ``ReplaceRequests``. Return ``ERR_INVALID_REPLACE_ID`` error if no such ``ReplaceRequest`` was found.
+1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from  ``ReplaceRequests``. Return ``ERR_REPLACE_ID_NOT_FOUND`` error if no such ``ReplaceRequest`` was found.
 
 2. Retrieve the ``vault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such Vault can be found.
 
@@ -361,7 +361,7 @@ Specification
 
 *Events*
 
-* ``ReplaceRequested(oldVault, btcAmount, timeout, replaceId)``
+* ``RequestReplace(oldVault, btcAmount, timeout, replaceId)``
 * ``AuctionReplace(newVault, replaceId, collateral)``: emits an event stating which Vault (``newVault``) has auctioned the ``ReplaceRequest`` request (``requestId``), and how much collateral in DOT it provided (``collateral``).
 
 *Errors*
@@ -410,7 +410,7 @@ Function Sequence
 
 9. Emit a ``AuctionReplace(newVault, replaceId, collateral)`` event.
 
-10. Emit a ``ReplaceRequested(oldVault, btcAmount, timeout, replaceId)`` event.
+10. Emit a ``RequestReplace(oldVault, btcAmount, timeout, replaceId)`` event.
 
 11. Return.
 
@@ -433,7 +433,7 @@ Specification
 *Parameters*
 
 * ``newVault``: Account identifier of the Vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
-* ``repalceId``: The identifier of the replace request in ``ReplaceRequests``.
+* ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
 * ``txId``: The hash of the Bitcoin transaction.
 * ``txBlockHeight``: Bitcoin block height at which the transaction is supposedly included.
 * ``txIndex``: Index of transaction in the Bitcoin block’s transaction Merkle tree.
@@ -447,9 +447,9 @@ Specification
 *Errors*
 
 
-* ``ERR_INVALID_REPLACE_ID =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
+* ``ERR_REPLACE_ID_NOT_FOUND =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
 * ``ERR_VAULT_NOT_FOUND = No Vault with given Account identifier found``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
-* ``ERR_PERIOD_EXPIRED = Replace request expired``: 
+* ``ERR_REPLACE_PERIOD_EXPIRED = Replace request expired``: 
 * See errors returned by *verifyTransactionInclusion* and *validateTransaction* in :ref:`btc-relay`.
 
 
@@ -466,9 +466,9 @@ Preconditions
 Function Sequence
 ..................
 
-1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_INVALID_REPLACE_ID`` error if no such ``ReplaceRequest`` request was found.
+1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_REPLACE_ID_NOT_FOUND`` error if no such ``ReplaceRequest`` request was found.
 
-2. Check that the current Parachain block height minus the ``ReplacePeriod`` is smaller than the ``opentime`` of the ``ReplaceRequest``. Throw ``ERR_PERIOD_EXPIRED`` if false.
+2. Check that the current Parachain block height minus the ``ReplacePeriod`` is smaller than the ``opentime`` of the ``ReplaceRequest``. Throw ``ERR_REPLACE_PERIOD_EXPIRED`` if false.
 
 3. Retrieve the ``Vault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such Vault can be found.
 
@@ -506,7 +506,7 @@ Specification
 *Parameters*
 
 * ``newVault``: Account identifier of the Vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
-* ``repalceId``: The identifier of the replace request in ``ReplaceRequests``.
+* ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
 
 
 *Events*
@@ -516,7 +516,7 @@ Specification
 *Errors*
 
 
-* ``ERR_INVALID_REPLACE_ID =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
+* ``ERR_REPLACE_ID_NOT_FOUND =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
 * ``ERR_VAULT_NOT_FOUND = No Vault with given Account identifier found``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
 * ``ERR_PERIOD_NOT_EXPIRED = Replace request not yet expired``: The old vault can still fulfil the replace request.
 
@@ -532,7 +532,7 @@ Preconditions
 Function Sequence
 ..................
 
-1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_INVALID_REPLACE_ID`` error if no such ``ReplaceRequest`` request was found.
+1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_REPLACE_ID_NOT_FOUND`` error if no such ``ReplaceRequest`` request was found.
 
 .. note:: If a replace request has been executed successfully, it has been deleted and this error will be thrown.
 
@@ -554,9 +554,204 @@ Function Sequence
 Events
 ~~~~~~~
 
+RequestReplace
+--------------
+
+Emit an event when a replace request is made by an *oldVault*.
+
+*Event Signature*
+
+``ReplaceRequested(oldVault, btcAmount, timeout, replaceId)``
+
+*Parameters*
+
+* ``oldVault``: Account identifier of the Vault to be replaced (as tracked in ``Vaults`` in :ref:`vault-registry`).
+* ``btcAmount``: Integer amount of BTC / PolkaBTC to be replaced.
+* ``timeout``: Time in blocks after which this request expires.
+* ``replaceId``: The unique identified of a replace request.
+
+*Functions*
+
+* :ref:`requestReplace`
+* :ref:`auctionReplace`
+
+*Substrate* ::
+
+  RequestReplace(AccountId, Balance, BlockNumber, H256);
+
+WithdrawReplaceRequest
+----------------------
+
+Emits an event stating that a Vault (``oldVault``) has withdrawn an existing replace request (``requestId``).
+
+*Event Signature*
+
+``WithdrawReplaceRequest(oldVault, replaceId)``
+
+*Parameters*
+
+* ``oldVault``: Account identifier of the Vault withdrawing it's replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
+
+*Functions*
+
+* ref:`withdrawReplaceRequest`
+
+*Substrate* ::
+
+  WithdrawReplaceRequest(AccountId, H256);
+
+
+AcceptReplace
+-------------
+
+Emits an event stating which Vault (``newVault``) has accepted the ``ReplaceRequest`` request (``requestId``), and how much collateral in DOT it provided (``collateral``).
+
+*Event Signature*
+
+``AcceptReplace(newVault, replaceId, collateral)``
+
+*Parameters*
+
+* ``newVault``: Account identifier of the Vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
+* ``collateral``: DOT collateral provided to match the replace request (i.e., for backing the locked BTC). Can be more than the necessary amount.
+
+*Functions*
+
+* ref:`acceptReplace`
+
+*Substrate* ::
+
+  AcceptReplace(AccountId, H256, Balance);
+
+
+AuctionReplace
+--------------
+
+Emits an event stating which Vault (``newVault``) has auctioned the ``ReplaceRequest`` request (``requestId``), and how much collateral in DOT it provided (``collateral``).
+
+*Event Signature*
+
+``AuctionReplace(newVault, replaceId, collateral)``
+
+*Parameters*
+
+* ``newVault``: Account identifier of the Vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
+* ``collateral``: DOT collateral provided to match the replace request (i.e., for backing the locked BTC). Can be more than the necessary amount.
+
+*Functions*
+
+* ref:`auctionReplace`
+
+*Substrate* ::
+
+  AuctionReplace(AccountId, H256, Balance);
+
+
+ExecuteReplace
+--------------
+
+Emits an event stating that the old Vault (``oldVault``) has executed the BTC transfer to the new Vault (``newVault``), finalizing the ``ReplaceRequest`` request (``requestId``).
+
+*Event Signature*
+
+``ExecuteReplace(oldVault, newVault, replaceId)``
+
+*Parameters*
+
+* ``oldVault``: Account identifier of the Vault withdrawing it's replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``newVault``: Account identifier of the Vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
+
+*Functions*
+
+* ref:`executeReplace`
+
+*Substrate* ::
+
+  ExecuteReplace(AccountId, AccountId, H256);
+
+
+CancelReplace
+-------------
+
+Emits an event stating that the old Vault (``oldVault``) has not completed the replace request and the new Vault (``newVault``) cancelled the ``ReplaceRequest`` request (``requestId``).
+
+*Event Signature*
+
+``CancelReplace(newVault, oldVault, replaceId)``
+
+*Parameters*
+
+* ``oldVault``: Account identifier of the Vault withdrawing it's replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``newVault``: Account identifier of the Vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
+
+*Functions*
+
+* ref:`cancelReplace`
+
+*Substrate* ::
+
+  CancelReplace(AccountId, AccountId, H256);
+
 Error Codes
 ~~~~~~~~~~~
 
+``ERR_MIN_AMOUNT``
 
+* **Message**: "Remaining collateral below ``MinimCollateralVaul`` limit."
+* **Function**: :ref:`requestReplace` 
+* **Cause**: The remaining DOT collateral (converted from the requested BTC replacement value given the current exchange rate) would be below the ``MinimumCollateralVault`` as defined in ``VaultRegistry``.
+
+``ERR_UNAUTHORIZED``
+
+* **Message**: "Unauthorized: Caller must be associated vault."
+* **Function**: :ref:`requestReplace` | :ref:`withdrawReplaceRequest`
+* **Cause**: The caller of this function is not the associated vault, and hence not authorized to take this action.
+
+``ERR_REPLACE_ID_NOT_FOUND``
+
+* **Message**: "The ``replaceId`` cannot be found."
+* **Function**: :ref:`withdrawReplaceRequest` | :ref:`acceptReplace` | :ref:`executeReplace` | :ref:`cancelReplace`
+* **Cause**: The ``replaceId`` in the ``ReplaceRequests`` mapping returned ``None``.
+
+``ERR_CANCEL_ACCEPTED_REQUEST``
+
+* **Message**: "Cannot cancel the ReplaceRequest as it was already accepted by a Vault."
+* **Function**: :ref:`withdrawReplaceRequest` 
+* **Cause**: The ``ReplaceRequest`` was already accepted by another Vault and can hence no longer be withdrawn.
+
+``ERR_INSUFFICIENT_COLLATERAL``
+
+* **Message**: "The provided collateral is too low."
+* **Function**: :ref:`acceptReplace` | :ref:`auctionReplace`
+* **Cause**: The provided collateral is insufficient to match the replace request. 
+
+``ERR_VAULT_NOT_FOUND``
+
+* **Message**: "The ``vault`` cannot be found."
+* **Function**: :ref:`requestReplace` | :ref:`acceptReplace` | :ref:`auctionReplace` | :ref:`cancelReplace`
+* **Cause**: The vault was not found in the existing ``Vaults`` list in ``VaultRegistry``.
+
+``ERR_SUFFICIENT_COLLTERAL_RATE``
+
+* **Message**: "The to-be-replaced vault is not below the ``AuctionCollateralThreshold``."
+* **Function**: :ref:`auctionReplace`
+* **Cause**: The *oldVault* is not below the ``AuctionCollateralThreshold``.
+
+``ERR_REPLACE_PERIOD_EXPIRED``
+
+* **Message**: "The replace period expired."
+* **Function**: :ref:`executeReplace`
+* **Cause**: The time limit as defined by the ``ReplacePeriod`` is not met.
+
+* ``ERR_REPLACE_PERIOD_NOT_EXPIRED``
+
+* **Message**: "The period to complete the replace request is not yet expired."
+* **Function**: :ref:`cancelReplace`
+* **Cause**:  Raises an error if the time limit to call ``executeReplace`` has not yet passed.
 
 
