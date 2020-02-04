@@ -20,7 +20,7 @@ Step-by-step
 VaultRegistry
 -------------
 
-The data access and state changes to the vault registry are documented in the figure below.
+The data access and state changes to the vault registry are documented in :numref:`fig-vault-registry-issue` below.
 
 .. _fig-vault-registry-issue:
 .. figure:: ../figures/VaultRegistry-Issue.png
