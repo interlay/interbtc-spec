@@ -22,8 +22,11 @@ VaultRegistry
 
 The data access and state changes to the vault registry are documented in the figure below.
 
+.. _fig-vault-registry-issue:
 .. figure:: ../figures/VaultRegistry-Issue.png
     :alt: vault-registry-issue
+
+    The issue protocol interacts with three functions in the vault registry that handle updating the different token balances.
 
 
 Data Model
