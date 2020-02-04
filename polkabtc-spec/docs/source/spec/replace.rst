@@ -33,7 +33,7 @@ Step-by-Step
 VaultRegistry
 -------------
 
-The data access and state changes to the vault registry are documented in :numref:`fig-vault-registry` below.
+The data access and state changes to the vault registry are documented in :numref:`fig-vault-registry-replace` below.
 
 .. _fig-vault-registry-replace:
 .. figure:: ../figures/VaultRegistry-Replace.png
