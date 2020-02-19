@@ -38,7 +38,7 @@ Specification
 
 ::
 
-  fn initialize(origin, blockHeaderBytes: T::RawBlockHeader, blockHeight: U256) -> Result {...}
+  fn initialize(origin, blockHeaderBytes: RawBlockHeader, blockHeight: U256) -> Result {...}
 
 Preconditions
 ~~~~~~~~~~~~~
@@ -58,13 +58,21 @@ The ``initialize`` function takes as input an 80 byte raw Bitcoin block header a
 
 2. Parse ``blockHeaderBytes``, extracting  the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` and :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash (``hashCurrentBlock``) using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
 
-3. Create new ``Blockchain`` entry in ``Chains``, setting ``chainId =``:ref:`getChainsCounter` ``maxHeight = blockHeight``, ``noData = False``, ``invalid = False``, and inserting ``hashCurrentBlock`` in the ``chain`` mapping using ``blockHeight`` as key. Insert a pointer to ``Blockchain`` into ``ChainsIndex`` using  ``chainId`` as key.
+3. Create a new ``BlockChain`` entry in ``Chains``:
 
-4.Store a new ``BlockHeader`` struct containing ``merkleRoot``, ``blockHeight``, ``timestamp``, ``target``, and a pointer (``chainRef``) to the ``BlockChain`` struct - as associated with this block header - in ``BlockHeaders``, using ``hashCurrentBlock`` as key. 
+    - ``chainId =``:ref:`getChainsCounter`
+    - ``maxHeight = blockHeight``
+    - ``noData = False``
+    - ``invalid = False``
+    - Insert ``hashCurrentBlock`` in the ``chain`` mapping using ``blockHeight`` as key. 
 
-5. Set ``BestBlock = hashCurrentBlock`` and ``BestBlockHeight = blockHeight``.
+4. Insert a pointer to ``BlockChain`` into ``ChainsIndex`` using  ``chainId`` as key.
 
-6. Emit a ``Initialized`` event using ``height`` and ``hashCurrentBlock`` as input (``Initialized(height, hashCurrentBlock)``). 
+5. Store a new ``BlockHeader`` struct containing ``merkleRoot``, ``blockHeight``, ``timestamp``, ``target``, and a pointer (``chainRef``) to the ``BlockChain`` struct - as associated with this block header - in ``BlockHeaders``, using ``hashCurrentBlock`` as key. 
+
+6. Set ``BestBlock = hashCurrentBlock`` and ``BestBlockHeight = blockHeight``.
+
+7. Emit a ``Initialized`` event using ``height`` and ``hashCurrentBlock`` as input (``Initialized(height, hashCurrentBlock)``). 
 
 .. warning:: Attention: the Bitcoin block header submitted to ``initialize`` must be in the Bitcoin main chain - this must be checked outside of the BTC Parachain **before** making this function call! A wrong initialization will cause the entire BTC Parachain to fail, since verification requires that all submitted blocks **must** (indirectly) point to the initialized block (i.e., have it as ancestor, just like the actual Bitcoin genesis block).
 
@@ -100,7 +108,7 @@ Specification
 
 ::
 
-  fn storeBlockHeader(origin, blockHeaderBytes: T::RawBlockHeader) -> Result {...}
+  fn storeBlockHeader(origin, blockHeaderBytes: RawBlockHeader) -> Result {...}
 
 Preconditions
 ~~~~~~~~~~~~~
@@ -121,7 +129,7 @@ The ``storeBlockHeader`` function takes as input the 80 byte raw Bitcoin block h
 
 2. Call :ref:`verifyBlockHeader` passing ``blockHeaderBytes`` as function parameter. If this call **returns an error** , then abort and return the raised error. If successful, this call returns the hash of the previous block (``hashPrevBlock``), referenced in ``blockHeaderBytes``, as stored in ``BlockHeaders``.
 
-3. Determine which ``BlockChain`` entry in ``Chains`` this block header is extending, or if it is a new fork and hence a new ``BlockChain`` entry needs to be created. For this, get the ``BlockHeader`` struct stored in ``BlockHeaders`` with ``hashPrevBlock`` and use its ``chainRef`` pointer as key to lookup the associated ``BlockChain`` struct. Then, check if the  ``BlockHeader.blockHeight`` (as referenced by ``hashPrevBlock``) is equal  to ``BlockChain.maxHeight``.
+3. Determine which ``BlockChain`` entry in ``Chains`` this block header is extending, or if it is a new fork and hence a new ``BlockChain`` entry needs to be created. For this, get the ``prevBlockHeader`` stored in ``BlockHeaders`` with ``hashPrevBlock`` and use its ``chainRef`` pointer as key to lookup the associated ``BlockChain`` struct. Then, check if the  ``prevBlockHeader.blockHeight`` (as referenced by ``hashPrevBlock``) is equal  to ``BlockChain.maxHeight``.
 
    a. If not equal (can only be less in this case), then the current submission is creating a **new fork**. 
      
@@ -250,7 +258,7 @@ Specification
 
 ::
 
-  fn verifyBlockHeader(origin, blockHeaderBytes: T::RawBlockHeader) -> H256 {...}
+  fn verifyBlockHeader(origin, blockHeaderBytes: RawBlockHeader) -> H256 {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -326,7 +334,7 @@ Specification
 
 ::
 
-  fn verifyTransactionInclusion(txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: U256) -> Result {...}
+  fn verifyTransactionInclusion(txId: H256, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: U256) -> Result {...}
 
 Preconditions
 ~~~~~~~~~~~~~
