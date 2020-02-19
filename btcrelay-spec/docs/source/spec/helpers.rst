@@ -6,34 +6,32 @@ Functions: Utils
 There are several helper methods available that abstract Bitcoin internals away in the main function implementation.
 
 
-
-
-.. _getChainId:
-
-getChainId
-----------
-
-Increments ``ChainId`` and returns the new value. Called when a new entry is being added to ``Chains`` (fork submission to BTC-Relay).
-
-*Function Signature*
-
-``getChainId()``
-
-*Returns*
-
-* ``chainId``: the next value of ``ChainId``.
-
-*Substrate*
-
-::
-
-  fn getChainId() -> U256 {...}
-  
-Function Sequence
-~~~~~~~~~~~~~~~~~
-
-1. ``ChainId++``
-2. Return ``ChainId``
+.. .. _getChainId:
+.. 
+.. getChainId
+.. ----------
+.. 
+.. Increments ``ChainId`` and returns the new value. Called when a new entry is being added to ``Chains`` (fork submission to BTC-Relay).
+.. 
+.. *Function Signature*
+.. 
+.. ``getChainId()``
+.. 
+.. *Returns*
+.. 
+.. * ``chainId``: the next value of ``ChainId``.
+.. 
+.. *Substrate*
+.. 
+.. ::
+.. 
+..   fn getChainId() -> U256 {...}
+..   
+.. Function Sequence
+.. ~~~~~~~~~~~~~~~~~
+.. 
+.. 1. ``ChainId++``
+.. 2. Return ``ChainId``
 
 
 .. _sha256d:
@@ -61,7 +59,7 @@ Bitcoin uses a double SHA256 hash to protect against `"length-extension" attacks
 
 ::
 
-  fn sha256d(data: String) -> T::H256 {...}
+  fn sha256d(data: String) -> H256 {...}
   
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -95,7 +93,7 @@ A function that computes a parent hash from two child nodes. This function is us
 
 ::
 
-  fn concatSha256d(left: T::H256, right: T::H256) -> T::H256 {...}
+  fn concatSha256d(left: H256, right: H256) -> H256 {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -170,7 +168,7 @@ Verifies the currently submitted block header has the correct difficulty target.
 
 ::
 
-  fn checkCorrectTarget(hashPrevBlock: T::H256, blockHeight: U256, target: U256) -> bool {...}
+  fn checkCorrectTarget(hashPrevBlock: H256, blockHeight: U256, target: U256) -> bool {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -212,7 +210,7 @@ Computes the new difficulty target based on the given parameters, `as implemente
 
 ::
 
-  fn computeNewTarget(prevTime: T::DateTime, startTime: T::DateTime, prevTarget: U256) -> U256 {...}
+  fn computeNewTarget(prevTime: T::Moment, startTime: T::Moment, prevTarget: U256) -> U256 {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -255,7 +253,7 @@ The computeMerkle function calculates the root of the Merkle tree of transaction
 
 ::
 
-  fn computeMerkle(txId: T::H256, txIndex: u64, merkleProof: String) -> Result<H256, ERR_INVALID_MERKLE_PROOF> {...}
+  fn computeMerkle(txId: H256, txIndex: u64, merkleProof: String) -> Result<H256, ERR_INVALID_MERKLE_PROOF> {...}
 
 
 Function Sequence
@@ -360,7 +358,7 @@ Specification
 
 ::
 
-  fn getForkIdByBlockHash(blockHash: T::H256) -> Result<U256, ERR_FORK_ID_NOT_FOUND> {...}
+  fn getForkIdByBlockHash(blockHash: H256) -> Result<U256, ERR_FORK_ID_NOT_FOUND> {...}
 
 
 Function Sequence
@@ -375,32 +373,32 @@ Function Sequence
 
 .. _getChainsCounter:
 
-getChainsCounter
-----------------
+incrementChainCounter
+---------------------
 
-Increments the current ``ChainsCounter`` and returns the new value.
+Increments the current ``ChainCounter`` and returns the new value.
 
 Specification
 ~~~~~~~~~~~~~~
 
 *Function Signature*
 
-``getChainsCounter()``
+``incrementChainsCounter()``
 
 
 *Returns*
 
-* ``chainsCounter``: the new integer value of the ``ChainsCounter``.
+* ``chainCounter``: the new integer value of the ``ChainCounter``.
 
 *Substrate* ::
 
-  fn getChainsCounter() -> U256 {...}
+  fn incrementChainCounter() -> U256 {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-1. ``ChainsCounter++``
-2. Return ``ChainsCounter``
+1. ``ChainCounter++``
+2. Return ``ChainCounter``
 
 
 

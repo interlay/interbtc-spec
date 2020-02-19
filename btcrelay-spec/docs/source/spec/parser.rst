@@ -37,7 +37,7 @@ Extracts the ``hashPrevBlock`` (reference to previous block) from a Bitcoin bloc
 
 ::
 
-  fn extractHashPrevBlock(blockHeaderBytes: T::RawBlockHeader) -> T::H256 {...}
+  fn extractHashPrevBlock(blockHeaderBytes: T::RawBlockHeader) -> H256 {...}
 
 
 Function Sequence
@@ -68,7 +68,7 @@ Extracts the ``merkleRoot`` from a Bitcoin block header.
 
 ::
 
-  fn extractMerkleRoot(blockHeaderBytes: T::RawBlockHeader) -> T::H256 {...}
+  fn extractMerkleRoot(blockHeaderBytes: T::RawBlockHeader) -> H256 {...}
 
 
 Function Sequence
@@ -100,7 +100,7 @@ Extracts the timestamp from the block header.
 
 ::
 
-  fn extractTimestamp(blockHeaderBytes: T::RawBlockHeader) -> T::DateTime {...}
+  fn extractTimestamp(blockHeaderBytes: T::RawBlockHeader) -> T::Moment {...}
 
 Function Sequence
 .................
@@ -132,7 +132,7 @@ Extracts the ``nBits`` from a Bitcoin block header. This field is necessary to c
 
 ::
 
-  fn extractNBits(blockHeaderBytes: T::RawBlockHeader) -> T::Bytes {...}
+  fn extractNBits(blockHeaderBytes: T::RawBlockHeader) -> u32 {...}
 
 Function Sequence
 .................
