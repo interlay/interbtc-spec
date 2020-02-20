@@ -78,7 +78,6 @@ Parameter           Type        Description
 ``premiumDOT``      DOT         Amount of DOT to be paid as a premium to this user (if the Vault's collateral rate was below ``PremiumRedeemThreshold`` at the time of redeeming).
 ``redeemer``        Account     The BTC Parachain address of the user requesting the redeem.
 ``btcAddress``      bytes[20]   Base58 encoded Bitcoin public key of the User.  
-``completed``       bool        Indicates if the redeem has been completed.
 ==================  ==========  =======================================================
 
 *Substrate*
@@ -96,7 +95,6 @@ Parameter           Type        Description
         premiumDOT: Balance,
         redeemer: AccountId,
         btcAddress: H160,
-        completed: bool
   }
 
 Functions
@@ -280,16 +278,19 @@ cancelRedeem
 If a redeem request is not completed on time, the redeem request can be cancelled.
 The user that initially requested the redeem process calls this function to obtain the Vault's collateral as compensation for not refunding the BTC back to his address.
 
+The failed Vault is banned from further issue, redeem and replace requests for a pre-defined time period (``PunishmentDelay`` as defined in :ref:`vault-registry`).
+
 Specification
 .............
 
 *Function Signature*
 
-``cancelRedeem(redeemId)``
+``cancelRedeem(redeemId, reimburse)``
 
 *Parameters*
 
 * ``redeemId``: the unique hash of the redeem request.
+* ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the Vault, or wishes to keep the PolkaBTC (and retry :ref:`Redeem` with another Vault).
 
 *Returns*
 
@@ -303,11 +304,10 @@ Specification
 
 * ``ERR_REDEEM_ID_NOT_FOUND``: The ``redeemId`` cannot be found.
 * ``ERR_REDEEM_PERIOD_NOT_EXPIRED``: Raises an error if the time limit to call ``executeRedeem`` has not yet passed.
-* ``ERR_REDEEM_COMPLETED``: Raises an error if the redeem is already completed.
 
 *Substrate* ::
 
-  fn cancelRedeem(origin, redeemId) -> Result {...}
+  fn cancelRedeem(origin, redeemId: T::H256, reimburse: bool) -> Result {...}
 
 Preconditions
 .............
@@ -322,18 +322,21 @@ Function Sequence
 
 2. Check if the expiry time of the redeem request is up, i.e ``redeem.opentime + RedeemPeriod < now``. If the time is not up, throw ``ERR_REDEEM_PERIOD_NOT_EXPIRED``.
 
-3. Check if the ``redeem.completed`` field is set to true. If yes, throw ``ERR_REDEEM_COMPLETED``.
+3. If ``reimburse == True`` (user requested to be reimbursed in DOT): 
 
-4. Call the :ref:`decreaseTokens` function in the VaultRegistry to transfer (a part) of the Vault's collateral to the user with the ``redeem.vault``, ``redeem.redeemer``, and ``redeem.amount`` parameters.
+   a. . Call the :ref:`decreaseTokens` function in the VaultRegistry to transfer (a part) of the Vault's collateral to the user with the ``redeem.vault``, ``redeem.redeemer``, and ``redeem.amount`` parameters.
 
-5. Call the :ref:`burn` function in the Treasury to burn the ``redeem.amount`` of PolkaBTC of the user.
+   b. Call the :ref:`burn` function in the Treasury to burn the ``redeem.amount`` of PolkaBTC of the user.
    
-6. Remove ``redeem`` from ``RedeemRequests``.
+4. Call :ref:`slashCollateral` 
 
-7. Emit a ``CancelRedeem`` event with the ``redeemId``.
+.. todo:: TODO
 
-8. Return.
+5. Remove ``redeem`` from ``RedeemRequests``.
 
+6. Emit a ``CancelRedeem`` event with the ``redeemId``.
+
+7. Return.
 
 
 .. _getPartialRedeemFactor:
@@ -491,9 +494,3 @@ Error Codes
 * **Message**: "The period to complete the redeem request is not yet expired."
 * **Function**: :ref:`cancelRedeem`
 * **Cause**:  Raises an error if the time limit to call ``executeRedeem`` has not yet passed.
-
-``ERR_REDEEM_COMPLETED``
-
-* **Message**: "The redeem request is already completed."
-* **Function**: :ref:`cancelRedeem` 
-* **Cause**: Raises an error if the redeem is already completed.

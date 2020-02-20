@@ -45,7 +45,7 @@ The minimum collateral (DOT) a Vault needs to provide to participate in the issu
 PunishmentFee
 .............
 
-If a vault misbehaves in either the redeem or replace protocol by failing to prove that it sent the correct amount of BTC to the correct address within the time limit, a vault is punished.
+If a Vault misbehaves in either the redeem or replace protocol by failing to prove that it sent the correct amount of BTC to the correct address within the time limit, a vault is punished.
 The punishment is the equivalent value of BTC in DOT (valued at the current exchange rate via :ref:`getExchangeRate`) plus a fixed ``PunishmentFee`` that is added as a percentage on top to compensate the damaged party for its loss.
 For example, if the ``PunishmentFee`` is set to 50000, it is equivalent to 50%.
 
@@ -53,6 +53,16 @@ For example, if the ``PunishmentFee`` is set to 50000, it is equivalent to 50%.
 *Substrate* ::
 
   PunishmentFee: u128;
+
+PunishmentDelay
+.................
+
+If a Vault fails to execute a correct redeem or replace, it is *temporarily* banned from further issue, redeem or replace requests. 
+
+*Substrate* ::
+
+  PunishmentDelay: BlockNumber;
+
 
 RedeemPremiumFee
 .................
@@ -167,6 +177,7 @@ Parameter                  Type       Description
 ``toBeRedeemedTokens``     PolkaBTC   Number of PolkaBTC tokens reserved by pending redeem and replace requests. 
 ``collateral``             DOT        Total amount of collateral provided by this Vault (note: "free" collateral is calculated on the fly and updated each time new exchange rate data is received).
 ``btcAddress``             bytes[20]  Bitcoin address of this Vault, to be used for issuing of PolkaBTC tokens.
+``bannedUntil``            u256       Block height until which this Vault is banned from being used for Issue, Redeem (except during automatic liquidation) and Replace . 
 =========================  =========  ========================================================
 
 .. note:: This specification currently assumes for simplicity that a Vault will reuse the same BTC address, even after multiple redeem requests. **[Future Extension]**: For better security, Vaults may desire to generate new BTC addresses each time they execute a redeem request. This can be handled by pre-generating multiple BTC addresses and storing these in a list for each Vault. Caution is necessary for users which execute issue requests with "old" Vault addresses - these BTC must be moved to the latest address by Vaults. 
@@ -184,7 +195,8 @@ Parameter                  Type       Description
         issuedTokens: Balance,
         toBeRedeemedTokens: Balance,
         collateral: Balance,
-        btcAddress: H160
+        btcAddress: H160,
+        bannedUntil: BlockNumber
   }
 
 
