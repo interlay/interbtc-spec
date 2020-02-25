@@ -111,10 +111,26 @@ Parameter               Type            Description
 ======================  ==============  ========================================================================
 ``chainId``             U256            Unique identifier for faster lookup in ``ChainsIndex``
 ``chain``               Map<U256,H256>  Mapping of ``blockHeight`` to ``blockHash``, which points to a ``BlockHeader`` entry in ``BlockHeaders``.
+``startHeight``         U256            Starting/lowest block height in the ``chain`` mapping. Used to determine the forking point during chain reorganizations.
 ``maxHeight``           U256            Max. block height in the ``chain`` mapping. Used for ordering in the ``Chains`` priority queue.
 ``noData``              bool            Indicates that this blockchain was flagged with a ``NO_DATA_BTC_RELAY`` error by Staked Relayers.
 ``invalid``             bool            Indicates that this blockchain was flagged with a ``INVALID_BTC_RELAY`` error by Staked Relayers.
 ======================  ==============  ========================================================================
+
+*Substrate* 
+
+::
+
+  #[derive(Encode, Decode, Default, Clone, PartialEq)]
+  #[cfg_attr(feature = "std", derive(Debug))]
+  pub struct BlockHeader<H256, Timestamp> {
+        chainId: U256,
+        chain: HashMap<U256,H256>,
+        startHeight: U256,
+        maxHeight: U256,
+        noData: bool, 
+        invalid: bool
+  }
 
 
 Data Structures
