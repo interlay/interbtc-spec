@@ -377,7 +377,7 @@ Specification
 
 *Errors*
 
-* ``ERR_UNKNOWN_VAULT``: The specified Vault does not exist. 
+* ``ERR_VAULT_NOT_FOUND``: The specified Vault does not exist. 
 
 *Substrate* ::
 
@@ -394,7 +394,7 @@ Function Sequence
 
 1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccountId (``vault``).
 
-  a. Raise ``ERR_UNKNOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
+  a. Raise ``ERR_VAULT_NOT_FOUND`` error if no such ``vault`` entry exists in ``Vaults``.
 
 2. Increase the ``collateral`` of the ``Vault``. 
 
@@ -430,7 +430,7 @@ Specification
 
 *Errors*
 
-* ``ERR_UNKNOWN_VAULT = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
+* ``ERR_VAULT_NOT_FOUND = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
 * ``ERR_INSUFFICIENT_FREE_COLLATERAL``: The Vault is trying to withdraw more collateral than is currently free. 
 * ``ERR_MIN_AMOUNT``: The amount of locked collateral (free + used) needs to be above ``MinimumCollateralVault``.
 * ``ERR_UNAUTHORIZED``: The caller of the withdrawal is not the specified Vault, and hence not authorized to withdraw funds.
@@ -449,7 +449,7 @@ Function Sequence
 
 1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccountId (``vault``).
 
-  a. Raise ``ERR_UNKNOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
+  a. Raise ``ERR_VAULT_NOT_FOUND`` error if no such ``vault`` entry exists in ``Vaults``.
 
 2) Check that the caller of this function is indeed the specified ``Vault`` (AccountId ``vault``). 
 
@@ -1461,7 +1461,7 @@ Error Codes
 * **Cause**: BTC-Relay failed to verify the BTC address. See ``verifyTransactionInclusion`` in BTC-Relay. 
 
 
-``ERR_UNKNOWN_VAULT``
+``ERR_VAULT_NOT_FOUND``
 
 * **Message**: "The specified Vault does not exist. ."
 * **Function**: :ref:`lockAdditionalCollateral`

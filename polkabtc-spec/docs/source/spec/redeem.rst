@@ -137,9 +137,10 @@ Specification
 
 *Errors*
 
-* ``ERR_UNKNOWN_VAULT = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
+* ``ERR_VAULT_NOT_FOUND = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
 * ``ERR_AMOUNT_EXCEEDS_USER_BALANCE``: If the user is trying to redeem more BTC than his PolkaBTC balance.
 * ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE``: If the user is trying to redeem from a vault that has less BTC locked than requested for redeem.
+* ``ERR_VAULT_BANNED = "The selected Vault has been temporarily banned."``: Redeem requests are not possible with temporarily banned Vaults.
 
 *Substrate* ::
 
@@ -149,22 +150,25 @@ Specification
 Preconditions
 .............
 
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0`` or to ``ERROR:1`` with ``Errors`` containing only ``LIQUIDATION``. All other states are disallowed.
+* The selected Vault must not have been banned. 
 
 Function Sequence
 .................
 
 1. Check if the ``amountPolkaBTC`` is less or equal to the user's balance in the treasury. Return ``ERR_AMOUNT_EXCEEDS_USER_BALANCE`` if this check fails.
 
-2. Retrieve the ``vault`` from :ref:`vault-registry`. Return ``ERR_UNKNOWN_VAULT`` if no Vault can be found.
+2. Retrieve the ``vault`` from :ref:`vault-registry`. Return ``ERR_VAULT_NOT_FOUND`` if no Vault can be found.
 
-3. Check if the ``amountPolkaBTC`` is less or equal to the ``issuedTokens`` by the selected vault in the VaultRegistry. Return ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE`` if this check fails.
+3. Check that the ``vault`` is currently not banned, i.e., ``vault.bannedUntil == None`` or ``vault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
 
-4. Check if ``ParachainState`` in :ref:`security` is ``ERROR`` with ``LIQUIDATION`` in ``Errors``. 
+4. Check if the ``amountPolkaBTC`` is less or equal to the ``issuedTokens`` by the selected vault in the VaultRegistry. Return ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE`` if this check fails.
+
+5. Check if ``ParachainState`` in :ref:`security` is ``ERROR`` with ``LIQUIDATION`` in ``Errors``. 
 
    a. If this is the case,
 
-      i ) set ``amountDOTinBTC = amountPolkaBTC * getPartialRedeemFactor() / 10000`` (note: this is due to the representation of fractions as integers between 0 and 10000).
+      i ) set ``amountDOTinBTC = amountPolkaBTC * getPartialRedeemFactor() / 100000`` (note: this is due to the representation of fractions as integers between 0 and 100000).
 
       ii ) Set ``amountBTC = amountPolkaBTC - amountDOTinBTC``.
 
@@ -172,17 +176,17 @@ Function Sequence
 
    b. Otherwise, set ``amountBTC = amount``, ``amountDOT = 0``.
 
-5. Call the :ref:`vault-registry` :ref:`increaseToBeRedeemedTokens` function with the ``amountBTC`` of tokens to be redeemed and the ``vault`` identified by its address.
+6. Call the :ref:`vault-registry` :ref:`increaseToBeRedeemedTokens` function with the ``amountBTC`` of tokens to be redeemed and the ``vault`` identified by its address.
 
-6. If ``amountDOT > 0``, call :ref:`redeemTokensLiquidation` in :ref:`vault-registry`. This allocates the user ``amountDOT`` using the ``LiquidationVault``'s collateral and updates the ``LiquidationVault``'s polkaBTC balances. 
+7. If ``amountDOT > 0``, call :ref:`redeemTokensLiquidation` in :ref:`vault-registry`. This allocates the user ``amountDOT`` using the ``LiquidationVault``'s collateral and updates the ``LiquidationVault``'s polkaBTC balances. 
 
-7. Call the :ref:`lock` function in the Treasury to lock the PolkaBTC ``amount`` of the user.
+8. Call the :ref:`lock` function in the Treasury to lock the PolkaBTC ``amount`` of the user.
 
-8. Generate a ``redeemId`` using :ref:`generateSecureId`, passing ``redeemer`` as parameter.
+9. Generate a ``redeemId`` using :ref:`generateSecureId`, passing ``redeemer`` as parameter.
 
-9. Check if the Vault's collateral rate is below ``PremiumRedeemThreshold``. If this is the case, set ``premiumDOT = RedeemPremiumFee`` (as per :ref:`vault-registry`). Otherwise set ``premiumDOT = 0``.
+10. Check if the Vault's collateral rate is below ``PremiumRedeemThreshold``. If this is the case, set ``premiumDOT = RedeemPremiumFee`` (as per :ref:`vault-registry`). Otherwise set ``premiumDOT = 0``.
 
-10. Store a new ``Redeem`` struct in the ``RedeemRequests`` mapping as ``RedeemRequests[redeemId] = redeem``, where:
+11. Store a new ``Redeem`` struct in the ``RedeemRequests`` mapping as ``RedeemRequests[redeemId] = redeem``, where:
     
     - ``redeem.vault`` is the requested ``vault``
     - ``redeem.opentime`` is the current block number
@@ -193,9 +197,9 @@ Function Sequence
     - ``redeem.redeemer`` is the redeemer account
     - ``redeem.btcAddress`` the Bitcoin address of the user.
 
-11. Emit the ``RequestRedeem`` event with the ``redeemId``, ``redeemer`` account, ``amount``, ``vault``, and ``btcAddress``.
+12. Emit the ``RequestRedeem`` event with the ``redeemId``, ``redeemer`` account, ``amount``, ``vault``, and ``btcAddress``.
 
-12. Return the ``redeemId``. The user stores this for future reference locally.
+13. Return the ``redeemId``. The user stores this for future reference locally.
 
 .. _executeRedeem:
 
@@ -337,7 +341,7 @@ Function Sequence
     
   a. Call :ref:`slashCollateral` in the :ref:`collateral` module, passing ``redeem.vault``, ``redeem.redeemer`` and value of the collateral punishment, calculated as ``redeem.amountPolkaBTC *`` :ref:`getExchangeRate` ``* (PunishmentFee / 100000)`` 
 
-5. Temporarily Ban the Vault from Redeem and Replace processes by setting ``redeem.vault.bannedUntil = current parachain block height + PunishmentDelay``.
+5. Temporarily Ban the Vault from issue, redeem and replace processes by setting ``redeem.vault.bannedUntil = current parachain block height + PunishmentDelay``.
 
 6. Remove ``redeem`` from ``RedeemRequests``.
 
@@ -459,7 +463,7 @@ Emit an event when a user cancels a redeem request that has not been fulfilled a
 Error Codes
 ~~~~~~~~~~~
 
-``ERR_UNKNOWN_VAULT``
+``ERR_VAULT_NOT_FOUND``
 
 * **Message**: "There exists no Vault with the given account id."
 * **Function**: :ref:`requestRedeem`
@@ -471,6 +475,11 @@ Error Codes
 * **Function**: :ref:`requestRedeem`
 * **Cause**: If the user is trying to redeem more BTC than his PolkaBTC balance.
 
+``ERR_VAULT_BANNED``
+
+* **Message**: "The selected Vault has been temporarily banned."
+* **Function**: :ref:`requestRedeem`
+* **Cause**:  Redeem requests are not possible with temporarily banned Vaults
 
 ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE``
 
@@ -496,9 +505,10 @@ Error Codes
 * **Function**: :ref:`executeRedeem`
 * **Cause**: The caller of this function is not the associated vault, and hence not authorized to take this action.
 
-* ``ERR_REDEEM_PERIOD_NOT_EXPIRED``
+``ERR_REDEEM_PERIOD_NOT_EXPIRED``
 
 * **Message**: "The period to complete the redeem request is not yet expired."
 * **Function**: :ref:`cancelRedeem`
 * **Cause**:  Raises an error if the time limit to call ``executeRedeem`` has not yet passed.
+
 

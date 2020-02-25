@@ -866,7 +866,7 @@ Specification
 
 * ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
 * ``ERR_ALREADY_REPORTED = "This txId has already been logged as a theft by the given Vault"``: This transaction / Vault combination has already been reported.
-* ``ERR_UNKNOWN_VAULT = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
+* ``ERR_VAULT_NOT_FOUND = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
 * ``ERR_ALREADY_LIQUIDATED = "This Vault is already being liquidated``: The specified Vault is already being liquidated.
 * ``ERR_VALID_REDEEM_OR_REPLACE = "The given transaction is a valid Redeem or Replace execution by the accused Vault"``: The given transaction is associated with a valid :ref:`redeem-protocol` or :ref:`replace-protocol`.
 * ``ERR_VALID_MERGE_TRANSACTION = "The given transaction is a valid 'UTXO merge' transaction by the accused Vault"``: The given transaction represents an allowed "merging" of UTXOs by the accused Vault (no BTC was displaced).
@@ -881,7 +881,7 @@ Function Sequence
 
 1. Check that the caller of this function is indeed a Staked Relayer. Return ``ERR_STAKED_RELAYERS_ONLY`` if this check fails.
 
-2. Check if the specified ``vault`` exists in ``Vaults`` in :ref:`vault-registry`. Return ``ERR_UNKNOWN_VAULT`` if there is no Vault with the specified account identifier.
+2. Check if the specified ``vault`` exists in ``Vaults`` in :ref:`vault-registry`. Return ``ERR_VAULT_NOT_FOUND`` if there is no Vault with the specified account identifier.
 
 3. Check if this ``vault`` is already being liquidated, i.e., is in the ``LiquidationList``. If this is the case, return ``ERR_ALREADY_LIQUIDATED`` (no point in duplicate reporting).
 
@@ -954,7 +954,7 @@ Specification
 
 * ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
 * ``ERR_COLLATERAL_OK = "The accused Vault's collateral rate is above the liquidation threshold"``: The accused Vault's collateral rate is  above ``LiquidationCollateralThreshold``.
-* ``ERR_UNKNOWN_VAULT = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
+* ``ERR_VAULT_NOT_FOUND = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
 
 *Substrate* ::
 
@@ -965,7 +965,7 @@ Function Sequence
 
 1. Check that the caller of this function is indeed a Staked Relayer. Return ``ERR_STAKED_RELAYERS_ONLY`` if this check fails.
 
-2. Retrieve the Vault from ``Vaults`` in :ref:`vault-registry` using ``vault``. Return ``ERR_UNKNOWN_VAULT`` if there is no Vault with the specified account identifier.
+2. Retrieve the Vault from ``Vaults`` in :ref:`vault-registry` using ``vault``. Return ``ERR_VAULT_NOT_FOUND`` if there is no Vault with the specified account identifier.
 
 3. Check if the Vault's collateralization rate is below ``LiquidationCollateralThreshold`` as defined in :ref:`vault-registry`.  That is, check ``Vault.collateral`` against ``Vault.issuedTokens``. If the Vault's collateral rate is above ``LiquidationCollateralThreshold``, return ``ERR_COLLATERAL_OK``
 
