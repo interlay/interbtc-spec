@@ -241,10 +241,11 @@ Function Sequence
 
   g. Emit a ``ChainReorg(newChainTip, blockHeight, forkDepth)``, where ``newChainTip`` is the new ``BestBlock``, ``blockHeight`` is the new ``BestBlockHeight``, and ``forkDepth`` is the depth of the fork (``fork.maxHeight - fork.startHeight``).
 
+3. Return.
+
 .. todo:: We will want to execute the re-writing of the main chain only when a new fork is at least ``k`` blocks ahead.
 
 
-4. Return.
 
 .. note:: The exact implementation of :ref:`checkAndDoReorg` depends on the data structure used for ``Chains``.
 
