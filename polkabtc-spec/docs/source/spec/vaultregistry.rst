@@ -45,7 +45,7 @@ The minimum collateral (DOT) a Vault needs to provide to participate in the issu
 PunishmentFee
 .............
 
-If a vault misbehaves in either the redeem or replace protocol by failing to prove that it sent the correct amount of BTC to the correct address within the time limit, a vault is punished.
+If a Vault misbehaves in either the redeem or replace protocol by failing to prove that it sent the correct amount of BTC to the correct address within the time limit, a vault is punished.
 The punishment is the equivalent value of BTC in DOT (valued at the current exchange rate via :ref:`getExchangeRate`) plus a fixed ``PunishmentFee`` that is added as a percentage on top to compensate the damaged party for its loss.
 For example, if the ``PunishmentFee`` is set to 50000, it is equivalent to 50%.
 
@@ -53,6 +53,16 @@ For example, if the ``PunishmentFee`` is set to 50000, it is equivalent to 50%.
 *Substrate* ::
 
   PunishmentFee: u128;
+
+PunishmentDelay
+.................
+
+If a Vault fails to execute a correct redeem or replace, it is *temporarily* banned from further issue, redeem or replace requests. 
+
+*Substrate* ::
+
+  PunishmentDelay: BlockNumber;
+
 
 RedeemPremiumFee
 .................
@@ -167,6 +177,7 @@ Parameter                  Type       Description
 ``toBeRedeemedTokens``     PolkaBTC   Number of PolkaBTC tokens reserved by pending redeem and replace requests. 
 ``collateral``             DOT        Total amount of collateral provided by this Vault (note: "free" collateral is calculated on the fly and updated each time new exchange rate data is received).
 ``btcAddress``             bytes[20]  Bitcoin address of this Vault, to be used for issuing of PolkaBTC tokens.
+``bannedUntil``            u256       Block height until which this Vault is banned from being used for Issue, Redeem (except during automatic liquidation) and Replace . 
 =========================  =========  ========================================================
 
 .. note:: This specification currently assumes for simplicity that a Vault will reuse the same BTC address, even after multiple redeem requests. **[Future Extension]**: For better security, Vaults may desire to generate new BTC addresses each time they execute a redeem request. This can be handled by pre-generating multiple BTC addresses and storing these in a list for each Vault. Caution is necessary for users which execute issue requests with "old" Vault addresses - these BTC must be moved to the latest address by Vaults. 
@@ -184,7 +195,8 @@ Parameter                  Type       Description
         issuedTokens: Balance,
         toBeRedeemedTokens: Balance,
         collateral: Balance,
-        btcAddress: H160
+        btcAddress: H160,
+        bannedUntil: BlockNumber
   }
 
 
@@ -365,7 +377,7 @@ Specification
 
 *Errors*
 
-* ``ERR_UNKNOWN_VAULT``: The specified Vault does not exist. 
+* ``ERR_VAULT_NOT_FOUND``: The specified Vault does not exist. 
 
 *Substrate* ::
 
@@ -382,7 +394,7 @@ Function Sequence
 
 1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccountId (``vault``).
 
-  a. Raise ``ERR_UNKNOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
+  a. Raise ``ERR_VAULT_NOT_FOUND`` error if no such ``vault`` entry exists in ``Vaults``.
 
 2. Increase the ``collateral`` of the ``Vault``. 
 
@@ -418,7 +430,7 @@ Specification
 
 *Errors*
 
-* ``ERR_UNKNOWN_VAULT = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
+* ``ERR_VAULT_NOT_FOUND = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
 * ``ERR_INSUFFICIENT_FREE_COLLATERAL``: The Vault is trying to withdraw more collateral than is currently free. 
 * ``ERR_MIN_AMOUNT``: The amount of locked collateral (free + used) needs to be above ``MinimumCollateralVault``.
 * ``ERR_UNAUTHORIZED``: The caller of the withdrawal is not the specified Vault, and hence not authorized to withdraw funds.
@@ -437,7 +449,7 @@ Function Sequence
 
 1) Retrieve the ``Vault`` from ``Vaults`` with the specified AccountId (``vault``).
 
-  a. Raise ``ERR_UNKNOWN_VAULT`` error if no such ``vault`` entry exists in ``Vaults``.
+  a. Raise ``ERR_VAULT_NOT_FOUND`` error if no such ``vault`` entry exists in ``Vaults``.
 
 2) Check that the caller of this function is indeed the specified ``Vault`` (AccountId ``vault``). 
 
@@ -1449,7 +1461,7 @@ Error Codes
 * **Cause**: BTC-Relay failed to verify the BTC address. See ``verifyTransactionInclusion`` in BTC-Relay. 
 
 
-``ERR_UNKNOWN_VAULT``
+``ERR_VAULT_NOT_FOUND``
 
 * **Message**: "The specified Vault does not exist. ."
 * **Function**: :ref:`lockAdditionalCollateral`

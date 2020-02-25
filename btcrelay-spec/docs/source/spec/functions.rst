@@ -38,7 +38,7 @@ Specification
 
 ::
 
-  fn initialize(origin, blockHeaderBytes: T::RawBlockHeader, blockHeight: U256) -> Result {...}
+  fn initialize(origin, blockHeaderBytes: RawBlockHeader, blockHeight: U256) -> Result {...}
 
 Preconditions
 ~~~~~~~~~~~~~
@@ -58,13 +58,22 @@ The ``initialize`` function takes as input an 80 byte raw Bitcoin block header a
 
 2. Parse ``blockHeaderBytes``, extracting  the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` and :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash (``hashCurrentBlock``) using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
 
-3. Create new ``Blockchain`` entry in ``Chains``, setting ``chainId =``:ref:`getChainsCounter` ``maxHeight = blockHeight``, ``noData = False``, ``invalid = False``, and inserting ``hashCurrentBlock`` in the ``chain`` mapping using ``blockHeight`` as key. Insert a pointer to ``Blockchain`` into ``ChainsIndex`` using  ``chainId`` as key.
+3. Create a new ``BlockChain`` entry in ``Chains``:
 
-4.Store a new ``BlockHeader`` struct containing ``merkleRoot``, ``blockHeight``, ``timestamp``, ``target``, and a pointer (``chainRef``) to the ``BlockChain`` struct - as associated with this block header - in ``BlockHeaders``, using ``hashCurrentBlock`` as key. 
+    - ``chainId =``:ref:`getChainsCounter`
+    - ``startHeight = blockHeight``
+    - ``maxHeight = blockHeight``
+    - ``noData = Vec::new()``
+    - ``invalid = Vec::new()``
+    - Insert ``hashCurrentBlock`` in the ``chain`` mapping using ``blockHeight`` as key. 
 
-5. Set ``BestBlock = hashCurrentBlock`` and ``BestBlockHeight = blockHeight``.
+4. Insert a pointer to ``BlockChain`` into ``ChainsIndex`` using  ``chainId`` as key.
 
-6. Emit a ``Initialized`` event using ``height`` and ``hashCurrentBlock`` as input (``Initialized(height, hashCurrentBlock)``). 
+5. Store a new ``BlockHeader`` struct containing ``merkleRoot``, ``blockHeight``, ``timestamp``, ``target``, and a pointer (``chainRef``) to the ``BlockChain`` struct - as associated with this block header - in ``BlockHeaders``, using ``hashCurrentBlock`` as key. 
+
+6. Set ``BestBlock = hashCurrentBlock`` and ``BestBlockHeight = blockHeight``.
+
+7. Emit a ``Initialized`` event using ``height`` and ``hashCurrentBlock`` as input (``Initialized(height, hashCurrentBlock)``). 
 
 .. warning:: Attention: the Bitcoin block header submitted to ``initialize`` must be in the Bitcoin main chain - this must be checked outside of the BTC Parachain **before** making this function call! A wrong initialization will cause the entire BTC Parachain to fail, since verification requires that all submitted blocks **must** (indirectly) point to the initialized block (i.e., have it as ancestor, just like the actual Bitcoin genesis block).
 
@@ -100,7 +109,7 @@ Specification
 
 ::
 
-  fn storeBlockHeader(origin, blockHeaderBytes: T::RawBlockHeader) -> Result {...}
+  fn storeBlockHeader(origin, blockHeaderBytes: RawBlockHeader) -> Result {...}
 
 Preconditions
 ~~~~~~~~~~~~~
@@ -121,7 +130,7 @@ The ``storeBlockHeader`` function takes as input the 80 byte raw Bitcoin block h
 
 2. Call :ref:`verifyBlockHeader` passing ``blockHeaderBytes`` as function parameter. If this call **returns an error** , then abort and return the raised error. If successful, this call returns the hash of the previous block (``hashPrevBlock``), referenced in ``blockHeaderBytes``, as stored in ``BlockHeaders``.
 
-3. Determine which ``BlockChain`` entry in ``Chains`` this block header is extending, or if it is a new fork and hence a new ``BlockChain`` entry needs to be created. For this, get the ``BlockHeader`` struct stored in ``BlockHeaders`` with ``hashPrevBlock`` and use its ``chainRef`` pointer as key to lookup the associated ``BlockChain`` struct. Then, check if the  ``BlockHeader.blockHeight`` (as referenced by ``hashPrevBlock``) is equal  to ``BlockChain.maxHeight``.
+3. Determine which ``BlockChain`` entry in ``Chains`` this block header is extending, or if it is a new fork and hence a new ``BlockChain`` entry needs to be created. For this, get the ``prevBlockHeader`` stored in ``BlockHeaders`` with ``hashPrevBlock`` and use its ``chainRef`` pointer as key to lookup the associated ``BlockChain`` struct. Then, check if the  ``prevBlockHeader.blockHeight`` (as referenced by ``hashPrevBlock``) is equal  to ``BlockChain.maxHeight``.
 
    a. If not equal (can only be less in this case), then the current submission is creating a **new fork**. 
      
@@ -173,11 +182,11 @@ Specification
 
 *Function Signature*
 
-``checkAndDoReorg(blockChain)``
+``checkAndDoReorg(fork)``
 
 *Parameters*
 
-* ``&blockChain``: pointer to a ``BlockChain`` entry in ``Chains``. 
+* ``&fork``: pointer to a ``BlockChain`` entry in ``Chains``. 
 
 *Events*
 
@@ -187,27 +196,60 @@ Specification
 
 ::
 
-  fn checkAndDoReorg(blockChain: &BlockChain) -> Result {...}
+  fn checkAndDoReorg(fork: &BlockChain) -> Result {...}
 
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-1.  Check ordering of the ``BlockChain`` entry needs updating. For this, check the ``maxHeight`` of the "next-highest" ``BlockChain`` (parent in heap or predecessor in sorted linked list). 
+1.  Check if the ordering of the ``BlockChain`` entry needs updating. For this, check the ``maxHeight`` of the "next-highest" ``BlockChain`` (parent in heap or predecessor in sorted linked list). 
 
-   a. If ``BlockChain`` is the top-level element, do nothing.
+   a. If ``fork`` is the top-level element, do nothing.
    
    b. Else if the "next-highest" entry has a lower ``maxHeight``, switch position - continue, until reaching the "top" of the data structure or a ``BlockChain`` entry with a higher ``maxHeight``. 
 
-2. If ordering was updated, check if the top-level element in the ``Chains`` data structure changed. If yes, emit a ``ChainReorg(hashCurrentBlock, blockHeight, forkDepth)``, where ``forkDepth`` is the size of the ``chain`` mapping in the new top-level ``BlockChain`` (new *main chain*) entry.
+2. If ordering was updated, check if the top-level element in the ``Chains`` data structure changed. If yes, retrieve the previous top level ``BlockChain`` entry(``mainChain``) and update as follows:
 
-3. Check that ``noData`` or ``invalid`` are both set to ``False`` for this  ``BlockChain`` entry. If this is the case, check if we need to update the BTC Parachain state.
+  a. Create a new empty ``BlockChain`` (``forkedMainChain``) struct and initalize with: 
 
-   a. If ``Errors`` in :ref:`security` contains ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY`` call :ref:`recoverFromLIQUIDATION` to recover the BTC Parachain from ``LIQUIDATION`` error.
+    - ``forkedMainChain.chainId =`` :ref:`getChainsCounter`,  
+    - ``forkedMainChain.chain = HashMap::new()``
+    - ``forkedMainChain.startHeight = fork.startHeight``, 
+    - ``forkedMainChain.maxHeight = mainChain.maxHeight``
+    - ``forkedMainChain.noData = Vec::new()``
+    - ``forkedMainChain.invalid = Vec::new()``
+
+  b. Loop: starting from ``fork.startHeight`` as ``currHeight`` until ``fork.maxHeight``:
+  
+    i ) Set ``forkedMainChain.chain[currHeight] = mainChain.chain[currHeight]`` (overwrite the forked out main chain blocks with blocks in the fork).
+    
+    ii ) Set ``mainChain.chain[currHeight] = fork.chain[currHeight]`` (write forked main chain blocks to new ``BlockChain`` entry to be tracked as an ongoing fork).
+
+    iii ) If ``currHeight > mainChain.maxHeight`` set ``mainChain.maxHeight = currHeight``.
+
+  c. For each block height in ``fork.noData`` and ``fork.invalid``: add the block height to ``mainChain.noData`` and ``mainChain.noData`` respectively.
+  
+  d. Update ``BestBlockHeight = mainChain.maxHeight`` and ``BestBlock = mainChain.chain[mainChain.maxHeight]``
+
+  e. Check that ``noData`` or ``invalid`` are both **empty** in ``mainChain``. If this is the case, check if we need to update the BTC Parachain state.
+
+    i ) If ``noData`` or ``invalid`` are both **empty** and ``Errors`` in :ref:`security` contains ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY`` call ``recoverFromBTCRelayFailure`` to recover the BTC Parachain from the BTC-Relay related error.
+
+    ii ) If ``ParachainStatus`` is set to ``RUNNING`` and either ``noData`` or ``invalid`` are **not empty** in the new main chain ``BlockChain`` entry: update ``ParachainStatus`` to ``ERROR`` and append ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY`` (depending on which of ``invalid`` and ``noData`` lists was not empty) to the ``Errors`` list. 
+
+  f. Remove ``fork`` from ``Chains``. 
+
+  g. Emit a ``ChainReorg(newChainTip, blockHeight, forkDepth)``, where ``newChainTip`` is the new ``BestBlock``, ``blockHeight`` is the new ``BestBlockHeight``, and ``forkDepth`` is the depth of the fork (``fork.maxHeight - fork.startHeight``).
 
 3. Return.
 
+.. todo:: We will want to execute the re-writing of the main chain only when a new fork is at least ``k`` blocks ahead.
+
+
+
 .. note:: The exact implementation of :ref:`checkAndDoReorg` depends on the data structure used for ``Chains``.
+
+.. note:: We may want to track the ``mainChain`` identifier separately for quicker access (same main chain updated in case of forks).
 
 
 
@@ -250,7 +292,7 @@ Specification
 
 ::
 
-  fn verifyBlockHeader(origin, blockHeaderBytes: T::RawBlockHeader) -> H256 {...}
+  fn verifyBlockHeader(origin, blockHeaderBytes: RawBlockHeader) -> H256 {...}
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -326,7 +368,7 @@ Specification
 
 ::
 
-  fn verifyTransactionInclusion(txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: U256) -> Result {...}
+  fn verifyTransactionInclusion(txId: H256, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: U256) -> Result {...}
 
 Preconditions
 ~~~~~~~~~~~~~
@@ -335,6 +377,7 @@ Preconditions
 * The BTC Parachain status must not be set to ``HALTED: 2``. If ``HALTED`` is set, all transaction verification is disabled.
 * The BTC Parachain status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN`` is set, all transaction verification is disabled.
 
+
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
@@ -342,27 +385,29 @@ The ``verifyTransactionInclusion`` function follows the function sequence below:
 
 1. Check if the BTC Parachain status is set to ``SHUTDOWN``. If true, return ``ERR_SHUTDOWN`` and return. 
 
-2. Check if the BTC Parachain status is set to ``ERROR``. If yes, retrieve ``Errors`` from the *Security* module of PolkaBTC is set to ``INVALID_BTC_RELAY``.
+2. Check if the BTC Parachain status is set to ``ERROR``. If yes, retrieve ``Errors`` from the *Security* module of PolkaBTC.
 
 3. If ``Errors`` contains ``INVALID_BTC_RELAY``, abort and return a ``ERR_INVALID`` error.
 
-4. If ``Errors`` contains ``NO_DATA_BTC_RELAY``, the first ``NO_DATA_BTC_RELAY`` block (i.e., a block where ``BlockHeader.noData == True``). For this, 
+4. If ``Errors`` contains ``NO_DATA_BTC_RELAY``, lookup the first block flagged with ``NO_DATA_BTC_RELAY`` in the ``chain`` map of this ``BlockChain``. For this, 
 
   a. Retrieve the top-most ``BlockChain`` entry from ``Chains``,
-  b. Iterate over ``BlockChain.chain`` until a block header with ``BlockHeader.noData == True`` is found. 
-  c. If ``txBlockHeight`` is greater or equal to the block height of the found block, abort and return ``ERR_NO_DATA``.
 
-5. Check if the BTC Parachain status is set to ``NO_DATA_BTC_RELAY``. If true, check if the ``txBlockHeight`` is equal to or greater than the first ``NO_DATA_BTC_RELAY`` block. If false, return ``ERR_PARTIAL`` and return.
+  b. Retrieve the lowest block height from the ``noData`` list in this ``BlockChain``.
 
-6. Check that ``txId`` is 32 bytes long. Return ``ERR_INVALID_FORK_ID`` error if this check fails. 
+  c. If ``txBlockHeight`` is greater or equal to the block height of the lowest ``noData`` block, abort and return ``ERR_NO_DATA``.
 
-7. Check that the current ``BestBlockHeight`` exceeds ``txBlockHeight`` by the specified number of ``confirmations``. Return ``ERR_CONFIRMATIONS`` if this check fails. 
+5. Check that ``txId`` is 32 bytes long. Return ``ERR_MALFORMED_TXID`` error if this check fails. 
 
-8. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``Chains`` at the passed ``txBlockHeight``.  
+6. Check that the current ``BestBlockHeight`` exceeds ``txBlockHeight`` by the specified number of ``confirmations``. Return ``ERR_CONFIRMATIONS`` if this check fails. 
 
-9. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Return ``ERR_INVALID_MERKLE_PROOF`` if one of these checks fails.
+.. todo:: Check that there is no fork going on which would conflict with the required confirmations - and return error otherwise.
 
-10. Call :ref:`computeMerkle` passing ``txId``, ``txIndex`` and ``merkleProof`` as parameters. 
+7. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``Chains`` at the passed ``txBlockHeight``.  
+
+8. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Return ``ERR_INVALID_MERKLE_PROOF`` if one of these checks fails.
+
+9. Call :ref:`computeMerkle` passing ``txId``, ``txIndex`` and ``merkleProof`` as parameters. 
 
   a. If this call returns the ``merkleRoot``, emit a ``VerifyTransaction(txId, txBlockHeight, confirmations)`` event and return ``True``.
   
@@ -503,7 +548,7 @@ Specification
 
 *Substrate* ::
 
-  fn reportBTCRelayFailure(chainId: U256, errorCode: ErrorCode) -> Result {...}
+  fn flagBlockError(blockHash: T::H256, errorCode: T::ErrorCode) -> Result {...}
 
 Function Sequence
 .................
@@ -512,15 +557,17 @@ Function Sequence
 
 2. Retrieve the ``BlockHeader`` entry from ``BlockHeaders`` using ``blockHash``. Return ``ERR_BLOCK_NOT_FOUND`` if no block header can be found.
 
-3. Set error code of the ``BlockHeader``.
+3. Retrieve the ``BlockChain`` entry for the given ``BlockHeader`` using ``ChainsIndex`` for lookup with the block header's ``chainRef`` as key. 
 
-   a. If ``errors`` contains ``NO_DATA_BTC_RELAY``, set ``BlockHeader.noData = True`` and set ``BlockChain.noData = True`` accordingly (as per the ``BlockHeader.chainRef``).
+4. Flag errors in the ``BlockChain`` entry:
 
-   b. If ``errors`` contains ``INVALID_BTC_RELAY``, set ``BlockHeader.invalid = True`` and set ``BlockChain.noData = True`` accordingly (as per the ``BlockHeader.chainRef``).
+   a. If ``errors`` contains ``NO_DATA_BTC_RELAY``, append the ``BlockHeader.blockHeight`` to ``BlockChain.noData`` 
 
-4. Emit ``FlagBTCBlockError(blockHash, chainId, errors)`` event, with the given ``blockHash``, the ``chainId`` of the flagged ``BlockChain`` entry and the given ``errors`` as parameters.
+   b. If ``errors`` contains ``INVALID_BTC_RELAY``,  append the ``BlockHeader.blockHeight`` to ``BlockChain.invalid`` .
 
-5. Return
+5. Emit ``FlagBTCBlockError(blockHash, chainId, errors)`` event, with the given ``blockHash``, the ``chainId`` of the flagged ``BlockChain`` entry and the given ``errors`` as parameters.
+
+6. Return
 
 
 
@@ -572,20 +619,14 @@ Function Sequence
 
 2. Retrieve the ``BlockHeader`` entry from ``BlockHeaders`` using ``blockHash``. Return ``ERR_BLOCK_NOT_FOUND`` if no block header can be found.
 
-3. Un-flag error codes in the ``BlockHeader``.
+3. Retrieve the ``BlockChain`` entry for the given ``BlockHeader`` using ``ChainsIndex`` for lookup with the block header's ``chainRef`` as key. 
 
-   a. If ``errors`` contains ``NO_DATA_BTC_RELAY``:
-   
-     i ) Set ``BlockHeader.noData = False``.
-     
-     ii )Call :ref:`checkChainErrorStatus` passing ``NO_DATA_BTC_RELAY`` as parameter. If the call returns ``False``, set ``BlockChain.noData = False`` (no more ``NO_DATA_BTC_RELAY`` errors in this ``BlockChain``).
+4. Un-flag error codes in the ``BlockChain`` entry.
 
-   a. If ``errors`` contains ``INVALID_BTC_RELAY``:
-   
-     i ) Set ``BlockHeader.invalid = False``.
-     
-     ii ) Call :ref:`checkChainErrorStatus` passing ``INVALID_BTC_RELAY`` as parameter. If the call returns ``False``, set ``BlockChain.invalid = False`` (no more ``INVALID_BTC_RELAY`` errors in this ``BlockChain``).
+   a. If ``errors`` contains ``NO_DATA_BTC_RELAY``: remove ``BlockHeader.blockHeight`` from ``BlockChain.noData``
 
-4. Emit ``ClearBlockError(blockHash, chainId, errors)`` event, with the given ``blockHash``, the ``chainId`` of the flagged ``BlockChain`` entry and the given ``errors`` as parameters.
+   b. If ``errors`` contains ``INVALID_BTC_RELAY``: remove ``BlockHeader.blockHeight`` from ``BlockChain.invalid`` 
 
-5. Return
+5. Emit ``ClearBlockError(blockHash, chainId, errors)`` event, with the given ``blockHash``, the ``chainId`` of the flagged ``BlockChain`` entry and the given ``errors`` as parameters.
+
+6. Return

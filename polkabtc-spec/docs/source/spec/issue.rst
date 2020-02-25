@@ -151,6 +151,8 @@ Specification
 
 *Errors*
 
+* ``ERR_VAULT_NOT_FOUND = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
+* ``ERR_VAULT_BANNED = "The selected Vault has been temporarily banned."``: Issue requests are not possible with temporarily banned Vaults.
 * ``ERR_INSUFFICIENT_COLLATERAL``: The user did not provide enough griefing collateral.
 
 *Substrate* ::
@@ -165,16 +167,19 @@ Preconditions
 Function Sequence
 .................
 
+1. Retrieve the ``vault`` from :ref:`vault-registry`. Return ``ERR_VAULT_NOT_FOUND`` if no Vault can be found.
 
-1. Check if the ``griefingCollateral`` is greater or equal ``IssueGriefingCollateral``. If this check fails, return ``ERR_INSUFFICIENT_COLLATERAL``.
+2 Check that the ``vault`` is currently not banned, i.e., ``vault.bannedUntil == None`` or ``vault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
 
-2. Lock the user's griefing collateral by calling the :ref:`lockCollateral` function with the ``requester`` as the sender and the ``griefingCollateral`` as the amount.
+3. Check if the ``griefingCollateral`` is greater or equal ``IssueGriefingCollateral``. If this check fails, return ``ERR_INSUFFICIENT_COLLATERAL``.
 
-3. Call the VaultRegistry :ref:`increaseToBeIssuedTokens` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. If the vault has not locked enough collateral, throws a ``ERR_EXCEEDING_VAULT_LIMIT`` error. This function returns a ``btcAddress`` that the user should send Bitcoin to.
+4. Lock the user's griefing collateral by calling the :ref:`lockCollateral` function with the ``requester`` as the sender and the ``griefingCollateral`` as the amount.
 
-4. Generate an ``issueId`` by hashing a random seed, a nonce from the security module, and the address of the user.
+5. Call the VaultRegistry :ref:`increaseToBeIssuedTokens` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. If the vault has not locked enough collateral, throws a ``ERR_EXCEEDING_VAULT_LIMIT`` error. This function returns a ``btcAddress`` that the user should send Bitcoin to.
 
-5. Store a new ``Issue`` struct in the ``IssueRequests`` mapping as ``IssueRequests[issueId] = issue``, where ``issue`` is the ``Issue`` struct as:
+6. Generate an ``issueId`` by hashing a random seed, a nonce from the security module, and the address of the user.
+
+7. Store a new ``Issue`` struct in the ``IssueRequests`` mapping as ``IssueRequests[issueId] = issue``, where ``issue`` is the ``Issue`` struct as:
 
     - ``issue.vault`` is the ``vault``
     - ``issue.opentime`` is the current block number
@@ -183,9 +188,9 @@ Function Sequence
     - ``issue.requester`` is the user's account
     - ``issue.btcAddress`` the Bitcoin address of the Vault as returned in step 3
 
-6. Issue the ``RequestIssue`` event with the ``issueId``, the ``requester`` account, ``amount``, ``vault``, and ``btcAddress``.
+8. Issue the ``RequestIssue`` event with the ``issueId``, the ``requester`` account, ``amount``, ``vault``, and ``btcAddress``.
 
-7. Return the ``issueId``. The user stores this for future reference and the next steps, locally.
+9. Return the ``issueId``. The user stores this for future reference and the next steps, locally.
 
 
 .. lock
@@ -449,6 +454,18 @@ CancelIssue
 
 Error Codes
 ~~~~~~~~~~~
+
+``ERR_VAULT_NOT_FOUND``
+
+* **Message**: "There exists no Vault with the given account id."
+* **Function**: :ref:`requestIssue`
+* **Cause**: The specified Vault does not exist.
+
+``ERR_VAULT_BANNED``
+
+* **Message**: "The selected Vault has been temporarily banned."
+* **Function**: :ref:`requestIssue`
+* **Cause**:  Issue requests are not possible with temporarily banned Vaults
 
 ``ERR_INSUFFICIENT_COLLATERAL``
 

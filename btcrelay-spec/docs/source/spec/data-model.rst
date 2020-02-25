@@ -48,7 +48,7 @@ The maximum difficulty target, :math:`2^{224}-1` in the case of Bitcoin. For mor
 
 *Substrate* ::
 
-  const UNROUNDED_MAX_TARGET: U256 = 26959946667150639794667015087019630673637144422540572481103610249215;
+    const UNROUNDED_MAX_TARGET: U256 = U256([0x00000000ffffffffu64, <u64>::max_value(), <u64>::max_value(), <u64>::max_value()]);
 
 Structs
 ~~~~~~~
@@ -69,9 +69,7 @@ Parameter               Type       Description
 ``merkleRoot``          byte32     Root of the Merkle tree referencing transactions included in the block.
 ``target``              u256       Difficulty target of this block (converted from ``nBits``, see `Bitcoin documentation <https://bitcoin.org/en/developer-reference#target-nbits>`_.).
 ``timestamp``           timestamp  UNIX timestamp indicating when this block was mined in Bitcoin.
-``chainRef``            pointer    Pointer to the ``BlockChain`` struct in which this block header is contained.
-``noData``              bool            Indicates that this block header was flagged with a ``NO_DATA_BTC_RELAY`` error by Staked Relayers.
-``invalid``             bool            Indicates that this block header was flagged with a ``INVALID_BTC_RELAY`` error by Staked Relayers.
+``chainRef``            U256       Pointer to the ``BlockChain`` struct in which this block header is contained.
 .                       .          .
 ``version``             u32        [Optional] Version of the submitted block.
 ``hashPrevBlock``       byte32     [Optional] Block hash of the predecessor of this block.
@@ -84,18 +82,18 @@ Parameter               Type       Description
 
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct BlockHeader<H256, DateTime> {
+  pub struct BlockHeader<H256, Timestamp> {
         blockHeight: U256,
         merkleRoot: H256,
         target: U256,
-        timestamp: DateTime,
-        chainRef: &Chain,
+        timestamp: Timestamp,
+        chainRef: U256,
         noData: bool, 
         invalid: bool,
         // Optional fields
-        version: U32, 
+        version: u32, 
         hashPrevBlock: H256,
-        nonce: U32
+        nonce: u32
   }
 
 
@@ -110,11 +108,27 @@ Representation of a Bitcoin blockchain.
 Parameter               Type            Description
 ======================  ==============  ========================================================================
 ``chainId``             U256            Unique identifier for faster lookup in ``ChainsIndex``
-``chain``               Map<u256,H256>  Mapping of ``blockHeight`` to ``blockHash``, which points to a ``BlockHeader`` entry in ``BlockHeaders``.
+``chain``               Map<U256,H256>  Mapping of ``blockHeight`` to ``blockHash``, which points to a ``BlockHeader`` entry in ``BlockHeaders``.
+``startHeight``         U256            Starting/lowest block height in the ``chain`` mapping. Used to determine the forking point during chain reorganizations.
 ``maxHeight``           U256            Max. block height in the ``chain`` mapping. Used for ordering in the ``Chains`` priority queue.
-``noData``              bool            Indicates that this blockchain was flagged with a ``NO_DATA_BTC_RELAY`` error by Staked Relayers.
-``invalid``             bool            Indicates that this blockchain was flagged with a ``INVALID_BTC_RELAY`` error by Staked Relayers.
+``noData``              Vec<U256>       List of block heights in ``chain`` referencing block hashes of ``BlockHeader`` entries in ``BlockHeaders`` which have been flagged as ``noData`` by Staked Relayers.
+``invalid``             Vec<U256>       List of block heights in ``chain`` referencing block hashes of ``BlockHeader`` entries in ``BlockHeaders`` which have been flagged as ``invalid`` by Staked Relayers.
 ======================  ==============  ========================================================================
+
+*Substrate* 
+
+::
+
+  #[derive(Encode, Decode, Default, Clone, PartialEq)]
+  #[cfg_attr(feature = "std", derive(Debug))]
+  pub struct BlockHeader<H256, Timestamp> {
+        chainId: U256,
+        chain: HashMap<U256,H256>,
+        startHeight: U256,
+        maxHeight: U256,
+        noData: Vec<U256>, 
+        invalid: Vec<U256>
+  }
 
 
 Data Structures
@@ -127,8 +141,7 @@ Mapping of ``<blockHash, BlockHeader>``, storing all verified Bitcoin block head
 
 *Substrate* ::
 
-  BlockHeaders: map T::H256 => BlockHeader<T::H256>;
-
+  BlockHeaders: map H256 => BlockHeader<U256, H256, T::Moment>;
 
 
 Chains
@@ -178,7 +191,7 @@ Auxiliary mapping of ``BlockChain`` structs to unique identifiers, for faster re
 
 *Substrate* ::
 
-  ChainsIndex: map U256 => BlockChain<T::H256>;
+  ChainsIndex: map U256 => BlockChain<H256>;
 
 BestBlock
 .........
@@ -187,10 +200,10 @@ BestBlock
 
 *Substrate* ::
 
-  BestBlock: T::H256;
+  BestBlock: H256;
 
 
-.. note:: Bitcoin uses SHA256 (32 bytes) for its block hashes, transaction identifiers and Merkle trees. In Substrate, we hence use ``T::H256`` to represent these hashes.
+.. note:: Bitcoin uses SHA256 (32 bytes) for its block hashes, transaction identifiers and Merkle trees. In Substrate, we hence use ``H256`` to represent these hashes.
 
 BestBlockHeight
 ...............

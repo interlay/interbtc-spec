@@ -162,6 +162,8 @@ Specification
 * ``ERR_VAULT_NOT_FOUND = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
 * ``ERR_MIN_AMOUNT``: The remaining DOT collateral (converted from the requested BTC replacement value given the current exchange rate) would be below the ``MinimumCollateralVault`` as defined in ``VaultRegistry``.
 * ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated Vault``: The caller of this function is not the associated Vault, and hence not authorized to take this action.
+* ``ERR_VAULT_BANNED = "The selected Vault has been temporarily banned."``: Executing replace requests is not possible with temporarily banned Vaults.
+
 
 *Substrate* ::
 
@@ -180,30 +182,32 @@ Function Sequence
 
 2. Retrieve the ``vault`` as per the ``oldVault`` account identifier from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` if no Vault can be found.
 
-3. Check that the requested ``btcAmount`` is equal to or lower than ``vault.issuedTokens`` mins the ``vault.toBeRedeemedTokens``.
+3. Check that the ``vault`` is currently not banned, i.e., ``vault.bannedUntil == None`` or ``vault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
+
+4. Check that the requested ``btcAmount`` is equal to or lower than ``vault.issuedTokens`` mins the ``vault.toBeRedeemedTokens``.
 
   a. If ``btcAmount > vault.issuedTokens`` set ``btcAmount = vault.issuedTokens`` (i.e., the request is for the entire BTC holdings of the Vault).
 
-4. If the request is not for the entire BTC holdings, check that the remaining DOT collateral of the Vault is higher than ``MinimumCollateralVault`` as defined in ``VaultRegistry``. Return ``ERR_MIN_AMOUNT`` error if this check fails.
+5. If the request is not for the entire BTC holdings, check that the remaining DOT collateral of the Vault is higher than ``MinimumCollateralVault`` as defined in ``VaultRegistry``. Return ``ERR_MIN_AMOUNT`` error if this check fails.
 
-5. Check that the ``griefingCollateral`` is greater or equal ``ReplaceGriefingCollateral``
+6. Check that the ``griefingCollateral`` is greater or equal ``ReplaceGriefingCollateral``
 
-6. Lock the *oldVault*'s griefing collateral by calling :ref:`lockCollateral` and passing ``oldVault`` and ``griefingCollateral`` as parameters.
+7. Lock the *oldVault*'s griefing collateral by calling :ref:`lockCollateral` and passing ``oldVault`` and ``griefingCollateral`` as parameters.
 
-7. Call the :ref:`increaseToBeRedeemedTokens` function with the ``oldVault`` and the ``btcAmount`` to ensure that the oldVault's tokens cannot be redeemed when a replace procedure is happening.
+8. Call the :ref:`increaseToBeRedeemedTokens` function with the ``oldVault`` and the ``btcAmount`` to ensure that the oldVault's tokens cannot be redeemed when a replace procedure is happening.
 
-8. Generate a ``replaceId`` by hashing a random seed, a nonce, and the address of the Requester.
+9. Generate a ``replaceId`` by hashing a random seed, a nonce, and the address of the Requester.
 
-9. Create new ``ReplaceRequest`` entry:
+10. Create new ``ReplaceRequest`` entry:
 
    * ``Replace.oldVault = vault``,
    * ``Replace.opentime`` = current time on Parachain,
    * ``Replace.amount = amount``,
    * ``Replace.griefingCollateral = griefingCollateral``.
    
-10. Emit ``RequestReplace(vault, btcAmount, timeout, replaceId)`` event.  
+11. Emit ``RequestReplace(vault, btcAmount, timeout, replaceId)`` event.  
 
-11. Return the ``replaceId``.
+12. Return the ``replaceId``.
 
 .. _withdrawReplaceRequest:
 
@@ -302,6 +306,7 @@ Specification
 * ``ERR_REPLACE_ID_NOT_FOUND =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
 * ``ERR_INSUFFICIENT_COLLATERAL``: The provided collateral is insufficient to match the replace request. 
 * ``ERR_VAULT_NOT_FOUND``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
+* ``ERR_VAULT_BANNED = "The selected Vault has been temporarily banned."``: Executing replace requests is not possible with temporarily banned Vaults.
 
 *Substrate* ::
 
@@ -319,20 +324,22 @@ Function Sequence
 
 1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from  ``ReplaceRequests``. Return ``ERR_REPLACE_ID_NOT_FOUND`` error if no such ``ReplaceRequest`` was found.
 
-2. Retrieve the ``vault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such Vault can be found.
+2. Retrieve the Vault as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such Vault can be found.
 
-3. Check that the provided ``collateral`` exceeds the necessary amount, i.e., ``collateral >= SecureCollateralThreshold * Replace.btcAmount``. Return ``ERR_INSUFFICIENT_COLLATERAL`` error if this check fails.
+3. Check that the ``newVault`` is currently not banned, i.e., ``newVault.bannedUntil == None`` or ``newVault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
 
-4. Lock the *newVault*'s collateral by calling :ref:`lockCollateral` and providing ``newVault`` and ``collateral`` as parameters.
+4. Check that the provided ``collateral`` exceeds the necessary amount, i.e., ``collateral >= SecureCollateralThreshold * Replace.btcAmount``. Return ``ERR_INSUFFICIENT_COLLATERAL`` error if this check fails.
 
-5. Update the ``ReplaceRequest`` entry:
+5. Lock the *newVault*'s collateral by calling :ref:`lockCollateral` and providing ``newVault`` and ``collateral`` as parameters.
+
+6. Update the ``ReplaceRequest`` entry:
 
   * ``Replace.newVault = newVault``,
   * ``Replace.acceptTime`` = current Parachain time, 
   * ``Replace.btcAddress = btcAddress`` (new Vault's BTC address),
   * ``Replace.collateral = collateral`` (DOT collateral locked by new Vault).
 
-6. Emit a ``AcceptReplace(newVault, replaceId, collateral)`` event.
+7. Emit a ``AcceptReplace(newVault, replaceId, collateral)`` event.
 
 
 .. _auctionReplace:
