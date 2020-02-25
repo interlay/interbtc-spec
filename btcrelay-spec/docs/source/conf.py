@@ -24,9 +24,9 @@ copyright = u'2020, Interlay'
 author = u'Interlay'
 
 # The short X.Y version
-version = u'v1.0'
+version = u'v1.1'
 # The full version, including alpha/beta/rc tags
-release = u'v1.0'
+release = u'v1.1'
 
 
 # -- General configuration ---------------------------------------------------
