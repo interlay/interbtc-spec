@@ -111,8 +111,8 @@ Parameter               Type            Description
 ``chain``               Map<U256,H256>  Mapping of ``blockHeight`` to ``blockHash``, which points to a ``BlockHeader`` entry in ``BlockHeaders``.
 ``startHeight``         U256            Starting/lowest block height in the ``chain`` mapping. Used to determine the forking point during chain reorganizations.
 ``maxHeight``           U256            Max. block height in the ``chain`` mapping. Used for ordering in the ``Chains`` priority queue.
-``noData``              Vec<H256>       List of block hashes (references to ``BlockHeader`` entries in ``BlockHeaders`` which have been flagged with ``noData`` by Staked Relayers.
-``invalid``             Vec<H256>       List of block hashes (references to ``BlockHeader`` entries in ``BlockHeaders`` which have been flagged with ``invalid`` by Staked Relayers
+``noData``              Vec<U256>       List of block heights in ``chain`` referencing block hashes of ``BlockHeader`` entries in ``BlockHeaders`` which have been flagged as ``noData`` by Staked Relayers.
+``invalid``             Vec<U256>       List of block heights in ``chain`` referencing block hashes of ``BlockHeader`` entries in ``BlockHeaders`` which have been flagged as ``invalid`` by Staked Relayers.
 ======================  ==============  ========================================================================
 
 *Substrate* 
@@ -126,8 +126,8 @@ Parameter               Type            Description
         chain: HashMap<U256,H256>,
         startHeight: U256,
         maxHeight: U256,
-        noData: bool, 
-        invalid: bool
+        noData: Vec<U256>, 
+        invalid: Vec<U256>
   }
 
 
