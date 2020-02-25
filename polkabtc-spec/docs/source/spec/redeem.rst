@@ -280,6 +280,7 @@ The user that initially requested the redeem process calls this function to obta
 
 The failed Vault is banned from further issue, redeem and replace requests for a pre-defined time period (``PunishmentDelay`` as defined in :ref:`vault-registry`).
 
+
 Specification
 .............
 
@@ -322,21 +323,27 @@ Function Sequence
 
 2. Check if the expiry time of the redeem request is up, i.e ``redeem.opentime + RedeemPeriod < now``. If the time is not up, throw ``ERR_REDEEM_PERIOD_NOT_EXPIRED``.
 
-3. If ``reimburse == True`` (user requested to be reimbursed in DOT): 
+3. Retrieve the current BTC-DOT exchange rate (``exchangeRate``) via :ref:`getExchangeRate` from the :ref:`oracle`.
 
-   a. . Call the :ref:`decreaseTokens` function in the VaultRegistry to transfer (a part) of the Vault's collateral to the user with the ``redeem.vault``, ``redeem.redeemer``, and ``redeem.amount`` parameters.
+4. If ``reimburse == True`` (user requested to be reimbursed in DOT): 
+
+   a. Call the :ref:`decreaseTokens` function in the VaultRegistry to transfer (a part) of the Vault's collateral to the user with the ``redeem.vault``, ``redeem.redeemer``, and ``redeem.amount`` parameters.
 
    b. Call the :ref:`burn` function in the Treasury to burn the ``redeem.amount`` of PolkaBTC of the user.
    
-4. Call :ref:`slashCollateral` 
+   c. Call :ref:`slashCollateral` in the :ref:`collateral` module, passing ``redeem.vault``, ``redeem.redeemer`` and the value of the reimbursed collateral, calculated as ``redeem.amountPolkaBTC *`` :ref:`getExchangeRate` ``* (1 + PunishmentFee / 100000)``
 
-.. todo:: TODO
+4. Else, if ``reimburse == False`` (user does not want full reimbursement and wishes to retry the redeem)
+    
+  a. Call :ref:`slashCollateral` in the :ref:`collateral` module, passing ``redeem.vault``, ``redeem.redeemer`` and value of the collateral punishment, calculated as ``redeem.amountPolkaBTC *`` :ref:`getExchangeRate` ``* (PunishmentFee / 100000)`` 
 
-5. Remove ``redeem`` from ``RedeemRequests``.
+5. Temporarily Ban the Vault from Redeem and Replace processes by setting ``redeem.vault.bannedUntil = current parachain block height + PunishmentDelay``.
 
-6. Emit a ``CancelRedeem`` event with the ``redeemId``.
+6. Remove ``redeem`` from ``RedeemRequests``.
 
-7. Return.
+7. Emit a ``CancelRedeem`` event with the ``redeemer`` account identifier and the ``redeemId``.
+
+8. Return.
 
 
 .. _getPartialRedeemFactor:
@@ -494,3 +501,4 @@ Error Codes
 * **Message**: "The period to complete the redeem request is not yet expired."
 * **Function**: :ref:`cancelRedeem`
 * **Cause**:  Raises an error if the time limit to call ``executeRedeem`` has not yet passed.
+
