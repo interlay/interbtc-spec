@@ -111,8 +111,8 @@ Parameter               Type            Description
 ``chain``               Map<U256,H256>  Mapping of ``blockHeight`` to ``blockHash``, which points to a ``BlockHeader`` entry in ``BlockHeaders``.
 ``startHeight``         U256            Starting/lowest block height in the ``chain`` mapping. Used to determine the forking point during chain reorganizations.
 ``maxHeight``           U256            Max. block height in the ``chain`` mapping. Used for ordering in the ``Chains`` priority queue.
-``noData``              bool            Indicates that this blockchain was flagged with a ``NO_DATA_BTC_RELAY`` error by Staked Relayers.
-``invalid``             bool            Indicates that this blockchain was flagged with a ``INVALID_BTC_RELAY`` error by Staked Relayers.
+``noData``              Vec<H256>       List of block hashes (references to ``BlockHeader`` entries in ``BlockHeaders`` which have been flagged with ``noData`` by Staked Relayers.
+``invalid``             Vec<H256>       List of block hashes (references to ``BlockHeader`` entries in ``BlockHeaders`` which have been flagged with ``invalid`` by Staked Relayers
 ======================  ==============  ========================================================================
 
 *Substrate* 
