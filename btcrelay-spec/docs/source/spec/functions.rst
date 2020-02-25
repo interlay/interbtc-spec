@@ -182,11 +182,11 @@ Specification
 
 *Function Signature*
 
-``checkAndDoReorg(blockChain)``
+``checkAndDoReorg(fork)``
 
 *Parameters*
 
-* ``&blockChain``: pointer to a ``BlockChain`` entry in ``Chains``. 
+* ``&fork``: pointer to a ``BlockChain`` entry in ``Chains``. 
 
 *Events*
 
@@ -196,27 +196,59 @@ Specification
 
 ::
 
-  fn checkAndDoReorg(blockChain: &BlockChain) -> Result {...}
+  fn checkAndDoReorg(fork: &BlockChain) -> Result {...}
 
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-1.  Check ordering of the ``BlockChain`` entry needs updating. For this, check the ``maxHeight`` of the "next-highest" ``BlockChain`` (parent in heap or predecessor in sorted linked list). 
+1.  Check if the ordering of the ``BlockChain`` entry needs updating. For this, check the ``maxHeight`` of the "next-highest" ``BlockChain`` (parent in heap or predecessor in sorted linked list). 
 
-   a. If ``BlockChain`` is the top-level element, do nothing.
+   a. If ``fork`` is the top-level element, do nothing.
    
    b. Else if the "next-highest" entry has a lower ``maxHeight``, switch position - continue, until reaching the "top" of the data structure or a ``BlockChain`` entry with a higher ``maxHeight``. 
 
-2. If ordering was updated, check if the top-level element in the ``Chains`` data structure changed. If yes, emit a ``ChainReorg(hashCurrentBlock, blockHeight, forkDepth)``, where ``forkDepth`` is the size of the ``chain`` mapping in the new top-level ``BlockChain`` (new *main chain*) entry.
+2. If ordering was updated, check if the top-level element in the ``Chains`` data structure changed. If yes, retrieve the previous top level ``BlockChain`` entry(``mainChain``) and update as follows:
 
-3. Check that ``noData`` or ``invalid`` are both **empty** for this  ``BlockChain`` entry. If this is the case, check if we need to update the BTC Parachain state.
+  a. Create a new empty ``BlockChain`` (``forkedMainChain``) struct and initalize with: 
 
-   a. If ``Errors`` in :ref:`security` contains ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY`` call :ref:`recoverFromLIQUIDATION` to recover the BTC Parachain from ``LIQUIDATION`` error.
+    - ``forkedMainChain.chainId =`` :ref:`getChainsCounter`,  
+    - ``forkedMainChain.chain = HashMap::new()``
+    - ``forkedMainChain.startHeight = fork.startHeight``, 
+    - ``forkedMainChain.maxHeight = mainChain.maxHeight``
+    - ``forkedMainChain.noData = Vec::new()``
+    - ``forkedMainChain.invalid = Vec::new()``
 
-3. Return.
+  b. Loop: starting from ``fork.startHeight`` as ``currHeight`` until ``fork.maxHeight``:
+  
+    i ) Set ``forkedMainChain.chain[currHeight] = mainChain.chain[currHeight]`` (overwrite the forked out main chain blocks with blocks in the fork).
+    
+    ii ) Set ``mainChain.chain[currHeight] = fork.chain[currHeight]`` (write forked main chain blocks to new ``BlockChain`` entry to be tracked as an ongoing fork).
+
+    iii ) If ``currHeight > mainChain.maxHeight`` set ``mainChain.maxHeight = currHeight``.
+
+  c. For each block height in ``fork.noData`` and ``fork.invalid``: add the block height to ``mainChain.noData`` and ``mainChain.noData`` respectively.
+  
+  d. Update ``BestBlockHeight = mainChain.maxHeight`` and ``BestBlock = mainChain.chain[mainChain.maxHeight]``
+
+  e. Check that ``noData`` or ``invalid`` are both **empty** in ``mainChain``. If this is the case, check if we need to update the BTC Parachain state.
+
+    i ) If ``noData`` or ``invalid`` are both **empty** and ``Errors`` in :ref:`security` contains ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY`` call ``recoverFromBTCRelayFailure`` to recover the BTC Parachain from the BTC-Relay related error.
+
+    ii ) If ``ParachainStatus`` is set to ``RUNNING`` and either ``noData`` or ``invalid`` are **not empty** in the new main chain ``BlockChain`` entry: update ``ParachainStatus`` to ``ERROR`` and append ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY`` (depending on which of ``invalid`` and ``noData`` lists was not empty) to the ``Errors`` list. 
+
+  f. Remove ``fork`` from ``Chains``. 
+
+  g. Emit a ``ChainReorg(newChainTip, blockHeight, forkDepth)``, where ``newChainTip`` is the new ``BestBlock``, ``blockHeight`` is the new ``BestBlockHeight``, and ``forkDepth`` is the depth of the fork (``fork.maxHeight - fork.startHeight``).
+
+.. todo:: We will want to execute the re-writing of the main chain only when a new fork is at least ``k`` blocks ahead.
+
+
+4. Return.
 
 .. note:: The exact implementation of :ref:`checkAndDoReorg` depends on the data structure used for ``Chains``.
+
+.. note:: We may want to track the ``mainChain`` identifier separately for quicker access (same main chain updated in case of forks).
 
 
 
@@ -344,6 +376,7 @@ Preconditions
 * The BTC Parachain status must not be set to ``HALTED: 2``. If ``HALTED`` is set, all transaction verification is disabled.
 * The BTC Parachain status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN`` is set, all transaction verification is disabled.
 
+
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
@@ -360,7 +393,7 @@ The ``verifyTransactionInclusion`` function follows the function sequence below:
   a. Retrieve the top-most ``BlockChain`` entry from ``Chains``,
 
   b. Retrieve the lowest block height from the ``noData`` list in this ``BlockChain``.
-  
+
   c. If ``txBlockHeight`` is greater or equal to the block height of the lowest ``noData`` block, abort and return ``ERR_NO_DATA``.
 
 5. Check that ``txId`` is 32 bytes long. Return ``ERR_MALFORMED_TXID`` error if this check fails. 
