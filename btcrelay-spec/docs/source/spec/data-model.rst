@@ -50,13 +50,62 @@ The maximum difficulty target, :math:`2^{224}-1` in the case of Bitcoin. For mor
 
     const UNROUNDED_MAX_TARGET: U256 = U256([0x00000000ffffffffu64, <u64>::max_value(), <u64>::max_value(), <u64>::max_value()]);
 
+MAIN_CHAIN_ID
+.............
+
+Identifier of the Bitcoin main chain tracked in the ``ChainsIndex`` mapping. At any point in time, the ``BlockChain`` with this identifier is considered to be the main chain and will be used to transaction inclusion verification.
+
+*Substrate* ::
+
+    const MAIN_CHAIN_ID: U256 = 0;
+
 Structs
 ~~~~~~~
   
 BlockHeader
 ...........
 
-Representation of a Bitcoin block header. 
+Representation of a Bitcoin block header, as stored in the 80 byte byte representation in the Bitcoin block chain (contains no additional metadata - see :ref:`richBlockHeader`). 
+This struct is only used for parsing the 80 byte block header - not for storage! 
+
+.. note:: Fields marked as [Optional] are not critical for the secure operation of BTC-Relay, but can be stored anyway, at the developers discretion. We omit these fields in the rest of this specification. 
+
+.. tabularcolumns:: |l|l|L|
+
+======================  =========  ========================================================================
+Parameter               Type       Description
+======================  =========  ========================================================================
+``merkleRoot``          byte32     Root of the Merkle tree referencing transactions included in the block.
+``target``              u256       Difficulty target of this block (converted from ``nBits``, see `Bitcoin documentation <https://bitcoin.org/en/developer-reference#target-nbits>`_.).
+``timestamp``           timestamp  UNIX timestamp indicating when this block was mined in Bitcoin.
+``hashPrevBlock``       byte32     Block hash of the predecessor of this block.
+.                       .          .
+``version``             u32        [Optional] Version of the submitted block.
+``nonce``               u32        [Optional] Nonce used to solve the PoW of this block. 
+======================  =========  ========================================================================
+
+*Substrate* 
+
+::
+
+  #[derive(Encode, Decode, Default, Clone, PartialEq)]
+  #[cfg_attr(feature = "std", derive(Debug))]
+  pub struct BlockHeader<H256, Timestamp> {
+        merkleRoot: H256,
+        target: U256,
+        timestamp: Timestamp,
+        hashPrevBlock: H256,
+        // Optional fields
+        version: u32, 
+        nonce: u32
+  }
+
+.. _richBlockHeader: 
+
+RichBlockHeader
+................
+
+Representation of a Bitcoin block header containing additional metadata. This struct is used to store Bitcoin block headers. 
 
 .. note:: Fields marked as [Optional] are not critical for the secure operation of BTC-Relay, but can be stored anyway, at the developers discretion. We omit these fields in the rest of this specification. 
 
@@ -66,13 +115,14 @@ Representation of a Bitcoin block header.
 Parameter               Type       Description
 ======================  =========  ========================================================================
 ``blockHeight``         u256       Height of this block in the Bitcoin main chain.
+``chainRef``            U256       Pointer to the ``BlockChain`` struct in which this block header is contained.
+.                       .          .
 ``merkleRoot``          byte32     Root of the Merkle tree referencing transactions included in the block.
 ``target``              u256       Difficulty target of this block (converted from ``nBits``, see `Bitcoin documentation <https://bitcoin.org/en/developer-reference#target-nbits>`_.).
 ``timestamp``           timestamp  UNIX timestamp indicating when this block was mined in Bitcoin.
-``chainRef``            U256       Pointer to the ``BlockChain`` struct in which this block header is contained.
+``hashPrevBlock``       byte32     Block hash of the predecessor of this block.
 .                       .          .
 ``version``             u32        [Optional] Version of the submitted block.
-``hashPrevBlock``       byte32     [Optional] Block hash of the predecessor of this block.
 ``nonce``               u32        [Optional] Nonce used to solve the PoW of this block. 
 ======================  =========  ========================================================================
 
@@ -84,23 +134,23 @@ Parameter               Type       Description
   #[cfg_attr(feature = "std", derive(Debug))]
   pub struct BlockHeader<H256, Timestamp> {
         blockHeight: U256,
+        chainRef: U256,
+        // same as BlockHeader
         merkleRoot: H256,
         target: U256,
         timestamp: Timestamp,
-        chainRef: U256,
-        noData: bool, 
-        invalid: bool,
+        hashPrevBlock: H256,
         // Optional fields
         version: u32, 
-        hashPrevBlock: H256,
         nonce: u32
   }
+
 
 
 BlockChain
 ..........
 
-Representation of a Bitcoin blockchain. 
+Representation of a Bitcoin blockchain / fork.
 
 .. tabularcolumns:: |l|l|L|
 
@@ -219,10 +269,10 @@ ChainCounter
 .................
 
 Integer increment-only counter used to track existing BlockChain entries.
-
+Initialized with 1 (0 is reserved for ``MAIN_CHAIN_ID``).
 *Substrate* ::
 
-  ChainCounter: U256;
+  ChainCounter: U256 = 1;
 
 
 

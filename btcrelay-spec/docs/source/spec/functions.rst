@@ -202,13 +202,13 @@ Specification
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-1.  Check if the ordering of the ``BlockChain`` entry needs updating. For this, check the ``maxHeight`` of the "next-highest" ``BlockChain`` (parent in heap or predecessor in sorted linked list). 
+1.  Check if the ordering of the ``BlockChain`` entry needs updating. For this, check the ``maxHeight`` of the "next-highest" ``BlockChain`` (parent in heap or predecessor in sorted linked list) in ``Chains``. 
 
-   a. If ``fork`` is the top-level element, do nothing.
+   a. If ``fork`` is the top-level element, i.e., the main chain, do nothing.
    
-   b. Else if the "next-highest" entry has a lower ``maxHeight``, switch position - continue, until reaching the "top" of the data structure or a ``BlockChain`` entry with a higher ``maxHeight``. 
+   b. Else if the "next-highest" entry has a lower ``maxHeight``, update ordering by switching positions - continue, until reaching the "top" of the ``Chains`` data structure or a ``BlockChain`` entry with a higher ``maxHeight``. 
 
-2. If ordering was updated, check if the top-level element in the ``Chains`` data structure changed. If yes, retrieve the previous top level ``BlockChain`` entry(``mainChain``) and update as follows:
+2. If ordering was updated, check if the top-level element in the ``Chains`` data structure changed (i.e., is no longer the main chain defined by ``MAIN_CHAIN_ID``). If this is the case, retrieve the main chain ``BlockChain`` entry (``mainChain``) from ``ChainsIndex`` using ``MAIN_CHAIN_ID`` as key and perform the reorg:
 
   a. Create a new empty ``BlockChain`` (``forkedMainChain``) struct and initalize with: 
 
@@ -222,24 +222,30 @@ Function Sequence
   b. Loop: starting from ``fork.startHeight`` as ``currHeight`` until ``fork.maxHeight``:
   
     i ) Set ``forkedMainChain.chain[currHeight] = mainChain.chain[currHeight]`` (overwrite the forked out main chain blocks with blocks in the fork).
-    
-    ii ) Set ``mainChain.chain[currHeight] = fork.chain[currHeight]`` (write forked main chain blocks to new ``BlockChain`` entry to be tracked as an ongoing fork).
 
-    iii ) If ``currHeight > mainChain.maxHeight`` set ``mainChain.maxHeight = currHeight``.
+    ii ) Get the ``BlockHeader`` for the new ``mainChain.chain[currHeight]`` and update its ``chainRef`` to point to ``mainChain``.
+    
+    iii ) Set ``forkedMainChain.chain[currHeight] = fork.chain[currHeight]`` (write forked main chain blocks to new ``BlockChain`` entry to be tracked as an ongoing fork).
+
+    iv ) Get the ``BlockHeader`` for the new ``forkedMainChain.chain[currHeight]`` and update its ``chainRef`` to point to ``forkedMainChain``.
+
+    v ) If ``currHeight > mainChain.maxHeight`` set ``mainChain.maxHeight = currHeight``.
 
   c. For each block height in ``fork.noData`` and ``fork.invalid``: add the block height to ``mainChain.noData`` and ``mainChain.noData`` respectively.
   
   d. Update ``BestBlockHeight = mainChain.maxHeight`` and ``BestBlock = mainChain.chain[mainChain.maxHeight]``
 
-  e. Check that ``noData`` or ``invalid`` are both **empty** in ``mainChain``. If this is the case, check if we need to update the BTC Parachain state.
+  e. Update ``nextBestForkHeight = mainChain.maxHeight`` 
+
+  f. Check that ``noData`` or ``invalid`` are both **empty** in ``mainChain``. If this is the case, check if we need to update the BTC Parachain state.
 
     i ) If ``noData`` or ``invalid`` are both **empty** and ``Errors`` in :ref:`security` contains ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY`` call ``recoverFromBTCRelayFailure`` to recover the BTC Parachain from the BTC-Relay related error.
 
     ii ) If ``ParachainStatus`` is set to ``RUNNING`` and either ``noData`` or ``invalid`` are **not empty** in the new main chain ``BlockChain`` entry: update ``ParachainStatus`` to ``ERROR`` and append ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY`` (depending on which of ``invalid`` and ``noData`` lists was not empty) to the ``Errors`` list. 
 
-  f. Remove ``fork`` from ``Chains``. 
+  g. Remove ``fork`` from ``Chains``. 
 
-  g. Emit a ``ChainReorg(newChainTip, blockHeight, forkDepth)``, where ``newChainTip`` is the new ``BestBlock``, ``blockHeight`` is the new ``BestBlockHeight``, and ``forkDepth`` is the depth of the fork (``fork.maxHeight - fork.startHeight``).
+  h. Emit a ``ChainReorg(newChainTip, blockHeight, forkDepth)``, where ``newChainTip`` is the new ``BestBlock``, ``blockHeight`` is the new ``BestBlockHeight``, and ``forkDepth`` is the depth of the fork (``fork.maxHeight - fork.startHeight``).
 
 3. Return.
 
