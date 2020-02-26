@@ -62,10 +62,10 @@ Identifier of the Bitcoin main chain tracked in the ``ChainsIndex`` mapping. At 
 Structs
 ~~~~~~~
   
-BlockHeader
-...........
+PureBlockHeader
+..................
 
-Representation of a Bitcoin block header, as stored in the 80 byte byte representation in the Bitcoin block chain (contains no additional metadata - see :ref:`richBlockHeader`). 
+Representation of a Bitcoin block header, as stored in the 80 byte byte representation in the Bitcoin block chain (contains **no additional metadata** - see :ref:`blockHeader`). 
 This struct is only used for parsing the 80 byte block header - not for storage! 
 
 .. note:: Fields marked as [Optional] are not critical for the secure operation of BTC-Relay, but can be stored anyway, at the developers discretion. We omit these fields in the rest of this specification. 
@@ -90,7 +90,7 @@ Parameter               Type       Description
 
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct BlockHeader<H256, Timestamp> {
+  pub struct PureBlockHeader<H256, Timestamp> {
         merkleRoot: H256,
         target: U256,
         timestamp: Timestamp,
@@ -100,9 +100,9 @@ Parameter               Type       Description
         nonce: u32
   }
 
-.. _richBlockHeader: 
+.. _blockHeader: 
 
-RichBlockHeader
+BlockHeader
 ................
 
 Representation of a Bitcoin block header containing additional metadata. This struct is used to store Bitcoin block headers. 
