@@ -38,7 +38,7 @@ Specification
 
 ::
 
-  fn initialize(origin, blockHeaderBytes: RawBlockHeader, blockHeight: U256) -> Result {...}
+  fn initialize(origin, blockHeaderBytes: Vec<u8>, blockHeight: U256) -> DispatchResult {...}
 
 Preconditions
 ~~~~~~~~~~~~~
@@ -109,7 +109,7 @@ Specification
 
 ::
 
-  fn storeBlockHeader(origin, blockHeaderBytes: RawBlockHeader) -> Result {...}
+  fn storeBlockHeader(origin, blockHeaderBytes: Vec<u8>) -> DispatchResult {...}
 
 Preconditions
 ~~~~~~~~~~~~~
@@ -207,7 +207,7 @@ Specification
 
 ::
 
-  fn checkAndDoReorg(fork: &BlockChain) -> Result {...}
+  fn checkAndDoReorg(fork: &BlockChain) -> DispatchResult {...}
 
 
 Function Sequence
@@ -382,7 +382,7 @@ Specification
 
 ::
 
-  fn verifyTransactionInclusion(txId: H256, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: U256) -> Result {...}
+  fn verifyTransactionInclusion(txId: H256, txBlockHeight: U256, txIndex: u64, merkleProof: String, confirmations: U256) -> DispatchResult {...}
 
 Preconditions
 ~~~~~~~~~~~~~
@@ -491,7 +491,7 @@ Specification
 
 ::
 
-  fn validateTransaction(txId: H256, rawTx: String, paymentValue: Balance, recipientBtcAddress: H160, opReturnId: H256) -> Result {...}
+  fn validateTransaction(txId: H256, rawTx: String, paymentValue: Balance, recipientBtcAddress: H160, opReturnId: H256) -> DispatchResult {...}
 
 Preconditions
 ~~~~~~~~~~~~~
@@ -562,7 +562,7 @@ Specification
 
 *Substrate* ::
 
-  fn flagBlockError(blockHash: T::H256, errorCode: T::ErrorCode) -> Result {...}
+  fn flagBlockError(blockHash: H256, errorCode: ErrorCode) -> DispatchResult {...}
 
 Function Sequence
 .................
@@ -624,7 +624,7 @@ Specification
 
 *Substrate* ::
 
-  fn reportBTCRelayFailure(chainId: U256, errors: Vec<ErrorCode>) -> Result {...}
+  fn reportBTCRelayFailure(chainId: U256, errors: Vec<ErrorCode>) -> DispatchResult {...}
 
 Function Sequence
 .................

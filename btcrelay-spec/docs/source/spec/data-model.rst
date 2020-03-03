@@ -80,7 +80,7 @@ Parameter               Type       Description
 ``timestamp``           timestamp  UNIX timestamp indicating when this block was mined in Bitcoin.
 ``hashPrevBlock``       byte32     Block hash of the predecessor of this block.
 .                       .          .
-``version``             u32        [Optional] Version of the submitted block.
+``version``             i32        [Optional] Version of the submitted block.
 ``nonce``               u32        [Optional] Nonce used to solve the PoW of this block. 
 ======================  =========  ========================================================================
 
@@ -90,13 +90,12 @@ Parameter               Type       Description
 
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct PureBlockHeader<H256, Timestamp> {
-        merkleRoot: H256,
+  pub struct PureBlockHeader<H256, U256, Timestamp> {
+        merkle_root: H256,
         target: U256,
         timestamp: Timestamp,
-        hashPrevBlock: H256,
-        // Optional fields
-        version: u32, 
+        hash_prev_block: H256,
+        version: i32, 
         nonce: u32
   }
 
@@ -122,7 +121,7 @@ Parameter               Type       Description
 ``timestamp``           timestamp  UNIX timestamp indicating when this block was mined in Bitcoin.
 ``hashPrevBlock``       byte32     Block hash of the predecessor of this block.
 .                       .          .
-``version``             u32        [Optional] Version of the submitted block.
+``version``             i32        [Optional] Version of the submitted block.
 ``nonce``               u32        [Optional] Nonce used to solve the PoW of this block. 
 ======================  =========  ========================================================================
 
@@ -132,17 +131,10 @@ Parameter               Type       Description
 
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct BlockHeader<H256, Timestamp> {
-        blockHeight: U256,
-        chainRef: U256,
-        // same as BlockHeader
-        merkleRoot: H256,
-        target: U256,
-        timestamp: Timestamp,
-        hashPrevBlock: H256,
-        // Optional fields
-        version: u32, 
-        nonce: u32
+  pub struct BlockHeader<H256, U256, Timestamp> {
+        block_height: U256,
+        chain_ref: U256,
+        block_header: PureBlockHeader<H256, U256, Timestamp>,
   }
 
 
@@ -173,7 +165,7 @@ Parameter               Type            Description
   #[cfg_attr(feature = "std", derive(Debug))]
   pub struct BlockHeader<H256, Timestamp> {
         chainId: U256,
-        chain: HashMap<U256,H256>,
+        chain: BTreeMap<U256,H256>,
         startHeight: U256,
         maxHeight: U256,
         noData: Vec<U256>, 
@@ -191,7 +183,7 @@ Mapping of ``<blockHash, BlockHeader>``, storing all verified Bitcoin block head
 
 *Substrate* ::
 
-  BlockHeaders: map H256 => BlockHeader<U256, H256, T::Moment>;
+  BlockHeaders: map H256 => BlockHeader<U256, H256, Moment>;
 
 
 Chains
