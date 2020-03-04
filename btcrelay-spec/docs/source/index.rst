@@ -1,6 +1,6 @@
 .. PolkaBTC documentation master file
 
-Welcome to the BTC-Relay documentation!
+Welcome to the Polkadot BTC-Relay documentation!
 ==============================================
 
 .. toctree::

@@ -1,7 +1,7 @@
 .. PolkaBTC documentation master file
 
-Welcome to PolkaBTC's documentation!
-====================================
+Welcome to the BTC Parachain documentation!
+============================================
 
 .. toctree::
    :maxdepth: 2
