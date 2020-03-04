@@ -40,4 +40,4 @@ Welcome to the Polkadot BTC-Relay documentation!
    :caption: All the rest
 
    other/license
-   other/ref   
+   other/interlay
