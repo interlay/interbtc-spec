@@ -14,6 +14,9 @@ See the Bitcoin Developer Reference for details on the `block header <https://bi
 Block Header 
 ------------
 
+
+
+
 .. _extractHashPrevBlock:
 
 extractHashPrevBlock
@@ -138,6 +141,56 @@ Function Sequence
 .................
 
 1. Return 4 bytes starting at index 72 of ``blockHeaderBytes``.
+
+
+
+.. _parseBlockHeader:
+
+parseBlockHeader
+~~~~~~~~~~~~~~~~
+
+Parses a 80 bytes raw Bitcoin block header and, if successful, returns a  ``BlockHeader`` struct. 
+
+
+
+*Function Signature*
+
+``parseBlockHeader(blockHeaderBytes)``
+
+*Parameters*
+
+* ``blockHeaderBytes``: 80 byte raw Bitcoin block header
+
+*Returns*
+
+* ``pureBlockHeader``: the parsed Bitcoin block header
+
+*Errors*
+
+* ``ERR_INVALID_HEADER_SIZE = "Invalid block header size"``: return error if the submitted block header is not exactly 80 bytes long.
+
+*Substrate*
+
+::
+
+  fn parseBlockHeader(blockHeaderBytes: T::RawBlockHeader) -> T::BlockHeader {...}
+
+
+Function Sequence
+.................
+
+1. Check that the ``blockHeaderBytes`` is 80 bytes long. Return ``ERR_INVALID_HEADER_SIZE`` exception and abort otherwise.
+
+2. Create a new ``PureBlockHeader`` (``pureBlockHeader``) struct and initialize as follows:
+
+  * ``pureBlockHeader.merkleRoot =``:ref:`extractMerkleRoot` (``blockHeaderBytes``)
+  * ``pureBlockHeader.target =`` :ref:`nBitsToTarget` (:ref:`extractNBits` (``blockHeaderBytes``))
+  * ``pureBlockHeader.timestamp =`` :ref:`extractTimestamp` (``blockHeaderBytes``)
+  * ``pureBlockHeader.hashPrevBlock = :ref:`extractHashPrevBlock` (``blockHeaderBytes``)
+
+3. Return ``pureBlockHeader``
+
+
 
 
 

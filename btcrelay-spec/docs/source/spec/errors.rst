@@ -56,7 +56,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message**: "Invalid block header size": 
 
-* **Function**: :ref:`verifyBlockHeader`
+* **Function**: :ref:`parseBlockHeader`
 
 * **Cause**: Raised if the submitted block header is not exactly 80 bytes long.
 
