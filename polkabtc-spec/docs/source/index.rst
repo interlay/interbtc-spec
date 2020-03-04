@@ -37,5 +37,5 @@ Welcome to the BTC Parachain documentation!
    :maxdepth: 2
    :caption: All the rest
    
-   other/glossary
    other/license
+   other/interlay
