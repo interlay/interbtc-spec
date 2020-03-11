@@ -1454,13 +1454,7 @@ Error Codes
 ``ERR_STATUS_UPDATE_NOT_FOUND``
 
 * **Message**: "No StatusUpdate found with given identifier"
-* **Function**: :ref:`voteOnStatusUpdate`
-* **Cause**:  No ``StatusUpdate`` with the given ``statusUpdateId`` exists in ``StatusUpdates``
-
-``ERR_STATUS_UPDATE_NOT_FOUND``
-
-* **Message**: "No StatusUpdate found with given identifier"
-* **Function**: :ref:`executeStatusUpdate`, :ref:`rejectStatusUpdate`
+* **Function**: :ref:`voteOnStatusUpdate`, :ref:`executeStatusUpdate`, :ref:`rejectStatusUpdate`
 * **Cause**: No ``StatusUpdate`` with the given ``statusUpdateId`` exists in ``StatusUpdates``.
 
 ``ERR_INSUFFICIENT_YES_VOTES``
