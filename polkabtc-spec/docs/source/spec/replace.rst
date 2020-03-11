@@ -755,7 +755,7 @@ Error Codes
 * **Function**: :ref:`executeReplace`
 * **Cause**: The time limit as defined by the ``ReplacePeriod`` is not met.
 
-* ``ERR_REPLACE_PERIOD_NOT_EXPIRED``
+``ERR_REPLACE_PERIOD_NOT_EXPIRED``
 
 * **Message**: "The period to complete the replace request is not yet expired."
 * **Function**: :ref:`cancelReplace`

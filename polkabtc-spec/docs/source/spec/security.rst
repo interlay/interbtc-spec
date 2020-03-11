@@ -46,93 +46,12 @@ We differentiate between:
 Data Model
 ~~~~~~~~~~
 
-
-Constants
----------
-
-STAKED_RELAYER_VOTE_THRESHOLD
-...............................
-
-Integer denoting the percentage of Staked Relayer signatures/votes necessary to alter the state of the BTC Parachain (``NO_DATA_BTC_RELAY`` and ``INVALID_BTC_RELAY`` error codes).
-
-.. note:: Must be a number between 0 and 100.
-
-
-*Substrate* ::
-
-  STAKED_RELAYER_VOTE_THRESHOLD: U8;
-
-
-STAKED_RELAYER_STAKE
-......................
-
-Integer denoting the minimum DOT stake which Staked Relayers must provide when registering. 
-
-
-*Substrate* ::
-
-  STAKED_RELAYER_STAKE: Balance;
-
-
-Scalars
---------
-
-ParachainStatus
-.................
-
-Integer/Enum (see ``StatusCode`` below). Defines the current state of BTC-Relay. 
-
-*Substrate* ::
-
-  ParachainStatus: T::StatusCode;
-
-
-Errors
-........
-
-Set of error codes (``ErrorCode`` enums), indicating the reason for the error. The ``ErrorCode`` entries included in this set specify how to react to the failure (e.g. shutdown transaction verification in :ref:`btc-relay`).
-
-
-*Substrate* ::
-
-  Errors: HashSet<T::ErrorCode>;
-
-
-StatusLog
-..........
-
-Array of ``StatusUpdate`` structs, providing a history of status changes of the BTC Parachain. 
-
-*Substrate* ::
-
-  StatusLog: Vec<StatusUpdate>;
-
-
-StatusCounter
-.................
-
-Integer increment-only counter used to track status updates.
-
-*Substrate* ::
-
-  StatusCounter: U256;
-
-Nonce
-.....
-
-Integer increment-only counter, used to prevent collisions when generating identifiers for e.g. issue, redeem or replace requests (for OP_RETURN field in Bitcoin).
-
-*Substrate* ::
-
-  Nonce: U256;
-
-
 Enums
 ------
 
 StatusCode
 ...........
-Indicated ths status of the BTC Parachain.
+Indicates ths status of the BTC Parachain.
 
 * ``RUNNING: 0`` - BTC Parachain fully operational
 
@@ -153,7 +72,7 @@ Indicated ths status of the BTC Parachain.
 ErrorCode
 .........
 
-Enum specifying reasons for error leading to a status update.
+Enum specifying error codes tracked in ``Errors``.
 
 
 * ``NONE : 0`` - no error has occurred (used to simplify implementation). 
@@ -235,12 +154,12 @@ Parameter               Type            Description
   pub struct StatusUpdate<StatusCode, ErrorCode, BlockNumber, AccountId> {
         newStatusCode: StatusCode,
         oldStatusCode: StatusCode,
-        addErrors: HashSet<ErrorCode>,
-        removeErrors: HashSet<ErrorCode>,
+        addErrors: BTreeSet<ErrorCode>,
+        removeErrors: BTreeSet<ErrorCode>,
         time: BlockNumber,
         msg: String,
-        votesYes: HashSet<AccountId>,
-        votesNo: HashSet<AccountId>,
+        votesYes: BTreeSet<AccountId>,
+        votesNo: BTreeSet<AccountId>,
   }
 
 
@@ -270,6 +189,81 @@ Parameter                  Type       Description
 
 .. note:: Struct used here in case more information needs to be stored for Staked Relayers, e.g. SLA (votes cast vs. votes missed).
 
+
+
+Data Storage
+~~~~~~~~~~~~
+
+Constants
+---------
+
+STAKED_RELAYER_VOTE_THRESHOLD
+...............................
+
+Integer denoting the percentage of Staked Relayer signatures/votes necessary to alter the state of the BTC Parachain (``NO_DATA_BTC_RELAY`` and ``INVALID_BTC_RELAY`` error codes).
+
+.. note:: Must be a number between 0 and 100.
+
+
+*Substrate* ::
+
+  STAKED_RELAYER_VOTE_THRESHOLD: U8;
+
+
+STAKED_RELAYER_STAKE
+......................
+
+Integer denoting the minimum DOT stake which Staked Relayers must provide when registering. 
+
+
+*Substrate* ::
+
+  STAKED_RELAYER_STAKE: Balance;
+
+
+Scalars
+--------
+
+ParachainStatus
+.................
+
+Integer/Enum (see ``StatusCode`` below). Defines the current state of the BTC Parachain. 
+
+*Substrate* ::
+
+  ParachainStatus: StatusCode;
+
+
+Errors
+........
+
+Set of error codes (``ErrorCode`` enums), indicating the reason for the error. The ``ErrorCode`` entries included in this set specify how to react to the failure (e.g. shutdown transaction verification in :ref:`btc-relay`).
+
+
+*Substrate* ::
+
+  Errors: BTreeSet<ErrorCode>;
+
+
+StatusCounter
+.................
+
+Integer increment-only counter used to track status updates.
+
+*Substrate* ::
+
+  StatusCounter: U256;
+
+Nonce
+.....
+
+Integer increment-only counter, used to prevent collisions when generating identifiers for e.g. issue, redeem or replace requests (for OP_RETURN field in Bitcoin).
+
+*Substrate* ::
+
+  Nonce: U256;
+
+
 Maps
 ----
 
@@ -291,7 +285,7 @@ Map of ``StatusUpdates``, identified by an integer key. ``<U256, StatusUpdate>``
 
 *Substrate* ::
 
-    StakedRelayers map U256 => StatusUpdate<StatusCode, ErrorCode, BlockNumber, AccountId>
+    StatusUpdates map U256 => StatusUpdate<StatusCode, ErrorCode, BlockNumber, AccountId>
 
 
 TheftReports
@@ -304,7 +298,7 @@ This mapping is necessary to prevent duplicate theft reports.
 
 *Substrate* ::
 
-    TheftReports map H256 => HashSet<AccountId>
+    TheftReports map H256 => BTreeSet<AccountId>
 
 
 Functions
@@ -459,7 +453,7 @@ Specification
   
 *Substrate* ::
 
-  fn suggestStatusUpdate(origin, newStatusCode: StatusCode, addErrors: HashSet<ErrorCode>, removeErrors: HashSet<ErrorCode>, msg: String) -> Result {...}
+  fn suggestStatusUpdate(origin, newStatusCode: StatusCode, addErrors: BTreeSet<ErrorCode>, removeErrors: BTreeSet<ErrorCode>, msg: String) -> Result {...}
 
 Preconditions
 .............
@@ -481,8 +475,8 @@ Function Sequence
    * ``StatusUpdate.blockHash = blockHash``,
    * ``StatusUpdate.msg = msg``,
    * ``StatusUpdate.proposalStatus = ProposalStatus.PENDING``,
-   * Initialize ``StatusUpdate.votesYes`` with a new Set (``HashSet``), and insert ``stakedRelayer`` (as the first vote),
-   * Initialize ``StatusUpdate.votesNo`` with an empty Set (``HashSet``).
+   * Initialize ``StatusUpdate.votesYes`` with a new Set (``BTreeSet``), and insert ``stakedRelayer`` (as the first vote),
+   * Initialize ``StatusUpdate.votesNo`` with an empty Set (``BTreeSet``).
 
 4. Insert the new ``StatusUpdate`` into the ``StatusUpdates`` mapping, using :ref:`getStatusCounter` as key.
 
@@ -723,7 +717,7 @@ Specification
 
 ::
 
-  fn forceStatusUpdate(origin, newStatusCode: StatusCode, addErrors: HashSet<ErrorCode>, removeErrors: HashSet<ErrorCode>, msg, String) -> Result {...}
+  fn forceStatusUpdate(origin, newStatusCode: StatusCode, addErrors: BTreeSet<ErrorCode>, removeErrors: BTreeSet<ErrorCode>, msg, String) -> Result {...}
 
 
 Precondition
@@ -744,8 +738,8 @@ Function Sequence
    * ``StatusUpdate.time =`` current Parachain block number,
    * ``StatusUpdate.msg = msg``,
    * ``StatusUpdate.proposalStatus = ProposalStatus.ACCEPTED``,
-   * Initialize ``StatusUpdate.votesYes`` with a new Set (``HashSet``), and insert ``governanceMechanism`` (as the first any **only** vote),
-   * Initialize ``StatusUpdate.votesNo`` with an empty Set (``HashSet``).
+   * Initialize ``StatusUpdate.votesYes`` with a new Set (``BTreeSet``), and insert ``governanceMechanism`` (as the first any **only** vote),
+   * Initialize ``StatusUpdate.votesNo`` with an empty Set (``BTreeSet``).
 
 
 3. Insert the new ``StatusUpdate`` into the ``StatusUpdates`` mapping, using :ref:`getStatusCounter` as key.
@@ -1202,10 +1196,327 @@ Function Sequence
 Events
 ~~~~~~~
 
+RegisterStakedRelayer
+----------------------
+
+Emit an event stating that a new Staked Relayer was registered and provide information on the Staked Relayer's stake
+
+*Event Signature*
+
+``RegisterStakedRelayer(StakedRelayer, collateral)``
+
+*Parameters*
+
+* ``stakedRelayer``: newly registered staked Relayer
+* ``stake``: stake provided by the staked relayer upon registration 
+
+*Functions*
+
+* :ref:`registerStakedRelayer`
+
+*Substrate* ::
+
+  RegisterStakedRelayer(AccountId, Balance);
+
+
+DeRegisterStakedRelayer
+-------------------------
+
+Emit an event stating that a Staked Relayer has been de-registered 
+
+*Event Signature*
+
+``DeRegisterStakedRelayer(StakedRelayer)``
+
+*Parameters*
+
+* ``stakedRelayer``: account identifier of de-registered Staked Relayer
+
+*Functions*
+
+* :ref:`deRegisterStakedRelayer`
+
+*Substrate* ::
+
+  DeRegisterStakedRelayer(AccountId);
+
+
+StatusUpdateSuggested
+--------------
+
+Emits an event indicating a status change of the BTC Parachain.
+
+*Event Signature*
+
+* ``StatusUpdateSuggested(newStatusCode, addErrors, removeErrors, msg, stakedRelayer)`` 
+
+*Parameters*
+
+*``newStatusCode``: the new ``StatusCode``
+* ``addErrors``: the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``)
+* ``removeErrors``: the set of to-be-removed ``ErrorCode`` entries
+* ``msg``: the detailed message provided by the function caller
+* ``stakedRelayer``: the account identifier of the Staked Relayer suggesting the update.
+
+
+*Functions*
+
+* :ref:`suggestStatusUpdate`
+
+*Substrate* ::
+
+  StatusUpdateSuggested(StatusCode, BTreeSet<ErrorCode>, BTreeSet<ErrorCode>, String, AccountId);
+
+
+VoteOnStatusUpdate
+--------------------
+
+Emit an event informing about the vote cast by a staked relayer on a pending status update.
+
+*Event Signature*
+
+``VoteOnStatusUpdate(statusUpdateId, stakedRelayer, vote)``:
+
+*Parameters*
+
+* ``statusUpdateId``: identifier of the ``StatusUpdate`` being voted upon
+* ``stakedRelayer``: account identifier of voting staked relayer
+* ``vote``: boolean vote cast by the ``stakedRelayer`` 
+
+*Functions*
+
+* :ref:`voteOnStatusUpdate`
+
+*Substrate* ::
+
+  VoteOnStatusUpdate(U256, AccountId, bool);
+
+ 
+
+
+ExecuteStatusUpdate
+--------------------
+
+Emit an event when a BTC Parachain status update is executed
+
+* ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` -  with 
+
+
+*Event Signature*
+
+``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)``
+
+*Parameters*
+
+* ``newStatusCode``: the new ``StatusCode``
+* ``addErrors``: the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``)
+* ``removeErrors``: the set of to-be-removed ``ErrorCode`` entries
+* ``msg``: the detailed reason for the status update.
+
+
+*Functions*
+
+* :ref:`executeStatusUpdate`
+* :ref:`reportVaultTheft`
+* :ref:`reportVaultUndercollateralized`
+* :ref:`reportOracleOffline`
+* :ref:`recoverFromLIQUIDATION`
+* :ref:`recoverFromORACLEOFFLINE`
+* :ref:`recoverFromBTCRelayFailure`
+
+
+*Substrate* ::
+
+  ExecuteStatusUpdate(StatusCode, BTreeSet<ErrorCode>, BTreeSet<ErrorCode>, String);
+
+
+RejectStatusUpdate
+--------------------
+Emits an event when a BTC Parachain status change proposal is rejected.
+
+*Event Signature*
+
+ ``RejectStatusUpdate(newStatusCode, addErrors, removeErrors, msg)``
+
+*Parameters*
+
+* ``newStatusCode``: the new ``StatusCode``
+* ``addErrors``: the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``)
+* ``removeErrors``: the set of to-be-removed ``ErrorCode`` entries
+* ``msg``: the detailed reason for the status update.
+
+
+*Functions*
+
+* :ref:`rejectStatusUpdate`
+
+*Substrate* ::
+
+  RejectStatusUpdate(StatusCode, BTreeSet<ErrorCode>, BTreeSet<ErrorCode>, String);
+
+
+ForceStatusUpdate
+-------------------
+
+Emit an event indicating a forced status change of the BTC Parachain, triggered by the Governance Mechanism. 
+
+
+*Event Signature*
+
+``ForceStatusUpdate(newStatusCode, addErrors, removeErrors, msg)``
+
+*Parameters*
+
+* ``newStatusCode``: the new ``StatusCode``
+* ``addErrors``: the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``)
+* ``removeErrors``: the set of to-be-removed ``ErrorCode`` entries
+* ``msg``: the detailed reason for the status update.
+
+
+*Functions*
+
+* :ref:`forceStatusUpdate`
+
+*Substrate* ::
+
+  ForceStatusUpdate(StatusCode, BTreeSet<ErrorCode>, BTreeSet<ErrorCode>, String);
+
+
+
+SlashStakedRelayer
+-------------------
+
+Emits an event indicating that a Staked Relayer has been slashed.
+
+
+*Event Signature*
+
+``SlashStakedRelayer(stakedRelayer)``
+
+*Parameters*
+
+* ``stakedRelayer``: account identifier of the slashed staked relayer.
+
+*Functions*
+
+* :ref:`slashStakedRelayer`
+
+*Substrate* ::
+
+  SlashStakedRelayer(AccountId);
+
+
+
+ReportVaultTheft
+-------------------
+
+Emits an event when a Vault has been accused of theft.
+
+*Event Signature*
+
+``ReportVaultTheft(vault)``
+
+*Parameters*
+
+* ``vault``: account identifier of the Vault accused of theft. 
+
+*Functions*
+
+* :ref:`reportVaultTheft`
+
+*Substrate* ::
+
+  ReportVaultTheft(AccountId)
+
+
+
 Error Codes
 ~~~~~~~~~~~
 
+``ERR_NOT_REGISTERED``
+
+* **Message**: "This AccountId is not registered as a Staked Relayer."
+* **Function**: :ref:`deRegisterStakedRelayer`, :ref:`slashStakedRelayer`
+* **Cause**: The given account identifier is not registered. 
+
+``ERR_GOVERNANCE_ONLY``
+
+* **Message**: "This action can only be executed by the Governance Mechanism"
+* **Function**: :ref:`suggestStatusUpdate`, :ref:`forceStatusUpdate`, :ref:`slashStakedRelayer`
+* **Cause**: The suggested status (``SHUTDOWN``) can only be triggered by the Governance Mechanism but the caller of the function is not part of the Governance Mechanism.
+
+``ERR_STAKED_RELAYERS_ONLY``
+
+* **Message**: "This action can only be executed by Staked Relayers"
+* **Function**: :ref:`suggestStatusUpdate`, :ref:`voteOnStatusUpdate`, :ref:`reportVaultTheft`, :ref:`reportVaultUndercollateralized`
+* **Cause**: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
+  
+``ERR_STATUS_UPDATE_NOT_FOUND``
+
+* **Message**: "No StatusUpdate found with given identifier"
+* **Function**: :ref:`voteOnStatusUpdate`
+* **Cause**:  No ``StatusUpdate`` with the given ``statusUpdateId`` exists in ``StatusUpdates``
+
+``ERR_STATUS_UPDATE_NOT_FOUND``
+
+* **Message**: "No StatusUpdate found with given identifier"
+* **Function**: :ref:`executeStatusUpdate`, :ref:`rejectStatusUpdate`
+* **Cause**: No ``StatusUpdate`` with the given ``statusUpdateId`` exists in ``StatusUpdates``.
+
+``ERR_INSUFFICIENT_YES_VOTES``
+
+* **Message**: "Insufficient YES votes to execute this StatusUpdate"
+* **Function**: :ref:`executeStatusUpdate`
+* **Cause**: The ``StatusUpdate`` does not have enough "Yes" votes to be executed.
+
+``ERR_INSUFFICIENT_NO_VOTES``
+
+* **Message**: "Insufficient YES votes to reject this StatusUpdate"
+* **Function**: :ref:`rejectStatusUpdate`
+* **Cause**: The ``StatusUpdate`` does not have enough "No" votes to be rejected. 
+
+``ERR_ALREADY_REPORTED``
+
+* **Message**: "This txId has already been logged as a theft by the given Vault"
+* **Function**: :ref:`reportVaultTheft`
+* **Cause**: This transaction / Vault combination has already been reported.
 
 
+``ERR_VAULT_NOT_FOUND``
+
+* **Message**: "There exists no Vault with the given account id"
+* **Function**: :ref:`reportVaultTheft`, :ref:`reportVaultUndercollateralized`
+* **Cause**:  The specified Vault does not exist. 
+
+``ERR_ALREADY_LIQUIDATED``
+
+* **Message**: "This Vault is already being liquidated"
+* **Function**: :ref:`reportVaultTheft`
+* **Cause**:  The specified Vault is already being liquidated.
+
+``ERR_VALID_REDEEM_OR_REPLACE``
+
+* **Message**: "The given transaction is a valid Redeem or Replace execution by the accused Vault"
+* **Function**: :ref:`reportVaultTheft`
+* **Cause**: The given transaction is associated with a valid :ref:`redeem-protocol` or :ref:`replace-protocol`.
 
 
+``ERR_VALID_MERGE_TRANSACTION``
+
+* **Message**: "The given transaction is a valid 'UTXO merge' transaction by the accused Vault"
+* **Function**: :ref:`reportVaultTheft`
+* **Cause**: The given transaction represents an allowed "merging" of UTXOs by the accused Vault (no BTC was displaced).
+
+``ERR_COLLATERAL_OK``
+* **Message**: "The accused Vault's collateral rate is above the liquidation threshold"
+* **Function**: :ref:`reportVaultUndercollateralized`
+* **Cause**: The accused Vault's collateral rate is above ``LiquidationCollateralThreshold``.
+
+``ERR_ORACLE_ONLINE``
+* **Message**: "The exchange rate oracle shows up-to-date data"
+* **Function**: :ref:`reportOracleOffline`
+* **Cause**: The :ref:`oracle` does not appear to be offline. 
+
+* **Message**: 
+* **Function**: :ref:`reportVaultTheft`
+* **Cause**: 
