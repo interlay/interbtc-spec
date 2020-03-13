@@ -274,7 +274,7 @@ verifyBlockHeader
 -----------------
 
 The ``verifyBlockHeader`` function parses and verifies Bitcoin block headers. 
-If all checks are successful, returns the hash of the predecessor of the passed block header, as stored in ``BlockHeaders``.
+If all checks are successful, returns a ``PureBlockHeader`` representation of the 80 byte raw block header given as input.
 
 .. note:: This function does not check whether the submitted block header extends the main chain or a fork. This check is performed in :ref:`storeBlockHeader`.
 
