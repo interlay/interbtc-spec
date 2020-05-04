@@ -149,7 +149,7 @@ Function Sequence
 parseBlockHeader
 ~~~~~~~~~~~~~~~~
 
-Parses a 80 bytes raw Bitcoin block header and, if successful, returns a  ``BlockHeader`` struct. 
+Parses a 80 bytes raw Bitcoin block header and, if successful, returns a  ``RichBlockHeader`` struct. 
 
 
 
@@ -163,7 +163,7 @@ Parses a 80 bytes raw Bitcoin block header and, if successful, returns a  ``Bloc
 
 *Returns*
 
-* ``pureBlockHeader``: the parsed Bitcoin block header
+* ``BlockHeader``: the parsed Bitcoin block header
 
 *Errors*
 
@@ -173,7 +173,7 @@ Parses a 80 bytes raw Bitcoin block header and, if successful, returns a  ``Bloc
 
 ::
 
-  fn parseBlockHeader(blockHeaderBytes: T::RawBlockHeader) -> T::BlockHeader {...}
+  fn parseBlockHeader(blockHeaderBytes: T::RawBlockHeader) -> T::RichBlockHeader {...}
 
 
 Function Sequence
@@ -181,14 +181,14 @@ Function Sequence
 
 1. Check that the ``blockHeaderBytes`` is 80 bytes long. Return ``ERR_INVALID_HEADER_SIZE`` exception and abort otherwise.
 
-2. Create a new ``PureBlockHeader`` (``pureBlockHeader``) struct and initialize as follows:
+2. Create a new ``BlockHeader`` (``BlockHeader``) struct and initialize as follows:
 
-  * ``pureBlockHeader.merkleRoot =``:ref:`extractMerkleRoot` (``blockHeaderBytes``)
-  * ``pureBlockHeader.target =`` :ref:`nBitsToTarget` (:ref:`extractNBits` (``blockHeaderBytes``))
-  * ``pureBlockHeader.timestamp =`` :ref:`extractTimestamp` (``blockHeaderBytes``)
-  * ``pureBlockHeader.hashPrevBlock = :ref:`extractHashPrevBlock` (``blockHeaderBytes``)
+  * ``BlockHeader.merkleRoot =``:ref:`extractMerkleRoot` (``blockHeaderBytes``)
+  * ``BlockHeader.target =`` :ref:`nBitsToTarget` (:ref:`extractNBits` (``blockHeaderBytes``))
+  * ``BlockHeader.timestamp =`` :ref:`extractTimestamp` (``blockHeaderBytes``)
+  * ``BlockHeader.hashPrevBlock = :ref:`extractHashPrevBlock` (``blockHeaderBytes``)
 
-3. Return ``pureBlockHeader``
+3. Return ``BlockHeader``
 
 
 
