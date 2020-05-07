@@ -16,15 +16,16 @@ Welcome to the BTC Parachain documentation!
    :maxdepth: 2
    :caption: Specification
 
-   spec/treasury
-   spec/vaultregistry
+   spec/btc-relay
    spec/collateral
+   spec/oracle
    spec/issue
    spec/redeem
    spec/replace
-   spec/oracle
-   spec/btc-relay
    spec/security
+   spec/staked-relayers
+   spec/treasury
+   spec/vaultregistry
 
 .. toctree::
    :maxdepth: 2
