@@ -135,21 +135,21 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 * **Cause**: Return this error if there exists no ``forkId`` for the given ``blockHash``.
 
 
-``ERR_PARTIAL``
+``ERR_NO_DATA``
 
-* **Message**: "BTC Parachain partially deactivated"
+* **Message**: "BTC-Relay has a NO_DATA failure and the requested block cannot be verified reliably"
 
 * **Function**: :ref:`verifyTransactionInclusion`
 
-* **Cause**: The BTC Parachain has been partially deactivated since a specific block height.
+* **Cause**: The BTC Parachain has been partially deactivated for all blocks with a higher block height than the lowest blocked flagged with ``NO_DATA_BTC_RELAY``.
 
 ``ERR_INVALID``
 
-* **Message**: "BTC Parachain is halted"
+* **Message**:  "BTC-Relay has detected an invalid block in the current main chain, and has been halted"
 
 * **Function**: :ref:`verifyTransactionInclusion`
 
-* **Cause**: The BTC Parachain has been halted.
+* **Cause**: The BTC Parachain has been halted because Staked Relayers reported an invalid block.
 
 ``ERR_SHUTDOWN``
 
@@ -223,3 +223,11 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 * **Function**: :ref:`extractOPRETURN`
 
 * **Cause**: The given output was not an OP_RETURN output.
+
+``ERR_ONGOING_FORK``
+
+* **Message**: "Verification disabled due to ongoing fork"
+
+* **Function**: :ref:`verifyTransaction`
+
+* **Cause**: The ``mainChain`` is not at least ``STABLE_TRANSACTION_CONFIRMATIONS`` ahead of the next best fork. 
