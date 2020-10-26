@@ -39,6 +39,20 @@ Data Model
 .. .. warning:: Substrate's built in module to generate random data needs 80 blocks to actually generate random data.
 
 
+Constants
+---------
+
+IssuePeriod
+............
+
+The time difference in number of blocks between an issue request is created and required completion time by a user. The issue period has an upper limit to prevent griefing of vault collateral.
+
+*Substrate* ::
+
+  IssuePeriod: T::BlockNumber;
+
+
+
 Scalars
 -------
 
@@ -55,15 +69,6 @@ The minimum collateral (DOT) a user needs to provide as griefing protection.
     IssueGriefingCollateral: Balance;
 
 
-
-IssuePeriod
-............
-
-The time difference in number of blocks between an issue request is created and required completion time by a user. The issue period has an upper limit to prevent griefing of vault collateral.
-
-*Substrate* ::
-
-  IssuePeriod: T::BlockNumber;
 
 Maps
 ----
@@ -106,13 +111,13 @@ Parameter               Type        Description
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct Issue<AccountId, BlockNumber, Balance> {
+  pub struct Issue<AccountId, BlockNumber, PolkaBTC, DOT> {
         vault: AccountId,
         opentime: BlockNumber,
-        griefingCollateral: Balance,
-        amount: Balance,
+        griefing_collateral: DOT,
+        amount: PolkaBTC,
         requester: AccountId,
-        btcAddress: H160,
+        btc_address: H160,
         completed: bool
   }
 
@@ -157,7 +162,7 @@ Specification
 
 *Substrate* ::
 
-  fn requestIssue(origin, amount: U256, vault: AccountId, griefingCollateral: DOT) -> Result {...}
+  fn request_issue(origin, amount: PolkaBTC, vault: AccountId, griefingCollateral: DOT) -> Result {...}
 
 Preconditions
 .............
@@ -169,7 +174,7 @@ Function Sequence
 
 1. Retrieve the ``vault`` from :ref:`vault-registry`. Return ``ERR_VAULT_NOT_FOUND`` if no Vault can be found.
 
-2 Check that the ``vault`` is currently not banned, i.e., ``vault.bannedUntil == None`` or ``vault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
+2. Check that the ``vault`` is currently not banned, i.e., ``vault.bannedUntil == None`` or ``vault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
 
 3. Check if the ``griefingCollateral`` is greater or equal ``IssueGriefingCollateral``. If this check fails, return ``ERR_INSUFFICIENT_COLLATERAL``.
 
@@ -177,7 +182,7 @@ Function Sequence
 
 5. Call the VaultRegistry :ref:`increaseToBeIssuedTokens` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. If the vault has not locked enough collateral, throws a ``ERR_EXCEEDING_VAULT_LIMIT`` error. This function returns a ``btcAddress`` that the user should send Bitcoin to.
 
-6. Generate an ``issueId`` by hashing a random seed, a nonce from the security module, and the address of the user.
+6. Generate an ``issueId`` by hashing a nonce from the security module and the address of the user.
 
 7. Store a new ``Issue`` struct in the ``IssueRequests`` mapping as ``IssueRequests[issueId] = issue``, where ``issue`` is the ``Issue`` struct as:
 
@@ -192,49 +197,6 @@ Function Sequence
 
 9. Return the ``issueId``. The user stores this for future reference and the next steps, locally.
 
-
-.. lock
-.. ----
-.. 
-.. The user sends BTC to a vault's address.
-.. 
-.. Specification
-.. .............
-.. 
-.. *Function Signature*
-.. 
-.. ``lock(requester, amount, vault, issueId)``
-.. 
-.. *Parameters*
-.. 
-.. * ``requester``: The user's BTC Parachain account.
-.. * ``amount``: The amount of PolkaBTC to be issued.
-.. * ``vault``: The BTC Parachain address of the Vault involved in this issue request.
-.. * ``issueId``: the unique hash created during the ``requestIssue`` function.
-.. 
-.. *Returns*
-.. 
-.. * ``txId``: A unique hash identifying the Bitcoin transaction.
-.. 
-.. .. todo:: Do we define the Bitcoin transactions here?
-.. 
-.. *Bitcoin* ::
-.. 
-..   OP_RETURN
-.. 
-.. 
-.. Function Sequence
-.. .................
-.. 
-.. 1. The user prepares a Bitcoin transaction with the following details:
-.. 
-..    a. The input(s) must be spendable from the user.
-..    b. The transaction has at least two outputs with the following conditions:
-.. 
-..         1. One output is spendable by the ``btcAddress`` of the Vault selected in the ``requestIssue`` function. The output includes the ``amount`` requested in the ``requestIssue`` function in the ``value`` field. This means the number of requested PolkaBTC must be the same amount of transferred BTC (expressed as satoshis).
-..         2. One output must include a ``OP_RETURN`` with the ``issueId`` received in the ``requestIssue`` function. This output will not be spendable and therefore the ``value`` field should be ``0``.
-.. 
-.. 2. The user sends the transaction prepared in step 1 to the Bitcoin network and locally stores the ``txId``, i.e. the unique hash of the transaction.
 
 
 .. _executeIssue:
@@ -257,10 +219,8 @@ Specification
 * ``issueId``: the unique hash created during the ``requestIssue`` function,
 * ``txId``: The hash of the Bitcoin transaction.
 * ``txBlockHeight``: Bitcoin block height at which the transaction is supposedly included.
-* ``txIndex``: Index of transaction in the Bitcoin block’s transaction Merkle tree.
 * ``MerkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
-
 
 *Returns*
 
@@ -279,7 +239,7 @@ Specification
 
 *Substrate* ::
 
-  fn executeIssue(origin, issueId: T::H256, txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: Bytes, rawTx: Bytes) -> Result {...}
+  fn execute_issue(origin, issueId: T::H256, txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: Bytes, rawTx: Bytes) -> Result {...}
 
 Preconditions
 .............
@@ -309,7 +269,7 @@ Function Sequence
 
 5. Verify the transaction.
 
-    a. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
+    a. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight`` and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
     b. Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-issued BTC (``issue.amount``), the ``vault``'s Bitcoin address (``issue.btcAddress``), and the ``issueId`` as parameters. If this call returns an error, abort and return the received error. 
 
 6. Call the :ref:`issueTokens` with the ``issue.vault`` and the ``amount`` to decrease the ``toBeIssuedTokens`` and increase the ``issuedTokens``.
@@ -353,7 +313,7 @@ Specification
 
 *Substrate* ::
 
-  fn cancelIssue(origin, issueId) -> Result {...}
+  fn cancel_issue(origin, issueId) -> Result {...}
 
 Preconditions
 .............
@@ -395,7 +355,6 @@ Emit a ``RequestIssue`` event if a user successfully open a issue request.
 
 *Parameters*
 
-
 * ``issueId``: A unique hash identifying the issue request. 
 * ``requester``: The user's BTC Parachain account.
 * ``amount``: The amount of PolkaBTC to be issued.
@@ -408,7 +367,7 @@ Emit a ``RequestIssue`` event if a user successfully open a issue request.
 
 *Substrate* ::
 
-  RequestIssue(H256, AccountId, U256, AccountId, H160);
+  RequestIssue(H256, AccountId, PolkaBTC, AccountId, H160);
 
 ExecuteIssue
 ------------
@@ -430,7 +389,7 @@ ExecuteIssue
 
 *Substrate* ::
 
-  ExecuteIssue(H256, AccountId, U256, AccountId);
+  ExecuteIssue(H256, AccountId, PolkaBTC, AccountId);
 
 CancelIssue
 -----------
@@ -496,7 +455,6 @@ Error Codes
 * **Message**: "Time to issue PolkaBTC not yet expired."
 * **Function**: :ref:`cancelIssue`
 * **Cause**: Raises an error if the time limit to call ``executeIssue`` has not yet passed.
-
 
 ``ERR_ISSUE_COMPLETED``
 

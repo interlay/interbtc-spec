@@ -12,7 +12,6 @@ The Exchange Rate Oracle receives a continuous data feed on the exchange rate be
 
 The implementation of the oracle **is not part of this specification**. PolkaBTC assumes the oracle operates correctly and that the received data is reliable. 
 
-
 .. todo:: Update BTC Parachain status to ``ORACLE_OFFLINE`` if oracle stops receiving sending price data, and recover (using :ref:`recoverFromORACLEOFFLINE`) when data becomes available again.
 
 Data Model
@@ -34,36 +33,47 @@ The granularity of the exchange rate. The granularity is set to :math:`10^{-5}`.
 Scalars
 -------
 
-ExchangeRate
-............
+ExchangeRateBtcInDot
+....................
 
-The BTC to DOT exchange rate. This exchange rate is used to determine how much collateral is required to issue a specific amount of PolkaBTC. 
+The BTC in DOT exchange rate. This exchange rate is used to determine how much collateral is required to issue a specific amount of PolkaBTC. 
 
 .. note:: If the ``ExchangeRate`` is set to 1238763, it translates to :math:`12.38763` as the last five digits are used for the floating point (as defined by the ``GRANULARITY``).
 
 
+*Substrate* ::
 
-.. .. todo:: What granularity should we set here?
+    ExchangeRateBtcInDot: u128;
+
+SatoshiPerBytesFast
+...................
+
+The estimated Satoshis per bytes required to get a Bitcoin transaction included in the next block.
 
 *Substrate* ::
 
-    ExchangeRate: u128;
+    SatoshiPerBytesFast: u32;
 
+SatoshiPerBytesMedium
+.....................
 
-.. .. todo:: Do we maintain a log of submitted exchange rate "ticks"? Or do we just maintain the value of the current rate? For stability, probably better to maintain a (FIFO) log. 
-
-AuthorizedOracle
-................
-
-The account of the oracle. 
+The estimated Satoshis per bytes required to get a Bitcoin transaction included in the next three blocks (about 30 min).
 
 *Substrate* ::
 
-  AuthorizedOracle: AccountId;
+    SatoshiPerBytesMedium: u32;
 
+SatoshiPerBytesSlow
+...................
+
+The estimated Satoshis per bytes required to get a Bitcoin transaction included in the six blocks (about 1 hour).
+
+*Substrate* ::
+
+    SatoshiPerBytesSlow: u32;
 
 MaxDelay
-----------
+........
 
 The maximum delay in seconds between incoming calls providing exchange rate data. If the Exchange Rate Oracle receives no data for more than this period, the BTC Parachain enters an ``Error`` state with a ``ORACLE_OFFLINE`` error cause.
 
@@ -73,7 +83,7 @@ The maximum delay in seconds between incoming calls providing exchange rate data
 
 
 LastExchangeRateTime
----------------------
+....................
 
 UNIX timestamp indicating when the last exchange rate data was received. 
 
@@ -81,6 +91,19 @@ UNIX timestamp indicating when the last exchange rate data was received.
 *Substrate* ::
 
   LastExchangeRateTime: U32;
+
+
+Maps
+----
+
+AuthorizedOracles
+.................
+
+The account(s) of the oracle. Returns true if registered as an oracle.
+
+*Substrate* ::
+
+  AuthorizedOracle: map AccountId => bool;
 
 
 Functions
