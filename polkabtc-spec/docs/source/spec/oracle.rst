@@ -3,8 +3,6 @@
 Exchange Rate Oracle
 ====================
 
-.. .. todo:: I think the oracle should be in a separate component, like BTC-Relay. And we do not implement / specify it, as this is not part of the Milestone plan. This is a whole new project. For our PoC we can just have a daemon feeding exchange rate data. 
-
 .. note:: This exchange oracle module is a bare minimum model that relies on a single trusted oracle source. Decentralized oracles are a difficult and open research problem that is outside of the scope of this specification. However, the general interface to get the exchange rate can remain the same even with different constructions.
 
 
@@ -12,7 +10,6 @@ The Exchange Rate Oracle receives a continuous data feed on the exchange rate be
 
 The implementation of the oracle **is not part of this specification**. PolkaBTC assumes the oracle operates correctly and that the received data is reliable. 
 
-.. todo:: Update BTC Parachain status to ``ORACLE_OFFLINE`` if oracle stops receiving sending price data, and recover (using :ref:`recoverFromORACLEOFFLINE`) when data becomes available again.
 
 Data Model
 ~~~~~~~~~~
@@ -92,6 +89,19 @@ UNIX timestamp indicating when the last exchange rate data was received.
 
   LastExchangeRateTime: U32;
 
+Enums
+-----
+
+InclusionEstimate
+.................
+
+The estimated time until when a BTC transaction is included based on the Satoshi per byte fee.
+
+* ``FAST: 0`` - the fee to include a BTC transaction within the next block.
+
+* ``MEDIUM: 1``- the fee to include a BTC transaction within the next three blocks (~30 min)).
+
+* ``SLOW: 2`` - the fee to include a BTC transaction within the six blocks  (~60 min).
 
 Maps
 ----
@@ -112,7 +122,7 @@ Functions
 .. _setExchangeRate:
 
 setExchangeRate
-----------------
+---------------
 
 Set the latest (aggregate) BTC/DOT exchange rate. This function invokes a check of Vault collateral rates in the :ref:`Vault-registry` component.
 
@@ -140,12 +150,6 @@ Specification
 
 * ``ERR_INVALID_ORACLE_SOURCE``: the caller of the function was not the authorized oracle. 
 
-*Substrate* ::
-
-    fn setExchangeRate(origin, rate:u128) -> Result {...}
-
-
-.. .. todo:: Check how to handle caller validation in Substrate - only pre-defined oracle should be allowed to call this function.
 
 Preconditions
 .............
@@ -161,6 +165,42 @@ Function Sequence
 4. Set ``LastExchangeRateTime`` to the current UNIX timestamp.
 5. Emit the ``SetExchangeRate`` event.
 6. Return.
+
+.. _setSatoshiPerBytes:
+
+setSatoshiPerBytes
+------------------
+
+Set the Satoshi per bytes fee
+
+Specification
+.............
+
+*Function Signature*
+
+``setSatoshiPerBytes(fee, InclusionEstimate)``
+
+*Parameters*
+
+* ``fee``: the Satoshi per byte fee.
+* ``InclusionEstimate``: the estimated inclusion time.
+
+*Events*
+
+* ``SetSatoshiPerByte(fee, InclusionEstimate)``:
+
+*Errors*
+
+* ``ERR_INVALID_ORACLE_SOURCE``: the caller of the function was not the authorized oracle. 
+
+
+Requirements
+............
+ 
+* The BTC Parachain status in the :ref:`security` component MUST be set to ``RUNNING:0``.
+* If the caller of the function is not in ``AuthorizedOracles`` MUST return ``ERR_INVALID_ORACLE_SOURCE``.
+* If the above checks passed, the function MUST update the ``SatoshiPerBytes`` field indicated by the ``InclusionEstimate`` enum. 
+* If the above steps passed, MUST emit the ``SetSatoshiPerByte`` event.
 
 .. _getExchangeRate:
 
