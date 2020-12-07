@@ -11,6 +11,7 @@ As such, Bitcoin transactions for which transaction inclusion proofs are submitt
 
 Many Bitcoin wallets automatically order UTXOs. We require that the *Payment UTXO* and the *Data UTXO* are made within the first three indexes (index 0 - 2).
 We *do not* require any specific ordering of those outputs.
+The reason behind checking for the first three outputs is that wallets like Electrum might insert the UTXOs returning part of the spent input at index 1.
 
 .. note:: Please refer to the PolkaBTC specification for more details on the *Issue*, *Redeem* and *Replace* protocols. 
 
