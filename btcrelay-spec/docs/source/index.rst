@@ -1,7 +1,7 @@
 .. PolkaBTC documentation master file
 
 Welcome to the Polkadot BTC-Relay documentation!
-==============================================
+================================================
 
 .. toctree::
    :maxdepth: 2
@@ -22,7 +22,6 @@ Welcome to the Polkadot BTC-Relay documentation!
    spec/functions
    spec/helpers
    spec/parser
-   spec/failure-handling
    spec/events
    spec/errors
 

@@ -3,6 +3,8 @@
 Welcome to the BTC Parachain documentation!
 ============================================
 
+.. note:: Please note that this specification is a living document. The actual implementation might deviate from the specification. In case of deviations in the code, the code has priority over the specification.
+
 .. toctree::
    :maxdepth: 2
    :caption: Introduction

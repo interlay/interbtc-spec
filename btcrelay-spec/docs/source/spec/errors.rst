@@ -230,4 +230,4 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Function**: :ref:`verifyTransaction`
 
-* **Cause**: The ``mainChain`` is not at least ``STABLE_TRANSACTION_CONFIRMATIONS`` ahead of the next best fork. 
+* **Cause**: The ``mainChain`` is not at least ``STABLE_BITCOIN_CONFIRMATIONS`` ahead of the next best fork. 

@@ -74,14 +74,23 @@ Identifier of the Bitcoin main chain tracked in the ``ChainsIndex`` mapping. At 
     const MAIN_CHAIN_ID: u32 = 0;
 
 
-STABLE_TRANSACTION_CONFIRMATIONS
-.................................
+STABLE_BITCOIN_CONFIRMATIONS
+............................
 
-Global security parameter (typically referred to as ``k`` in scientific literature), determining the umber of confirmations (in blocks) necessary for a transaction to be considered "stable". Stable thereby means that the probability of the transaction being excluded from the blockchain due to a fork is negligible. 
+Global security parameter (typically referred to as ``k`` in scientific literature), determining the umber of confirmations (in blocks) necessary for a transaction to be considered "stable" in Bitcoin. Stable thereby means that the probability of the transaction being excluded from the blockchain due to a fork is negligible. 
 
 *Substrate* ::
 
-    const STABLE_TRANSACTION_CONFIRMATIONS: u32 = 6;
+    const STABLE_BITCOIN_CONFIRMATIONS: u32 = 6;
+
+STABLE_PARACHAIN_CONFIRMATIONS
+..............................
+
+Global security parameter (typically referred to as ``k`` in scientific literature), determining the umber of confirmations (in blocks) necessary for a transaction to be considered "stable" in the BTC Parachain. Stable thereby means that the probability of the transaction being excluded from the blockchain due to a fork is negligible. 
+
+*Substrate* ::
+
+    const STABLE_PARACHAIN_CONFIRMATIONS: u32 = 6;
 
 Structs
 ~~~~~~~
