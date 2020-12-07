@@ -21,13 +21,15 @@ The reason behind checking for the first three outputs is that wallets like Elec
 ============================  ===========================================================
 Inputs                        Outputs
 ============================  ===========================================================
-*Arbitrary number of inputs*  *Index 0 to 2*: 
+*Arbitrary number of inputs*  **Index 0 to 2**: 
 
-                              - *Payment UTXO*: P2PKH / P2WPKH output to ``btcAddress`` Bitcoin address.
+                              *Payment UTXO*: P2PKH / P2WPKH output to ``btcAddress`` Bitcoin address.
 
-                              - *Data UTXO*: OP_RETURN containing ``identifier``
-                            
-                              *Max 30 other UTXOs*
+                              *Data UTXO*: OP_RETURN containing ``identifier`` 
+
+                              **Index 3-31**: 
+                              
+                              Any other UTXOs that will not be considered.
 
 ============================  ===========================================================
 
