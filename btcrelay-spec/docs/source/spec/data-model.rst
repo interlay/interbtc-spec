@@ -88,6 +88,8 @@ STABLE_PARACHAIN_CONFIRMATIONS
 
 Global security parameter (typically referred to as ``k`` in scientific literature), determining the umber of confirmations (in blocks) necessary for a transaction to be considered "stable" in the BTC Parachain. Stable thereby means that the probability of the transaction being excluded from the blockchain due to a fork is negligible. 
 
+.. note:: We use this to enforce a minimum delay on Bitcoin block header acceptance in the BTC-Parachain in cases where a (large) number of block headers are submitted as a batch.
+
 *Substrate* ::
 
     const STABLE_PARACHAIN_CONFIRMATIONS: u32 = 6;
