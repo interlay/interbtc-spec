@@ -42,6 +42,7 @@ The minimum collateral (DOT) a Vault needs to provide to participate in the issu
 
     MinimumCollateralVault: Balance;
 
+
 PunishmentFee
 .............
 
@@ -169,35 +170,19 @@ Stores the information of a Vault.
 
 .. tabularcolumns:: |l|l|L|
 
-=========================  =========  ========================================================
-Parameter                  Type       Description
-=========================  =========  ========================================================
-``toBeIssuedTokens``       PolkaBTC   Number of PolkaBTC tokens currently requested as part of an uncompleted issue request.
-``issuedTokens``           PolkaBTC   Number of PolkaBTC tokens actively issued by this Vault.
-``toBeRedeemedTokens``     PolkaBTC   Number of PolkaBTC tokens reserved by pending redeem and replace requests. 
-``collateral``             DOT        Total amount of collateral provided by this Vault (note: "free" collateral is calculated on the fly and updated each time new exchange rate data is received).
-``btcAddress``             bytes[20]  Bitcoin address of this Vault, to be used for issuing of PolkaBTC tokens.
-``bannedUntil``            u256       Block height until which this Vault is banned from being used for Issue, Redeem (except during automatic liquidation) and Replace . 
-=========================  =========  ========================================================
+=========================  ==================  ========================================================
+Parameter                  Type                Description
+=========================  ==================  ========================================================
+``toBeIssuedTokens``       PolkaBTC            Number of PolkaBTC tokens currently requested as part of an uncompleted issue request.
+``issuedTokens``           PolkaBTC            Number of PolkaBTC tokens actively issued by this Vault.
+``toBeRedeemedTokens``     PolkaBTC            Number of PolkaBTC tokens reserved by pending redeem and replace requests. 
+``collateral``             DOT                 Total amount of collateral provided by this Vault (note: "free" collateral is calculated on the fly and updated each time new exchange rate data is received).
+``btcAddress``             Wallet<BtcAddress>  A set of Bitcoin address(es) of this Vault, to be used for issuing of PolkaBTC tokens.
+``bannedUntil``            u256                Block height until which this Vault is banned from being used for Issue, Redeem (except during automatic liquidation) and Replace . 
+``status``                 VaultStatus         Current status of the vault (Active, Liquidated, CommittedTheft)
+=========================  ==================  ========================================================
 
 .. note:: This specification currently assumes for simplicity that a Vault will reuse the same BTC address, even after multiple redeem requests. **[Future Extension]**: For better security, Vaults may desire to generate new BTC addresses each time they execute a redeem request. This can be handled by pre-generating multiple BTC addresses and storing these in a list for each Vault. Caution is necessary for users which execute issue requests with "old" Vault addresses - these BTC must be moved to the latest address by Vaults. 
-
-
-*Substrate*
-
-::
-  
-  #[derive(Encode, Decode, Default, Clone, PartialEq)]
-  #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct Vault<AccountId, Balance> {
-        vault: AccountId,
-        toBeIssuedTokens: Balance,
-        issuedTokens: Balance,
-        toBeRedeemedTokens: Balance,
-        collateral: Balance,
-        btcAddress: H160,
-        bannedUntil: BlockNumber
-  }
 
 
 RegisterRequest (Optional)
@@ -347,6 +332,37 @@ Function Sequence
 4. Remove the ``RegisterRequest`` with the ``registerID`` from ``RegisterRequests``.
 
 5. Emit a ``ProveValidBTCAddress`` event, setting the ``vault`` account identifier and the vault's Bitcoin address (``Vault.btcAddress``) as parameters. 
+
+.. _addBtAddress:
+
+AddBtcAddress
+-------------
+
+Add a new BTC address to the vault's wallet.
+
+Specification
+.............
+
+*Function Signature*
+
+``addBtcAddress(address: BtcAddress)``
+
+*Parameters*
+
+* ``address``: a valid BTC address.
+
+*Events*
+
+* ``UpdateBtcAddress(address)``
+
+
+Function Sequence
+.................
+
+1. Add a new BTC address to the vault's wallet.
+2. Set the new BTC address to the primary (default) address.
+ 
+
 
 .. _lockAdditionalCollateral:
 

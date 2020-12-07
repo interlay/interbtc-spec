@@ -9,6 +9,10 @@ However, the PolkaBTC component of the BTC Parachain restricts the format of Bit
 
 As such, Bitcoin transactions for which transaction inclusion proofs are submitted to BTC-Relay as part of the in the PolkaBTC *Issue*, *Redeem*, and *Replace* protocols must be `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_ or `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_ transactions and follow the format below.
 
+Many Bitcoin wallets automatically order UTXOs. We require that the *Payment UTXO* and the *Data UTXO* are made within the first three indexes (index 0 - 2).
+We *do not* require any specific ordering of those outputs.
+The reason behind checking for the first three outputs is that wallets like Electrum might insert the UTXOs returning part of the spent input at index 1.
+
 .. note:: Please refer to the PolkaBTC specification for more details on the *Issue*, *Redeem* and *Replace* protocols. 
 
 
@@ -17,15 +21,16 @@ As such, Bitcoin transactions for which transaction inclusion proofs are submitt
 ============================  ===========================================================
 Inputs                        Outputs
 ============================  ===========================================================
-*Arbitrary number of inputs*  *Index 0: Payment UTXO*: P2PKH / P2WPKH output to ``btcAddress`` Bitcoin address.
+*Arbitrary number of inputs*  **Index 0 to 2**: 
 
-                              *Index 1: Data UTXO*: OP_RETURN containing ``identifier``
-                            
-                             
-                             
-                              *Arbitrary numnber of other UTXOs*
-                             
-                             
+                              *Payment UTXO*: P2PKH / P2WPKH output to ``btcAddress`` Bitcoin address.
+
+                              *Data UTXO*: OP_RETURN containing ``identifier`` 
+
+                              **Index 3-31**: 
+                              
+                              Any other UTXOs that will not be considered.
+
 ============================  ===========================================================
 
 The value and recipient address (``btcAddress``) of the *Payment UTXO* and the ``identifier`` in the *Data UTXO* (OP_RETURN) depend on the executed PolkaBTC protocol:

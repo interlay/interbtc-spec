@@ -223,7 +223,7 @@ Function Sequence
 
   a. Retrieve the main chain ``BlockChain`` entry (``mainChain``) from ``ChainsIndex`` using ``MAIN_CHAIN_ID``
 
-  b. Check if the ``maxHeight`` of the new top-level ``BlockChain`` exceeds ``mainChain.maxHeight`` by at least ``STABLE_TRANSACTION_CONFIRMATIONS``. If true, continue. If false, ``return`` (no chain reorg needs to be executed yet). 
+  b. Check if the ``maxHeight`` of the new top-level ``BlockChain`` exceeds ``mainChain.maxHeight`` by at least ``STABLE_BITCOIN_CONFIRMATIONS``. If true, continue. If false, ``return`` (no chain reorg needs to be executed yet). 
 
   a. Create a new empty ``BlockChain`` (``forkedMainChain``) struct and initalize with: 
 
@@ -359,7 +359,7 @@ Specification
 * ``txIndex``: integer index of transaction in the block's tx Merkle tree.
 * ``merkleProof``: Merkle tree path (concatenated LE sha256 hashes, dynamic sized).
 * ``confirmations``: integer number of confirmation required.
-* ``insecure``: boolean parameter indicating whether to check against the recommended ``STABLE_TRANSACTION_CONFIRMATIONS`` 
+* ``insecure``: boolean parameter indicating whether to check against the recommended ``STABLE_BITCOIN_CONFIRMATIONS`` 
 
 .. note:: The Merkle proof for a Bitcoin transaction can be retrieved using the ``bitcoin-rpc`` `gettxoutproof <https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/gettxoutproof/>`_ method and dropping the first 170 characters. The Merkle proof thereby consists of a list of SHA256 hashes, as well as an indicator in which order the hash concatenation is to be applied (left or right).
 
@@ -381,7 +381,7 @@ Specification
 * ``ERR_MALFORMED_TXID = "Malformed transaction identifier"``: return error if the transaction identifier (``txId``) is malformed.
 * ``ERR_CONFIRMATIONS = "Transaction has less confirmations than requested"``: return error if the block in which the transaction specified by ``txId`` was included has less confirmations than requested.
 * ``ERR_INVALID_MERKLE_PROOF = "Invalid Merkle Proof"``: return error if the Merkle proof is malformed or fails verification (does not hash to Merkle root).
-* ``ERR_ONGOING_FORK = "Verification disabled due to ongoing fork"``: return error if the ``mainChain`` is not at least ``STABLE_TRANSACTION_CONFIRMATIONS`` ahead of the next best fork. 
+* ``ERR_ONGOING_FORK = "Verification disabled due to ongoing fork"``: return error if the ``mainChain`` is not at least ``STABLE_BITCOIN_CONFIRMATIONS`` ahead of the next best fork. 
 
 *Substrate*
 
@@ -421,13 +421,15 @@ Function Sequence
 
   a. If ``insecure == True``, check against user-defined ``confirmations`` only
 
-  b. If ``insecure == True``, check against ``max(confirmations, STABLE_TRANSACTION_CONFIRMATIONS)``.
+  b. If ``insecure == True``, check against ``max(confirmations, STABLE_BITCOIN_CONFIRMATIONS)``.
 
-7. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``Chains`` at the passed ``txBlockHeight``.  
+7. Check if the Bitcoin block was stored for a sufficient number of blocks (on the parachain) to ensure that staked relayers had the time to flag the block as potentially invalid. Check performed against ``STABLE_PARACHAIN_CONFIRMATIONS``.
 
-8. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Return ``ERR_INVALID_MERKLE_PROOF`` if one of these checks fails.
+8. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``Chains`` at the passed ``txBlockHeight``.  
 
-9. Call :ref:`computeMerkle` passing ``txId``, ``txIndex`` and ``merkleProof`` as parameters. 
+9. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Return ``ERR_INVALID_MERKLE_PROOF`` if one of these checks fails.
+
+10. Call :ref:`computeMerkle` passing ``txId``, ``txIndex`` and ``merkleProof`` as parameters. 
 
   a. If this call returns the ``merkleRoot``, emit a ``VerifyTransaction(txId, txBlockHeight, confirmations)`` event and return ``True``.
   
@@ -451,9 +453,8 @@ Given a raw Bitcoin transaction, this function
 
 1) Parses and extracts 
 
-   a. the value of the first output, 
-   b. the recipient address of the first output and 
-   c. the OP_RETURN value of the second output of the transaction.
+   a. the value and recipient address of the *Payment UTXO*, 
+   b. the OP_RETURN value of the *Data UTXO*.
 
 2) Validates the extracted values against the function parameters.
 
@@ -513,13 +514,13 @@ See the `raw Transaction Format section in the Bitcoin Developer Reference <http
 
 4. Extract the ``outputs`` from ``rawTx`` using :ref:`extractOutputs`.
 
-  a. Check that the transaction (``rawTx``) has at least 2 outputs. The first output (*Payment UTXO*) must be a `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_ or `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_ output. The second output (*Data UTXO*) must be an `OP_RETURN <https://bitcoin.org/en/transactions-guide#term-null-data>`_ output. Raise ``ERR_TX_FORMAT`` if this check fails. 
+  a. Check that the transaction (``rawTx``) has at least 2 outputs. One output (*Payment UTXO*) must be a `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_ or `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_ output. Another output (*Data UTXO*) must be an `OP_RETURN <https://bitcoin.org/en/transactions-guide#term-null-data>`_ output. Raise ``ERR_TX_FORMAT`` if this check fails. 
 
-5. Extract the value of the (first) *Payment UTXO* (``outputs[0]``) using :ref:`extractOutputValue` and check that it is equal (or greater) than ``paymentValue``. Return ``ERR_INSUFFICIENT_VALUE`` if this check fails. 
+5. Extract the value of the *Payment UTXO* using :ref:`extractOutputValue` and check that it is equal (or greater) than ``paymentValue``. Return ``ERR_INSUFFICIENT_VALUE`` if this check fails. 
 
-6. Extract the Bitcoin address specified as recipient in the (first) *Payment UTXO* (``outputs[0]``)  using :ref:`extractOutputAddress`  and check that it matches ``recipientBtcAddress``. Return ``ERR_WRONG_RECIPIENT`` if this check fails, or the error returned by :ref:`extractOutputAddress` (if the output was malformed).
+6. Extract the Bitcoin address specified as recipient in the *Payment UTXO* using :ref:`extractOutputAddress` and check that it matches ``recipientBtcAddress``. Return ``ERR_WRONG_RECIPIENT`` if this check fails, or the error returned by :ref:`extractOutputAddress` (if the output was malformed).
 
-7. Extract the OP_RETURN value from the (second) *Data UTXO* (``outputs[1]``) using :ref:`extractOPRETURN` and check that it matches ``opReturnId``. Return ``ERR_INVALID_OPRETURN`` error if this check fails, or the error returned by :ref:`extractOPRETURN` (if the output was malformed).
+7. Extract the OP_RETURN value from the *Data UTXO* using :ref:`extractOPRETURN` and check that it matches ``opReturnId``. Return ``ERR_INVALID_OPRETURN`` error if this check fails, or the error returned by :ref:`extractOPRETURN` (if the output was malformed).
 
 8. Return ``True``.
 
