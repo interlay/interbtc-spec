@@ -451,9 +451,8 @@ Given a raw Bitcoin transaction, this function
 
 1) Parses and extracts 
 
-   a. the value of the first output, 
-   b. the recipient address of the first output and 
-   c. the OP_RETURN value of the second output of the transaction.
+   a. the value and recipient address of the *Payment UTXO*, 
+   b. the OP_RETURN value of the *Data UTXO*.
 
 2) Validates the extracted values against the function parameters.
 
@@ -513,13 +512,13 @@ See the `raw Transaction Format section in the Bitcoin Developer Reference <http
 
 4. Extract the ``outputs`` from ``rawTx`` using :ref:`extractOutputs`.
 
-  a. Check that the transaction (``rawTx``) has at least 2 outputs. The first output (*Payment UTXO*) must be a `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_ or `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_ output. The second output (*Data UTXO*) must be an `OP_RETURN <https://bitcoin.org/en/transactions-guide#term-null-data>`_ output. Raise ``ERR_TX_FORMAT`` if this check fails. 
+  a. Check that the transaction (``rawTx``) has at least 2 outputs. One output (*Payment UTXO*) must be a `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_ or `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_ output. Another output (*Data UTXO*) must be an `OP_RETURN <https://bitcoin.org/en/transactions-guide#term-null-data>`_ output. Raise ``ERR_TX_FORMAT`` if this check fails. 
 
-5. Extract the value of the (first) *Payment UTXO* (``outputs[0]``) using :ref:`extractOutputValue` and check that it is equal (or greater) than ``paymentValue``. Return ``ERR_INSUFFICIENT_VALUE`` if this check fails. 
+5. Extract the value of the *Payment UTXO* using :ref:`extractOutputValue` and check that it is equal (or greater) than ``paymentValue``. Return ``ERR_INSUFFICIENT_VALUE`` if this check fails. 
 
-6. Extract the Bitcoin address specified as recipient in the (first) *Payment UTXO* (``outputs[0]``)  using :ref:`extractOutputAddress`  and check that it matches ``recipientBtcAddress``. Return ``ERR_WRONG_RECIPIENT`` if this check fails, or the error returned by :ref:`extractOutputAddress` (if the output was malformed).
+6. Extract the Bitcoin address specified as recipient in the *Payment UTXO* using :ref:`extractOutputAddress` and check that it matches ``recipientBtcAddress``. Return ``ERR_WRONG_RECIPIENT`` if this check fails, or the error returned by :ref:`extractOutputAddress` (if the output was malformed).
 
-7. Extract the OP_RETURN value from the (second) *Data UTXO* (``outputs[1]``) using :ref:`extractOPRETURN` and check that it matches ``opReturnId``. Return ``ERR_INVALID_OPRETURN`` error if this check fails, or the error returned by :ref:`extractOPRETURN` (if the output was malformed).
+7. Extract the OP_RETURN value from the *Data UTXO* using :ref:`extractOPRETURN` and check that it matches ``opReturnId``. Return ``ERR_INVALID_OPRETURN`` error if this check fails, or the error returned by :ref:`extractOPRETURN` (if the output was malformed).
 
 8. Return ``True``.
 
