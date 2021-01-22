@@ -1,12 +1,13 @@
 .. _storage-verification:
 
 Functions: Storage and Verification
-====================================
+===================================
 
 .. _initialize:
 
 initialize
 ----------
+
 Initializes BTC-Relay with the first Bitcoin block to be tracked and initializes all data structures (see :ref:`data-model`).
 
 .. note:: BTC-Relay **does not** have to be initialized with Bitcoin's genesis block! The first block to be tracked can be selected freely. 
@@ -15,7 +16,7 @@ Initializes BTC-Relay with the first Bitcoin block to be tracked and initializes
 
 
 Specification
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 *Function Signature*
 
@@ -34,9 +35,7 @@ Specification
 
 * ``ERR_ALREADY_INITIALIZED = "Already initialized"``: return error if this function is called after BTC-Relay has already been initialized.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn initialize(origin, blockHeaderBytes: Vec<u8>, blockHeight: U256) -> DispatchResult {...}
 
@@ -105,9 +104,7 @@ Specification
 
 * ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the Governance Mechanism.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn storeBlockHeader(origin, blockHeaderBytes: Vec<u8>) -> DispatchResult {...}
 
@@ -170,8 +167,6 @@ Function sequence
 
    b. If submission was to another ``BlockChain`` entry (new or existing), emit ``StoreForkHeader(height, hashCurrentBlock)``.
 
-8. Return.
-
 
 .. figure:: ../figures/storeBlockHeader-sequence.png
     :alt: storeBlockHeader sequence diagram
@@ -203,9 +198,7 @@ Specification
 
 *  ``ChainReorg(newChainTip, blockHeight, forkDepth)``: if the submitted block header on a fork results in a reorganization (fork longer than current main chain), emit an event with the block hash of the new highest block (``newChainTip``), the new maximum block height (``blockHeight``) and the depth of the fork (``forkDepth``).
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn checkAndDoReorg(fork: &BlockChain) -> DispatchResult {...}
 
@@ -260,8 +253,6 @@ Function Sequence
 
   h. Emit a ``ChainReorg(newChainTip, blockHeight, forkDepth)``, where ``newChainTip`` is the new ``BestBlock``, ``blockHeight`` is the new ``BestBlockHeight``, and ``forkDepth`` is the depth of the fork (``fork.maxHeight - fork.startHeight``).
 
-3. Return.
-
 .. todo:: We will want to execute the re-writing of the main chain only when a new fork is at least ``k`` blocks ahead.
 
 
@@ -307,9 +298,7 @@ Specification
 * ``ERR_LOW_DIFF = "PoW hash does not meet difficulty target of header"``: return error when the header's ``blockHash`` does not meet the ``target`` specified in the block header.
 * ``ERR_DIFF_TARGET_HEADER = "Incorrect difficulty target specified in block header"``: return error if the ``target`` specified in the block header is incorrect for its block height (difficulty re-target not executed).
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn verifyBlockHeader(origin, blockHeaderBytes: RawBlockHeader) -> H256 {...}
 
@@ -338,7 +327,7 @@ Function Sequence
 
 
 
-.. _verifyTransaction:
+.. _verifyTransactionInclusion:
 
 verifyTransactionInclusion
 --------------------------
@@ -383,9 +372,7 @@ Specification
 * ``ERR_INVALID_MERKLE_PROOF = "Invalid Merkle Proof"``: return error if the Merkle proof is malformed or fails verification (does not hash to Merkle root).
 * ``ERR_ONGOING_FORK = "Verification disabled due to ongoing fork"``: return error if the ``mainChain`` is not at least ``STABLE_BITCOIN_CONFIRMATIONS`` ahead of the next best fork. 
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn verifyTransactionInclusion(txId: H256, txBlockHeight: U256, txindex: u32, merkleProof: Vec<u8>, confirmations: u32, insecure: bool) -> DispatchResult {...}
 
@@ -472,7 +459,7 @@ Specification
 * ``rawTx``:  raw Bitcoin transaction including the transaction inputs and outputs.
 * ``paymentValue``: integer value of BTC sent in the (first) *Payment UTXO* of transaction.
 * ``recipientBtcAddress``: 20 byte Bitcoin address of recipient of the BTC in the (first) *Payment UTXO*.
-* ``opReturnId``: 32 byte hash identifier expected in OP_RETURN (see :ref:`_replace-attacks`).
+* ``opReturnId``: 32 byte hash identifier expected in OP_RETURN (see :ref:`replace-attacks`).
 
 *Returns*
 
@@ -492,9 +479,7 @@ Specification
 * ``ERR_WRONG_RECIPIENT = "Incorrect recipient Bitcoin address"``: return error if the recipient specified in the (first) *Payment UTXO* does not match the given ``recipientBtcAddress``.
 * ``ERR_INVALID_OPRETURN = "Incorrect identifier in OP_RETURN field"``: return error if the OP_RETURN field of the (second) *Data UTXO* does not match the given ``opReturnId``.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn validateTransaction(rawTx: Vec<u8>, paymentValue: Balance, recipientBtcAddress: H160, opReturnId: H256) -> DispatchResult {...}
 
@@ -549,9 +534,6 @@ Specification
 * ``blockHash``: SHA256 block hash of the block containing the error. 
 * ``errors``: list of ``ErrorCode`` entries which are to be flagged for the block with the given blockHash. Can be "NO_DATA_BTC_RELAY" or "INVALID_BTC_RELAY".
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -563,7 +545,7 @@ Specification
 * ``ERR_BLOCK_NOT_FOUND  = "No Bitcoin block header found with the given block hash"``: No ``RichBlockHeader`` entry exists with the given block hash.
 * ``ERR_ALREADY_REPORTED = "This error has already been reported for the given block hash and is pending confirmation"``: The error reported for the given block hash is currently pending a vote by Staked Relayers.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn flagBlockError(blockHash: H256, errorCode: ErrorCode) -> DispatchResult {...}
 
@@ -611,9 +593,6 @@ Specification
 * ``blockHash``: SHA256 block hash of the block containing the error. 
 * ``errors``: list of ``ErrorCode`` entries which are to be **cleared** from the block with the given blockHash. Can be ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY``.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -625,7 +604,7 @@ Specification
 * ``ERR_BLOCK_NOT_FOUND  = "No Bitcoin block header found with the given block hash"``: No ``RichBlockHeader`` entry exists with the given block hash.
 * ``ERR_ALREADY_REPORTED = "This error has already been reported for the given block hash and is pending confirmation"``: The error reported for the given block hash is currently pending a vote by Staked Relayers.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn reportBTCRelayFailure(chainId: U256, errors: Vec<ErrorCode>) -> DispatchResult {...}
 

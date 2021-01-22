@@ -8,10 +8,10 @@ Actors
 
 There are four main participant roles in the system. A high-level overview of all modules and actors, as well as interactions between them, is provided in :numref:`high-level` below.
 
-- **Vaults**: Vaults are collateralized intermediaries that are active on both the backing blockchain (Bitcoin) and the issuing blockchain to provide collateral in DOT. They receive and hold BTC from users who wish to create PolkaBTC tokens. When a user destroys PolkaBTC tokens, a Vault releases the corresponding amount of BTC to the user's BTC address. Vaults interact with the following modules directly: :ref:`vault-registry`, :ref:`redeem-protocol`, and :ref:`replace-protocol`.
+- **Vaults**: Vaults are collateralized intermediaries that are active on both the backing blockchain (Bitcoin) and the issuing blockchain to provide collateral in DOT. They receive and hold BTC from users who wish to create PolkaBTC tokens. When a user destroys PolkaBTC tokens, a vault releases the corresponding amount of BTC to the user's BTC address. Vaults interact with the following modules directly: :ref:`vault-registry`, :ref:`redeem-protocol`, and :ref:`replace-protocol`.
 - **Users**: Users interact with the BTC Parachain to create, use (trade/transfer/...), and redeem Bitcoin-backed PolkaBTC tokens. Since the different protocol phases can be executed by different users, we introduce the following *sub-roles*:
 
-  - **Requester**: A user that locks BTC with a Vault on Bitcoin and issues PolkaBTC on the BTC Parachain. Interacts with the :ref:`issue-protocol` module.
+  - **Requester**: A user that locks BTC with a vault on Bitcoin and issues PolkaBTC on the BTC Parachain. Interacts with the :ref:`issue-protocol` module.
   - **Sender** and **Receiver**: A user (Sender) that sends PolkaBTC to another user (Receiver) on the BTC Parachain. Interacts with the :ref:`treasury-module` module. 
   - **Redeemer**: A user that destroys PolkaBTC on the BTC Parachain to receive the corresponding amount of BTC on the Bitcoin blockchain from a Vault. Interacts with the :ref:`redeem-protocol` module. 
 
@@ -35,7 +35,7 @@ The specification clearly separates these modules to ensure that each module can
 .. figure:: ../figures/PolkaBTC-Architecture.png
     :alt: architecture diagram
 
-    High level overview of the BTC Parachain. PolkaBTC consists of seven modules. The Oracle module stores the exchange rates based on the input of centralized and decentralized exchanges. The Treasury module maintains the ownership of PolkaBTC, the VaultRegistry module stores information about the current Vaults in the system, and the Issue, Redeem and Replace modules expose funcitons and maintain data related to the respective sub protocols. The StabilizedCollateral modules handles Vault collateralization, stabilization against exchange rate fluctuations and automatic liquidation. BTC-Relay tracks the Bitcoin main chain and verifies transaction inclusion. The Parachain Governance maintains correct operation of the BTC Parachain and intervenes / halts operation if necessary. 
+    High level overview of the BTC Parachain. PolkaBTC consists of seven modules. The Oracle module stores the exchange rates based on the input of centralized and decentralized exchanges. The Treasury module maintains the ownership of PolkaBTC, the VaultRegistry module stores information about the current Vaults in the system, and the Issue, Redeem and Replace modules expose funcitons and maintain data related to the respective sub protocols. The StabilizedCollateral modules handles vault collateralization, stabilization against exchange rate fluctuations and automatic liquidation. BTC-Relay tracks the Bitcoin main chain and verifies transaction inclusion. The Parachain Governance maintains correct operation of the BTC Parachain and intervenes / halts operation if necessary. 
 
 
 Exchange Rate Oracle
@@ -62,9 +62,9 @@ The VaultRegistry module manages the Vaults in the system.It allows Managing the
 This module also handles the collateralization rates of Vaults and reacts to exchange rate fluctuations.
 Specifically, it:
 
-* stores how much collateral each Vault provided and how much of that collateral is allocated to PolkaBTC.
-* tracks the collateralization rate of each Vault and triggers measures in case the rate declines, e.g. due to exchange rate fluctuations.
-* triggers, as a last resort, automatic liquidation if a Vault falls below the minimum collateralization rate.
+* stores how much collateral each vault provided and how much of that collateral is allocated to PolkaBTC.
+* tracks the collateralization rate of each vault and triggers measures in case the rate declines, e.g. due to exchange rate fluctuations.
+* triggers, as a last resort, automatic liquidation if a vault falls below the minimum collateralization rate.
 
 Collateral
 ----------
@@ -86,7 +86,7 @@ The Redeem module handles the redeem process for PolkaBTC tokens. It tracks rede
 Replace
 -------
 The Replace module handles the replace process for Vaults. 
-It tracks replace requests by existing Vaults, exposes functionality for to-be-replaced Vaults to prove correct transfer of locked BTC to new Vault candidates (interacting with the endpoints in BTC-Relay), and handles the collateral provided by participating Vaults as griefing protection.
+It tracks replace requests by existing Vaults, exposes functionality for to-be-replaced Vaults to prove correct transfer of locked BTC to new vault candidates (interacting with the endpoints in BTC-Relay), and handles the collateral provided by participating Vaults as griefing protection.
 
 
 Security

@@ -45,7 +45,7 @@ var    ``tx_out``              txOut      Transaction outputs.
 Inputs
 ~~~~~~
 
-Bitcoin's UTXO model requires a new transaction to spend at least one existing and unspent transaction output as a transaction input. The ``txIn`` type consists of the following bytes. See the `reference <https://bitcoin.org/en/developer-reference#txin>`_ for further details.
+Bitcoin's UTXO model requires a new transaction to spend at least one existing and unspent transaction output as a transaction input. The ``txIn`` type consists of the following bytes. See the `reference <https://bitcoin.org/en/developer-reference#txin>`__ for further details.
 
 .. tabularcolumns:: |l|l|l|L|
 
@@ -63,7 +63,7 @@ var    ``signature script``    char[]     The script satisfying the output's scr
 Outputs
 ~~~~~~~
 
-The transaction output has the following format according to the `reference <https://bitcoin.org/en/developer-reference#txout>`_.
+The transaction output has the following format according to the `reference <https://bitcoin.org/en/developer-reference#txout>`__.
 
 =====  ======================  =========  ==================================
 Bytes  Parameter               Type       Description

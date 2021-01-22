@@ -15,7 +15,7 @@ RawBlockHeader
 
 An 80 bytes long Bitcoin blockchain header.
 
-*Substrate* ::
+.. *Substrate* ::
 
    pub type RawBlockHeader = [u8; 80];
 
@@ -28,7 +28,7 @@ DIFFICULTY_ADJUSTMENT_INTERVAL
 
 The interval in number of blocks at which Bitcoin adjusts its difficulty (approx. every 2 weeks = 2016 blocks).
 
-*Substrate* ::
+.. *Substrate* ::
 
   const DIFFICULTY_ADJUSTMENT_INTERVAL: u32 = 2016;
 
@@ -37,7 +37,7 @@ TARGET_TIMESPAN
 
 Expected duration of the different adjustment interval in seconds, ``1209600`` seconds (two weeks) in the case of Bitcoin.
 
-*Substrate* ::
+.. *Substrate* ::
 
   const TARGET_TIMESPAN: u32 = 1209600;
 
@@ -46,7 +46,7 @@ TARGET_TIMESPAN_DIVISOR
 
 Auxiliary constant used in Bitcoin's difficulty re-target mechanism. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   const TARGET_TIMESPAN_DIVISOR: u32 = 4;
    
@@ -55,21 +55,21 @@ UNROUNDED_MAX_TARGET
 
 The maximum difficulty target, :math:`2^{224}-1` in the case of Bitcoin. For more information, see the `Bitcoin Wiki <https://en.bitcoin.it/wiki/Target>`_.
 
-*Substrate* ::
+.. *Substrate* ::
 
     const UNROUNDED_MAX_TARGET: U256 = U256([
     <u64>::max_value(),
     <u64>::max_value(),
     <u64>::max_value(),
     0x0000_0000_ffff_ffffu64,
-  ]);
+    ]);
 
 MAIN_CHAIN_ID
 .............
 
 Identifier of the Bitcoin main chain tracked in the ``ChainsIndex`` mapping. At any point in time, the ``BlockChain`` with this identifier is considered to be the main chain and will be used to transaction inclusion verification.
 
-*Substrate* ::
+.. *Substrate* ::
 
     const MAIN_CHAIN_ID: u32 = 0;
 
@@ -79,7 +79,7 @@ STABLE_BITCOIN_CONFIRMATIONS
 
 Global security parameter (typically referred to as ``k`` in scientific literature), determining the umber of confirmations (in blocks) necessary for a transaction to be considered "stable" in Bitcoin. Stable thereby means that the probability of the transaction being excluded from the blockchain due to a fork is negligible. 
 
-*Substrate* ::
+.. *Substrate* ::
 
     const STABLE_BITCOIN_CONFIRMATIONS: u32 = 6;
 
@@ -90,7 +90,7 @@ Global security parameter (typically referred to as ``k`` in scientific literatu
 
 .. note:: We use this to enforce a minimum delay on Bitcoin block header acceptance in the BTC-Parachain in cases where a (large) number of block headers are submitted as a batch.
 
-*Substrate* ::
+.. *Substrate* ::
 
     const STABLE_PARACHAIN_CONFIRMATIONS: u32 = 6;
 
@@ -98,7 +98,7 @@ Structs
 ~~~~~~~
   
 BlockHeader
-..................
+...........
 
 Representation of a Bitcoin block header, as stored in the 80 byte byte representation in the Bitcoin block chain (contains **no additional metadata** - see :ref:`RichBlockHeader`). 
 This struct is only used for parsing the 80 byte block header - not for storage! 
@@ -119,22 +119,20 @@ Parameter               Type       Description
 ``nonce``               u32        [Optional] Nonce used to solve the PoW of this block. 
 ======================  =========  ========================================================================
 
-*Substrate* 
+.. *Substrate* ::
 
-::
-
-  #[derive(Encode, Decode, Default, Clone, PartialEq)]
-  #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct BlockHeader<H256, U256, Timestamp> {
+    #[derive(Encode, Decode, Default, Clone, PartialEq)]
+    #[cfg_attr(feature = "std", derive(Debug))]
+    pub struct BlockHeader<H256, U256, Timestamp> {
         merkle_root: H256,
         target: U256,
         timestamp: u64,
         hash_prev_block: H256,
         version: i32, 
         nonce: u32
-  }
+    }
 
-.. _blockHeader: 
+.. _RichBlockHeader: 
 
 RichBlockHeader
 ................
@@ -145,26 +143,24 @@ Representation of a Bitcoin block header containing additional metadata. This st
 
 .. tabularcolumns:: |l|l|L|
 
-======================  =========    ========================================================================
+======================  ===========  ========================================================================
 Parameter               Type         Description
-======================  =========    ========================================================================
+======================  ===========  ========================================================================
 ``blockhash``           bytes32      Bitcoin's double SHA256 PoW block hash
 ``blockHeight``         u32          Height of this block in the Bitcoin main chain.
 ``chainRef``            u32          Pointer to the ``BlockChain`` struct in which this block header is contained.
 ``blockHeader``         BlockHeader  Associated parsed ``BlockHeader`` struct 
-======================  =========    ========================================================================
+======================  ===========  ========================================================================
 
-*Substrate* 
+.. *Substrate*::
 
-::
-
-  #[derive(Encode, Decode, Default, Clone, PartialEq)]
-  #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct RichBlockHeader<H256, U256, Timestamp> {
+    #[derive(Encode, Decode, Default, Clone, PartialEq)]
+    #[cfg_attr(feature = "std", derive(Debug))]
+    pub struct RichBlockHeader<H256, U256, Timestamp> {
         block_height: U256,
         chain_ref: U256,
         block_header: BlockHeader<H256, U256, Timestamp>,
-  }
+    }
 
 
 
@@ -186,20 +182,18 @@ Parameter               Type            Description
 ``invalid``             Vec<U256>       List of block heights in ``chain`` referencing block hashes of ``RichBlockHeader`` entries in ``BlockHeaders`` which have been flagged as ``invalid`` by Staked Relayers.
 ======================  ==============  ========================================================================
 
-*Substrate* 
+.. *Substrate*::
 
-::
-
-  #[derive(Encode, Decode, Default, Clone, PartialEq)]
-  #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct RichBlockHeader<H256, Timestamp> {
+    #[derive(Encode, Decode, Default, Clone, PartialEq)]
+    #[cfg_attr(feature = "std", derive(Debug))]
+    pub struct RichBlockHeader<H256, Timestamp> {
         chainId: U256,
         chain: BTreeMap<U256,H256>,
         startHeight: U256,
         maxHeight: U256,
         noData: Vec<U256>, 
         invalid: Vec<U256>
-  }
+    }
 
 
 Data Structures
@@ -210,7 +204,7 @@ BlockHeaders
 
 Mapping of ``<blockHash, RichBlockHeader>``, storing all verified Bitcoin block headers (fork and main chain) submitted to BTC-Relay.
 
-*Substrate* ::
+.. *Substrate* ::
 
   BlockHeaders: map H256 => RichBlockHeader<U256, H256, Moment>;
 
@@ -231,9 +225,9 @@ The exact choice of data structure is left to the developer. We recommend to use
 
 .. attention:: If two ``BlockChain`` entries have the same ``maxHeight``, do **not** change ordering! 
 
-.. note:: The assumption for ``Chains`` is that, in the majority of cases, block headers will be appended to the *main chain* (longest chain), i.e., the ``BlockChain`` entry at the most significant position in the queue/heap. Similarly, transaction inclusion proofs (:ref:`verifyTransaction`) are only checked against the *main chain*. This means, in the average case lookup complexity will be O(1). Furthermore, block headers can only be appended if they (i) have a valid PoW and (ii) do not yet exist in ``BlockHeaders`` - hence, spamming is very costly and unlikely. Finally, blockchain forks and re-organizations occur infrequently, especially in Bitcoin. In principle, optimizing lookup costs should be prioritized, ideally O(1), while inserting of new items and re-balancing can even be O(n). 
+.. note:: The assumption for ``Chains`` is that, in the majority of cases, block headers will be appended to the *main chain* (longest chain), i.e., the ``BlockChain`` entry at the most significant position in the queue/heap. Similarly, transaction inclusion proofs (:ref:`verifyTransactionInclusion`) are only checked against the *main chain*. This means, in the average case lookup complexity will be O(1). Furthermore, block headers can only be appended if they (i) have a valid PoW and (ii) do not yet exist in ``BlockHeaders`` - hence, spamming is very costly and unlikely. Finally, blockchain forks and re-organizations occur infrequently, especially in Bitcoin. In principle, optimizing lookup costs should be prioritized, ideally O(1), while inserting of new items and re-balancing can even be O(n). 
 
-.. *Substrate* ::
+.. .. *Substrate* ::
   // ideally:
   // Chains: PriorityQueue<BlockChain, Ord>;
   // alternative:
@@ -260,7 +254,7 @@ ChainsIndex
 
 Auxiliary mapping of ``BlockChain`` structs to unique identifiers, for faster read access / lookup ``<U256, BlockChain>``, 
 
-*Substrate* ::
+.. *Substrate* ::
 
   ChainsIndex: map U256 => BlockChain<H256>;
 
@@ -269,7 +263,7 @@ BestBlock
 
 32 byte Bitcoin block hash (double SHA256) identifying the current blockchain tip, i.e., the ``RichBlockHeader`` with the highest ``blockHeight`` in the ``BlockChain`` entry, which has the most significant ``height`` in the ``Chains`` priority queue (topmost position). 
 
-*Substrate* ::
+.. *Substrate* ::
 
   BestBlock: H256;
 
@@ -281,7 +275,7 @@ BestBlockHeight
 
 Integer representing the maximum block height (``height``) in the ``Chains`` priority queue. This is also the ``blockHeight`` of the ``RichBlockHeader`` entry pointed to by ``BestBlock``.
 
-*Substrate* ::
+.. *Substrate* ::
 
   BestBlockHeight: U256;
 
@@ -291,9 +285,10 @@ ChainCounter
 
 Integer increment-only counter used to track existing BlockChain entries.
 Initialized with 1 (0 is reserved for ``MAIN_CHAIN_ID``).
-*Substrate* ::
 
-  ChainCounter: U256 = 1;
+.. *Substrate* ::
+
+    ChainCounter: U256 = 1;
 
 
 

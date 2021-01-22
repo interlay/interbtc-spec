@@ -36,9 +36,7 @@ Extracts the ``hashPrevBlock`` (reference to previous block) from a Bitcoin bloc
 
 * ``hashPrevBlock``: the 32 byte block hash reference to the previous block.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn extractHashPrevBlock(blockHeaderBytes: T::RawBlockHeader) -> H256 {...}
 
@@ -67,9 +65,7 @@ Extracts the ``merkleRoot`` from a Bitcoin block header.
 
 * ``merkleRoot``: the 32 byte Merkle tree root of the block header
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn extractMerkleRoot(blockHeaderBytes: T::RawBlockHeader) -> H256 {...}
 
@@ -99,9 +95,7 @@ Extracts the timestamp from the block header.
 
 * ``timestamp``: timestamp representation of the 4 byte timestamp field of the block header
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn extractTimestamp(blockHeaderBytes: T::RawBlockHeader) -> T::Moment {...}
 
@@ -131,9 +125,7 @@ Extracts the ``nBits`` from a Bitcoin block header. This field is necessary to c
 
 * ``nBits``: the 4 byte nBits field of the block header
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn extractNBits(blockHeaderBytes: T::RawBlockHeader) -> u32 {...}
 
@@ -169,9 +161,7 @@ Parses a 80 bytes raw Bitcoin block header and, if successful, returns a  ``Rich
 
 * ``ERR_INVALID_HEADER_SIZE = "Invalid block header size"``: return error if the submitted block header is not exactly 80 bytes long.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn parseBlockHeader(blockHeaderBytes: T::RawBlockHeader) -> T::RichBlockHeader {...}
 
@@ -222,7 +212,7 @@ Specification
 
 * ``outputs``: A list of variable byte size encoded outputs of the given transaction.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn extractOutputs(rawTransaction: T::Vec<u8>) -> T::Vec<T::Vec<u8>> {...}
 
@@ -267,7 +257,7 @@ Extracts the starting index of the outputs in a transaction (i.e., skips over th
 
 .. note:: Currently, the transaction version can be 1 or 2. See `transaction format details <https://bitcoin.org/en/developer-reference#raw-transaction-format>`_ in the Bitcoin Developer Reference. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn getOutputStartIndex(origin, ) -> Result {...}
 
@@ -311,7 +301,7 @@ Determines the length of the Bitcoin CompactSize Unsigned Integers (other term f
 * ``varInt``: integer length of the VarInt (excluding flag).
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn determineVarIntDataLength(varIntFlag: T::Vec<u8>) -> u8 {...}
 
@@ -355,7 +345,7 @@ Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used t
 
 * ``ERR_NOT_OP_RETURN = "Expecting OP_RETURN output, but got another type.``: The given output was not an OP_RETURN output.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn extractOpreturn(output: T::Vec<u8>) -> T::Vec<u8> {...}
 
@@ -391,7 +381,7 @@ Extracts the value of the given output.
 
 * ``value``: value of the output.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn extractOutputValue(output: T::Vec<u8>) -> u64 {...}
 
@@ -428,7 +418,7 @@ Extracts the value of the given output.
 
 * ``ERR_INVALID_OUTPUT_SCRIPT = "Invalid or malformed output script"``: The script of the given output is invalid or malformed. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn extractOutputAddress(output: T::Vec<u8>) -> T::H160 {...}
 

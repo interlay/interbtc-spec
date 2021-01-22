@@ -31,7 +31,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message:**  "Previous block hash does not match last block in fork submission"
 
-* **Function:** :ref:`storeForkBlockHeader`
+* **Function:** :ref:`storeBlockHeader`
 
 * **Cause**: Raised if the block header does not reference the highest block in the fork specified by ``forkId`` (via ``prevBlockHash``). 
 
@@ -39,7 +39,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message**: "Indicated fork submission, but block is in main chain"
 
-* **Function**: :ref:`storeForkBlockHeader` 
+* **Function**: :ref:`storeBlockHeader` 
 
 * **Cause**:  Raised if raise exception if the submitted block header is actually extending the current longest chain tracked by BTC-Relay (``Chains``), instead of a fork.
 
@@ -47,7 +47,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message**:  "Incorrect fork identifier."
 
-* **Function**: :ref:`storeForkBlockHeader`
+* **Function**: :ref:`storeBlockHeader`
 
 * **Cause**: Raised if a non-existent fork identifier is passed. 
 
@@ -155,7 +155,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message**: "BTC Parachain has shut down"
 
-* **Function**: :ref:`verifyTransactionInclusion` | :ref:`storeForkBlockHeader` | :ref:`storeBlockHeader`
+* **Function**: :ref:`verifyTransactionInclusion` | :ref:`storeBlockHeader` | :ref:`storeBlockHeader`
 
 * **Cause**: The BTC Parachain has been shutdown by a manual intervention of the Governance Mechanism.
 
@@ -228,6 +228,6 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Message**: "Verification disabled due to ongoing fork"
 
-* **Function**: :ref:`verifyTransaction`
+* **Function**: :ref:`verifyTransactionInclusion`
 
 * **Cause**: The ``mainChain`` is not at least ``STABLE_BITCOIN_CONFIRMATIONS`` ahead of the next best fork. 

@@ -3,7 +3,7 @@
 Security
 ======== 
 
-The Security module is responsible for tracking the status of the BTC Parachain, flagging failures such as liveness and safety failures of :ref:`btc-relay` or crashes of the :ref:`exchange-rate-oracle`.
+The Security module is responsible for tracking the status of the BTC Parachain, flagging failures such as liveness and safety failures of :ref:`btc-relay` or crashes of the :ref:`oracle`.
 Specifically, this module provides a central interface for all other modules to check whether specific features should be disabled to prevent financial damage to users (e.g. stop :ref:`issue-protocol` if no reliable price data is available).
 In addition, the Security module provides functions to handle security critical operations, such as generating secure identifiers for replay protection in :ref:`issue-protocol`, :ref:`redeem-protocol`, and :ref:`replace-protocol`. 
 
@@ -43,7 +43,7 @@ Indicates ths status of the BTC Parachain.
 
 * ``SHUTDOWN: 2`` - BTC Parachain operation fully suspended. This can only be achieved via manual intervention by the Governance Mechanism.
 
-*Substrate* 
+.. *Substrate* 
 
 ::
 
@@ -65,13 +65,11 @@ Enum specifying error codes tracked in ``Errors``.
 
 * ``INVALID_BTC_RELAY : 2`` - an invalid transaction was detected in a block header submitted to :ref:`btc-relay`. 
 
-* ``ORACLE_OFFLINE : 3`` - the :ref:`exchangeRateOracle` experienced a liveness failure (no up-to-date exchange rate available).
+* ``ORACLE_OFFLINE : 3`` - the :ref:`oracle` experienced a liveness failure (no up-to-date exchange rate available).
 
-* ``LIQUIDATION : 4`` - at least one Vault is either below the ``LiquidationCollateralThreshold`` or has been reported to have stolen BTC. This status implies that any :ref:`redeem-protocol` request will be executed partially in BTC and partially in DOT, until the system is rebalanced (1:1 backing between PolkaBTC and BTC). 
+* ``LIQUIDATION : 4`` - at least one vault is either below the ``LiquidationCollateralThreshold`` or has been reported to have stolen BTC. This status implies that any :ref:`redeem-protocol` request will be executed partially in BTC and partially in DOT, until the system is rebalanced (1:1 backing between PolkaBTC and BTC). 
 
-*Substrate*
-
-::
+.. *Substrate*::
   
   enum ErrorCode {
         NONE = 0
@@ -93,7 +91,7 @@ ParachainStatus
 
 Integer/Enum (see ``StatusCode`` below). Defines the current state of the BTC Parachain. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   ParachainStatus: StatusCode;
 
@@ -104,7 +102,7 @@ Errors
 Set of error codes (``ErrorCode`` enums), indicating the reason for the error. The ``ErrorCode`` entries included in this set specify how to react to the failure (e.g. shutdown transaction verification in :ref:`btc-relay`).
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   Errors: BTreeSet<ErrorCode>;
 
@@ -115,7 +113,7 @@ Nonce
 
 Integer increment-only counter, used to prevent collisions when generating identifiers for e.g. issue, redeem or replace requests (for OP_RETURN field in Bitcoin).
 
-*Substrate* ::
+.. *Substrate* ::
 
   Nonce: U256;
 
@@ -148,7 +146,7 @@ Specification
 
 * ``hash``: a cryptographic hash generated via a secure hash function.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn generateSecureId(account: AccountId) -> T::H256 {...}
 
@@ -179,7 +177,7 @@ Specification
 
 * ``U256``: the new value of the ``StatusCounter``.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn getStatusCounter() -> U256 {...}
 

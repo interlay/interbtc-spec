@@ -17,9 +17,13 @@ Step-by-step
 4. The vault executes the :ref:`executeRedeem` function by providing the Bitcoin transaction from step 3 together with the redeem request identifier within the time limit. If the function completes successfully, the locked PolkaBTC are destroyed and the user received its BTC.
 5. Optional: If the user could not receive BTC within the given time (as required in step 4), the user calls :ref:`cancelRedeem` after the redeem time limit. The user is then refunded with the DOT collateral the vault provided.
 
+Security
+--------
 
-VaultRegistry
--------------
+- Unique identification of Bitcoin payments: :ref:`op-return`
+
+Vault Registry
+--------------
 
 The data access and state changes to the vault registry are documented in :numref:`fig-vault-registry-redeem` below.
 
@@ -40,7 +44,7 @@ RedeemPeriod
 
 The time difference in number of blocks between a redeem request is created and required completion time by a vault. The redeem period has an upper limit to ensure the user gets his BTC in time and to potentially punish a vault for inactivity or stealing BTC.
 
-*Substrate* ::
+.. *Substrate* ::
 
   RedeemPeriod: T::BlockNumber;
 
@@ -52,7 +56,7 @@ RedeemRequests
 
 Users create redeem requests to receive BTC in return for PolkaBTC. This mapping provides access from a unique hash ``redeemId`` to a ``Redeem`` struct. ``<redeemId, Redeem>``.
 
-*Substrate* ::
+.. *Substrate* ::
 
   RedeemRequests map T::H256 => Redeem<T::AccountId, T::BlockNumber, T::Balance>
 
@@ -70,7 +74,7 @@ Stores the status and information about a single redeem request.
 ==================  ==========  =======================================================	
 Parameter           Type        Description                                            
 ==================  ==========  =======================================================
-``vault``           Account     The BTC Parachain address of the Vault responsible for this redeem request.
+``vault``           Account     The BTC Parachain address of the vault responsible for this redeem request.
 ``opentime``        u256        Block height of opening the request.
 ``amountPolkaBTC``  PolkaBTC    Amount of PolkaBTC the user requested to be redeemed.
 ``amountBTC``       BTC         Amount of BTC to be released to the user.
@@ -80,9 +84,7 @@ Parameter           Type        Description
 ``btcAddress``      bytes[20]   Base58 encoded Bitcoin public key of the User.  
 ==================  ==========  =======================================================
 
-*Substrate*
-
-::
+.. *Substrate*::
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
@@ -137,12 +139,12 @@ Specification
 
 *Errors*
 
-* ``ERR_VAULT_NOT_FOUND = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
+* ``ERR_VAULT_NOT_FOUND = "There exists no vault with the given account id"``: The specified vault does not exist. 
 * ``ERR_AMOUNT_EXCEEDS_USER_BALANCE``: If the user is trying to redeem more BTC than his PolkaBTC balance.
 * ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE``: If the user is trying to redeem from a vault that has less BTC locked than requested for redeem.
-* ``ERR_VAULT_BANNED = "The selected Vault has been temporarily banned."``: Redeem requests are not possible with temporarily banned Vaults.
+* ``ERR_VAULT_BANNED = "The selected vault has been temporarily banned."``: Redeem requests are not possible with temporarily banned Vaults.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn requestRedeem(origin, amount: Balance, btcAddress: H160, vault: AccountID) -> Result {...}
 
@@ -151,14 +153,14 @@ Preconditions
 .............
 
 * The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0`` or to ``ERROR:1`` with ``Errors`` containing only ``LIQUIDATION``. All other states are disallowed.
-* The selected Vault must not have been banned. 
+* The selected vault must not have been banned. 
 
 Function Sequence
 .................
 
 1. Check if the ``amountPolkaBTC`` is less or equal to the user's balance in the treasury. Return ``ERR_AMOUNT_EXCEEDS_USER_BALANCE`` if this check fails.
 
-2. Retrieve the ``vault`` from :ref:`vault-registry`. Return ``ERR_VAULT_NOT_FOUND`` if no Vault can be found.
+2. Retrieve the ``vault`` from :ref:`vault-registry`. Return ``ERR_VAULT_NOT_FOUND`` if no vault can be found.
 
 3. Check that the ``vault`` is currently not banned, i.e., ``vault.bannedUntil == None`` or ``vault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
 
@@ -206,7 +208,7 @@ Function Sequence
 executeRedeem
 -------------
 
-A Vault calls this function after receiving an ``RequestRedeem`` event with his public key. Before calling the function, the Vault transfers the specific amount of BTC to the BTC address given in the original redeem request. The Vault completes the redeem with this function.
+A vault calls this function after receiving an ``RequestRedeem`` event with his public key. Before calling the function, the vault transfers the specific amount of BTC to the BTC address given in the original redeem request. The vault completes the redeem with this function.
 
 Specification
 .............
@@ -226,10 +228,6 @@ Specification
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
 
-*Returns*
-
-* ``None``: if the transaction can be successfully verified and the function has been called within the time limit.
-
 *Events*
 
 * ``ExecuteRedeem(redeemer, redeemId, amount, vault)``:
@@ -241,7 +239,7 @@ Specification
 * ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated vault``: The caller of this function is not the associated vault, and hence not authorized to take this action.
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn executeRedeem(origin, redeemId: T::H256, txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: Bytes, rawTx: Bytes) -> Result {...}
 
@@ -272,7 +270,6 @@ Function Sequence
 
 7. Remove ``redeem`` from ``RedeemRequests``.
 8. Emit an ``ExecuteRedeem`` event with the user's address, the redeemId, the amount, and the Vault's address.
-9. Return.
 
 .. _cancelRedeem:
 
@@ -282,7 +279,7 @@ cancelRedeem
 If a redeem request is not completed on time, the redeem request can be cancelled.
 The user that initially requested the redeem process calls this function to obtain the Vault's collateral as compensation for not refunding the BTC back to his address.
 
-The failed Vault is banned from further issue, redeem and replace requests for a pre-defined time period (``PunishmentDelay`` as defined in :ref:`vault-registry`).
+The failed vault is banned from further issue, redeem and replace requests for a pre-defined time period (``PunishmentDelay`` as defined in :ref:`vault-registry`).
 
 
 Specification
@@ -295,11 +292,8 @@ Specification
 *Parameters*
 
 * ``redeemId``: the unique hash of the redeem request.
-* ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the Vault, or wishes to keep the PolkaBTC (and retry :ref:`Redeem` with another Vault).
+* ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the vault, or wishes to keep the PolkaBTC (and retry to redeem with another Vault).
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -310,7 +304,7 @@ Specification
 * ``ERR_REDEEM_ID_NOT_FOUND``: The ``redeemId`` cannot be found.
 * ``ERR_REDEEM_PERIOD_NOT_EXPIRED``: Raises an error if the time limit to call ``executeRedeem`` has not yet passed.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn cancelRedeem(origin, redeemId: T::H256, reimburse: bool) -> Result {...}
 
@@ -335,19 +329,17 @@ Function Sequence
 
    b. Call the :ref:`burn` function in the Treasury to burn the ``redeem.amount`` of PolkaBTC of the user.
    
-   c. Call :ref:`slashCollateral` in the :ref:`collateral` module, passing ``redeem.vault``, ``redeem.redeemer`` and the value of the reimbursed collateral, calculated as ``redeem.amountPolkaBTC *`` :ref:`getExchangeRate` ``* (1 + PunishmentFee / 100000)``
+   c. Call :ref:`slashCollateral` in the :ref:`collateral-module` module, passing ``redeem.vault``, ``redeem.redeemer`` and the value of the reimbursed collateral, calculated as ``redeem.amountPolkaBTC *`` :ref:`getExchangeRate` ``* (1 + PunishmentFee / 100000)``
 
 4. Else, if ``reimburse == False`` (user does not want full reimbursement and wishes to retry the redeem)
     
-  a. Call :ref:`slashCollateral` in the :ref:`collateral` module, passing ``redeem.vault``, ``redeem.redeemer`` and value of the collateral punishment, calculated as ``redeem.amountPolkaBTC *`` :ref:`getExchangeRate` ``* (PunishmentFee / 100000)`` 
+  a. Call :ref:`slashCollateral` in the :ref:`collateral-module` module, passing ``redeem.vault``, ``redeem.redeemer`` and value of the collateral punishment, calculated as ``redeem.amountPolkaBTC *`` :ref:`getExchangeRate` ``* (PunishmentFee / 100000)`` 
 
-5. Temporarily Ban the Vault from issue, redeem and replace processes by setting ``redeem.vault.bannedUntil = current parachain block height + PunishmentDelay``.
+5. Temporarily Ban the vault from issue, redeem and replace processes by setting ``redeem.vault.bannedUntil = current parachain block height + PunishmentDelay``.
 
 6. Remove ``redeem`` from ``RedeemRequests``.
 
 7. Emit a ``CancelRedeem`` event with the ``redeemer`` account identifier and the ``redeemId``.
-
-8. Return.
 
 
 .. _getPartialRedeemFactor:
@@ -368,7 +360,7 @@ Specification
 
 * ``redeemFactor``: integer value between 0 an 10000 indicating the percentage of BTC to be redeemed in DOT. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn getPartialRedeemFactor() -> U128 {...}
 
@@ -379,7 +371,7 @@ Function Sequence
 
 2. Calculate ``totalLiquidationValue =`` :math:`\sum_{v}^{LiquidationList} (\mathit{v.issuedTokens} \cdot \mathit{exchangeRate} - \mathit{v.collateral})`
 
-3. Retrieve the ``TotalSupply`` of PolkaBTC from :ref:`treasury`.
+3. Retrieve the ``TotalSupply`` of PolkaBTC from :ref:`treasury-module`.
 
 4. Return ``totalLiquidationValue / TotalSupply``
 
@@ -408,7 +400,7 @@ Emit an event when a redeem request is created. This event needs to be monitored
 
 * ref:`requestRedeem`
 
-*Substrate* ::
+.. *Substrate* ::
 
   RequestRedeem(H256, AccountId, Balance, H160, AccountId);
 
@@ -433,7 +425,7 @@ Emit an event when a redeem request is successfully executed by a vault.
 
 * ref:`executeRedeem`
 
-*Substrate* ::
+.. *Substrate* ::
 
   ExecuteRedeem(AccountId, H256, Balance, AccountId);
 
@@ -455,7 +447,7 @@ Emit an event when a user cancels a redeem request that has not been fulfilled a
 
 * ref:`cancelRedeem`
 
-*Substrate* ::
+.. *Substrate* ::
 
   CancelRedeem(AccountId, H256);
 
@@ -465,9 +457,9 @@ Error Codes
 
 ``ERR_VAULT_NOT_FOUND``
 
-* **Message**: "There exists no Vault with the given account id."
+* **Message**: "There exists no vault with the given account id."
 * **Function**: :ref:`requestRedeem`
-* **Cause**: The specified Vault does not exist.
+* **Cause**: The specified vault does not exist.
 
 ``ERR_AMOUNT_EXCEEDS_USER_BALANCE``
 
@@ -477,7 +469,7 @@ Error Codes
 
 ``ERR_VAULT_BANNED``
 
-* **Message**: "The selected Vault has been temporarily banned."
+* **Message**: "The selected vault has been temporarily banned."
 * **Function**: :ref:`requestRedeem`
 * **Cause**:  Redeem requests are not possible with temporarily banned Vaults
 

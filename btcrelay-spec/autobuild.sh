@@ -1,2 +1,2 @@
 #!/bin/bash
-sphinx-autobuild docs/source docs/build/html
+sphinx-autobuild -W docs/source docs/build/html
