@@ -105,7 +105,6 @@ Function Sequence
 
 1. Add the ``amount`` of provided collateral to the ``CollateralBalances`` of the ``sender``.
 2. Increase ``TotalCollateral`` by ``amount``.
-3. Return.
 
 .. _releaseCollateral:
 

@@ -161,7 +161,6 @@ Function Sequence
 3. If ``LastExchangeRateTime`` minus the current UNIX timestamp is greater or equal to ``MaxDelay``, call :ref:`recoverFromORACLEOFFLINE` to recover from an ``ORACLE_OFFLINE`` error (which was the case before this data submission).
 4. Set ``LastExchangeRateTime`` to the current UNIX timestamp.
 5. Emit the ``SetExchangeRate`` event.
-6. Return.
 
 .. _setSatoshiPerBytes:
 

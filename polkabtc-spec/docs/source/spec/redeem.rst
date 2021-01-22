@@ -266,7 +266,6 @@ Function Sequence
 
 7. Remove ``redeem`` from ``RedeemRequests``.
 8. Emit an ``ExecuteRedeem`` event with the user's address, the redeemId, the amount, and the Vault's address.
-9. Return.
 
 .. _cancelRedeem:
 
@@ -337,8 +336,6 @@ Function Sequence
 6. Remove ``redeem`` from ``RedeemRequests``.
 
 7. Emit a ``CancelRedeem`` event with the ``redeemer`` account identifier and the ``redeemId``.
-
-8. Return.
 
 
 .. _getPartialRedeemFactor:

@@ -269,8 +269,6 @@ Function Sequence
 
 8. Emit a ``WithdrawReplaceRequest(oldVault, replaceId)`` event.
  
-9. Return.
-
 .. _acceptReplace:
 
 acceptReplace
@@ -417,8 +415,6 @@ Function Sequence
 
 10. Emit a ``RequestReplace(oldVault, btcAmount, timeout, replaceId)`` event.
 
-11. Return.
-
 .. _executeReplace: 
 
 executeReplace
@@ -489,8 +485,6 @@ Function Sequence
 
 9. Remove the ``ReplaceRequest`` from ``ReplaceRequests``.
 
-10. Return.
-
 .. note:: It can be the case that the to-be-replaced *OldVault* controls a significant numbers of Bitcoin UTXOs with user funds, making it impossible to execute the migration of funds to the *NewVault* within a single Bitcoin transaction. As a result, it may be necessary to "merge" these UTXOs using multiple "merge transactions" on Bitcoin, i.e., transactions which takes as input multiple UTXOs controlled by the *OldVault* and create a single UTXO controlled (again) by the *OldVault*. Once the UTXOs produced by "merge transactions" can be merged by a single, final transaction, the *OldVault* moves the funds to the *NewVault*. (An alternative is to allow the *OldVault* to submit multiple transaction inclusion proofs when calling ``executeReplace``, although this significantly increases the complexity of transaction parsing on the BTC Parachain side).
 
 
@@ -553,8 +547,6 @@ Function Sequence
 
 7. Emit a ``CancelReplace(newVault, oldVault, replaceId)`` event.
  
-8. Return.
-
 
 Events
 ~~~~~~~

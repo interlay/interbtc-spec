@@ -271,7 +271,6 @@ Function Sequence
 7. Call the :ref:`mint` function in the Treasury with the ``amount`` and the user's address as the ``receiver``.
 8. Remove the ``IssueRequest`` from ``IssueRequests``.
 9. Emit an ``ExecuteIssue`` event with the user's address, the issueId, the amount, and the Vault's address.
-10. Return.
 
 .. _cancelIssue:
 
@@ -329,8 +328,6 @@ Function Sequence
 6. Remove the ``IssueRequest`` from ``IssueRequests``.
 
 8. Emit a ``CancelIssue`` event with the ``issueId``.
-
-9. Return.
 
 
 Events

@@ -255,8 +255,6 @@ The ``registerStakedRelayer`` function takes as input a Parachain AccountID, and
 
 5) Emit a ``RegisterStakedRelayer(StakedRelayer, collateral)`` event. 
 
-6) Return.
-
 
 .. _deRegisterStakedRelayer:
 
@@ -302,9 +300,6 @@ Function Sequence
 4) Remove the entry from ``StakedRelayers`` which has ``stakedRelayer`` as key.
 
 5) Emit a ``DeRegisterStakedRelayer(StakedRelayer)`` event. 
-
-6) Return.
-
 
 
 .. _suggestStatusUpdate: 
@@ -373,8 +368,6 @@ Function Sequence
 
 4. Emit a ``StatusUpdateSuggested(newStatusCode, addErrors, removeErrors, msg, stakedRelayer)`` event.
 
-5. Return.
-
 .. _voteOnStatusUpdate: 
 
 voteOnStatusUpdate
@@ -432,8 +425,6 @@ Function Sequence
 4a. Check if the "Yes" votes exceed the necessary ``STAKED_RELAYER_VOTE_THRESHOLD``, i.e., check if ``StatusUpdate.voteYes.length * 100 / StakedRelayers.length`` exceeds ``STAKED_RELAYER_VOTE_THRESHOLD``. If this is the case, call :ref:`executeStatusUpdate`, passing ``statusUpdateId`` as parameter.
 
 4b. Otherwise, check if the ``StatusUpdate`` has been rejected. For this ``(StatusUpdate.voteNo.length *100 / StakedRelayers.length`` exceeds ``100 - STAKED_RELAYER_VOTE_THRESHOLD`` (i.e., ``STAKED_RELAYER_VOTE_THRESHOLD`` can no longer be reached by the "Yes" votes). If this is the case, call :ref:`rejectStatusUpdate` passing ``statusUpdateId`` as parameter
-
-5. Return.
 
 .. note:: We do not automatically slash Staked Relayers who voted against a majority. This is left for the Governance Mechanism to decide and execute manually via :ref:`slashStakedRelayer`.
 
@@ -499,8 +490,6 @@ Function Sequence
 
 9. Emit ``StatusUpdateExecuted(StatusUpdate.statusCode, StatusUpdate.addErrors, StatusUpdate.removeErrors, StatusUpdate.msg)`` event.
 
-10. Return.
-
 
 .. _rejectStatusUpdate:
 
@@ -553,8 +542,6 @@ Function Sequence
 4. Set ``StatusUpdate.proposalStatus`` to ``ProposalStatus.REJECTED``.
 
 5. Emit ``RejectStatusUpdate(StatusUpdate.statusCode, StatusUpdate.addErrors, StatusUpdate.removeErrors, StatusUpdate.msg)`` event.
-
-6. Return.
 
 
 .. _forceStatusUpdate:
@@ -676,8 +663,6 @@ Function Sequence
 4. Remove ``stakedRelayer`` from ``StakedRelayers``
 
 5. Emit ``SlashStakedRelayer(stakedRelayer)`` event.
-
-6. Return.
 
 
 .. _reportVaultTheft:
