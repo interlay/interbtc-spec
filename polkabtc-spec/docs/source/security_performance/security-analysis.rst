@@ -6,10 +6,75 @@ Security Analysis
 Replay Attacks
 ~~~~~~~~~~~~~~
 
-Without adequate protection, inclusion proofs for transactions on Bitcoin can be **replayed** by: (i) the user to trick PolkaBTC component into issuing duplicate PolkaBTC tokens and (ii) the vault to reuse a single transaction on Bitcoin to falsely prove multiple redeem requests. 
-A simple and practical mitigation is to introduce unique identifiers for each execution of :ref:`issue-protocol` and :ref:`redeem-protocol` and require transactions on Bitcoin submitted to the BTC-Relay of these protocols to contain the corresponding identifier.
+Without adequate protection, inclusion proofs for transactions on Bitcoin can be **replayed** by: (i) the user to trick PolkaBTC component into issuing duplicate PolkaBTC tokens and (ii) the vault to reuse a single transaction on Bitcoin to falsely prove multiple redeem, replace, and refund requests. 
+We employ two different mechanisms to achieve this: 
 
-In this specification, we achieve this by requiring that both, users and vaults, prepare a transaction with at least two outputs. One output is an OP_RETURN with a unique hash created in the :ref:`security` module.
+1. *Identification via OP_RETURN*: When sending a Bitcoin transaction, the BTC-Parachain requires that a unique identifier is included as one of the outputs in the transaction.
+2. *Unique Addresses via On-Chain Key Derivation*: The BTC-Parachain generates a new and unique address that Bitcoin can be transferred to.
+
+The details of the transaction format can be found at the `accepted Bitcoin transaction format <https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/intro/accepted-format.html>`_.
+
+
+.. _op-return:
+
+OP_RETURN
+---------
+
+Applied in the following protocols:
+
+- :ref:`redeem-protocol`
+- :ref:`replace-protocol`
+- :ref:`refund-protocol`
+
+A simple and practical mitigation is to introduce unique identifiers for each protocol execution and require transactions on Bitcoin submitted to the BTC-Relay of these protocols to contain the corresponding identifier.
+
+In this specification, we achieve this by requiring that vaults prepare a transaction with at least two outputs. One output is an OP_RETURN with a unique hash created in the :ref:`security` module.
+Vaults are using Bitcoin full-nodes to send transactions and can easily and programmatically create transactions with an OP_RETURN output.
+
+**UX Issues with OP_RETURN**
+
+However, OP_RETURN has severe UX problems. Most Bitcoin wallets do not support OP_RETURN. That is, a user cannot use the UI to easily create an OP_RETURN transaction. 
+As of this writing, the only wallet that supports this out of the box is Electrum. Other wallets, such as Samurai, exist but only support mainnet transactions (hence, have not yet been tested).
+
+In addition, while Bitcoin’s URI format (`BIP21 <https://en.bitcoin.it/wiki/BIP_0021>`_) generally supports OP_RETURN, none of the existing wallets have implemented an interpreter for this “upgraded” URI structure - this would have to be implemented manually by wallet providers. 
+An alternative solution is to pre-generate the Bitcoin transaction for the user. The problem with this is that - again - most Bitcoin wallets do not support parsing of raw Bitcoin transactions. That is, a user cannot easily verify that the raw Bitcoin transaction string provided by PolkaBTC indeed does what it should do (and does not steal the user's funds). This approach works with hardware wallets, such as Ledger - but again, not all users will use PolkaBTC from hardware wallets. 
+
+
+
+
+Unique Addresses via On-Chain Key Derivation
+--------------------------------------------
+
+Applied in the following protocol:
+
+- :ref:`issue-protocol`
+
+To avoid the use of OP_RETURN during the issue process, and the significant usability drawbacks incurred by this approach, we employ the use of an On-chain Key Derivation scheme (OKD) for Bitcoin’s ECDSA (secp256k1 curve). The BTC-Parachain maintains a BTC ‘master’ public key for each registered vault and generates a unique, ephemeral ‘deposit’ public key (and RIPEMD-160 address) for each issue request, utilizing the unique issue identifier for replay protection. 
+
+This way, each issue request can be linked to a distinct Bitcoin transaction via the receiving (‘deposit’) address, making it impossible for vaults/users to execute replay attacks. The use of OKD thereby allows to keep the issue process non-interactive, ensuring vaults cannot censor issue requests.
+
+.. _okd:
+
+On-Chain Key Derivation Scheme
+..............................
+
+We define the full OKD scheme as follows (additive notation):
+
+**Preliminaries**
+
+A Vault has a private/public keypair :math:`(v, V)`, where :math:`V = v·G` and :math:`G` is the base point of the secp256k1 curve.
+Upon registration, the Vault submits public key :math:`V` to the BTC-Parachain storage.
+
+**Issue protocol via new OKD scheme** 
+ 
+1. When a user creates an issue request, the BTC-Parachain 
+    a. Computes :math:`c = H(V || id)`, where id is the unique issue identifier, generated on-chain by the BTC-Parachain using the user’s AccountId and an internal auto-incrementing nonce as input.
+    b. Generates a new public key (“deposit public key”) :math:`D = V·c` and then the corresponding BTC RIPEMD-160 hash-based address :math:`addr(D)` (‘deposit’ address) using :math:`D` as input.
+    c. Stores :math:`D` and :math:`addr(D)` alongside the id of the Issue request. 
+2. The user deposits the amount of to-be-issued BTC to :math:`addr(D)` and submits the Bitcoin transaction inclusion proof, alongside the raw Bitcoin transaction, to BTC-Relay.
+3. The BTC-Relay verifies that the destination address of the Bitcoin transaction is indeed :math:`addr(D)` (and the amount, etc.) and mints new PolkaBTC to the user’s AccountId. 
+4. The Vault knows that the private key of :math:`D` is :math:`c·v`, where :math:`c = H(V || id)` is publicly known (can be computed by the Vault off-chain, or stored on-chain for convenience). The Vault can now import the private key :math:`c·v` into its Bitcoin wallet to gain access to the deposited BTC (required for redeem). 
+
 
 Counterfeiting
 ~~~~~~~~~~~~~~

@@ -3,14 +3,12 @@
 Vault Registry
 ==============
 
-
-.. note:: We recommend implementing getter functions for (i) the total collateral locked through by active PolkaBTC tokens, (ii) the total collateral reserved in pending issue requests, (iii) the total collateral reserved in pending replace requests, and (iv) the total free collateral (not locked / reserved) for compliance and transparency purposes.
-
 Overview
 ~~~~~~~~
 
 The vault registry is the central place to manage vaults. Vaults can register themselves here, update their collateral, or can be liquidated.
-Similarly, the issue, redeem, and replace protocols call this module to assign vaults during issue, redeem, and replace procedures.
+Similarly, the issue, redeem, refund, and replace protocols call this module to assign vaults during issue, redeem, refund, and replace procedures.
+Morever, vaults use the registry to register public key for the :ref:`okd` and register addresses for the :ref:`op-return` scheme.
 
 Data Model
 ~~~~~~~~~~
@@ -323,10 +321,10 @@ Function Sequence
 
 5. Emit a ``ProveValidBTCAddress`` event, setting the ``vault`` account identifier and the vault's Bitcoin address (``Vault.btcAddress``) as parameters. 
 
-.. _addBtAddress:
+.. _registerAddress:
 
-AddBtcAddress
--------------
+RegisterAddress
+---------------
 
 Add a new BTC address to the vault's wallet.
 
@@ -335,15 +333,16 @@ Specification
 
 *Function Signature*
 
-``addBtcAddress(address: BtcAddress)``
+``registerAddress(vaultId: AccountId, address: BtcAddress)``
 
 *Parameters*
 
+* ``vaultId``: the account of the vault.
 * ``address``: a valid BTC address.
 
 *Events*
 
-* ``UpdateBtcAddress(address)``
+* ``RegisterAddress(vaultId, address)``
 
 
 Function Sequence
@@ -352,6 +351,35 @@ Function Sequence
 1. Add a new BTC address to the vault's wallet.
 2. Set the new BTC address to the primary (default) address.
  
+.. _updatePublicKey:
+
+UpdatePublicKey
+---------------
+
+The vault adds a new public key as a basis for the :ref:`okd`.
+
+Specification
+.............
+
+*Function Signature*
+
+``updatePublicKey(vaultId: AccountId, publicKey: BtcPublicKey)``
+
+*Parameters*
+
+* ``vaultId``: the account of the vault.
+* ``publicKey``: the BTC public key of the vault to update.
+
+*Events*
+
+* ``UpdatePublicKey(vaultId, publicKey)``
+
+
+Function Sequence
+.................
+
+1. Add a new BTC address to the vault's wallet.
+2. Set the new BTC address to the primary (default) address.
 
 
 .. _lockAdditionalCollateral:

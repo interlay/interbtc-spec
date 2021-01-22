@@ -30,8 +30,14 @@ Step-by-Step
 
 6. Optional: If *OldVault* fails to provide the correct transaction inclusion proof on time, the *NewVault*'s ``collateral`` is unlocked and *OldVault*'s ``griefingCollateral`` is sent to the *NewVault* as reimbursement for the opportunity costs of locking up DOT collateral via the :ref:`cancelReplace` function. 
 
-VaultRegistry
--------------
+Security
+--------
+
+- Unique identification of Bitcoin payments: :ref:`op-return`
+
+
+Vault Registry
+--------------
 
 The data access and state changes to the vault registry are documented in :numref:`fig-vault-registry-replace` below.
 

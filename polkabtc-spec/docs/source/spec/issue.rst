@@ -17,6 +17,11 @@ Step-by-step
 4. The user or a vault acting on behalf of the user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain. The user or a vault acting on behalf of the user executes the :ref:`executeIssue` function on the BTC Parachain. The issue function requires a reference to the issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of PolkaBTC into his account.
 5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``IssuePeriod``), the vault is able to call the :ref:`cancelIssue` function to cancel the issue request adn will receive the griefing collateral locked by the user.
 
+Security
+--------
+
+- Unique identification of Bitcoin payments: :ref:`okd`
+
 Vault Registry
 --------------
 
@@ -241,29 +246,19 @@ Preconditions
 Function Sequence
 .................
 
-.. note:: The accepted Bitcoin transaction format for this function is specified in the BTC-Relay specification and can be found at `https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/intro/accepted-format.html <https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/intro/accepted-format.html>`_.
+.. note:: Ideally the ``SecureCollateralThreshold`` in the VaultRegistry should be high enough to prevent the vault from entering into the liquidation or auction state in-between the request and execute.
 
-.. warning:: Ideally the ``SecureCollateralThreshold`` in the VaultRegistry should be high enough to prevent the vault from entering into the liquidation or auction state.
+1. Checks if the ``issueId`` exists. Return ``ERR_ISSUE_ID_NOT_FOUND`` if not found. Else, loads the according issue request struct as ``issue``.
+2. Checks if the current block height minus the ``IssuePeriod`` is smaller than the ``issue.opentime``. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``.
+3. Verify the transaction.
 
-1. The user prepares the inputs and calls the ``executeIssue`` function.
-    
-    a. ``requester``: The BTC Parachain address of the requester.
-    b. ``issueId``: The unique hash received in the ``requestIssue`` function.
-    c. ``txId``: the hash of the Bitcoin transaction to the Vault. With the ``txId`` the user can get the remainder of the Bitcoin transaction data including ``txBlockHeight``, ``txIndex``, ``MerkleProof``, and ``rawTx``. See BTC-Relay documentation for details.
-
-2. Checks if the ``issueId`` exists. Return ``ERR_ISSUE_ID_NOT_FOUND`` if not found. Else, loads the according issue request struct as ``issue``.
-3. Checks if the ``requester`` is the ``issue.requester``. Return ``ERR_UNAUTHORIZED_USER`` if called by any account other than the associated ``issue.requester``.
-4. Checks if the current block height minus the ``IssuePeriod`` is smaller than the ``issue.opentime``. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``.
-
-5. Verify the transaction.
-
-    a. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight`` and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
+    a. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
     b. Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-issued BTC (``issue.amount``), the ``vault``'s Bitcoin address (``issue.btcAddress``), and the ``issueId`` as parameters. If this call returns an error, abort and return the received error. 
 
-6. Call the :ref:`issueTokens` with the ``issue.vault`` and the ``amount`` to decrease the ``toBeIssuedTokens`` and increase the ``issuedTokens``.
-7. Call the :ref:`mint` function in the Treasury with the ``amount`` and the user's address as the ``receiver``.
-8. Remove the ``IssueRequest`` from ``IssueRequests``.
-9. Emit an ``ExecuteIssue`` event with the user's address, the issueId, the amount, and the Vault's address.
+4. Call the :ref:`issueTokens` with the ``issue.vault`` and the ``amount`` to decrease the ``toBeIssuedTokens`` and increase the ``issuedTokens``.
+5. Call the :ref:`mint` function in the Treasury with the ``amount`` and the user's address as the ``receiver``.
+6. Remove the ``IssueRequest`` from ``IssueRequests``.
+7. Emit an ``ExecuteIssue`` event with the user's address, the issueId, the amount, and the Vault's address.
 
 .. _cancelIssue:
 
@@ -310,7 +305,7 @@ Function Sequence
 
 1. Check if an issue with id ``issueId`` exists. If not, throw ``ERR_ISSUE_ID_NOT_FOUND``. Otherwise, load the issue request  as ``issue``.
 
-2. Check if the expiry time of the issue request is up, i.e ``issue.opentime + IssuePeriod < now``. If the time is not up, throw ``ERR_TIME_NOT_EXPIRED``.
+2. Check if the expiry time of the issue request is up, i.e., ``issue.opentime + IssuePeriod < now``. If the time is not up, throw ``ERR_TIME_NOT_EXPIRED``.
 
 3. Check if the ``issue.completed`` field is set to true. If yes, throw ``ERR_ISSUE_COMPLETED``.
 
