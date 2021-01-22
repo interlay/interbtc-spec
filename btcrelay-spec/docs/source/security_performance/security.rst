@@ -1,8 +1,7 @@
-
 .. _security:
 
 Security Analysis
-==================
+=================
 
 This section provides an overview of security considerations related to BTC-Relay.
 We refer the reader to `this paper (Section 7) <https://eprint.iacr.org/2018/643.pdf>`_ for more details.
@@ -29,7 +28,7 @@ The existence of bribing attacks, which can even be executed cross-chain, makes 
 BTC-Relay does not specify a recommended value for *k*. This task lies with the applications which interact with the relay. BTC-Relay itself only *mirrors* the state of Bitcoin to Polkadot, including all forks and failures which may occur. 
 
 Liveness Failures
-----------------------
+-----------------
 
 The correct operation of BTC-Relay relies on receiving a steady stream of Bitcoin block headers as input. 
 A high delay between block generation in Bitcoin and submission to BTC-Relay yields the system susceptible to attacks: an adversary can attempt to *poison* the relay by submitting a fork, even if the fork was not submitted to Bitcoin itself (see :ref:`relay-poisoning` below).
@@ -39,11 +38,11 @@ These can be *Staked Relayers*, which already run Bitcoin full nodes for validat
 
 
 Safety Failures
-----------------------
+---------------
 
 
 51% Attack on Bitcoin
-~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 One of the major questions that arises in cross-chain communication is: what to do if one of the interlinked chains fails?
 
@@ -77,14 +76,14 @@ Since BTC-Relay does not store Bitcoin transactions, nor can it be aware of all 
 As such, it lies in the responsibility of each application interacting with BTC-Relay to introduce necessary replay protection mechanisms (e.g. nonces stored in OP_RETURN outputs of verified transactions) and to check the latter using the :ref:`parser` component of BTC-Relay. 
 
 Hard and Soft forks
---------------------
+-------------------
+
 Permanent chain splits or *hard forks* occur where consensus rules are "loosened" or new conflicting rules are introduced.
 As a result, multiple instances of the same blockchain are created, e.g. as in the case of Bitcoin and Bitcoin Cash. 
 
 BTC-Relay by default will follow the old consensus rules, and must be updated accordingly if it is to follow the new version of the system.
 
 Thereby, is it for the *Governance Mechanism* to determine (i) whether an update will be executed and (ii) if two parallel blockchains result from the hard fork, whether an additional new instance of BTC-Relay is to be deployed (and how). 
-
 
 Note: to differentiate between the two resulting chains after a hard fork, replay protection is necessary for secure operation. 
 While typically accounted for by the developers of the verified blockchain, the absence of replay protection can lead to undesirable behavior. 

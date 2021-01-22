@@ -24,6 +24,7 @@ Welcome to the BTC Parachain documentation!
    spec/issue
    spec/redeem
    spec/replace
+   spec/refund
    spec/security
    spec/staked-relayers
    spec/treasury

@@ -20,13 +20,13 @@
 # -- Project information -----------------------------------------------------
 
 project = u'BTC Parachain Spec'
-copyright = u'2020, Interlay'
+copyright = u'2021, Interlay'
 author = u'Interlay'
 
 # The short X.Y version
-version = u''
+version = u'v2.0.0'
 # The full version, including alpha/beta/rc tags
-release = u'1.1'
+release = u'v2.0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -113,7 +113,7 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+# html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.

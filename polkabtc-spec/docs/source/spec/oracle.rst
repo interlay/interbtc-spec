@@ -22,7 +22,7 @@ GRANULARITY
 
 The granularity of the exchange rate. The granularity is set to :math:`10^{-5}`.
 
-*Substrate* ::
+.. *Substrate* ::
 
   GRANULARITY: u128 = 5;
 
@@ -38,7 +38,7 @@ The BTC in DOT exchange rate. This exchange rate is used to determine how much c
 .. note:: If the ``ExchangeRate`` is set to 1238763, it translates to :math:`12.38763` as the last five digits are used for the floating point (as defined by the ``GRANULARITY``).
 
 
-*Substrate* ::
+.. *Substrate* ::
 
     ExchangeRateBtcInDot: u128;
 
@@ -47,7 +47,7 @@ SatoshiPerBytesFast
 
 The estimated Satoshis per bytes required to get a Bitcoin transaction included in the next block.
 
-*Substrate* ::
+.. *Substrate* ::
 
     SatoshiPerBytesFast: u32;
 
@@ -56,7 +56,7 @@ SatoshiPerBytesMedium
 
 The estimated Satoshis per bytes required to get a Bitcoin transaction included in the next three blocks (about 30 min).
 
-*Substrate* ::
+.. *Substrate* ::
 
     SatoshiPerBytesMedium: u32;
 
@@ -65,7 +65,7 @@ SatoshiPerBytesSlow
 
 The estimated Satoshis per bytes required to get a Bitcoin transaction included in the six blocks (about 1 hour).
 
-*Substrate* ::
+.. *Substrate* ::
 
     SatoshiPerBytesSlow: u32;
 
@@ -74,7 +74,7 @@ MaxDelay
 
 The maximum delay in seconds between incoming calls providing exchange rate data. If the Exchange Rate Oracle receives no data for more than this period, the BTC Parachain enters an ``Error`` state with a ``ORACLE_OFFLINE`` error cause.
 
-*Substrate* ::
+.. *Substrate* ::
 
   MaxDelay: U128;
 
@@ -85,7 +85,7 @@ LastExchangeRateTime
 UNIX timestamp indicating when the last exchange rate data was received. 
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   LastExchangeRateTime: U32;
 
@@ -111,7 +111,7 @@ AuthorizedOracles
 
 The account(s) of the oracle. Returns true if registered as an oracle.
 
-*Substrate* ::
+.. *Substrate* ::
 
   AuthorizedOracle: map AccountId => bool;
 
@@ -124,7 +124,7 @@ Functions
 setExchangeRate
 ---------------
 
-Set the latest (aggregate) BTC/DOT exchange rate. This function invokes a check of Vault collateral rates in the :ref:`Vault-registry` component.
+Set the latest (aggregate) BTC/DOT exchange rate. This function invokes a check of vault collateral rates in the :ref:`Vault-registry` component.
 
 Specification
 .............
@@ -138,9 +138,6 @@ Specification
 * ``oracle``: the oracle account calling this function. Must be pre-authorized and tracked in this component!
 * ``rate``: the ``u128`` BTC/DOT exchange rate
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -164,7 +161,6 @@ Function Sequence
 3. If ``LastExchangeRateTime`` minus the current UNIX timestamp is greater or equal to ``MaxDelay``, call :ref:`recoverFromORACLEOFFLINE` to recover from an ``ORACLE_OFFLINE`` error (which was the case before this data submission).
 4. Set ``LastExchangeRateTime`` to the current UNIX timestamp.
 5. Emit the ``SetExchangeRate`` event.
-6. Return.
 
 .. _setSatoshiPerBytes:
 
@@ -222,7 +218,7 @@ Specification
 * `u128` (aggregate) exchange rate value
 
 
-*Substrate*
+.. *Substrate*
 
 ``fn getExchangeRate(origin) -> Result<u128, ERR_MISSING_EXCHANGE_RATE> {...}``
 
@@ -264,7 +260,7 @@ Specification
 * `timestamp`: 32bit UNIX timestamp
 
 
-*Substrate*
+.. *Substrate*
 
 ``fn getLastExchangeRateTime() -> U32 {...}``
 
@@ -296,7 +292,7 @@ Emits the new exchange rate when it is updated by the oracle.
 
 :ref:`setExchangeRate`
 
-*Substrate* ::
+.. *Substrate* ::
 
     SetExchangeRate(AccountId, u128);
 
