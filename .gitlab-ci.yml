@@ -24,7 +24,7 @@ btcrelay:
     stage: test
     script:
     - cd btcrelay-spec/docs; make html
-    - sphinx-build -b -W latex source build/latex
+    - sphinx-build -b latex source build/latex
     - make -C build/latex  
     only:
     - branches
@@ -35,7 +35,7 @@ polkabtc:
     stage: test
     script:
     - cd polkabtc-spec/docs; make html
-    - sphinx-build -b -W latex source build/latex
+    - sphinx-build -b latex source build/latex
     - make -C build/latex    
     only:
     - branches
