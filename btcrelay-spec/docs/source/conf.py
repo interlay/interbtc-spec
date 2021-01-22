@@ -20,13 +20,13 @@
 # -- Project information -----------------------------------------------------
 
 project = u'Polkadot BTC-Relay Spec'
-copyright = u'2020, Interlay'
+copyright = u'2021, Interlay'
 author = u'Interlay'
 
 # The short X.Y version
-version = u'v1.2'
+version = u'v2.0.0'
 # The full version, including alpha/beta/rc tags
-release = u'v1.2'
+release = u'v2.0.0'
 
 
 # -- General configuration ---------------------------------------------------

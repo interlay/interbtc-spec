@@ -20,13 +20,13 @@
 # -- Project information -----------------------------------------------------
 
 project = u'BTC Parachain Spec'
-copyright = u'2020, Interlay'
+copyright = u'2021, Interlay'
 author = u'Interlay'
 
 # The short X.Y version
-version = u''
+version = u'v2.0.0'
 # The full version, including alpha/beta/rc tags
-release = u'1.1'
+release = u'v2.0.0'
 
 
 # -- General configuration ---------------------------------------------------
