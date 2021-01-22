@@ -54,7 +54,7 @@ The minimum collateral (DOT) a Vault requesting a replacement needs to provide a
 
 .. note:: Requiring a Vault to add DOT collateral for executing replace may be a problem for Vaults which trigger this process due to low collateralization rates. We can potentially slash some of the Vault's existing collateral instead - this will result in reducing the collateralization rate and move the Vault closer to liquidation.
 
-*Substrate*::
+.. *Substrate*::
 
   ReplaceGriefingCollateral: Balance;
 
@@ -65,7 +65,7 @@ ReplacePeriod
 
 The time difference in number of blocks between a replace request is accepted by another Vault and the transfer of BTC (and submission of the transaction inclusion proof) by the to-be-replaced Vault. The replace period has an upper limit to prevent griefing of Vault collateral.
 
-*Substrate* ::
+.. *Substrate* ::
 
   ReplacePeriod: T::BlockNumber;
 
@@ -77,7 +77,7 @@ ReplaceRequests
 
 Vaults create replace requests if they want to have (a part of) their DOT collateral to be replaced by other Vaults. This mapping provides access from a unique hash ``ReplaceId`` to a ``ReplaceRequest`` struct. ``<ReplaceId, Replace>``.
 
-*Substrate* ::
+.. *Substrate* ::
 
   ReplaceRequests map T::H256 => Replace<T::AccountId, T::BlockNumber, T::Balance>;
 
@@ -107,9 +107,7 @@ Parameter               Type        Description
 
 .. note:: The ``btcAddress`` parameter is not to be set the the new Vault, but is extracted from the ``Vaults`` mapping in ``VaultRegistry`` for the account of the new Vault.  
 
-*Substrate*
-
-::
+.. *Substrate*::
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
@@ -165,7 +163,7 @@ Specification
 * ``ERR_VAULT_BANNED = "The selected Vault has been temporarily banned."``: Executing replace requests is not possible with temporarily banned Vaults.
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn requestReplace(origin, amount: U256, timeout: BlockNumber) -> Result {...}
 
@@ -242,7 +240,7 @@ Specification
 * ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated Vault``: The caller of this function is not the associated Vault, and hence not authorized to take this action.
 * ``ERR_CANCEL_ACCEPTED_REQUEST = Cannot cancel the ReplaceRequest as it was already accepted by a Vault``: The ``ReplaceRequest`` was already accepted by another Vault and can hence no longer be withdrawn.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn WithdrawReplaceRequest(origin, replaceId: H256) -> Result {...}
 
@@ -308,7 +306,7 @@ Specification
 * ``ERR_VAULT_NOT_FOUND``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
 * ``ERR_VAULT_BANNED = "The selected Vault has been temporarily banned."``: Executing replace requests is not possible with temporarily banned Vaults.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn acceptReplace(origin, replaceId: H256, collateral: Balance) -> Result {...}
 
@@ -377,7 +375,7 @@ Specification
 * ``ERR_INSUFFICIENT_COLLATERAL``: The provided collateral is insufficient to match the replace request. 
 * ``ERR_VAULT_NOT_FOUND``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn auctionReplace(origin, replaceId: H256, collateral: Balance) -> Result {...}
 
@@ -460,7 +458,7 @@ Specification
 * See errors returned by *verifyTransactionInclusion* and *validateTransaction* in :ref:`btc-relay`.
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn executeReplace(origin, replaceId: H256, collateral: Balance) -> Result {...}
 
@@ -527,7 +525,7 @@ Specification
 * ``ERR_VAULT_NOT_FOUND = No Vault with given Account identifier found``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
 * ``ERR_PERIOD_NOT_EXPIRED = Replace request not yet expired``: The old vault can still fulfil the replace request.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn cancelReplace(origin, replaceId: H256) -> Result {...}
 
@@ -582,7 +580,7 @@ Emit an event when a replace request is made by an *oldVault*.
 * :ref:`requestReplace`
 * :ref:`auctionReplace`
 
-*Substrate* ::
+.. *Substrate* ::
 
   RequestReplace(AccountId, Balance, BlockNumber, H256);
 
@@ -604,7 +602,7 @@ Emits an event stating that a Vault (``oldVault``) has withdrawn an existing rep
 
 * ref:`withdrawReplaceRequest`
 
-*Substrate* ::
+.. *Substrate* ::
 
   WithdrawReplaceRequest(AccountId, H256);
 
@@ -628,7 +626,7 @@ Emits an event stating which Vault (``newVault``) has accepted the ``ReplaceRequ
 
 * ref:`acceptReplace`
 
-*Substrate* ::
+.. *Substrate* ::
 
   AcceptReplace(AccountId, H256, Balance);
 
@@ -652,7 +650,7 @@ Emits an event stating which Vault (``newVault``) has auctioned the ``ReplaceReq
 
 * ref:`auctionReplace`
 
-*Substrate* ::
+.. *Substrate* ::
 
   AuctionReplace(AccountId, H256, Balance);
 
@@ -676,7 +674,7 @@ Emits an event stating that the old Vault (``oldVault``) has executed the BTC tr
 
 * ref:`executeReplace`
 
-*Substrate* ::
+.. *Substrate* ::
 
   ExecuteReplace(AccountId, AccountId, H256);
 
@@ -700,7 +698,7 @@ Emits an event stating that the old Vault (``oldVault``) has not completed the r
 
 * ref:`cancelReplace`
 
-*Substrate* ::
+.. *Substrate* ::
 
   CancelReplace(AccountId, AccountId, H256);
 

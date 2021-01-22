@@ -43,7 +43,7 @@ Indicates ths status of the BTC Parachain.
 
 * ``SHUTDOWN: 2`` - BTC Parachain operation fully suspended. This can only be achieved via manual intervention by the Governance Mechanism.
 
-*Substrate* 
+.. *Substrate* 
 
 ::
 
@@ -69,9 +69,7 @@ Enum specifying error codes tracked in ``Errors``.
 
 * ``LIQUIDATION : 4`` - at least one Vault is either below the ``LiquidationCollateralThreshold`` or has been reported to have stolen BTC. This status implies that any :ref:`redeem-protocol` request will be executed partially in BTC and partially in DOT, until the system is rebalanced (1:1 backing between PolkaBTC and BTC). 
 
-*Substrate*
-
-::
+.. *Substrate*::
   
   enum ErrorCode {
         NONE = 0
@@ -93,7 +91,7 @@ ParachainStatus
 
 Integer/Enum (see ``StatusCode`` below). Defines the current state of the BTC Parachain. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   ParachainStatus: StatusCode;
 
@@ -104,7 +102,7 @@ Errors
 Set of error codes (``ErrorCode`` enums), indicating the reason for the error. The ``ErrorCode`` entries included in this set specify how to react to the failure (e.g. shutdown transaction verification in :ref:`btc-relay`).
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   Errors: BTreeSet<ErrorCode>;
 
@@ -115,7 +113,7 @@ Nonce
 
 Integer increment-only counter, used to prevent collisions when generating identifiers for e.g. issue, redeem or replace requests (for OP_RETURN field in Bitcoin).
 
-*Substrate* ::
+.. *Substrate* ::
 
   Nonce: U256;
 
@@ -148,7 +146,7 @@ Specification
 
 * ``hash``: a cryptographic hash generated via a secure hash function.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn generateSecureId(account: AccountId) -> T::H256 {...}
 
@@ -179,7 +177,7 @@ Specification
 
 * ``U256``: the new value of the ``StatusCounter``.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn getStatusCounter() -> U256 {...}
 

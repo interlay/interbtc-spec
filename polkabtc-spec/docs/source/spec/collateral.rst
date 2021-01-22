@@ -31,7 +31,7 @@ TotalCollateral
 
 The total collateral provided.
 
-*Substrate* ::
+.. *Substrate* ::
 
   TotalCollateral: Balance;
 
@@ -45,7 +45,7 @@ The total collateral provided.
 .. 
 .. .. note:: For now, only DOT is accepted as collateral.
 .. 
-.. *Substrate* ::
+.. .. *Substrate* ::
 .. 
 ..   enum CollateralType {
 ..     DOT = 0,
@@ -59,7 +59,7 @@ CollateralBalances
 
 Mapping from accounts to their collateral balances.
 
-*Substrate* ::
+.. *Substrate* ::
 
   CollateralBalances: map T::AccountId => Balance;
 
@@ -85,15 +85,12 @@ Specification
 * ``sender``: The sender wishing to lock collateral.
 * ``amount``: The amount of collateral.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
 * ``LockCollateral(sender, amount)``: Issues an event when collateral is locked.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn lockCollateral(sender: AccountId, amount: Balance) -> Result {...}
 
@@ -129,9 +126,6 @@ Specification
 * ``sender``: The sender getting returned its collateral.
 * ``amount``: The amount of collateral.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -141,7 +135,7 @@ Specification
 
 * ``ERR_INSUFFICIENT_COLLATERAL_AVAILABLE``: The ``sender`` has less collateral stored than the requested ``amount``.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn releaseCollateral(sender: AccountId, amount: Balance) -> Result {...}
 
@@ -183,9 +177,6 @@ Specification
 * ``receiver``: The receiver of the collateral.
 * ``amount``: The amount of collateral.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -195,7 +186,7 @@ Specification
 
 * ``ERR_INSUFFICIENT_COLLATERAL_AVAILABLE``: The ``sender`` has less collateral stored than the requested ``amount``.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn slashCollateral(sender: AccountId, receiver: AccountId, amount: Balance) -> Result {...}
 
@@ -237,7 +228,7 @@ Emit a ``LockCollateral`` event when a sender locks collateral.
 
 * :ref:`lockCollateral`
 
-*Substrate* ::
+.. *Substrate* ::
 
   LockCollateral(AccountId, Balance);
 
@@ -259,7 +250,7 @@ Emit a ``ReleaseCollateral`` event when a sender releases collateral.
 
 * :ref:`releaseCollateral`
 
-*Substrate* ::
+.. *Substrate* ::
 
   ReleaseCollateral(AccountId, Balance);
 
@@ -282,7 +273,7 @@ Emit a ``SlashCollateral`` event when a sender's collateral is slashed and trans
 
 * :ref:`slashCollateral`
 
-*Substrate* ::
+.. *Substrate* ::
 
   SlashCollateral(AccountId, AccountId, Balance);
 

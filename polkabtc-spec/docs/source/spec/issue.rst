@@ -47,7 +47,7 @@ IssuePeriod
 
 The time difference in number of blocks between an issue request is created and required completion time by a user. The issue period has an upper limit to prevent griefing of vault collateral.
 
-*Substrate* ::
+.. *Substrate* ::
 
   IssuePeriod: T::BlockNumber;
 
@@ -64,7 +64,7 @@ The minimum collateral (DOT) a user needs to provide as griefing protection.
 
 .. note:: Serves as a measurement to disincentivize griefing attacks against a vault. A user could otherwise create an issue request, temporarily locking a vault's collateral and never execute the issue process.
 
-*Substrate* ::
+.. *Substrate* ::
     
     IssueGriefingCollateral: Balance;
 
@@ -78,7 +78,7 @@ IssueRequests
 
 Users create issue requests to issue PolkaBTC. This mapping provides access from a unique hash ``IssueId`` to a ``Issue`` struct. ``<IssueId, Issue>``.
 
-*Substrate* ::
+.. *Substrate* ::
 
   IssueRequests map T::H256 => Issue<T::AccountId, T::BlockNumber, T::Balance>
 
@@ -105,9 +105,7 @@ Parameter               Type        Description
 ``completed``           bool        Indicates if the issue has been completed.
 ======================  ==========  =======================================================
 
-*Substrate*
-
-::
+.. *Substrate*::
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
@@ -160,7 +158,7 @@ Specification
 * ``ERR_VAULT_BANNED = "The selected Vault has been temporarily banned."``: Issue requests are not possible with temporarily banned Vaults.
 * ``ERR_INSUFFICIENT_COLLATERAL``: The user did not provide enough griefing collateral.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn request_issue(origin, amount: PolkaBTC, vault: AccountId, griefingCollateral: DOT) -> Result {...}
 
@@ -222,9 +220,6 @@ Specification
 * ``MerkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
-*Returns*
-
-* ``None``: if the transaction can be successfully verified and the function has been called within the time limit.
 
 *Events*
 
@@ -237,7 +232,7 @@ Specification
 * ``ERR_UNAUTHORIZED_USER = Unauthorized: Caller must be associated user``: The caller of this function is not the associated user, and hence not authorized to take this action.
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn execute_issue(origin, issueId: T::H256, txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: Bytes, rawTx: Bytes) -> Result {...}
 
@@ -297,9 +292,6 @@ Specification
 * ``sender``: The sender of the cancel transaction.
 * ``issueId``: the unique hash of the issue request.
 
-*Returns*
-
-* ``None``: Does not return anything.
 
 *Events*
 
@@ -311,7 +303,7 @@ Specification
 * ``ERR_TIME_NOT_EXPIRED``: Raises an error if the time limit to call ``executeIssue`` has not yet passed.
 * ``ERR_ISSUE_COMPLETED``: Raises an error if the issue is already completed.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn cancel_issue(origin, issueId) -> Result {...}
 
@@ -365,7 +357,7 @@ Emit a ``RequestIssue`` event if a user successfully open a issue request.
 
 * :ref:`requestIssue`
 
-*Substrate* ::
+.. *Substrate* ::
 
   RequestIssue(H256, AccountId, PolkaBTC, AccountId, H160);
 
@@ -387,7 +379,7 @@ ExecuteIssue
 
 * :ref:`executeIssue`
 
-*Substrate* ::
+.. *Substrate* ::
 
   ExecuteIssue(H256, AccountId, PolkaBTC, AccountId);
 
@@ -407,7 +399,7 @@ CancelIssue
 
 * :ref:`cancelIssue`
 
-*Substrate* ::
+.. *Substrate* ::
   
     CancelIssue(H256, AccountId);
 

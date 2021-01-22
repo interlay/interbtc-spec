@@ -21,7 +21,7 @@ There are several helper methods available that abstract Bitcoin internals away 
 .. 
 .. * ``chainId``: the next value of ``ChainId``.
 .. 
-.. *Substrate*
+.. .. *Substrate*
 .. 
 .. ::
 .. 
@@ -55,9 +55,7 @@ Bitcoin uses a double SHA256 hash to protect against `"length-extension" attacks
 
 * ``hash``: the double SHA256 hash encodes as a bytes from ``data``.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn sha256d(data: String) -> H256 {...}
   
@@ -89,9 +87,7 @@ A function that computes a parent hash from two child nodes. This function is us
 
 * ``hash``: the double sha256 hash encoded as a bytes from ``left`` and ``right``.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn concatSha256d(left: H256, right: H256) -> H256 {...}
 
@@ -127,9 +123,7 @@ This function calculates the PoW difficulty target from a compressed nBits repre
 
 * ``target``: PoW difficulty target computed from nBits.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn nBitsToTarget(nBits: u32) -> U256 {...}
 
@@ -164,9 +158,7 @@ Verifies the currently submitted block header has the correct difficulty target.
 * ``True``: if the difficulty target is set correctly.
 * ``False``: otherwise.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn checkCorrectTarget(hashPrevBlock: H256, blockHeight: U256, target: U256) -> bool {...}
 
@@ -206,9 +198,7 @@ Computes the new difficulty target based on the given parameters, `as implemente
 
 * ``newTarget``: PoW difficulty target of the current block.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn computeNewTarget(prevTime: T::Moment, startTime: T::Moment, prevTarget: U256) -> U256 {...}
 
@@ -249,9 +239,7 @@ The computeMerkle function calculates the root of the Merkle tree of transaction
 
 * ``ERR_INVALID_MERKLE_PROOF = "Invalid Merkle Proof structure"``: raise an exception if the Merkle proof is malformed.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn computeMerkle(txId: H256, txIndex: u64, merkleProof: String) -> Result<H256, ERR_INVALID_MERKLE_PROOF> {...}
 
@@ -315,9 +303,7 @@ Given the ``target``, calculates the Proof-of-Work ``difficulty`` value, as defi
 
 * ``difficulty``: difficulty calculated from given ``target``.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn calculateDifficulty(target: U256) -> U256 {...}
 
@@ -354,9 +340,7 @@ Specification
 
 * ``ERR_FORK_ID_NOT_FOUND = Fork ID not found for specified block hash."``: return this error if there exists no ``forkId`` for the given ``blockHash``.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn getForkIdByBlockHash(blockHash: H256) -> Result<U256, ERR_FORK_ID_NOT_FOUND> {...}
 
@@ -390,7 +374,7 @@ Specification
 
 * ``chainCounter``: the new integer value of the ``ChainCounter``.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn incrementChainCounter() -> U256 {...}
 

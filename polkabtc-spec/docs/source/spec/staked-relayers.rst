@@ -42,7 +42,7 @@ Indicated the state of a proposed ``StatusUpdate``.
 
 * ``REJECTED: 2`` -this ``StatusUpdate`` has been rejected.
 
-*Substrate* 
+.. *Substrate* 
 
 ::
 
@@ -78,7 +78,7 @@ Parameter               Type            Description
 
 .. note:: ``StatusUpdates`` executed by the Governance Mechanism are not voted upon by Staked Relayers (hence ``votesNo`` will be empty).
 
-*Substrate* 
+.. *Substrate* 
 
 ::
 
@@ -110,7 +110,7 @@ Parameter                  Type       Description
 ``stake``                  DOT        Total amount of collateral/stake provided by this Staked Relayer.
 =========================  =========  ========================================================
 
-*Substrate* 
+.. *Substrate* 
 
 ::
 
@@ -137,7 +137,7 @@ Integer denoting the percentage of Staked Relayer signatures/votes necessary to 
 .. note:: Must be a number between 0 and 100.
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   STAKED_RELAYER_VOTE_THRESHOLD: U8;
 
@@ -148,7 +148,7 @@ STAKED_RELAYER_STAKE
 Integer denoting the minimum DOT stake which Staked Relayers must provide when registering. 
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   STAKED_RELAYER_STAKE: Balance;
 
@@ -158,7 +158,7 @@ StatusCounter
 
 Integer increment-only counter used to track status updates.
 
-*Substrate* ::
+.. *Substrate* ::
 
   StatusCounter: U256;
 
@@ -171,7 +171,7 @@ StakedRelayers
 
 Mapping from accounts of StakedRelayers to their struct. ``<Account, StakedRelayer>``.
 
-*Substrate* ::
+.. *Substrate* ::
 
     StakedRelayers map T::AccountId => StakedRelayer<Balance>
 
@@ -182,7 +182,7 @@ StatusUpdates
 
 Map of ``StatusUpdates``, identified by an integer key. ``<U256, StatusUpdate>``.
 
-*Substrate* ::
+.. *Substrate* ::
 
     StatusUpdates map U256 => StatusUpdate<StatusCode, ErrorCode, BlockNumber, AccountId>
 
@@ -195,7 +195,7 @@ Per Bitcoin transaction, multiple Vaults can be accused (multiple inputs can com
 This mapping is necessary to prevent duplicate theft reports.
 ``<H256, Set<AccountId>>``.
 
-*Substrate* ::
+.. *Substrate* ::
 
     TheftReports map H256 => BTreeSet<AccountId>
 
@@ -223,9 +223,6 @@ Specification
 * ``stakedRelayer``: The account of the Staked Relayer to be registered.
 * ``stake``: to-be-locked collateral/stake in DOT.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -236,7 +233,7 @@ Specification
 * ``ERR_ALREADY_REGISTERED = "This AccountId is already registered as a Staked Relayer"``: The given account identifier is already registered. 
 * ``ERR_INSUFFICIENT_STAKE = "Insufficient stake provided"``: The provided stake was insufficient - it must be above ``STAKED_RELAYER_STAKE``.
   
-*Substrate* ::
+.. *Substrate* ::
 
   fn registerStakedRelayer(origin, amount: Balance) -> Result {...}
 
@@ -279,9 +276,6 @@ Specification
 
 * ``stakedRelayer``: The account of the Staked Relayer to be de-registered.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -291,7 +285,7 @@ Specification
 
 * ``ERR_NOT_REGISTERED = "This AccountId is not registered as a Staked Relayer"``: The given account identifier is not registered. 
   
-*Substrate* ::
+.. *Substrate* ::
 
   fn deRegisterStakedRelayer(origin) -> Result {...}
 
@@ -338,9 +332,6 @@ Specification
 * ``blockHash``: [Optional] When reporting an error related to BTC-Relay, this field indicates the affected Bitcoin block (header).
 * ``msg`` : String message providing the detailed reason for the suggested status change. 
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -351,7 +342,7 @@ Specification
 * ``ERR_GOVERNANCE_ONLY = This action can only be executed by the Governance Mechanism``: The suggested status (``SHUTDOWN``) can only be triggered by the Governance Mechanism but the caller of the function is not part of the Governance Mechanism.
 * ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
   
-*Substrate* ::
+.. *Substrate* ::
 
   fn suggestStatusUpdate(origin, newStatusCode: StatusCode, addErrors: BTreeSet<ErrorCode>, removeErrors: BTreeSet<ErrorCode>, msg: String) -> Result {...}
 
@@ -408,9 +399,6 @@ Specification
 * ``statusUpdateId``: Identifier of the ``StatusUpdate`` voted upon in ``StatusUpdates``.
 * ``vote``: ``True`` or ``False``, depending on whether the Staked Relayer agrees or disagrees with the suggested suggestStatusUpdate.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -421,7 +409,7 @@ Specification
 * ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
 * ``ERR_STATUS_UPDATE_NOT_FOUND = "No StatusUpdate found with given identifier"``: No ``StatusUpdate`` with the given ``statusUpdateId`` exists in ``StatusUpdates``.
 
-*Substrate* ::found
+.. *Substrate* ::found
 
   fn voteOnStatusUpdate(origin, statusUpdateId: U256, vote: bool) -> Result {...}
 
@@ -472,9 +460,6 @@ Specification
 * ``statusUpdateId``: Identifier of the ``StatusUpdate`` voted upon in ``StatusUpdates``.
 
 
-*Returns*
-
-* ``None``
 
 *Errors*
 
@@ -485,9 +470,7 @@ Specification
 
 * ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, and ``msg`` the detailed reason for the status update. 
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn executeStatusUpdate(statusUpdateId: U256) -> Result {...}
 
@@ -542,9 +525,6 @@ Specification
 * ``statusUpdateId``: Identifier of the ``StatusUpdate`` voted upon in ``StatusUpdates``.
 
 
-*Returns*
-
-* ``None``
 
 *Errors*
 
@@ -555,9 +535,7 @@ Specification
 
 * ``RejectStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the rejected status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, and ``msg`` the detailed reason for the status update. 
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn rejectStatusUpdate(statusUpdateId: U256) -> Result {...}
 
@@ -601,9 +579,6 @@ Specification
 * ``errors``: If the suggested status is ``Error``, this set of ``ErrorCode`` entries provides details on the occurred errors.
 * ``msg`` : String message providing the detailed reason for the suggested status change. 
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -613,9 +588,7 @@ Specification
 
 * ``ERR_GOVERNANCE_ONLY = This action can only be executed by the Governance Mechanism``: The suggested status (``SHUTDOWN``) can only be triggered by the Governance Mechanism but the caller of the function is not part of the Governance Mechanism.
 
-*Substrate*
-
-::
+.. *Substrate*::
 
   fn forceStatusUpdate(origin, newStatusCode: StatusCode, addErrors: BTreeSet<ErrorCode>, removeErrors: BTreeSet<ErrorCode>, msg, String) -> Result {...}
 
@@ -675,9 +648,6 @@ Specification
 * ``governanceMechanism``: The AccountId of the Governance Mechanism.
 * ``stakedRelayer``: The account of the Staked Relayer to be slashed.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -689,7 +659,7 @@ Specification
 * ``ERR_NOT_REGISTERED = "This AccountId is not registered as a Staked Relayer"``: The given account identifier is not registered. 
 
   
-*Substrate* ::
+.. *Substrate* ::
 
   fn stakedRelayer(stakedRelayer: AccountId) -> Result {...}
 
@@ -747,9 +717,6 @@ Specification
 * ``MerkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -766,7 +733,7 @@ Specification
 * ``ERR_VALID_MERGE_TRANSACTION = "The given transaction is a valid 'UTXO merge' transaction by the accused Vault"``: The given transaction represents an allowed "merging" of UTXOs by the accused Vault (no BTC was displaced).
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn reportVaultTheft(vault: AccountId, txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: Bytes, rawTx: Bytes) -> T::H256 {...}
 
@@ -837,9 +804,6 @@ Specification
 * ``vault``: the account of the accused Vault.
 
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -851,7 +815,7 @@ Specification
 * ``ERR_COLLATERAL_OK = "The accused Vault's collateral rate is above the liquidation threshold"``: The accused Vault's collateral rate is  above ``LiquidationCollateralThreshold``.
 * ``ERR_VAULT_NOT_FOUND = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn reportVaultUndercollateralized(vault: AccountId) -> T::H256 {...}
 
@@ -892,9 +856,6 @@ Specification
 ``reportOracleOffline()``
 
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -905,7 +866,7 @@ Specification
 * ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
 * ``ERR_ORACLE_ONLINE = "The exchange rate oracle shows up-to-date data"``: The :ref:`oracle` does not appear to be offline. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn reportOracleOffline() -> Result {...}
 
@@ -947,7 +908,7 @@ Specification
 
 * ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries,, and ``msg`` the detailed reason for the status update. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn recoverFromLIQUIDATE() -> Result {...}
 
@@ -981,7 +942,7 @@ Specification
 
 * ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries,, and ``msg`` the detailed reason for the status update. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn recoverFromORACLEOFFLINE() -> Result {...}
 
@@ -1015,7 +976,7 @@ Specification
 
 * ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, and ``msg`` the detailed reason for the status update. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn recoverFromBTCRelayFailure() -> Result {...}
 
@@ -1050,7 +1011,7 @@ Emit an event stating that a new Staked Relayer was registered and provide infor
 
 * :ref:`registerStakedRelayer`
 
-*Substrate* ::
+.. *Substrate* ::
 
   RegisterStakedRelayer(AccountId, Balance);
 
@@ -1072,7 +1033,7 @@ Emit an event stating that a Staked Relayer has been de-registered
 
 * :ref:`deRegisterStakedRelayer`
 
-*Substrate* ::
+.. *Substrate* ::
 
   DeRegisterStakedRelayer(AccountId);
 
@@ -1099,7 +1060,7 @@ Emits an event indicating a status change of the BTC Parachain.
 
 * :ref:`suggestStatusUpdate`
 
-*Substrate* ::
+.. *Substrate* ::
 
   StatusUpdateSuggested(StatusCode, BTreeSet<ErrorCode>, BTreeSet<ErrorCode>, String, AccountId);
 
@@ -1123,7 +1084,7 @@ Emit an event informing about the vote cast by a staked relayer on a pending sta
 
 * :ref:`voteOnStatusUpdate`
 
-*Substrate* ::
+.. *Substrate* ::
 
   VoteOnStatusUpdate(U256, AccountId, bool);
 
@@ -1161,7 +1122,7 @@ Emit an event when a BTC Parachain status update is executed
 * :ref:`recoverFromBTCRelayFailure`
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   ExecuteStatusUpdate(StatusCode, BTreeSet<ErrorCode>, BTreeSet<ErrorCode>, String);
 
@@ -1186,7 +1147,7 @@ Emits an event when a BTC Parachain status change proposal is rejected.
 
 * :ref:`rejectStatusUpdate`
 
-*Substrate* ::
+.. *Substrate* ::
 
   RejectStatusUpdate(StatusCode, BTreeSet<ErrorCode>, BTreeSet<ErrorCode>, String);
 
@@ -1213,7 +1174,7 @@ Emit an event indicating a forced status change of the BTC Parachain, triggered 
 
 * :ref:`forceStatusUpdate`
 
-*Substrate* ::
+.. *Substrate* ::
 
   ForceStatusUpdate(StatusCode, BTreeSet<ErrorCode>, BTreeSet<ErrorCode>, String);
 
@@ -1237,7 +1198,7 @@ Emits an event indicating that a Staked Relayer has been slashed.
 
 * :ref:`slashStakedRelayer`
 
-*Substrate* ::
+.. *Substrate* ::
 
   SlashStakedRelayer(AccountId);
 
@@ -1260,7 +1221,7 @@ Emits an event when a Vault has been accused of theft.
 
 * :ref:`reportVaultTheft`
 
-*Substrate* ::
+.. *Substrate* ::
 
   ReportVaultTheft(AccountId)
 

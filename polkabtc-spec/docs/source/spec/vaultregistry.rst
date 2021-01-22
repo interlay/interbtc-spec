@@ -23,7 +23,7 @@ GRANULARITY
 
 The granularity of the ``SecureCollateralThreshold``, ``AuctionCollateralThreshold``, ``LiquidationCollateralThreshold``, and ``PunishmentFee``.
 
-*Substrate* ::
+.. *Substrate* ::
 
   GRANULARITY: u128 = 5;
 
@@ -38,7 +38,7 @@ The minimum collateral (DOT) a Vault needs to provide to participate in the issu
 
 .. note:: This is a protection against spamming the protocol with very small collateral amounts.
 
-*Substrate* :: 
+.. *Substrate* :: 
 
     MinimumCollateralVault: Balance;
 
@@ -51,7 +51,7 @@ The punishment is the equivalent value of BTC in DOT (valued at the current exch
 For example, if the ``PunishmentFee`` is set to 50000, it is equivalent to 50%.
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   PunishmentFee: u128;
 
@@ -60,7 +60,7 @@ PunishmentDelay
 
 If a Vault fails to execute a correct redeem or replace, it is *temporarily* banned from further issue, redeem or replace requests. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   PunishmentDelay: BlockNumber;
 
@@ -71,7 +71,7 @@ RedeemPremiumFee
 If a Vault is running low on collateral and falls below ``PremiumRedeemThreshold``, users are allocated a premium in DOT when redeeming with the Vault - as defined by this parameter.
 For example, if the ``RedeemPremiumFee`` is set to 5000, it is equivalent to 5%.
 
-*Substrate* ::
+.. *Substrate* ::
 
   RedeemPremiumFee: u128;
 
@@ -88,7 +88,7 @@ The maximum amount of PolkaBTC a Vault is able to support during the issue proce
 .. note:: As an example, assume we use ``DOT`` as collateral, we issue ``PolkaBTC`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureCollateralThreshold`` is 200%, i.e. a Vault has to provide two-times the amount of collateral to back an issue request. Now let's say the Vault deposits 400 ``DOT`` as collateral. Then this Vault can back at most 2.5 PolkaBTC as: :math:`400 * (1/80) / 2 = 2.5`.
 
 
-*Substrate* :: 
+.. *Substrate* :: 
     
     SecureCollateralThreshold: u128;
 
@@ -99,7 +99,7 @@ Determines the rate for the collateral rate of Vaults, at which the BTC backed b
 That is, if the Vault does not increase its collateral rate, it can be forced to execute the Replace protocol with another Vault, which bids sufficient DOT collateral to cover the issued PolkaBTC tokens.
 Must to be strictly greater than ``100000``, ``PremiumRedeemThreshold``, and ``LiquidationCollateralThreshold``.
 
-*Substrate* :: 
+.. *Substrate* :: 
     
     AuctionCollateralThreshold: u128;
 
@@ -110,7 +110,7 @@ PremiumRedeemThreshold
 Determines the rate for the collateral rate of Vaults, at which users receive a premium in DOT, allocated from the Vault's collateral, when performing a :ref:`redeem-protocol` with this Vault. 
 Must to be strictly greater than ``100000`` and ``LiquidationCollateralThreshold``.
 
-*Substrate* :: 
+.. *Substrate* :: 
     
     PremiumRedeemThreshold: u128;
 
@@ -120,7 +120,7 @@ LiquidationCollateralThreshold
 Determines the lower bound for the collateral rate in PolkaBTC. Must be strictly greater than ``100000``. If a Vault's collateral rate drops below this, automatic liquidation (forced Redeem) is triggered. 
 
 
-*Substrate* :: 
+.. *Substrate* :: 
     
     LiquidationCollateralThreshold: u128;
 
@@ -132,7 +132,7 @@ Account identifier of an artificial Vault maintained by the VaultRegistry to han
 
 .. note:: A Vault's token balances and DOT collateral are transferred to the ``LiquidationVault`` as a result of :ref:`reportVaultUndercollateralized` and :ref:`reportVaultTheft`.
 
-*Substrate* ::
+.. *Substrate* ::
 
   LiquidationVault: AccountId;
 
@@ -145,7 +145,7 @@ Vaults
 
 Mapping from accounts of Vaults to their struct. ``<Account, Vault>``.
 
-*Substrate* ::
+.. *Substrate* ::
 
     Vaults map T::AccountId => Vault<T::AccountId, T::Balance, T::DateTime>
 
@@ -155,7 +155,7 @@ RegisterRequests (Optional)
 
 Mapping from registerIDs of RegisterRequest to their structs. ``<U256, RegisterRequest>``.
 
-*Substrate* :: 
+.. *Substrate* :: 
 
     RegisterRequests map T::U256 => Vault<T::AccountId, T::DateTime>
 
@@ -198,9 +198,7 @@ Parameter            Type       Description
 ``timeout``          DateTime   Optional maximum delay before the Vault must submit a valid tranasction inclusion proof.
 ===================  =========  ========================================================
 
-*Substrate*
-
-::
+.. *Substrate*::
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
@@ -237,9 +235,6 @@ Specification
 * ``vault``: The account of the Vault to be registered.
 * ``collateral``: to-be-locked collateral in DOT.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -249,7 +244,7 @@ Specification
 
 * ``ERR_MIN_AMOUNT``: The provided collateral was insufficient - it must be above ``MinimumCollateralVault``.
   
-*Substrate* ::reservedTokens
+.. *Substrate* ::reservedTokens
 
   fn registerVault(origin, amount: Balance) -> Result {...}
 
@@ -296,9 +291,6 @@ Specification
 * ``merkleProof``: Merkle tree path (concatenated LE sha256 hashes).
 * ``transactionBytes``: Raw Bitcoin transaction 
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -309,7 +301,7 @@ Specification
 * ``ERR_INVALID_BTC_ADDRESS``: Not a valid BTC address.
 * see ``verifyTransactionInclusion`` in BTC-Relay.  
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn proveValidBTCAddress(registrationID: U256, txid: H256, txBlockHeight: U256, txIndex: U256, merkleProof: String, transactionBytes: String) -> Result {...}
 
@@ -383,9 +375,7 @@ Specification
 * ``Vault``: The account of the Vault locking collateral.
 * ``collateral``: to-be-locked collateral in DOT.
 
-*Returns*
-
-* ``None``: If the locking has completed successfully.
+: If the locking has completed successfully.
 
 *Events*
 
@@ -395,7 +385,7 @@ Specification
 
 * ``ERR_VAULT_NOT_FOUND``: The specified Vault does not exist. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn lockAdditionalCollateral(origin, amount: Balance) -> Result {...}
 
@@ -437,10 +427,6 @@ Specification
 * ``vault``: The account of the Vault withdrawing collateral.
 * ``withdrawAmount``: To-be-withdrawn collateral in DOT.
 
-*Returns*
-
-* ``None``: If sufficient free collateral is available and the withdrawal was successful.
-
 *Events*
 
 * ``WithdrawCollateral(Vault, withdrawAmount, totalCollateral)``: emit emit an event stating how much collateral was withdrawn by the Vault and total collateral a Vault has left.
@@ -452,7 +438,7 @@ Specification
 * ``ERR_MIN_AMOUNT``: The amount of locked collateral (free + used) needs to be above ``MinimumCollateralVault``.
 * ``ERR_UNAUTHORIZED``: The caller of the withdrawal is not the specified Vault, and hence not authorized to withdraw funds.
   
-*Substrate* ::
+.. *Substrate* ::
 
   fn withdrawCollateral(origin, amount: Balance) -> Result {...}
 
@@ -521,7 +507,7 @@ Specification
 
 * ``ERR_EXCEEDING_VAULT_LIMIT``: The selected vault has not provided enough collateral to issue the requested amount.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn increaseToBeIssuedTokens(vault: AccountId, tokens: Balance) -> Result {...}
 
@@ -561,9 +547,6 @@ Specification
 * ``vault``: The BTC Parachain address of the Vault.
 * ``tokens``: The amount of PolkaBTC to be unreserved.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -573,7 +556,7 @@ Specification
 
 * ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: The requested amount of ``tokens`` exceeds the ``toBeIssuedTokens`` by this vault.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn decreaseToBeIssuedTokens(vault: AccountId, tokens: Balance) -> Result {...}
 
@@ -621,9 +604,6 @@ Specification
 * ``vault``: The BTC Parachain address of the Vault.
 * ``tokens``: The amount of PolkaBTC that were just issued.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -633,7 +613,7 @@ Specification
 
 * ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: Return if the requested amount of ``tokens`` exceeds the ``toBeIssuedTokens`` by this vault.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn IssuedTokens(vault: AccountId, tokens: Balance) -> Result {...}
 
@@ -677,9 +657,6 @@ Specification
 * ``vault``: The BTC Parachain address of the Vault.
 * ``tokens``: The amount of PolkaBTC to be redeemed.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -689,7 +666,7 @@ Specification
 
 * ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: The requested amount of ``tokens`` exceeds the ``IssuedTokens`` by this vault.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn increaseToBeRedeemedTokens(vault: AccountId, tokens: Balance) -> Result {...}
 
@@ -730,9 +707,6 @@ Specification
 * ``vault``: The BTC Parachain address of the Vault.
 * ``tokens``: The amount of PolkaBTC not to be replaced.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -743,7 +717,7 @@ Specification
 
 * ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: The requested amount of ``tokens`` exceeds the ``toBeRedeemedTokens`` by this vault.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn decreaseToBeRedeemedTokens(vault: AccountId, tokens: Balance) -> Result {...}
 
@@ -784,9 +758,6 @@ Specification
 * ``tokens``: The amount of PolkaBTC that were not redeemed.
 * ``collateral``: The amount of collateral assigned to this request.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -796,7 +767,7 @@ Specification
 
 * ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: The requested amount of ``tokens`` exceeds the ``toBeRedeemedTokens`` by this vault.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn decreaseTokens(vault: AccountId, user: AccountId, tokens: Balance, collateral: Balance) -> Result {...}
 
@@ -846,9 +817,6 @@ Specification
 * ``vault``: The BTC Parachain address of the Vault.
 * ``tokens``: The amount of PolkaBTC redeemed.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -858,7 +826,7 @@ Specification
 
 * ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: Return if the requested amount of ``tokens`` exceeds the ``issuedTokens`` or ``toBeRedeemedTokens`` by this vault.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn redeemTokens(vault: AccountId, tokens: Balance) -> Result {...}
 
@@ -901,9 +869,6 @@ Specification
 * ``premiumDOT``: The amount of DOT to be paid to the user as a premium using the Vault's released collateral.
 * ``redeemer``: The user that redeems at a premium.
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -913,7 +878,7 @@ Specification
 
 * ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: Return if the requested amount of ``tokens`` exceeds the ``issuedTokens`` or ``toBeRedeemedTokens`` by this vault.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn redeemTokensPremium(vault: AccountId, tokens: Balance) -> Result {...}
 
@@ -958,9 +923,6 @@ Specification
 * ``redeemDOTinBTC``: The amount of PolkaBTC to be redeemed in DOT with the ``LiquidationVault``, denominated in BTC.
 
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -970,7 +932,7 @@ Specification
 
 * ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: Return if the requested amount of ``redeemDOTinBTC`` exceeds the ``issuedTokens`` or by this vault.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn redeemTokens(redeemDOTinBTC: Balance) -> Result {...}
 
@@ -1015,9 +977,6 @@ Specification
 * ``tokens``: The amount of PolkaBTC replaced.
 * ``collateral``: The collateral provided by the new vault. 
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -1027,7 +986,7 @@ Specification
 
 * ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: The requested amount of ``tokens`` exceeds the ``issuedTokens`` or ``toBeReplaceedTokens`` by this vault.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn replaceTokens(oldVault: AccountId, newVault: AccountId, tokens: Balance, collateral: Balance) -> Result {...}
 
@@ -1074,9 +1033,6 @@ Specification
 * ``vault``: Account identifier of the Vault to be liquidated.
 
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -1086,7 +1042,7 @@ Specification
 
 * ``ERR_INSUFFICIENT_TOKENS_COMMITTED``: The requested amount of ``tokens`` exceeds the ``issuedTokens`` or ``toBeReplaceedTokens`` by this vault.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn replaceTokens(oldVault: AccountId, newVault: AccountId, tokens: Balance, collateral: Balance) -> Result {...}
 
@@ -1129,7 +1085,7 @@ Emit an event stating that a new Vault (``vault``) was registered and provide in
 
 * :ref:`registerVault`
 
-*Substrate* ::
+.. *Substrate* ::
 
   RegisterVault(AccountId, Balance);
 
@@ -1153,7 +1109,7 @@ Emit an event stating that a Vault (``vault``) submitted a proof that its BTC ad
 
 * :ref:`proveValidBTCAddress`
 
-*Substrate* ::
+.. *Substrate* ::
 
   ProveValidBTCAddress();
 
@@ -1180,7 +1136,7 @@ Emit an event stating how much new (``newCollateral``), total collateral (``tota
 
 * ref:`lockAdditionalCollateral`
 
-*Substrate* ::
+.. *Substrate* ::
 
   LockAdditionalCollateral(AccountId, Balance, Balance, Balance);
 
@@ -1203,7 +1159,7 @@ Emit emit an event stating how much collateral was withdrawn by the Vault and to
 
 * ref:`withdrawCollateral`
 
-*Substrate* ::
+.. *Substrate* ::
 
   WithdrawCollateral(AccountId, Balance, Balance);
 
@@ -1226,7 +1182,7 @@ Emit
 
 * ref:``increaseToBeIssuedTokens``
 
-*Substrate* ::
+.. *Substrate* ::
 
   IncreaseToBeIssuedTokens(AccountId, Balance);
 
@@ -1249,7 +1205,7 @@ Emit
 
 * ref:``decreaseToBeIssuedTokens``
 
-*Substrate* ::
+.. *Substrate* ::
 
   DecreaseToBeIssuedTokens(AccountId, Balance);
 
@@ -1272,7 +1228,7 @@ Emit an event when an issue request is executed.
 
 * ref:``issueTokens``
 
-*Substrate* ::
+.. *Substrate* ::
 
   IssueTokens(AccountId, Balance);
 
@@ -1294,7 +1250,7 @@ Emit an event when a redeem request is requested.
 
 * ref:``increaseToBeRedeemedTokens``
 
-*Substrate* ::
+.. *Substrate* ::
 
   IncreaseToBeRedeemedTokens(AccountId, Balance);
 
@@ -1316,7 +1272,7 @@ Emit an event when a replace request cannot be completed because the vault has t
 
 * ref:``decreaseToBeRedeemedTokens``
 
-*Substrate* ::
+.. *Substrate* ::
 
   DecreaseToBeRedeemedTokens(AccountId, Balance);
 
@@ -1341,7 +1297,7 @@ Emit an event if a redeem request cannot be fulfilled.
 
 * ref:``decreaseTokens``
 
-*Substrate* ::
+.. *Substrate* ::
 
   DecreaseTokens(AccountId, AccountId, Balance, Balance);
 
@@ -1364,7 +1320,7 @@ Emit an event when a redeem request successfully completes.
 
 * ref:``redeemTokens``
 
-*Substrate* ::
+.. *Substrate* ::
 
   RedeemTokens(AccountId, Balance);
 
@@ -1389,7 +1345,7 @@ Emit an event when a user is executing a redeem request that includes a premium.
 
 * ref:``redeemTokensPremium``
 
-*Substrate* ::
+.. *Substrate* ::
 
   RedeemTokensPremium(AccountId, Balance, Balance, AccountId);
 
@@ -1412,7 +1368,7 @@ Emit an event when a redeem is executed under the ``LIQUIDATION`` status.
 
 * ref:``redeemTokensLiquidation``
 
-*Substrate* ::
+.. *Substrate* ::
 
   RedeemTokensLiquidation(AccountId, Balance);
 
@@ -1437,7 +1393,7 @@ Emit an event when a replace requests is successfully executed.
 
 * ref:``replaceTokens``
 
-*Substrate* ::
+.. *Substrate* ::
 
   ReplaceTokens(AccountId, AccountId, Balance, Balance);
 
@@ -1458,7 +1414,7 @@ Emit an event indicating that the Vault with ``vault`` account identifier has be
 
 * ref:``liquidateVault``
 
-*Substrate* ::
+.. *Substrate* ::
 
   LiquidateVault(AccountId);
 

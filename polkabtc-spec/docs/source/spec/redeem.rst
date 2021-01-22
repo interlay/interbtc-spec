@@ -40,7 +40,7 @@ RedeemPeriod
 
 The time difference in number of blocks between a redeem request is created and required completion time by a vault. The redeem period has an upper limit to ensure the user gets his BTC in time and to potentially punish a vault for inactivity or stealing BTC.
 
-*Substrate* ::
+.. *Substrate* ::
 
   RedeemPeriod: T::BlockNumber;
 
@@ -52,7 +52,7 @@ RedeemRequests
 
 Users create redeem requests to receive BTC in return for PolkaBTC. This mapping provides access from a unique hash ``redeemId`` to a ``Redeem`` struct. ``<redeemId, Redeem>``.
 
-*Substrate* ::
+.. *Substrate* ::
 
   RedeemRequests map T::H256 => Redeem<T::AccountId, T::BlockNumber, T::Balance>
 
@@ -80,9 +80,7 @@ Parameter           Type        Description
 ``btcAddress``      bytes[20]   Base58 encoded Bitcoin public key of the User.  
 ==================  ==========  =======================================================
 
-*Substrate*
-
-::
+.. *Substrate*::
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
@@ -142,7 +140,7 @@ Specification
 * ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE``: If the user is trying to redeem from a vault that has less BTC locked than requested for redeem.
 * ``ERR_VAULT_BANNED = "The selected Vault has been temporarily banned."``: Redeem requests are not possible with temporarily banned Vaults.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn requestRedeem(origin, amount: Balance, btcAddress: H160, vault: AccountID) -> Result {...}
 
@@ -226,10 +224,6 @@ Specification
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
 
-*Returns*
-
-* ``None``: if the transaction can be successfully verified and the function has been called within the time limit.
-
 *Events*
 
 * ``ExecuteRedeem(redeemer, redeemId, amount, vault)``:
@@ -241,7 +235,7 @@ Specification
 * ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated vault``: The caller of this function is not the associated vault, and hence not authorized to take this action.
 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn executeRedeem(origin, redeemId: T::H256, txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: Bytes, rawTx: Bytes) -> Result {...}
 
@@ -297,9 +291,6 @@ Specification
 * ``redeemId``: the unique hash of the redeem request.
 * ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the Vault, or wishes to keep the PolkaBTC (and retry to redeem with another Vault).
 
-*Returns*
-
-* ``None``
 
 *Events*
 
@@ -310,7 +301,7 @@ Specification
 * ``ERR_REDEEM_ID_NOT_FOUND``: The ``redeemId`` cannot be found.
 * ``ERR_REDEEM_PERIOD_NOT_EXPIRED``: Raises an error if the time limit to call ``executeRedeem`` has not yet passed.
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn cancelRedeem(origin, redeemId: T::H256, reimburse: bool) -> Result {...}
 
@@ -368,7 +359,7 @@ Specification
 
 * ``redeemFactor``: integer value between 0 an 10000 indicating the percentage of BTC to be redeemed in DOT. 
 
-*Substrate* ::
+.. *Substrate* ::
 
   fn getPartialRedeemFactor() -> U128 {...}
 
@@ -408,7 +399,7 @@ Emit an event when a redeem request is created. This event needs to be monitored
 
 * ref:`requestRedeem`
 
-*Substrate* ::
+.. *Substrate* ::
 
   RequestRedeem(H256, AccountId, Balance, H160, AccountId);
 
@@ -433,7 +424,7 @@ Emit an event when a redeem request is successfully executed by a vault.
 
 * ref:`executeRedeem`
 
-*Substrate* ::
+.. *Substrate* ::
 
   ExecuteRedeem(AccountId, H256, Balance, AccountId);
 
@@ -455,7 +446,7 @@ Emit an event when a user cancels a redeem request that has not been fulfilled a
 
 * ref:`cancelRedeem`
 
-*Substrate* ::
+.. *Substrate* ::
 
   CancelRedeem(AccountId, H256);
 
