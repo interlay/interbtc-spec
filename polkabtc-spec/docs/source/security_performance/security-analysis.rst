@@ -6,7 +6,7 @@ Security Analysis
 Replay Attacks
 ~~~~~~~~~~~~~~
 
-Without adequate protection, inclusion proofs for transactions on Bitcoin can be **replayed by: (i) the user  to trick PolkaBTC component into issuing duplicate PolkaBTC tokens and (ii) the vault to reuse a single transaction on Bitcoin to falsely prove multiple redeem requests. 
+Without adequate protection, inclusion proofs for transactions on Bitcoin can be **replayed** by: (i) the user to trick PolkaBTC component into issuing duplicate PolkaBTC tokens and (ii) the vault to reuse a single transaction on Bitcoin to falsely prove multiple redeem requests. 
 A simple and practical mitigation is to introduce unique identifiers for each execution of :ref:`issue-protocol` and :ref:`redeem-protocol` and require transactions on Bitcoin submitted to the BTC-Relay of these protocols to contain the corresponding identifier.
 
 In this specification, we achieve this by requiring that both, users and vaults, prepare a transaction with at least two outputs. One output is an OP_RETURN with a unique hash created in the :ref:`security` module.
@@ -14,9 +14,8 @@ In this specification, we achieve this by requiring that both, users and vaults,
 Counterfeiting
 ~~~~~~~~~~~~~~
 
-A vault which receives lock transaction from a user during :ref:`issue-protocol` could use these coins to re-execute the issue itself, creating counterfeit PolkaBTC, i.e., 
-This would result in PolkaBTC being issued for the same amount of lock transaction breaking **Consistency**, i.e., 
-|locked_BTC| < |PolkaBTC|. 
+A vault which receives lock transaction from a user during :ref:`issue-protocol` could use these coins to re-execute the issue itself, creating counterfeit PolkaBTC.
+This would result in PolkaBTC being issued for the same amount of lock transaction breaking **consistency**, i.e., :math:`|locked_BTC| < |PolkaBTC|`. 
 To this end, the PolkaBTC component forbids vaults to move locked funds lock transaction received during :ref:`issue-protocol` and considers such cases as theft.
 This theft is observable by any user.
 However, we used the specific roles of Staked Relayers to report theft of BTC.

@@ -3,7 +3,7 @@
 Security
 ======== 
 
-The Security module is responsible for tracking the status of the BTC Parachain, flagging failures such as liveness and safety failures of :ref:`btc-relay` or crashes of the :ref:`exchange-rate-oracle`.
+The Security module is responsible for tracking the status of the BTC Parachain, flagging failures such as liveness and safety failures of :ref:`btc-relay` or crashes of the :ref:`oracle`.
 Specifically, this module provides a central interface for all other modules to check whether specific features should be disabled to prevent financial damage to users (e.g. stop :ref:`issue-protocol` if no reliable price data is available).
 In addition, the Security module provides functions to handle security critical operations, such as generating secure identifiers for replay protection in :ref:`issue-protocol`, :ref:`redeem-protocol`, and :ref:`replace-protocol`. 
 
@@ -65,7 +65,7 @@ Enum specifying error codes tracked in ``Errors``.
 
 * ``INVALID_BTC_RELAY : 2`` - an invalid transaction was detected in a block header submitted to :ref:`btc-relay`. 
 
-* ``ORACLE_OFFLINE : 3`` - the :ref:`exchangeRateOracle` experienced a liveness failure (no up-to-date exchange rate available).
+* ``ORACLE_OFFLINE : 3`` - the :ref:`oracle` experienced a liveness failure (no up-to-date exchange rate available).
 
 * ``LIQUIDATION : 4`` - at least one Vault is either below the ``LiquidationCollateralThreshold`` or has been reported to have stolen BTC. This status implies that any :ref:`redeem-protocol` request will be executed partially in BTC and partially in DOT, until the system is rebalanced (1:1 backing between PolkaBTC and BTC). 
 

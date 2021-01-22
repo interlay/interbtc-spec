@@ -107,7 +107,7 @@ Must to be strictly greater than ``100000``, ``PremiumRedeemThreshold``, and ``L
 PremiumRedeemThreshold
 ......................
 
-Determines the rate for the collateral rate of Vaults, at which users receive a premium in DOT, allocated from the Vault's collateral, when performing a :ref:`redeem` with this Vault. 
+Determines the rate for the collateral rate of Vaults, at which users receive a premium in DOT, allocated from the Vault's collateral, when performing a :ref:`redeem-protocol` with this Vault. 
 Must to be strictly greater than ``100000`` and ``LiquidationCollateralThreshold``.
 
 *Substrate* :: 
@@ -418,6 +418,7 @@ Function Sequence
 
 
 .. _withdrawCollateral:
+
 withdrawCollateral
 ------------------
 
@@ -606,7 +607,7 @@ Function Sequence
 issueTokens
 -----------
 
-The issue process completes when a user calls the :ref:`executesIssue` function and provides a valid proof for sending BTC to the vault. At this point, the ``toBeIssuedTokens`` assigned to a vault are decreased and the ``issuedTokens`` balance is increased by the ``amount`` of issued tokens.
+The issue process completes when a user calls the :ref:`executeIssue` function and provides a valid proof for sending BTC to the vault. At this point, the ``toBeIssuedTokens`` assigned to a vault are decreased and the ``issuedTokens`` balance is increased by the ``amount`` of issued tokens.
 
 Specification
 .............
@@ -1158,6 +1159,7 @@ Emit an event stating that a Vault (``vault``) submitted a proof that its BTC ad
 
 
 .. _event_LockAdditionalCollateral:
+
 LockAdditionalCollateral
 ------------------------
 

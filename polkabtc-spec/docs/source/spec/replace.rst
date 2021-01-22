@@ -103,7 +103,7 @@ Parameter               Type        Description
 ``collateral``          DOT         DOT collateral locked by the new Vault.
 ``acceptTime``          u256        Block height at which this replace request was accepted by a new Vault. Serves as start for the countdown until when the old Vault must transfer the BTC.
 ``btcAddress``          bytes[20]   Base58 encoded Bitcoin public key of the new Vault.  
-====================== ==========  =======================================================
+======================  ==========  =======================================================
 
 .. note:: The ``btcAddress`` parameter is not to be set the the new Vault, but is extracted from the ``Vaults`` mapping in ``VaultRegistry`` for the account of the new Vault.  
 

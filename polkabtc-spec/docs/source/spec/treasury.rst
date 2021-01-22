@@ -51,7 +51,7 @@ Mapping from accounts to their balance.
     Balances: map T::AccountId => Balance;
 
 Locked Balances
-..............
+...............
 
 Mapping from accounts to their balance of locked tokens. Locked tokens serve two purposes:
 

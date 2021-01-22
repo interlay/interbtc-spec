@@ -84,7 +84,6 @@ Specification
 
 * ``sender``: The sender wishing to lock collateral.
 * ``amount``: The amount of collateral.
-.. * ``type``: The type of collateral provided.
 
 *Returns*
 
@@ -129,7 +128,6 @@ Specification
 
 * ``sender``: The sender getting returned its collateral.
 * ``amount``: The amount of collateral.
-.. * ``type``: The type of collateral provided.
 
 *Returns*
 
@@ -184,7 +182,6 @@ Specification
 * ``sender``: The sender that initially provided the collateral.
 * ``receiver``: The receiver of the collateral.
 * ``amount``: The amount of collateral.
-.. * ``type``: The type of collateral provided.
 
 *Returns*
 
@@ -245,7 +242,7 @@ Emit a ``LockCollateral`` event when a sender locks collateral.
   LockCollateral(AccountId, Balance);
 
 ReleaseCollateral
---------------
+-----------------
 
 Emit a ``ReleaseCollateral`` event when a sender releases collateral.
 

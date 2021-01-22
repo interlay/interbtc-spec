@@ -295,7 +295,7 @@ Specification
 *Parameters*
 
 * ``redeemId``: the unique hash of the redeem request.
-* ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the Vault, or wishes to keep the PolkaBTC (and retry :ref:`Redeem` with another Vault).
+* ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the Vault, or wishes to keep the PolkaBTC (and retry to redeem with another Vault).
 
 *Returns*
 
@@ -335,11 +335,11 @@ Function Sequence
 
    b. Call the :ref:`burn` function in the Treasury to burn the ``redeem.amount`` of PolkaBTC of the user.
    
-   c. Call :ref:`slashCollateral` in the :ref:`collateral` module, passing ``redeem.vault``, ``redeem.redeemer`` and the value of the reimbursed collateral, calculated as ``redeem.amountPolkaBTC *`` :ref:`getExchangeRate` ``* (1 + PunishmentFee / 100000)``
+   c. Call :ref:`slashCollateral` in the :ref:`collateral-module` module, passing ``redeem.vault``, ``redeem.redeemer`` and the value of the reimbursed collateral, calculated as ``redeem.amountPolkaBTC *`` :ref:`getExchangeRate` ``* (1 + PunishmentFee / 100000)``
 
 4. Else, if ``reimburse == False`` (user does not want full reimbursement and wishes to retry the redeem)
     
-  a. Call :ref:`slashCollateral` in the :ref:`collateral` module, passing ``redeem.vault``, ``redeem.redeemer`` and value of the collateral punishment, calculated as ``redeem.amountPolkaBTC *`` :ref:`getExchangeRate` ``* (PunishmentFee / 100000)`` 
+  a. Call :ref:`slashCollateral` in the :ref:`collateral-module` module, passing ``redeem.vault``, ``redeem.redeemer`` and value of the collateral punishment, calculated as ``redeem.amountPolkaBTC *`` :ref:`getExchangeRate` ``* (PunishmentFee / 100000)`` 
 
 5. Temporarily Ban the Vault from issue, redeem and replace processes by setting ``redeem.vault.bannedUntil = current parachain block height + PunishmentDelay``.
 
@@ -379,7 +379,7 @@ Function Sequence
 
 2. Calculate ``totalLiquidationValue =`` :math:`\sum_{v}^{LiquidationList} (\mathit{v.issuedTokens} \cdot \mathit{exchangeRate} - \mathit{v.collateral})`
 
-3. Retrieve the ``TotalSupply`` of PolkaBTC from :ref:`treasury`.
+3. Retrieve the ``TotalSupply`` of PolkaBTC from :ref:`treasury-module`.
 
 4. Return ``totalLiquidationValue / TotalSupply``
 

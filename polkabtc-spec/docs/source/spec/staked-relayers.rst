@@ -781,9 +781,9 @@ Function Sequence
 
 4. Check if the given Bitcoin transaction is already associated with an entry in ``TheftReports`` (use ``txId`` as key for lookup). If yes, check if the specified ``vault`` is already listed in the associated set of Vaults. If the Vault is already in the set, return ``ERR_ALREADY_REPORTED``. 
 
-5. Extract the ``outputs`` from ``rawTx`` using :ref:`extractOutputs`.
+5. Extract the ``outputs`` from ``rawTx`` using `extractOutputs` from the BTC-Relay.
 
-6. Check if the transaction is a "migration" of UTXOs to the same Vault. For each output, in the extracted ``outputs``, extract the recipient Bitcoin address (using :ref:`extractOutputAddress`). 
+6. Check if the transaction is a "migration" of UTXOs to the same Vault. For each output, in the extracted ``outputs``, extract the recipient Bitcoin address (using `extractOutputAddress` from the BTC-Relay). 
 
    a) If one of the extracted Bitcoin addresses does not match the Bitcoin address of the accused ``vault`` (``Vault.btcAddress``) **continue to step 7**. 
 
@@ -791,11 +791,12 @@ Function Sequence
 
 7. Check if the transaction is part of a valid :ref:`redeem-protocol` or :ref:`replace-protocol` process. 
 
-  a) Extract the OP_RETURN value from the (second) output (``outputs[1]``) using :ref:`extractOPRETURN`. If this call returns an error (not a valid OP_RETURN output, hence not valid :ref:`redeem-protocol` or :ref:`replace-protocol` process), **continue to step 8**. 
+  a) Extract the OP_RETURN value from the (second) output (``outputs[1]``) using `extractOPRETURN` from the BTC-Relay. If this call returns an error (not a valid OP_RETURN output, hence not valid :ref:`redeem-protocol` or :ref:`replace-protocol` process), **continue to step 8**. 
 
   c) Check if the extracted OP_RETURN value matches any ``redeemId`` in ``RedeemRequest`` (in ``RedeemRequests`` in :ref:`redeem-protocol`) or any ``replaceId`` in ``ReplaceRequest`` (in ``RedeemRequests`` in :ref:`redeem-protocol`) entries *associated with this Vault*. If no match is found, **continue to step 8**.
 
-  d) Otherwise, if an associated ``RedeemRequest``  or ``ReplaceRequest`` was found: extract the value (using :ref:`extractOutputValue`) and recipient Bitcoin address (using :ref:`extractOutputAddress`) from the first output (``outputs[0]``). Next, check 
+  d) Otherwise, if an associated ``RedeemRequest``  or ``ReplaceRequest`` was found: extract the value (using `extractOutputValue` from the BTC-Relay) and recipient Bitcoin address (using `extractOutputAddress` from the BTC-Relay) from the first output (``outputs[0]``). Next, check 
+
      
      i ) if the value is it is equal (or greater) than ``paymentValue`` in the ``RedeemRequest``  or ``ReplaceRequest``. 
      
@@ -1077,7 +1078,7 @@ Emit an event stating that a Staked Relayer has been de-registered
 
 
 StatusUpdateSuggested
---------------
+---------------------
 
 Emits an event indicating a status change of the BTC Parachain.
 
@@ -1087,7 +1088,7 @@ Emits an event indicating a status change of the BTC Parachain.
 
 *Parameters*
 
-*``newStatusCode``: the new ``StatusCode``
+* ``newStatusCode``: the new ``StatusCode``
 * ``addErrors``: the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``)
 * ``removeErrors``: the set of to-be-removed ``ErrorCode`` entries
 * ``msg``: the detailed message provided by the function caller
