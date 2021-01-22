@@ -124,7 +124,7 @@ Functions
 setExchangeRate
 ---------------
 
-Set the latest (aggregate) BTC/DOT exchange rate. This function invokes a check of Vault collateral rates in the :ref:`Vault-registry` component.
+Set the latest (aggregate) BTC/DOT exchange rate. This function invokes a check of vault collateral rates in the :ref:`Vault-registry` component.
 
 Specification
 .............

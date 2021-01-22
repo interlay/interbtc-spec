@@ -35,9 +35,9 @@ Inputs                        Outputs
 
 The value and recipient address (``btcAddress``) of the *Payment UTXO* and the ``identifier`` in the *Data UTXO* (OP_RETURN) depend on the executed PolkaBTC protocol:
 
-  + In *Issue* ``btcAddress`` is the Bitcoin address of the Vault selected by the user for the issuing process and ``identifier`` is the ``issueId`` of the ``IssueRequest`` in ``IssueRequests``.
+  + In *Issue* ``btcAddress`` is the Bitcoin address of the vault selected by the user for the issuing process and ``identifier`` is the ``issueId`` of the ``IssueRequest`` in ``IssueRequests``.
   + In *Redeem* ``btcAddress`` is the Bitcoin address of the user who triggered the redeem process and ``identifier`` is the ``redeemId`` of the ``RedeemRequest`` in ``RedeemRequests``.
-  + In *Replace* ``btcAddress`` is the Bitcoin address of the new Vault, which has agreed to replace the Vault which triggered the replace protocol and ``identifier`` is the ``replaceId`` of the ``ReplaceRequest`` in ``ReplaceRequests``.
+  + In *Replace* ``btcAddress`` is the Bitcoin address of the new Vault, which has agreed to replace the vault which triggered the replace protocol and ``identifier`` is the ``replaceId`` of the ``ReplaceRequest`` in ``ReplaceRequests``.
 
 
 

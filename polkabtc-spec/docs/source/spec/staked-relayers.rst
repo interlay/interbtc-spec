@@ -15,9 +15,9 @@ Overview
     1. Transactional data is available for submitted Bitcoin block headers (``NO_DATA_BTC_RELAY: 0`` code).
     2. Submitted blocks are valid under Bitcoin's consensus rules  (``INVALID_BTC_RELAY: 1`` code).
     3. Vaults do not move BTC to another Bitcoin address, unless expressly requested during :ref:`redeem-protocol` or :ref:`replace-protocol`.
-    4. If a Vault is under-collateralized, i.e., the collateral rate has fallen below ``LiquidationCollateralThreshold``, as defined in :ref:`vault-registry`. 
+    4. If a vault is under-collateralized, i.e., the collateral rate has fallen below ``LiquidationCollateralThreshold``, as defined in :ref:`vault-registry`. 
 
- If one of the above failures is detected, Staked Relayers file a report with the :ref:`security` module. In cases (1) and (2), a vote is initiated, whereby this module acts as bulleting board and collects Staked Relayer signatures - if a majority is reached, as defined by ``STAKED_RELAYER_VOTE_THRESHOLD``, the state of the BTC Parachain is updated. In cases (3) and (4) a single Staked Relayer report suffices - the Security module checks if the accusation against the Vault is correct, and if yes updates the BTC Parachain state and flags the Vault according to the reported failure.
+ If one of the above failures is detected, Staked Relayers file a report with the :ref:`security` module. In cases (1) and (2), a vote is initiated, whereby this module acts as bulleting board and collects staked relayer signatures - if a majority is reached, as defined by ``STAKED_RELAYER_VOTE_THRESHOLD``, the state of the BTC Parachain is updated. In cases (3) and (4) a single staked relayer report suffices - the Security module checks if the accusation against the vault is correct, and if yes updates the BTC Parachain state and flags the vault according to the reported failure.
 
 
 Staked Relayers are overseen by the Parachain **Governance Mechanism**. 
@@ -132,7 +132,7 @@ Constants
 STAKED_RELAYER_VOTE_THRESHOLD
 ...............................
 
-Integer denoting the percentage of Staked Relayer signatures/votes necessary to alter the state of the BTC Parachain (``NO_DATA_BTC_RELAY`` and ``INVALID_BTC_RELAY`` error codes).
+Integer denoting the percentage of staked relayer signatures/votes necessary to alter the state of the BTC Parachain (``NO_DATA_BTC_RELAY`` and ``INVALID_BTC_RELAY`` error codes).
 
 .. note:: Must be a number between 0 and 100.
 
@@ -220,13 +220,13 @@ Specification
 
 *Parameters*
 
-* ``stakedRelayer``: The account of the Staked Relayer to be registered.
+* ``stakedRelayer``: The account of the staked relayer to be registered.
 * ``stake``: to-be-locked collateral/stake in DOT.
 
 
 *Events*
 
-* ``RegisterStakedRelayer(StakedRelayer, collateral)``: emit an event stating that a new Staked Relayer (``stakedRelayer``) was registered and provide information on the Staked Relayer's stake (``stake``). 
+* ``RegisterStakedRelayer(StakedRelayer, collateral)``: emit an event stating that a new staked relayer (``stakedRelayer``) was registered and provide information on the Staked Relayer's stake (``stake``). 
 
 *Errors*
 
@@ -243,11 +243,11 @@ Preconditions
 Function Sequence
 .................
 
-The ``registerStakedRelayer`` function takes as input a Parachain AccountID, and DOT collateral (to be used as stake), and registers a new Staked Relayer in the system.
+The ``registerStakedRelayer`` function takes as input a Parachain AccountID, and DOT collateral (to be used as stake), and registers a new staked relayer in the system.
 
 1) Check that the ``stakedRelayer`` is not already in ``StakedRelayers``. Return ``ERR_ALREADY_REGISTERED`` if this check fails.
 
-2) Check that ``stake > STAKED_RELAYER_STAKE`` holds, i.e., the Staked Relayer provided sufficient collateral. Return ``ERR_INSUFFICIENT_STAKE`` error if this check fails.
+2) Check that ``stake > STAKED_RELAYER_STAKE`` holds, i.e., the staked relayer provided sufficient collateral. Return ``ERR_INSUFFICIENT_STAKE`` error if this check fails.
 
 3) Lock the DOT stake/collateral by calling :ref:`lockCollateral` and passing ``stakedRelayer`` and the ``stake`` as parameters.
 
@@ -272,12 +272,12 @@ Specification
 
 *Parameters*
 
-* ``stakedRelayer``: The account of the Staked Relayer to be de-registered.
+* ``stakedRelayer``: The account of the staked relayer to be de-registered.
 
 
 *Events*
 
-* ``DeRegisterStakedRelayer(StakedRelayer)``: emit an event stating that a Staked Relayer has been de-registered (``stakedRelayer``).
+* ``DeRegisterStakedRelayer(StakedRelayer)``: emit an event stating that a staked relayer has been de-registered (``stakedRelayer``).
 
 *Errors*
 
@@ -320,7 +320,7 @@ Specification
 
 *Parameters*
 
-* ``stakedRelayer``: The AccountId of the Staked Relayer suggesting the status change.
+* ``stakedRelayer``: The AccountId of the staked relayer suggesting the status change.
 * ``newStatusCode``: Suggested BTC Parachain status (``StatusCode`` enum).
 * ``addErrors``: If the suggested status is ``Error``, this set of ``ErrorCodes`` indicates which errors are to be added to the ``Errors`` mapping.
 * ``removeErrors``: Set of ``ErrorCodes`` to be removed from the ``Errors`` list.
@@ -330,7 +330,7 @@ Specification
 
 *Events*
 
-* ``StatusUpdateSuggested(newStatusCode, addErrors, removeErrors, msg, stakedRelayer)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, ``msg`` the detailed message provided by the function caller, and ``stakedRelayer`` the account identifier of the Staked Relayer suggesting the update.
+* ``StatusUpdateSuggested(newStatusCode, addErrors, removeErrors, msg, stakedRelayer)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, ``msg`` the detailed message provided by the function caller, and ``stakedRelayer`` the account identifier of the staked relayer suggesting the update.
 
 *Errors*
 
@@ -373,7 +373,7 @@ Function Sequence
 voteOnStatusUpdate
 ----------------------
 
-A Staked Relayer casts a vote on a suggested ``StatusUpdate``.
+A staked relayer casts a vote on a suggested ``StatusUpdate``.
 Checks the threshold of votes and executes / cancels a StatusUpdate depending on the threshold reached.
  
 .. warning:: This function can only be called by Staked Relayers. The Governance Mechanism can change the ``ParachainStatus`` using :ref:`executeStatusUpdate` directly.
@@ -388,9 +388,9 @@ Specification
 
 *Parameters*
 
-* * ``stakedRelayer``: The AccountId of the Staked Relayer casting the vote.
+* * ``stakedRelayer``: The AccountId of the staked relayer casting the vote.
 * ``statusUpdateId``: Identifier of the ``StatusUpdate`` voted upon in ``StatusUpdates``.
-* ``vote``: ``True`` or ``False``, depending on whether the Staked Relayer agrees or disagrees with the suggested suggestStatusUpdate.
+* ``vote``: ``True`` or ``False``, depending on whether the staked relayer agrees or disagrees with the suggested suggestStatusUpdate.
 
 
 *Events*
@@ -410,17 +410,17 @@ Specification
 Function Sequence
 .................
 
-1. Check if the caller of the function is a Staked Relayer in ``StakedRelayers``. Return ``ERR_STAKED_RELAYERS_ONLY`` if this check fails.
+1. Check if the caller of the function is a staked relayer in ``StakedRelayers``. Return ``ERR_STAKED_RELAYERS_ONLY`` if this check fails.
 
 2. Retrieve the ``StatusUpdate`` from ``StatusUpdates`` using ``statusUpdateId``. Return ``ERR_STATUS_UPDATE_NOT_FOUND`` if this check fails.
 
 3. Register the vote:
 
-   a. If ``vote == True``: add ``stakedRelayer`` to ``StatusUpdate.voteYes``. Check if the ``stakedRelayer`` is also included in ``StatusUpdate.voteNo`` (i.e., previously voted "No") and if this is the case, remove the entry - i.e., the Staked Relayer changed vote.
+   a. If ``vote == True``: add ``stakedRelayer`` to ``StatusUpdate.voteYes``. Check if the ``stakedRelayer`` is also included in ``StatusUpdate.voteNo`` (i.e., previously voted "No") and if this is the case, remove the entry - i.e., the staked relayer changed vote.
 
-   b. If ``vote == False``: add ``stakedRelayer`` to ``StatusUpdate.voteNo``. Check if the ``stakedRelayer`` is also included in ``StatusUpdate.voteYes`` (i.e., previously voted "Yes") and if this is the case, remove the entry - i.e., the Staked Relayer changed vote.
+   b. If ``vote == False``: add ``stakedRelayer`` to ``StatusUpdate.voteNo``. Check if the ``stakedRelayer`` is also included in ``StatusUpdate.voteYes`` (i.e., previously voted "Yes") and if this is the case, remove the entry - i.e., the staked relayer changed vote.
 
-.. attention:: This ensures a Staked Relayer cannot cast two conflicting votes on the same ``StatusUpdate``. 
+.. attention:: This ensures a staked relayer cannot cast two conflicting votes on the same ``StatusUpdate``. 
 
 4a. Check if the "Yes" votes exceed the necessary ``STAKED_RELAYER_VOTE_THRESHOLD``, i.e., check if ``StatusUpdate.voteYes.length * 100 / StakedRelayers.length`` exceeds ``STAKED_RELAYER_VOTE_THRESHOLD``. If this is the case, call :ref:`executeStatusUpdate`, passing ``statusUpdateId`` as parameter.
 
@@ -618,7 +618,7 @@ Function Sequence
 slashStakedRelayer
 ----------------------
 
-Slashes the stake/collateral of a Staked Relayer and removes them from the Staked Relayer list (mapping).
+Slashes the stake/collateral of a staked relayer and removes them from the staked relayer list (mapping).
 
 .. warning:: This function can only be called by the Governance Mechanism.
 
@@ -633,12 +633,12 @@ Specification
 *Parameters*
 
 * ``governanceMechanism``: The AccountId of the Governance Mechanism.
-* ``stakedRelayer``: The account of the Staked Relayer to be slashed.
+* ``stakedRelayer``: The account of the staked relayer to be slashed.
 
 
 *Events*
 
-* ``SlashStakedRelayer(stakedRelayer)``: emits an event indicating that a given Staked Relayer (``stakedRelayer``) has been slashed and removed from ``StakedRelayers``.
+* ``SlashStakedRelayer(stakedRelayer)``: emits an event indicating that a given staked relayer (``stakedRelayer``) has been slashed and removed from ``StakedRelayers``.
 
 *Errors*
 
@@ -656,7 +656,7 @@ Function Sequence
 
 1. Check that the caller of this function is indeed the Governance Mechanism. Return ``ERR_GOVERNANCE_ONLY`` if this check fails.
 
-2. Retrieve the Staked Relayer with the given account identifier (``stakedRelayer``) from ``StakedRelayers``. Return ``ERR_NOT_REGISTERED`` if not Staked Relayer with the given identifier can be found.
+2. Retrieve the staked relayer with the given account identifier (``stakedRelayer``) from ``StakedRelayers``. Return ``ERR_NOT_REGISTERED`` if not staked relayer with the given identifier can be found.
 
 3. Confiscate the Staked Relayer's collateral. For this, call :ref:`slashCollateral` providing ``stakedRelayer`` and ``governanceMechanism`` as parameters.
 
@@ -670,19 +670,19 @@ Function Sequence
 reportVaultTheft
 -----------------
 
-A Staked Relayer reports misbehavior by a Vault, providing a fraud proof (malicious Bitcoin transaction and the corresponding transaction inclusion proof). 
+A staked relayer reports misbehavior by a Vault, providing a fraud proof (malicious Bitcoin transaction and the corresponding transaction inclusion proof). 
 
-A Vault is not allowed to move BTC from its Bitcoin address (as specified by ``Vault.btcAddress``, except in the following three cases:
+A vault is not allowed to move BTC from its Bitcoin address (as specified by ``Vault.btcAddress``, except in the following three cases:
 
-   1) The Vault is executing a :ref:`redeem-protocol`. In this case, we can link the transaction to a ``RedeemRequest`` and check the correct recipient. 
-   2) The Vault is executing a :ref:`replace-protocol`. In this case, we can link the transaction to a ``ReplaceRequest`` and check the correct recipient. 
-   3) [Optional] The Vault is "merging" multiple UTXOs it controls into a single / multiple UTXOs it controls, e.g. for maintenance. In this case, the recipient address of all outputs (``P2PKH`` / ``P2WPKH``) must be the same Vault. 
+   1) The vault is executing a :ref:`redeem-protocol`. In this case, we can link the transaction to a ``RedeemRequest`` and check the correct recipient. 
+   2) The vault is executing a :ref:`replace-protocol`. In this case, we can link the transaction to a ``ReplaceRequest`` and check the correct recipient. 
+   3) [Optional] The vault is "merging" multiple UTXOs it controls into a single / multiple UTXOs it controls, e.g. for maintenance. In this case, the recipient address of all outputs (``P2PKH`` / ``P2WPKH``) must be the same Vault. 
 
-In all other cases, the Vault is considered to have stolen the BTC.
+In all other cases, the vault is considered to have stolen the BTC.
 
-This function checks if the Vault actually misbehaved (i.e., makes sure that the provided transaction is not one of the above valid cases) and automatically liquidates the Vault (i.e., triggers :ref:`redeem-protocol`).
+This function checks if the vault actually misbehaved (i.e., makes sure that the provided transaction is not one of the above valid cases) and automatically liquidates the vault (i.e., triggers :ref:`redeem-protocol`).
 
-.. note:: Status updates triggered by this function require no Staked Relayer vote, as the report can be programmatically verified by the BTC Parachain.
+.. note:: Status updates triggered by this function require no staked relayer vote, as the report can be programmatically verified by the BTC Parachain.
 
 
 Specification
@@ -705,17 +705,17 @@ Specification
 
 *Events*
 
-* ``ReportVaultTheft(vault)`` - emits an event indicating that a Vault (``vault``) has been caught displacing BTC without permission.
+* ``ReportVaultTheft(vault)`` - emits an event indicating that a vault (``vault``) has been caught displacing BTC without permission.
 * ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries, and ``msg`` the detailed reason for the status update. 
 
 *Errors*
 
 * ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
-* ``ERR_ALREADY_REPORTED = "This txId has already been logged as a theft by the given Vault"``: This transaction / Vault combination has already been reported.
-* ``ERR_VAULT_NOT_FOUND = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
-* ``ERR_ALREADY_LIQUIDATED = "This Vault is already being liquidated``: The specified Vault is already being liquidated.
+* ``ERR_ALREADY_REPORTED = "This txId has already been logged as a theft by the given Vault"``: This transaction / vault combination has already been reported.
+* ``ERR_VAULT_NOT_FOUND = "There exists no vault with the given account id"``: The specified vault does not exist. 
+* ``ERR_ALREADY_LIQUIDATED = "This vault is already being liquidated``: The specified vault is already being liquidated.
 * ``ERR_VALID_REDEEM_OR_REPLACE = "The given transaction is a valid Redeem or Replace execution by the accused Vault"``: The given transaction is associated with a valid :ref:`redeem-protocol` or :ref:`replace-protocol`.
-* ``ERR_VALID_MERGE_TRANSACTION = "The given transaction is a valid 'UTXO merge' transaction by the accused Vault"``: The given transaction represents an allowed "merging" of UTXOs by the accused Vault (no BTC was displaced).
+* ``ERR_VALID_MERGE_TRANSACTION = "The given transaction is a valid 'UTXO merge' transaction by the accused Vault"``: The given transaction represents an allowed "merging" of UTXOs by the accused vault (no BTC was displaced).
 
 
 .. *Substrate* ::
@@ -727,11 +727,11 @@ Function Sequence
 
 1. Check that the caller of this function is indeed a Staked Relayer. Return ``ERR_STAKED_RELAYERS_ONLY`` if this check fails.
 
-2. Check if the specified ``vault`` exists in ``Vaults`` in :ref:`vault-registry`. Return ``ERR_VAULT_NOT_FOUND`` if there is no Vault with the specified account identifier.
+2. Check if the specified ``vault`` exists in ``Vaults`` in :ref:`vault-registry`. Return ``ERR_VAULT_NOT_FOUND`` if there is no vault with the specified account identifier.
 
 3. Check if this ``vault`` is already being liquidated, i.e., is in the ``LiquidationList``. If this is the case, return ``ERR_ALREADY_LIQUIDATED`` (no point in duplicate reporting).
 
-4. Check if the given Bitcoin transaction is already associated with an entry in ``TheftReports`` (use ``txId`` as key for lookup). If yes, check if the specified ``vault`` is already listed in the associated set of Vaults. If the Vault is already in the set, return ``ERR_ALREADY_REPORTED``. 
+4. Check if the given Bitcoin transaction is already associated with an entry in ``TheftReports`` (use ``txId`` as key for lookup). If yes, check if the specified ``vault`` is already listed in the associated set of Vaults. If the vault is already in the set, return ``ERR_ALREADY_REPORTED``. 
 
 5. Extract the ``outputs`` from ``rawTx`` using `extractOutputs` from the BTC-Relay.
 
@@ -756,9 +756,9 @@ Function Sequence
 
     If both checks are successful, abort and return ``ERR_VALID_REDEEM_OR_REPLACE``. Otherwise, **continue to step 8**.
 
-8. The Vault misbehaved (displaced BTC). 
+8. The vault misbehaved (displaced BTC). 
 
-    a) Call :ref:`liquidateVault`, liquidating the Vault and transferring all of its balances and DOT collateral to th ``LiquidationVault`` for failure and reimbursement handling;
+    a) Call :ref:`liquidateVault`, liquidating the vault and transferring all of its balances and DOT collateral to th ``LiquidationVault`` for failure and reimbursement handling;
 
     b) set ``ParachainStatus = ERROR`` and add ``LIQUIDATION`` to ``Errors``,
 
@@ -772,9 +772,9 @@ Function Sequence
 reportVaultUndercollateralized
 -------------------------------
 
-A Staked Relayer reports that a Vault is undercollateralized, i.e., below the ``LiquidationCollateralThreshold`` as defined in :ref:`vault-registry`. This function checks if the Vault's collateral is indeed below this rate and if yes, flags the Vault for liquidation and updates the ``ParachainStatus`` to ``ERROR`` and adding ``LIQUIDATION`` to ``Errors``.
+A staked relayer reports that a vault is undercollateralized, i.e., below the ``LiquidationCollateralThreshold`` as defined in :ref:`vault-registry`. This function checks if the Vault's collateral is indeed below this rate and if yes, flags the vault for liquidation and updates the ``ParachainStatus`` to ``ERROR`` and adding ``LIQUIDATION`` to ``Errors``.
 
-.. note:: Status updates triggered by this function require no Staked Relayer vote, as the report can be programmatically verified by the BTC Parachain.
+.. note:: Status updates triggered by this function require no staked relayer vote, as the report can be programmatically verified by the BTC Parachain.
 
 Specification
 .............
@@ -798,7 +798,7 @@ Specification
 
 * ``ERR_STAKED_RELAYERS_ONLY = "This action can only be executed by Staked Relayers"``: The caller of this function was not a Staked Relayer. Only Staked Relayers are allowed to suggest and vote on BTC Parachain status updates.
 * ``ERR_COLLATERAL_OK = "The accused Vault's collateral rate is above the liquidation threshold"``: The accused Vault's collateral rate is  above ``LiquidationCollateralThreshold``.
-* ``ERR_VAULT_NOT_FOUND = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
+* ``ERR_VAULT_NOT_FOUND = "There exists no vault with the given account id"``: The specified vault does not exist. 
 
 .. *Substrate* ::
 
@@ -809,17 +809,17 @@ Function Sequence
 
 1. Check that the caller of this function is indeed a Staked Relayer. Return ``ERR_STAKED_RELAYERS_ONLY`` if this check fails.
 
-2. Retrieve the Vault from ``Vaults`` in :ref:`vault-registry` using ``vault``. Return ``ERR_VAULT_NOT_FOUND`` if there is no Vault with the specified account identifier.
+2. Retrieve the vault from ``Vaults`` in :ref:`vault-registry` using ``vault``. Return ``ERR_VAULT_NOT_FOUND`` if there is no vault with the specified account identifier.
 
 3. Check if the Vault's collateralization rate is below ``LiquidationCollateralThreshold`` as defined in :ref:`vault-registry`.  That is, check ``Vault.collateral`` against ``Vault.issuedTokens``. If the Vault's collateral rate is above ``LiquidationCollateralThreshold``, return ``ERR_COLLATERAL_OK``
 
-4. Otherwise, if the Vault is undercollateralized:
+4. Otherwise, if the vault is undercollateralized:
 
-    a) Call :ref:`liquidateVault`, liquidating the Vault and transferring all of its balances and DOT collateral to th ``LiquidationVault`` for failure and reimbursement handling;
+    a) Call :ref:`liquidateVault`, liquidating the vault and transferring all of its balances and DOT collateral to th ``LiquidationVault`` for failure and reimbursement handling;
 
     b) set ``ParachainStatus = ERROR`` and add ``LIQUIDATION`` to ``Errors``,
 
-    c) emit ``ExecuteStatusUpdate(ParachainStatus, [LIQUIDATION], [],`` ``"Undercollateralized Vault 'vault' is being liquidated")``
+    c) emit ``ExecuteStatusUpdate(ParachainStatus, [LIQUIDATION], [],`` ``"Undercollateralized vault 'vault' is being liquidated")``
   
 5. Return
 
@@ -829,9 +829,9 @@ Function Sequence
 reportOracleOffline
 --------------------
 
-A Staked Relayer reports that the :ref:`oracle` is offline. This function checks if the last exchange rate data in the Exchange Rate Oracle is indeed older than the indicated threshold. 
+A staked relayer reports that the :ref:`oracle` is offline. This function checks if the last exchange rate data in the Exchange Rate Oracle is indeed older than the indicated threshold. 
 
-.. note:: Status updates triggered by this function require no Staked Relayer vote, as the report can be programmatically verified by the BTC Parachain.
+.. note:: Status updates triggered by this function require no staked relayer vote, as the report can be programmatically verified by the BTC Parachain.
 
 Specification
 .............
@@ -981,7 +981,7 @@ Events
 RegisterStakedRelayer
 ----------------------
 
-Emit an event stating that a new Staked Relayer was registered and provide information on the Staked Relayer's stake
+Emit an event stating that a new staked relayer was registered and provide information on the Staked Relayer's stake
 
 *Event Signature*
 
@@ -1004,7 +1004,7 @@ Emit an event stating that a new Staked Relayer was registered and provide infor
 DeRegisterStakedRelayer
 -------------------------
 
-Emit an event stating that a Staked Relayer has been de-registered 
+Emit an event stating that a staked relayer has been de-registered 
 
 *Event Signature*
 
@@ -1038,7 +1038,7 @@ Emits an event indicating a status change of the BTC Parachain.
 * ``addErrors``: the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``)
 * ``removeErrors``: the set of to-be-removed ``ErrorCode`` entries
 * ``msg``: the detailed message provided by the function caller
-* ``stakedRelayer``: the account identifier of the Staked Relayer suggesting the update.
+* ``stakedRelayer``: the account identifier of the staked relayer suggesting the update.
 
 
 *Functions*
@@ -1168,7 +1168,7 @@ Emit an event indicating a forced status change of the BTC Parachain, triggered 
 SlashStakedRelayer
 -------------------
 
-Emits an event indicating that a Staked Relayer has been slashed.
+Emits an event indicating that a staked relayer has been slashed.
 
 
 *Event Signature*
@@ -1192,7 +1192,7 @@ Emits an event indicating that a Staked Relayer has been slashed.
 ReportVaultTheft
 -------------------
 
-Emits an event when a Vault has been accused of theft.
+Emits an event when a vault has been accused of theft.
 
 *Event Signature*
 
@@ -1200,7 +1200,7 @@ Emits an event when a Vault has been accused of theft.
 
 *Parameters*
 
-* ``vault``: account identifier of the Vault accused of theft. 
+* ``vault``: account identifier of the vault accused of theft. 
 
 *Functions*
 
@@ -1251,20 +1251,20 @@ Emits an event when a Vault has been accused of theft.
 
 * **Message**: "This txId has already been logged as a theft by the given Vault"
 * **Function**: :ref:`reportVaultTheft`
-* **Cause**: This transaction / Vault combination has already been reported.
+* **Cause**: This transaction / vault combination has already been reported.
 
 
 ``ERR_VAULT_NOT_FOUND``
 
-* **Message**: "There exists no Vault with the given account id"
+* **Message**: "There exists no vault with the given account id"
 * **Function**: :ref:`reportVaultTheft`, :ref:`reportVaultUndercollateralized`
-* **Cause**:  The specified Vault does not exist. 
+* **Cause**:  The specified vault does not exist. 
 
 ``ERR_ALREADY_LIQUIDATED``
 
-* **Message**: "This Vault is already being liquidated"
+* **Message**: "This vault is already being liquidated"
 * **Function**: :ref:`reportVaultTheft`
-* **Cause**:  The specified Vault is already being liquidated.
+* **Cause**:  The specified vault is already being liquidated.
 
 ``ERR_VALID_REDEEM_OR_REPLACE``
 
@@ -1277,7 +1277,7 @@ Emits an event when a Vault has been accused of theft.
 
 * **Message**: "The given transaction is a valid 'UTXO merge' transaction by the accused Vault"
 * **Function**: :ref:`reportVaultTheft`
-* **Cause**: The given transaction represents an allowed "merging" of UTXOs by the accused Vault (no BTC was displaced).
+* **Cause**: The given transaction represents an allowed "merging" of UTXOs by the accused vault (no BTC was displaced).
 
 ``ERR_COLLATERAL_OK``
 * **Message**: "The accused Vault's collateral rate is above the liquidation threshold"

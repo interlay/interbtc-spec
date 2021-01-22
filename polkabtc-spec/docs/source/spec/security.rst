@@ -67,7 +67,7 @@ Enum specifying error codes tracked in ``Errors``.
 
 * ``ORACLE_OFFLINE : 3`` - the :ref:`oracle` experienced a liveness failure (no up-to-date exchange rate available).
 
-* ``LIQUIDATION : 4`` - at least one Vault is either below the ``LiquidationCollateralThreshold`` or has been reported to have stolen BTC. This status implies that any :ref:`redeem-protocol` request will be executed partially in BTC and partially in DOT, until the system is rebalanced (1:1 backing between PolkaBTC and BTC). 
+* ``LIQUIDATION : 4`` - at least one vault is either below the ``LiquidationCollateralThreshold`` or has been reported to have stolen BTC. This status implies that any :ref:`redeem-protocol` request will be executed partially in BTC and partially in DOT, until the system is rebalanced (1:1 backing between PolkaBTC and BTC). 
 
 .. *Substrate*::
   

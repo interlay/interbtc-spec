@@ -96,7 +96,7 @@ Stores the status and information about a single issue request.
 ======================  ==========  =======================================================	
 Parameter               Type        Description                                            
 ======================  ==========  =======================================================
-``vault``               Account     The BTC Parachain address of the Vault responsible for this commit request.
+``vault``               Account     The BTC Parachain address of the vault responsible for this commit request.
 ``opentime``            u256        Block height of opening the request.
 ``griefingCollateral``  DOT         Collateral provided by a user.
 ``amount``              PolkaBTC    Amount of PolkaBTC to be issued.
@@ -141,7 +141,7 @@ Specification
 
 * ``requester``: The user's BTC Parachain account.
 * ``amount``: The amount of PolkaBTC to be issued.
-* ``vault``: The BTC Parachain address of the Vault involved in this issue request.
+* ``vault``: The BTC Parachain address of the vault involved in this issue request.
 * ``griefingCollateral``: The collateral amount provided by the user as griefing protection.
 
 *Returns*
@@ -154,8 +154,8 @@ Specification
 
 *Errors*
 
-* ``ERR_VAULT_NOT_FOUND = "There exists no Vault with the given account id"``: The specified Vault does not exist. 
-* ``ERR_VAULT_BANNED = "The selected Vault has been temporarily banned."``: Issue requests are not possible with temporarily banned Vaults.
+* ``ERR_VAULT_NOT_FOUND = "There exists no vault with the given account id"``: The specified vault does not exist. 
+* ``ERR_VAULT_BANNED = "The selected vault has been temporarily banned."``: Issue requests are not possible with temporarily banned Vaults.
 * ``ERR_INSUFFICIENT_COLLATERAL``: The user did not provide enough griefing collateral.
 
 .. *Substrate* ::
@@ -170,7 +170,7 @@ Preconditions
 Function Sequence
 .................
 
-1. Retrieve the ``vault`` from :ref:`vault-registry`. Return ``ERR_VAULT_NOT_FOUND`` if no Vault can be found.
+1. Retrieve the ``vault`` from :ref:`vault-registry`. Return ``ERR_VAULT_NOT_FOUND`` if no vault can be found.
 
 2. Check that the ``vault`` is currently not banned, i.e., ``vault.bannedUntil == None`` or ``vault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
 
@@ -189,7 +189,7 @@ Function Sequence
     - ``issue.griefingCollateral`` is the griefing collateral provided by the user
     - ``issue.amount`` is the ``amount`` provided as input
     - ``issue.requester`` is the user's account
-    - ``issue.btcAddress`` the Bitcoin address of the Vault as returned in step 3
+    - ``issue.btcAddress`` the Bitcoin address of the vault as returned in step 3
 
 8. Issue the ``RequestIssue`` event with the ``issueId``, the ``requester`` account, ``amount``, ``vault``, and ``btcAddress``.
 
@@ -250,7 +250,7 @@ Function Sequence
 
 .. note:: The accepted Bitcoin transaction format for this function is specified in the BTC-Relay specification and can be found at `https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/intro/accepted-format.html <https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/intro/accepted-format.html>`_.
 
-.. warning:: Ideally the ``SecureCollateralThreshold`` in the VaultRegistry should be high enough to prevent the Vault from entering into the liquidation or auction state.
+.. warning:: Ideally the ``SecureCollateralThreshold`` in the VaultRegistry should be high enough to prevent the vault from entering into the liquidation or auction state.
 
 1. The user prepares the inputs and calls the ``executeIssue`` function.
     
@@ -347,7 +347,7 @@ Emit a ``RequestIssue`` event if a user successfully open a issue request.
 * ``issueId``: A unique hash identifying the issue request. 
 * ``requester``: The user's BTC Parachain account.
 * ``amount``: The amount of PolkaBTC to be issued.
-* ``vault``: The BTC Parachain address of the Vault involved in this issue request.
+* ``vault``: The BTC Parachain address of the vault involved in this issue request.
 * ``btcAddress``: The Bitcoin address of the vault.
 
 *Functions*
@@ -370,7 +370,7 @@ ExecuteIssue
 * ``issueId``: A unique hash identifying the issue request. 
 * ``requester``: The user's BTC Parachain account.
 * ``amount``: The amount of PolkaBTC to be issued.
-* ``vault``: The BTC Parachain address of the Vault involved in this issue request.
+* ``vault``: The BTC Parachain address of the vault involved in this issue request.
 
 *Functions*
 
@@ -405,13 +405,13 @@ Error Codes
 
 ``ERR_VAULT_NOT_FOUND``
 
-* **Message**: "There exists no Vault with the given account id."
+* **Message**: "There exists no vault with the given account id."
 * **Function**: :ref:`requestIssue`
-* **Cause**: The specified Vault does not exist.
+* **Cause**: The specified vault does not exist.
 
 ``ERR_VAULT_BANNED``
 
-* **Message**: "The selected Vault has been temporarily banned."
+* **Message**: "The selected vault has been temporarily banned."
 * **Function**: :ref:`requestIssue`
 * **Cause**:  Issue requests are not possible with temporarily banned Vaults
 
