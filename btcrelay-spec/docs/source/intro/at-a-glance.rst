@@ -1,7 +1,6 @@
 BTC-Relay at a Glance
 =====================
 
-
 Overview
 --------
 BTC-Relay is the key component of the BTC Parachain on Polkadot. It's main task is to allow the Parachain to verify the state of Bitcoin and react to transactions and events. 
@@ -9,7 +8,6 @@ Specifically, BTC-Relay acts as a `Bitcoin SPV/light client <https://bitcoin.org
 Further, it is able to handle forks and follows the chain with the most accumulated Proof-of-Work.
 
 The correct operation of BTC-Relay is crucial: should BTC-Relay cease to operate, the bridge between Polkadot and Bitcoin is interrupted.
-
 
 .. figure:: ../figures/polkaBTC-btcrelay.png
     :alt: Overview of BTC-Relay as a component of the BTC Parachain
@@ -30,7 +28,7 @@ Recommended Background Reading
 
 We also recommend readers, unfamiliar with the problem of cross-chain communication, to study the following papers - in addition to acquiring a base understanding for the operation and security model of distributed ledgers.
 
-+ **XCLAIM: Trustless, Interoperable, Cryptocurrency-backed Assets**. *IEEE Security and Privacy (S&P).* Zamyatin, A., Harz, D., Lind, J., Panayiotou, P., Gervais, A., & Knottenbelt, W. (2019). `[PDF] <https://eprint.iacr.org/2018/643.pdf>`_
-+ **SoK: Communication Across Distributed Ledgers**. *Cryptology ePrint Archiv, Report 2019/1128*. Zamyatin A, Al-Bassam M, Zindros D, Kokoris-Kogias E, Moreno-Sanchez P, Kiayias A, Knottenbelt WJ. (2019) `[PDF] <https://eprint.iacr.org/2019/1128.pdf>`_
-+ **Proof-of-Work Sidechains**. *Workshop on Trusted Smart Contracts, Financial Cryptography* Kiayias, A., & Zindros, D. (2018) `[PDF] <https://eprint.iacr.org/2018/1048.pdf>`_
-+ **Enabling Blockchain Innovations with Pegged Sidechains**. *Back, A., Corallo, M., Dashjr, L., Friedenbach, M., Maxwell, G., Miller, A., Poelstra A., Timon J.,  & Wuille, P*. (2019) `[PDF] <https://blockstream.com/sidechains.pdf>`_
++ **XCLAIM: Trustless, Interoperable, Cryptocurrency-backed Assets**. *IEEE Security and Privacy (S&P).* Zamyatin, A., Harz, D., Lind, J., Panayiotou, P., Gervais, A., & Knottenbelt, W. (2019). `[PDF] <https://eprint.iacr.org/2018/643.pdf>`__
++ **SoK: Communication Across Distributed Ledgers**. *Cryptology ePrint Archiv, Report 2019/1128*. Zamyatin A, Al-Bassam M, Zindros D, Kokoris-Kogias E, Moreno-Sanchez P, Kiayias A, Knottenbelt WJ. (2019) `[PDF] <https://eprint.iacr.org/2019/1128.pdf>`__
++ **Proof-of-Work Sidechains**. *Workshop on Trusted Smart Contracts, Financial Cryptography* Kiayias, A., & Zindros, D. (2018) `[PDF] <https://eprint.iacr.org/2018/1048.pdf>`__
++ **Enabling Blockchain Innovations with Pegged Sidechains**. *Back, A., Corallo, M., Dashjr, L., Friedenbach, M., Maxwell, G., Miller, A., Poelstra A., Timon J.,  & Wuille, P*. (2019) `[PDF] <https://blockstream.com/sidechains.pdf>`__

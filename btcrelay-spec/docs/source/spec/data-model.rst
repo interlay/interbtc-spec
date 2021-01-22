@@ -98,7 +98,7 @@ Structs
 ~~~~~~~
   
 BlockHeader
-..................
+...........
 
 Representation of a Bitcoin block header, as stored in the 80 byte byte representation in the Bitcoin block chain (contains **no additional metadata** - see :ref:`RichBlockHeader`). 
 This struct is only used for parsing the 80 byte block header - not for storage! 
@@ -134,7 +134,7 @@ Parameter               Type       Description
         nonce: u32
   }
 
-.. _blockHeader: 
+.. _RichBlockHeader: 
 
 RichBlockHeader
 ................
@@ -145,14 +145,14 @@ Representation of a Bitcoin block header containing additional metadata. This st
 
 .. tabularcolumns:: |l|l|L|
 
-======================  =========    ========================================================================
+======================  ===========  ========================================================================
 Parameter               Type         Description
-======================  =========    ========================================================================
+======================  ===========  ========================================================================
 ``blockhash``           bytes32      Bitcoin's double SHA256 PoW block hash
 ``blockHeight``         u32          Height of this block in the Bitcoin main chain.
 ``chainRef``            u32          Pointer to the ``BlockChain`` struct in which this block header is contained.
 ``blockHeader``         BlockHeader  Associated parsed ``BlockHeader`` struct 
-======================  =========    ========================================================================
+======================  ===========  ========================================================================
 
 *Substrate* 
 
@@ -231,7 +231,7 @@ The exact choice of data structure is left to the developer. We recommend to use
 
 .. attention:: If two ``BlockChain`` entries have the same ``maxHeight``, do **not** change ordering! 
 
-.. note:: The assumption for ``Chains`` is that, in the majority of cases, block headers will be appended to the *main chain* (longest chain), i.e., the ``BlockChain`` entry at the most significant position in the queue/heap. Similarly, transaction inclusion proofs (:ref:`verifyTransaction`) are only checked against the *main chain*. This means, in the average case lookup complexity will be O(1). Furthermore, block headers can only be appended if they (i) have a valid PoW and (ii) do not yet exist in ``BlockHeaders`` - hence, spamming is very costly and unlikely. Finally, blockchain forks and re-organizations occur infrequently, especially in Bitcoin. In principle, optimizing lookup costs should be prioritized, ideally O(1), while inserting of new items and re-balancing can even be O(n). 
+.. note:: The assumption for ``Chains`` is that, in the majority of cases, block headers will be appended to the *main chain* (longest chain), i.e., the ``BlockChain`` entry at the most significant position in the queue/heap. Similarly, transaction inclusion proofs (:ref:`verifyTransactionInclusion`) are only checked against the *main chain*. This means, in the average case lookup complexity will be O(1). Furthermore, block headers can only be appended if they (i) have a valid PoW and (ii) do not yet exist in ``BlockHeaders`` - hence, spamming is very costly and unlikely. Finally, blockchain forks and re-organizations occur infrequently, especially in Bitcoin. In principle, optimizing lookup costs should be prioritized, ideally O(1), while inserting of new items and re-balancing can even be O(n). 
 
 .. *Substrate* ::
   // ideally:

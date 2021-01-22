@@ -1,12 +1,13 @@
 .. _storage-verification:
 
 Functions: Storage and Verification
-====================================
+===================================
 
 .. _initialize:
 
 initialize
 ----------
+
 Initializes BTC-Relay with the first Bitcoin block to be tracked and initializes all data structures (see :ref:`data-model`).
 
 .. note:: BTC-Relay **does not** have to be initialized with Bitcoin's genesis block! The first block to be tracked can be selected freely. 
@@ -15,7 +16,7 @@ Initializes BTC-Relay with the first Bitcoin block to be tracked and initializes
 
 
 Specification
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
 *Function Signature*
 
@@ -338,7 +339,7 @@ Function Sequence
 
 
 
-.. _verifyTransaction:
+.. _verifyTransactionInclusion:
 
 verifyTransactionInclusion
 --------------------------
@@ -472,7 +473,7 @@ Specification
 * ``rawTx``:  raw Bitcoin transaction including the transaction inputs and outputs.
 * ``paymentValue``: integer value of BTC sent in the (first) *Payment UTXO* of transaction.
 * ``recipientBtcAddress``: 20 byte Bitcoin address of recipient of the BTC in the (first) *Payment UTXO*.
-* ``opReturnId``: 32 byte hash identifier expected in OP_RETURN (see :ref:`_replace-attacks`).
+* ``opReturnId``: 32 byte hash identifier expected in OP_RETURN (see :ref:`replace-attacks`).
 
 *Returns*
 

@@ -64,7 +64,7 @@ If the submitted block header is on a fork, emit an event with the fork’s id, 
 
 *Functions*
 
-* :ref:`storeForkBlockHeader`
+* :ref:`storeBlockHeader`
 
 *Substrate* ::
 
@@ -87,7 +87,7 @@ If the submitted block header on a fork results in a reorganization (fork longer
 
 *Functions*
 
-* :ref:`storeForkBlockHeader`
+* :ref:`storeBlockHeader`
 
 *Substrate* ::
 
