@@ -13,12 +13,12 @@ Step-by-step
 
 1. Precondition: a vault has locked collateral as described in the :ref:`Vault-registry`.
 2. A user executes the :ref:`requestIssue` function to open an issue request on the BTC Parachain. The issue request includes the amount of PolkaBTC the user wants to issue, the selected vault, and a small collateral to prevent :ref:`griefing`.
-3. A user sends the equivalent amount of BTC that he wants to issue as PolkaBTC to the vault on the Bitcoin blockchain. The user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain.
-4. The user executes the :ref:`executeIssue` function on the BTC Parachain. The issue function requires a reference to the previous issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of PolkaBTC into his account.
-5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``IssuePeriod``), the vault is able to call the :ref:`cancelIssue` function to cancel the issue request.
+3. A user sends the equivalent amount of BTC that he wants to issue as PolkaBTC to the vault on the Bitcoin blockchain. 
+4. The user or a vault acting on behalf of the user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain. The user or a vault acting on behalf of the user executes the :ref:`executeIssue` function on the BTC Parachain. The issue function requires a reference to the issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of PolkaBTC into his account.
+5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``IssuePeriod``), the vault is able to call the :ref:`cancelIssue` function to cancel the issue request adn will receive the griefing collateral locked by the user.
 
-VaultRegistry
--------------
+Vault Registry
+--------------
 
 The data access and state changes to the vault registry are documented in :numref:`fig-vault-registry-issue` below.
 
@@ -39,8 +39,9 @@ Data Model
 .. .. warning:: Substrate's built in module to generate random data needs 80 blocks to actually generate random data.
 
 
-Constants
----------
+
+Scalars
+-------
 
 IssuePeriod
 ............
@@ -50,11 +51,6 @@ The time difference in number of blocks between an issue request is created and 
 .. *Substrate* ::
 
   IssuePeriod: T::BlockNumber;
-
-
-
-Scalars
--------
 
 
 IssueGriefingCollateral
@@ -100,9 +96,11 @@ Parameter               Type        Description
 ``opentime``            u256        Block height of opening the request.
 ``griefingCollateral``  DOT         Collateral provided by a user.
 ``amount``              PolkaBTC    Amount of PolkaBTC to be issued.
+``fee``                 PolkaBTC    Fee charged to the user for issuing.
 ``requester``           Account     User account receiving PolkaBTC upon successful issuing.
 ``btcAddress``          bytes[20]   Base58 encoded Bitcoin public key of the Vault.  
 ``completed``           bool        Indicates if the issue has been completed.
+``cancelled``           bool        Indicates if the issue request was cancelled.
 ======================  ==========  =======================================================
 
 .. *Substrate*::
@@ -127,7 +125,7 @@ Functions
 requestIssue
 ------------
 
-A user opens an issue request to create a specific amount of PolkaBTC. The user also has to provide a small amount of collateral.
+A user opens an issue request to create a specific amount of PolkaBTC. 
 When calling this function, a user provides her own parachain account identifier, the to be issued amount of PolkaBTC, and the vault she wants to use in this process (parachain account identifier). Further, she provides some (small) amount of DOT collateral (``griefingCollateral``) to prevent griefing.
 
 Specification
@@ -143,10 +141,6 @@ Specification
 * ``amount``: The amount of PolkaBTC to be issued.
 * ``vault``: The BTC Parachain address of the vault involved in this issue request.
 * ``griefingCollateral``: The collateral amount provided by the user as griefing protection.
-
-*Returns*
-
-* ``issueId``: A unique hash identifying the issue request. 
 
 *Events*
 
@@ -178,9 +172,9 @@ Function Sequence
 
 4. Lock the user's griefing collateral by calling the :ref:`lockCollateral` function with the ``requester`` as the sender and the ``griefingCollateral`` as the amount.
 
-5. Call the VaultRegistry :ref:`increaseToBeIssuedTokens` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. If the vault has not locked enough collateral, throws a ``ERR_EXCEEDING_VAULT_LIMIT`` error. This function returns a ``btcAddress`` that the user should send Bitcoin to.
+5. Call the VaultRegistry :ref:`increaseToBeIssuedTokens` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. This function returns a unique ``btcAddress`` that the user should send Bitcoin to.
 
-6. Generate an ``issueId`` by hashing a nonce from the security module and the address of the user.
+6. Generate an ``issueId`` via :ref:`generateSecureId`.
 
 7. Store a new ``Issue`` struct in the ``IssueRequests`` mapping as ``IssueRequests[issueId] = issue``, where ``issue`` is the ``Issue`` struct as:
 
@@ -216,8 +210,7 @@ Specification
 * ``requester``: the account of the user.
 * ``issueId``: the unique hash created during the ``requestIssue`` function,
 * ``txId``: The hash of the Bitcoin transaction.
-* ``txBlockHeight``: Bitcoin block height at which the transaction is supposedly included.
-* ``MerkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
+* ``merkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
 
