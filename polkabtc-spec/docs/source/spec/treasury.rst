@@ -110,8 +110,6 @@ The ``transfer`` function takes as input the sender, the receiver, and an amount
 
 4. Emit the ``Transfer(sender, receiver, amount)`` event.
 
-5. Return.
-
 .. _mint:
 
 mint
@@ -155,7 +153,6 @@ Function Sequence
 
 1. Increase the ``requester`` Balance by ``amount``, i.e. ``Balances[requester] += amount``.
 2. Emit the ``Mint(requester, amount)`` event.
-3. Return.
 
 .. _lock:
 
@@ -200,7 +197,6 @@ Function Sequence
 1. Checks if the user has a balance higher than or equal to the requested amount, i.e. ``Balances[redeemer] >= amount``. Return ``ERR_INSUFFICIENT_FUNDS`` if the user's balance is too low.
 2. Decreases the user's token balance by the amount and increases the locked tokens balance by amount, i.e. ``Balances[redeemer] -= amount`` and ``LockedBalances[redeemer] += amount``.
 3. Emit the ``Lock`` event.
-4. Return.
 
 .. _burn:
 
@@ -247,9 +243,6 @@ Function Sequence
 1. Check that the ``redeemer``'s locked balance is above the ``amount``. If ``LockedBalance[redeemer] < amount`` (in Substrate ``free_balance``), raise ``ERR_INSUFFICIENT_LOCKED_FUNDS``.
 2. Subtract the Redeemer's locked balance by ``amount``, i.e. ``LockedBalances[redeemer] -= amount``. 
 3. Emit the ``Burn(redeemer, amount)`` event.
-4. Return.
-
-
 
 Events
 ~~~~~~

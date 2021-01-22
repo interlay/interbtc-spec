@@ -266,8 +266,6 @@ The ``registerVault`` function takes as input a Parachain AccountID, a Bitcoin a
 
 3. **[Optional]**: generate a ``registrationID`` which the vault must be include in the OP_RETURN of a new BTC transaction spending BTC from the specified ``btcAddress``. This can be stored in a ``RegisterRequest`` struct, alongside the AccoundID (``vault``) and a timelimit in seconds.
 
-4. Return.
-
 .. _proveValidBTCAddress:
 
 proveValidBTCAddress (Optional)
@@ -404,8 +402,6 @@ Function Sequence
 
 2. Increase the ``collateral`` of the ``Vault``. 
 
-3. Return.
-
 
 .. _withdrawCollateral:
 
@@ -469,8 +465,6 @@ Function Sequence
 5. Call the :ref:`releaseCollateral` function to release the requested ``withdrawAmount`` of DOT collateral to the specified Vault's account (``vault`` AccountId) and deduct the collateral tracked for the Vault in ``Vaults``: ``Vault.collateral - withdrawAmount``.
 
 6. Emit ``WithdrawCollateral`` event
-
-7. Return.
 
 .. _increaseToBeIssuedTokens:
 
@@ -582,8 +576,6 @@ Function Sequence
 
 2. Subtracts ``tokens`` from ``vault.toBeIssuedTokens``.
 
-3. Returns.
-
 
 .. _issueTokens:
 
@@ -633,8 +625,6 @@ Function Sequence
 2. Subtracts ``tokens`` from ``vault.toBeIssuedTokens``.
 
 3. Add ``tokens`` to ``vault.issuedTokens``.
-
-4. Returns.
 
 
 .. _increaseToBeRedeemedTokens:
@@ -686,7 +676,6 @@ Function Sequence
 
 2. Add ``tokens`` to ``vault.toBeRedeemedTokens``.
 
-3. Returns.
 
 .. _decreaseToBeRedeemedTokens:
 
@@ -733,8 +722,6 @@ Function Sequence
 1. Checks if the amount of ``tokens`` less or equal to the amount of ``vault.toBeRedeemedTokens`` tokens. If not, throws ``ERR_INSUFFICIENT_TOKENS_COMMITTED``.
 
 2. Subtract ``tokens`` from ``vault.toBeRedeemedTokens``.
-
-3. Returns.
 
 
 .. _decreaseTokens:
@@ -795,8 +782,6 @@ Function Sequence
     - Call the :ref:`slashCollateral` function with the ``vault`` as ``sender``, ``user`` as ``receiver``, and ``payment`` as ``amount``.
     - Reduce the ``vault.collateral`` by ``payment``.
 
-5. Return.
-
 
 .. _redeemTokens:
 
@@ -844,9 +829,6 @@ Function Sequence
 2. Subtract ``tokens`` from ``vault.toBeRedeemedTokens``.
 
 3. Subtract ``tokens`` from ``vault.issuedTokens``.
-
-4. Returns.
-
 
 .. _redeemTokensPremium:
 
@@ -898,8 +880,6 @@ Function Sequence
    a. Transfer the corresponding amount of Vault's collateral to ``LiquidationVault`` by calling :ref:`slashCollateral` and passing ``vault`` and ``LiquidationVault`` as parameters.
 
    b. Emit ``RedeemTokensPremium(vault, tokens, premiumDOT, redeemer)`` event.
-
-3. Return.
 
 .. _redeemTokensLiquidation:
 
@@ -954,8 +934,6 @@ Function Sequence
 
 6. If ``LiquidationVault.issuedTokens == 0`` (i.e., no more tokens need to be reimbursed in DOT for re-balancing), call :ref:`recoverFromLIQUIDATION` to recover the BTC Parachain from ``LIQUIDATION`` error.
 
-7. Return.
-
 .. _replaceTokens:
 
 replaceTokens
@@ -1008,8 +986,6 @@ Function Sequence
 4. Add ``tokens`` to ``newVault.issuedTokens``.
 
 5. Add ``collateral`` to the ``newVault.collateral``.
-
-6. Return.
 
 
 .. _liquidateVault:
