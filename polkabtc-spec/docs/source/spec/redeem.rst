@@ -288,7 +288,7 @@ Specification
 *Parameters*
 
 * ``redeemId``: the unique hash of the redeem request.
-* ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the Vault, or wishes to keep the PolkaBTC (and retry to redeem with another Vault).
+* ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the vault, or wishes to keep the PolkaBTC (and retry to redeem with another Vault).
 
 
 *Events*

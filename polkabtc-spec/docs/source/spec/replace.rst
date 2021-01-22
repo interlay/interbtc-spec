@@ -99,13 +99,13 @@ Parameter               Type        Description
 ``opentime``            u256        Block height of opening the request.
 ``amount``              PolkaBTC    Amount of BTC / PolkaBTC to be replaced.
 ``griefingCollateral``  DOT         Griefing protection collateral locked by ``oldVault``.
-``newVault``            Account     Account of the new Vault, which accepts the replace request.
+``newVault``            Account     Account of the new vault, which accepts the replace request.
 ``collateral``          DOT         DOT collateral locked by the new Vault.
 ``acceptTime``          u256        Block height at which this replace request was accepted by a new Vault. Serves as start for the countdown until when the old vault must transfer the BTC.
 ``btcAddress``          bytes[20]   Base58 encoded Bitcoin public key of the new Vault.  
 ======================  ==========  =======================================================
 
-.. note:: The ``btcAddress`` parameter is not to be set the the new Vault, but is extracted from the ``Vaults`` mapping in ``VaultRegistry`` for the account of the new Vault.  
+.. note:: The ``btcAddress`` parameter is not to be set the the new vault, but is extracted from the ``Vaults`` mapping in ``VaultRegistry`` for the account of the new Vault.  
 
 .. *Substrate*::
   
@@ -159,7 +159,7 @@ Specification
 
 * ``ERR_VAULT_NOT_FOUND = "There exists no vault with the given account id"``: The specified vault does not exist. 
 * ``ERR_MIN_AMOUNT``: The remaining DOT collateral (converted from the requested BTC replacement value given the current exchange rate) would be below the ``MinimumCollateralVault`` as defined in ``VaultRegistry``.
-* ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated Vault``: The caller of this function is not the associated Vault, and hence not authorized to take this action.
+* ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated Vault``: The caller of this function is not the associated vault, and hence not authorized to take this action.
 * ``ERR_VAULT_BANNED = "The selected vault has been temporarily banned."``: Executing replace requests is not possible with temporarily banned Vaults.
 
 
@@ -237,7 +237,7 @@ Specification
 
 
 * ``ERR_REPLACE_ID_NOT_FOUND =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
-* ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated Vault``: The caller of this function is not the associated Vault, and hence not authorized to take this action.
+* ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated Vault``: The caller of this function is not the associated vault, and hence not authorized to take this action.
 * ``ERR_CANCEL_ACCEPTED_REQUEST = Cannot cancel the ReplaceRequest as it was already accepted by a Vault``: The ``ReplaceRequest`` was already accepted by another vault and can hence no longer be withdrawn.
 
 .. *Substrate* ::
@@ -420,7 +420,7 @@ Function Sequence
 executeReplace
 --------------
 
-The to-be-replaced vault finalizes the replace process by submitting a proof that it transferred the correct amount of BTC to the BTC address of the new Vault, as specified in the ``ReplaceRequest``.
+The to-be-replaced vault finalizes the replace process by submitting a proof that it transferred the correct amount of BTC to the BTC address of the new vault, as specified in the ``ReplaceRequest``.
 This function calls *verifyTransactionInclusion* in :ref:`btc-relay`, proving a transaction inclusion proof (``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof``) as input, as well as *validateTransaction* proving the ``rawTx``, ``replaceId`` and the *newVault*'s Bitcoin address as parameters.
 
 

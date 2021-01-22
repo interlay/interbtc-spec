@@ -96,7 +96,7 @@ AuctionCollateralThreshold
 ..........................
 
 Determines the rate for the collateral rate of Vaults, at which the BTC backed by the vault are opened up for auction to other Vaults. 
-That is, if the vault does not increase its collateral rate, it can be forced to execute the Replace protocol with another Vault, which bids sufficient DOT collateral to cover the issued PolkaBTC tokens.
+That is, if the vault does not increase its collateral rate, it can be forced to execute the Replace protocol with another vault, which bids sufficient DOT collateral to cover the issued PolkaBTC tokens.
 Must to be strictly greater than ``100000``, ``PremiumRedeemThreshold``, and ``LiquidationCollateralThreshold``.
 
 .. *Substrate* :: 
@@ -177,7 +177,7 @@ Parameter                  Type                Description
 ``issuedTokens``           PolkaBTC            Number of PolkaBTC tokens actively issued by this Vault.
 ``toBeRedeemedTokens``     PolkaBTC            Number of PolkaBTC tokens reserved by pending redeem and replace requests. 
 ``collateral``             DOT                 Total amount of collateral provided by this vault (note: "free" collateral is calculated on the fly and updated each time new exchange rate data is received).
-``btcAddress``             Wallet<BtcAddress>  A set of Bitcoin address(es) of this Vault, to be used for issuing of PolkaBTC tokens.
+``btcAddress``             Wallet<BtcAddress>  A set of Bitcoin address(es) of this vault, to be used for issuing of PolkaBTC tokens.
 ``bannedUntil``            u256                Block height until which this vault is banned from being used for Issue, Redeem (except during automatic liquidation) and Replace . 
 ``status``                 VaultStatus         Current status of the vault (Active, Liquidated, CommittedTheft)
 =========================  ==================  ========================================================
@@ -432,7 +432,7 @@ Specification
 * ``ERR_VAULT_NOT_FOUND = "There exists no vault with the given account id"``: The specified vault does not exist. 
 * ``ERR_INSUFFICIENT_FREE_COLLATERAL``: The vault is trying to withdraw more collateral than is currently free. 
 * ``ERR_MIN_AMOUNT``: The amount of locked collateral (free + used) needs to be above ``MinimumCollateralVault``.
-* ``ERR_UNAUTHORIZED``: The caller of the withdrawal is not the specified Vault, and hence not authorized to withdraw funds.
+* ``ERR_UNAUTHORIZED``: The caller of the withdrawal is not the specified vault, and hence not authorized to withdraw funds.
   
 .. *Substrate* ::
 
@@ -993,7 +993,7 @@ Function Sequence
 liquidateVault
 --------------
 
-Liquidates a Vault, transferring all of its token balances to the ``LiquidationVault``, as well as the DOT collateral.
+Liquidates a vault, transferring all of its token balances to the ``LiquidationVault``, as well as the DOT collateral.
 
 .. todo:: Update all pending Issue, Redeem and Replace requests with this vault to point to the ``LiquidationVault`` for handling of slashed collateral.
 
@@ -1428,7 +1428,7 @@ Error Codes
 
 * **Message**: "Origin of the call mismatches authorization."
 * **Function**: :ref:`withdrawCollateral`
-* **Cause**: The caller of the withdrawal is not the specified Vault, and hence not authorized to withdraw funds.
+* **Cause**: The caller of the withdrawal is not the specified vault, and hence not authorized to withdraw funds.
 
 ``ERR_EXCEEDING_VAULT_LIMIT``
 

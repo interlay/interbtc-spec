@@ -6,7 +6,7 @@ Issue
 Overview
 ~~~~~~~~
 
-The Issue module allows as user to create new PolkaBTC tokens. The user needs to request PolkaBTC through the :ref:`requestIssue` function, then send BTC to a Vault, and finally complete the issuing of PolkaBTC by calling the :ref:`executeIssue` function. If the user does not complete the process in time, the vault can cancel the issue request and receive a griefing collateral from the user by invoking the :ref:`cancelIssue` function. Below is a high-level step-by-step description of the protocol.
+The Issue module allows as user to create new PolkaBTC tokens. The user needs to request PolkaBTC through the :ref:`requestIssue` function, then send BTC to a vault, and finally complete the issuing of PolkaBTC by calling the :ref:`executeIssue` function. If the user does not complete the process in time, the vault can cancel the issue request and receive a griefing collateral from the user by invoking the :ref:`cancelIssue` function. Below is a high-level step-by-step description of the protocol.
 
 Step-by-step
 ------------
