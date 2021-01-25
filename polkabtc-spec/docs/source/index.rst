@@ -20,12 +20,14 @@ Welcome to the BTC Parachain documentation!
 
    spec/btc-relay
    spec/collateral
+   spec/fee
    spec/oracle
    spec/issue
    spec/redeem
-   spec/replace
    spec/refund
+   spec/replace
    spec/security
+   spec/sla
    spec/staked-relayers
    spec/treasury
    spec/vaultregistry
