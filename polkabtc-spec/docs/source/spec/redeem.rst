@@ -8,6 +8,8 @@ Overview
 
 The redeem module allows a user to receive BTC on the Bitcoin chain in return for destroying an equivalent amount of PolkaBTC on the BTC Parachain. The process is initiated by a user requesting a redeem with a vault. The vault then needs to send BTC to the user within a given time limit. Next, the vault has to finalize the process by providing a proof to the BTC Parachain that he has send the right amount of BTC to the user. If the vault fails to deliver a valid proof within the time limit, the user can claim an equivalent amount of DOT from the vault's locked collateral to reimburse him for his loss in BTC.
 
+Moreover, as part of the liquidation procedure, users are able to directly exchange PolkaBTC for DOT. To this end, a user is able to execute a special liquidation redeem if one or multiple vaults have been liquidated (:ref:`liquidation-err`).
+
 Step-by-step
 ------------
 
@@ -16,6 +18,7 @@ Step-by-step
 3. The selected vault listens for the ``RequestRedeem`` event emitted by the user. The vault then proceeds to transfer BTC to the address specified by the user in the :ref:`requestRedeem` function including a unique hash in the ``OP_RETURN`` of one output.
 4. The vault executes the :ref:`executeRedeem` function by providing the Bitcoin transaction from step 3 together with the redeem request identifier within the time limit. If the function completes successfully, the locked PolkaBTC are destroyed and the user received its BTC.
 5. Optional: If the user could not receive BTC within the given time (as required in step 4), the user calls :ref:`cancelRedeem` after the redeem time limit. The user is then refunded with the DOT collateral the vault provided.
+6. Optional: If one or more vaults are liquidated, a user can execute a :ref:`liquidationRedeem`.
 
 Security
 --------
@@ -84,21 +87,6 @@ Parameter           Type        Description
 ``btcAddress``      bytes[20]   Base58 encoded Bitcoin public key of the User.  
 ==================  ==========  =======================================================
 
-.. *Substrate*::
-  
-  #[derive(Encode, Decode, Default, Clone, PartialEq)]
-  #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct Redeem<AccountId, BlockNumber, Balance> {
-        vault: AccountId,
-        opentime: BlockNumber,
-        amountPolkaBTC: Balance,
-        amountBTC: Balance,
-        amountDOT: Balance,
-        premiumDOT: Balance,
-        redeemer: AccountId,
-        btcAddress: H160,
-  }
-
 Functions
 ~~~~~~~~~
 
@@ -108,12 +96,11 @@ requestRedeem
 --------------
 
 A user requests to start the redeem procedure.
-This function checks the BTC Parachain status in :ref:`security` and decides how the Redeem process is to be executed. 
+This function checks the BTC Parachain status in :ref:`security` and decides how the redeem process is to be executed. 
 The following modes are possible:
 
 * **Normal Redeem** - no errors detected, full BTC value is to be Redeemed. 
-* **Premium Redeem** - the selected Vault's collateral rate has fallen below ``PremiumRedeemThreshold``. Full BTC value is to be Redeemed, but the user is allocated a premium in DOT (``RedeemPremiumFee``), taken from the Vault's to-be-released collateral.
-* **Liquidation Redeem** - the BTC Parachain is in ``ERROR`` state with ``LIQUIDATION`` error code. The 1:1 backing is being recovered, hence only a part of the BTC value is being redeemed in BTC, the rest is being released in DOT. The user is also allocated the ``PunishmentFee`` in DOT, taken from the Vault's to-be-released collateral as reimbursement for possible opportunity costs.
+* **Premium Redeem** - the selected Vault's collateral rate has fallen below ``PremiumRedeemThreshold``. Full BTC value is to be redeemed, but the user is allocated a premium in DOT (``RedeemPremiumFee``), taken from the Vault's to-be-released collateral.
 
 Specification
 .............
@@ -144,9 +131,79 @@ Specification
 * ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE``: If the user is trying to redeem from a vault that has less BTC locked than requested for redeem.
 * ``ERR_VAULT_BANNED = "The selected vault has been temporarily banned."``: Redeem requests are not possible with temporarily banned Vaults.
 
-.. *Substrate* ::
 
-  fn requestRedeem(origin, amount: Balance, btcAddress: H160, vault: AccountID) -> Result {...}
+Preconditions
+.............
+
+* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0`` or to ``ERROR:1`` with ``Errors`` containing only ``LIQUIDATION``. All other states are disallowed.
+
+Function Sequence
+.................
+
+1. Check if the ``amountPolkaBTC`` is less or equal to the user's balance in the treasury. Return ``ERR_AMOUNT_EXCEEDS_USER_BALANCE`` if this check fails.
+
+2. Retrieve the ``vault`` from :ref:`vault-registry`. Return ``ERR_VAULT_NOT_FOUND`` if no vault can be found.
+
+3. Check that the ``vault`` is currently not banned, i.e., ``vault.bannedUntil == None`` or ``vault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
+
+4. Check if the ``amountPolkaBTC`` is less or equal to the ``issuedTokens`` by the selected vault in the VaultRegistry. Return ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE`` if this check fails.
+
+5. Check that the ``amountPolkaBTC`` is above the Bitcoin dust limit.
+
+6. Call the :ref:`vault-registry` :ref:`increaseToBeRedeemedTokens` function with the ``amountBTC`` of tokens to be redeemed and the ``vault`` identified by its address.
+
+7. Call the :ref:`lock` function in the Treasury to lock the PolkaBTC ``amount`` of the user.
+
+8. Generate a ``redeemId`` using :ref:`generateSecureId`, passing ``redeemer`` as parameter.
+
+9. Check if the Vault's collateral rate is below ``PremiumRedeemThreshold``. If this is the case, set ``premiumDOT = RedeemPremiumFee`` (as per :ref:`vault-registry`). Otherwise set ``premiumDOT = 0``.
+
+10. Store a new ``Redeem`` struct in the ``RedeemRequests`` mapping as ``RedeemRequests[redeemId] = redeem``, where:
+    
+    - ``redeem.vault`` is the requested ``vault``
+    - ``redeem.opentime`` is the current block number
+    - ``redeem.amountPolkaBTC`` is the ``amount`` provided as input
+    - ``redeem.amountBTC = amountBTC``
+    - ``redeem.amountDOT = amountDOT``
+    - ``redeem.premiumDOT = premiumDOT``
+    - ``redeem.redeemer`` is the redeemer account
+    - ``redeem.btcAddress`` the Bitcoin address of the user.
+
+11. Emit the ``RequestRedeem`` event with the ``redeemId``, ``redeemer`` account, ``amount``, ``vault``, and ``btcAddress``.
+
+.. _liquidationRedeem:
+
+liquidationRedeem
+-----------------
+
+A user executes a liquidation redeem that exchanges PolkaBTC for DOT from the `LiquidationVault`. The BTC Parachain is in ``ERROR`` state with ``LIQUIDATION`` error code. The 1:1 backing is being recovered, hence this function burns PolkaBTC without releasing any BTC. The user is also allocated the ``PunishmentFee`` in DOT as reimbursement for possible opportunity costs.
+
+Specification
+.............
+
+*Function Signature*
+
+``liquidationRedeem(redeemer, amountPolkaBTC)``
+
+*Parameters*
+
+* ``redeemer``: address of the user triggering the redeem.
+* ``amountPolkaBTC``: the amount of PolkaBTC to destroy.
+
+*Returns*
+
+* ``redeemId``: A unique hash identifying the redeem request.
+
+*Events*
+
+* ``RequestRedeem(redeemId, redeemer, amount, vault, btcAddress)``
+
+*Errors*
+
+* ``ERR_VAULT_NOT_FOUND = "There exists no vault with the given account id"``: The specified vault does not exist. 
+* ``ERR_AMOUNT_EXCEEDS_USER_BALANCE``: If the user is trying to redeem more BTC than his PolkaBTC balance.
+* ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE``: If the user is trying to redeem from a vault that has less BTC locked than requested for redeem.
+* ``ERR_VAULT_BANNED = "The selected vault has been temporarily banned."``: Redeem requests are not possible with temporarily banned Vaults.
 
 
 Preconditions
@@ -160,48 +217,14 @@ Function Sequence
 
 1. Check if the ``amountPolkaBTC`` is less or equal to the user's balance in the treasury. Return ``ERR_AMOUNT_EXCEEDS_USER_BALANCE`` if this check fails.
 
-2. Retrieve the ``vault`` from :ref:`vault-registry`. Return ``ERR_VAULT_NOT_FOUND`` if no vault can be found.
+2. Check if the ``amountPolkaBTC`` is less or equal to the ``issuedTokens`` by the `LiquidationVault` in the VaultRegistry. Return ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE`` if this check fails.
 
-3. Check that the ``vault`` is currently not banned, i.e., ``vault.bannedUntil == None`` or ``vault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
+3. Call the :ref:`vault-registry` :ref:`redeemTokensLiquidation` function with the ``amountBTC`` of tokens to be redeemed.
 
-4. Check if the ``amountPolkaBTC`` is less or equal to the ``issuedTokens`` by the selected vault in the VaultRegistry. Return ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE`` if this check fails.
+4. Call the :ref:`lock` and :ref:`burn` functions in the Treasury to lock the PolkaBTC ``amount`` of the user.
 
-5. Check if ``ParachainState`` in :ref:`security` is ``ERROR`` with ``LIQUIDATION`` in ``Errors``. 
+5. Emit the ``LiquidationRedeem`` event with the ``redeemer`` account and ``amountBTC``.
 
-   a. If this is the case,
-
-      i ) set ``amountDOTinBTC = amountPolkaBTC * getPartialRedeemFactor() / 100000`` (note: this is due to the representation of fractions as integers between 0 and 100000).
-
-      ii ) Set ``amountBTC = amountPolkaBTC - amountDOTinBTC``.
-
-      iii ) Set ``amountDOT = amountDOTinBTC *`` :ref:`getExchangeRate`.
-
-   b. Otherwise, set ``amountBTC = amount``, ``amountDOT = 0``.
-
-6. Call the :ref:`vault-registry` :ref:`increaseToBeRedeemedTokens` function with the ``amountBTC`` of tokens to be redeemed and the ``vault`` identified by its address.
-
-7. If ``amountDOT > 0``, call :ref:`redeemTokensLiquidation` in :ref:`vault-registry`. This allocates the user ``amountDOT`` using the ``LiquidationVault``'s collateral and updates the ``LiquidationVault``'s polkaBTC balances. 
-
-8. Call the :ref:`lock` function in the Treasury to lock the PolkaBTC ``amount`` of the user.
-
-9. Generate a ``redeemId`` using :ref:`generateSecureId`, passing ``redeemer`` as parameter.
-
-10. Check if the Vault's collateral rate is below ``PremiumRedeemThreshold``. If this is the case, set ``premiumDOT = RedeemPremiumFee`` (as per :ref:`vault-registry`). Otherwise set ``premiumDOT = 0``.
-
-11. Store a new ``Redeem`` struct in the ``RedeemRequests`` mapping as ``RedeemRequests[redeemId] = redeem``, where:
-    
-    - ``redeem.vault`` is the requested ``vault``
-    - ``redeem.opentime`` is the current block number
-    - ``redeem.amountPolkaBTC`` is the ``amount`` provided as input
-    - ``redeem.amountBTC = amountBTC``
-    - ``redeem.amountDOT = amountDOT``
-    - ``redeem.premiumDOT = premiumDOT``
-    - ``redeem.redeemer`` is the redeemer account
-    - ``redeem.btcAddress`` the Bitcoin address of the user.
-
-12. Emit the ``RequestRedeem`` event with the ``redeemId``, ``redeemer`` account, ``amount``, ``vault``, and ``btcAddress``.
-
-13. Return the ``redeemId``. The user stores this for future reference locally.
 
 .. _executeRedeem:
 
@@ -215,15 +238,13 @@ Specification
 
 *Function Signature*
 
-``executeRedeem(vault, redeemId, txId, txBlockHeight, txIndex, merkleProof, rawTx)``
+``executeRedeem(vault, redeemId, txId, merkleProof, rawTx)``
 
 *Parameters*
 
 * ``vault``: the vault responsible for executing this redeem request.
 * ``redeemId``: the unique hash created during the ``requestRedeem`` function,
 * ``txId``: The hash of the Bitcoin transaction.
-* ``txBlockHeight``: Bitcoin block height at which the transaction is supposedly included.
-* ``txIndex``: Index of transaction in the Bitcoin block’s transaction Merkle tree.
 * ``MerkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
@@ -239,10 +260,6 @@ Specification
 * ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated vault``: The caller of this function is not the associated vault, and hence not authorized to take this action.
 
 
-.. *Substrate* ::
-
-  fn executeRedeem(origin, redeemId: T::H256, txId: T::H256, txBlockHeight: U256, txIndex: u64, merkleProof: Bytes, rawTx: Bytes) -> Result {...}
-
 Preconditions
 .............
 
@@ -250,8 +267,6 @@ Preconditions
 
 Function Sequence
 .................
-
-.. note:: The accepted Bitcoin transaction format for this function is specified in the BTC-Relay specification and can be found at `https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/intro/accepted-format.html <https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/intro/accepted-format.html>`_.
 
 1. Check if the ``vault`` is the ``redeem.vault``. Return ``ERR_UNAUTHORIZED`` if called by any account other than the associated ``redeem.vault``.
 2. Check if the ``redeemId`` exists. Return ``ERR_REDEEM_ID_NOT_FOUND`` if not found.
@@ -304,10 +319,6 @@ Specification
 * ``ERR_REDEEM_ID_NOT_FOUND``: The ``redeemId`` cannot be found.
 * ``ERR_REDEEM_PERIOD_NOT_EXPIRED``: Raises an error if the time limit to call ``executeRedeem`` has not yet passed.
 
-.. *Substrate* ::
-
-  fn cancelRedeem(origin, redeemId: T::H256, reimburse: bool) -> Result {...}
-
 Preconditions
 .............
 
@@ -342,38 +353,34 @@ Function Sequence
 7. Emit a ``CancelRedeem`` event with the ``redeemer`` account identifier and the ``redeemId``.
 
 
-.. _getPartialRedeemFactor:
-
-getPartialRedeemFactor
-----------------------
-
-Calculates the fraction of BTC to be redeemed in DOT when the BTC Parachain state is in ``ERROR`` state due to a ``LIQUIDATION`` error.
-
-Specification
-.............
-
-*Function Signature*
-
-``getPartialRedeemFactor()``
-
-*Returns*
-
-* ``redeemFactor``: integer value between 0 an 10000 indicating the percentage of BTC to be redeemed in DOT. 
-
-.. *Substrate* ::
-
-  fn getPartialRedeemFactor() -> U128 {...}
-
-Function Sequence
-.................
-
-1. Get the current exchange rate (``exchangeRate``) using :ref:`getExchangeRate`.
-
-2. Calculate ``totalLiquidationValue =`` :math:`\sum_{v}^{LiquidationList} (\mathit{v.issuedTokens} \cdot \mathit{exchangeRate} - \mathit{v.collateral})`
-
-3. Retrieve the ``TotalSupply`` of PolkaBTC from :ref:`treasury-module`.
-
-4. Return ``totalLiquidationValue / TotalSupply``
+.. .. _getPartialRedeemFactor:
+.. 
+.. getPartialRedeemFactor
+.. ----------------------
+.. 
+.. Calculates the fraction of BTC to be redeemed in DOT when the BTC Parachain state is in ``ERROR`` state due to a ``LIQUIDATION`` error.
+.. 
+.. Specification
+.. .............
+.. 
+.. *Function Signature*
+.. 
+.. ``getPartialRedeemFactor()``
+.. 
+.. *Returns*
+.. 
+.. * ``redeemFactor``: integer value between 0 an 10000 indicating the percentage of BTC to be redeemed in DOT. 
+.. 
+.. Function Sequence
+.. .................
+.. 
+.. 1. Get the current exchange rate (``exchangeRate``) using :ref:`getExchangeRate`.
+.. 
+.. 2. Calculate ``totalLiquidationValue =`` :math:`\sum_{v}^{LiquidationList} (\mathit{v.issuedTokens} \cdot \mathit{exchangeRate} - \mathit{v.collateral})`
+.. 
+.. 3. Retrieve the ``TotalSupply`` of PolkaBTC from :ref:`treasury-module`.
+.. 
+.. 4. Return ``totalLiquidationValue / TotalSupply``
 
 
 Events
@@ -403,6 +410,24 @@ Emit an event when a redeem request is created. This event needs to be monitored
 .. *Substrate* ::
 
   RequestRedeem(H256, AccountId, Balance, H160, AccountId);
+
+LiquidationRedeem
+-----------------
+
+Emit an event when a user creates a liquidation redeem.
+
+*Event Signature*
+
+``LiquidationRedeem(redeemer, amountPolkaBTC)``
+
+*Parameters*
+
+* ``redeemer``: address of the user triggering the redeem.
+* ``amountPolkaBTC``: the amount of PolkaBTC to destroy and BTC to receive.
+
+*Functions*
+
+* ref:`liquidationRedeem`
 
 ExecuteRedeem
 -------------
@@ -458,13 +483,13 @@ Error Codes
 ``ERR_VAULT_NOT_FOUND``
 
 * **Message**: "There exists no vault with the given account id."
-* **Function**: :ref:`requestRedeem`
+* **Function**: :ref:`requestRedeem`, :ref:`liquidationRedeem`
 * **Cause**: The specified vault does not exist.
 
 ``ERR_AMOUNT_EXCEEDS_USER_BALANCE``
 
 * **Message**: "The requested amount exceeds the user's balance."
-* **Function**: :ref:`requestRedeem`
+* **Function**: :ref:`requestRedeem`, :ref:`liquidationRedeem`
 * **Cause**: If the user is trying to redeem more BTC than his PolkaBTC balance.
 
 ``ERR_VAULT_BANNED``
@@ -476,7 +501,7 @@ Error Codes
 ``ERR_AMOUNT_EXCEEDS_VAULT_BALANCE``
 
 * **Message**: "The requested amount exceeds the vault's balance."
-* **Function**: :ref:`requestRedeem`
+* **Function**: :ref:`requestRedeem`, :ref:`liquidationRedeem`
 * **Cause**: If the user is trying to redeem from a vault that has less BTC locked than requested for redeem.
 
 ``ERR_REDEEM_ID_NOT_FOUND``

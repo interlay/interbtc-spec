@@ -12,7 +12,7 @@ Overview
 ~~~~~~~~
 
 Failure Modes
---------------
+-------------
 
 The BTC Parachain can enter into different failure modes, depending on the occurred error.
 An overview is provided in the figure below.
@@ -26,6 +26,46 @@ An overview is provided in the figure below.
 More details on the exact failure states and error codes are provided in the Specification part of this module description.
 
 Failure handling methods calls are **restricted**, i.e., can only be called by pre-determined roles.
+
+.. _no-data-err:
+
+Missing Data in BTC-Relay
+-------------------------
+
+It was not possible to fetch transactional data for a block header submitted to :ref:`btc-relay`. 
+This can happen if a staked relayer detects a BTC header inside the BTC-Relay that the relayer does not yet have in its Bitcoin full node.
+
+**Error code:** ``NO_DATA_BTC_RELAY``
+
+.. _invalid-btc-relay-err:
+
+Invalid BTC-Relay
+-----------------
+
+An invalid transaction was detected in a block header submitted to :ref:`btc-relay`. 
+
+**Error code:** ``INVALID_BTC_RELAY``
+
+
+.. _liquidation-err:
+
+Liquidation
+-----------
+
+The entire system collateralization is below the ``LiquidationCollateralThreshold``.
+
+**Error code:** ``LIQUIDATION``
+
+
+.. _oracle-offline-err:
+
+Oracle Offline
+--------------
+
+The :ref:`oracle` experienced a liveness failure (no up-to-date exchange rate available).
+
+**Error code:** ``ORACLE_OFFLINE``
+
 
 Data Model
 ~~~~~~~~~~
@@ -43,41 +83,21 @@ Indicates ths status of the BTC Parachain.
 
 * ``SHUTDOWN: 2`` - BTC Parachain operation fully suspended. This can only be achieved via manual intervention by the Governance Mechanism.
 
-.. *Substrate* 
-
-::
-
-  enum StatusCode {
-        RUNNING = 0,
-        ERROR = 1,
-        SHUTDOWN = 2,
-  }
-
 ErrorCode
 .........
 
 Enum specifying error codes tracked in ``Errors``.
 
 
-* ``NONE : 0`` - no error has occurred (used to simplify implementation). 
+* ``NONE: 0``
 
-* ``NO_DATA_BTC_RELAY: 1`` - it was not possible to fetch transactional data for a block header submitted to :ref:`btc-relay`. 
+* ``NO_DATA_BTC_RELAY: 1``
 
-* ``INVALID_BTC_RELAY : 2`` - an invalid transaction was detected in a block header submitted to :ref:`btc-relay`. 
+* ``INVALID_BTC_RELAY: 2``
 
-* ``ORACLE_OFFLINE : 3`` - the :ref:`oracle` experienced a liveness failure (no up-to-date exchange rate available).
+* ``ORACLE_OFFLINE: 3``
 
-* ``LIQUIDATION : 4`` - at least one vault is either below the ``LiquidationCollateralThreshold`` or has been reported to have stolen BTC. This status implies that any :ref:`redeem-protocol` request will be executed partially in BTC and partially in DOT, until the system is rebalanced (1:1 backing between PolkaBTC and BTC). 
-
-.. *Substrate*::
-  
-  enum ErrorCode {
-        NONE = 0
-        NO_DATA_BTC_RELAY = 1,
-        INVALID_BTC_RELAY = 2,
-        ORACLE_OFFLINE = 3,
-        LIQUIDATION = 4
-  }
+* ``LIQUIDATION: 4``
 
 
 Data Storage
@@ -140,7 +160,7 @@ Specification
 
 *Parameters*
 
-* ``account``: Parachain account identifier (links this identifier to the AccountId associated with the process where this secure id is to be used, e.g. the user calling :ref:`requestIssue`).
+* ``account``: Parachain account identifier (links this identifier to the AccountId associated with the process where this secure id is to be used, e.g., the user calling :ref:`requestIssue`).
 
 *Returns*
 

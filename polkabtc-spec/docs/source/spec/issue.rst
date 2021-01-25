@@ -192,9 +192,6 @@ Function Sequence
 
 8. Issue the ``RequestIssue`` event with the ``issueId``, the ``requester`` account, ``amount``, ``vault``, and ``btcAddress``.
 
-9. Return the ``issueId``. The user stores this for future reference and the next steps, locally.
-
-
 
 .. _executeIssue:
 
