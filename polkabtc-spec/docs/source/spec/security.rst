@@ -29,8 +29,8 @@ Failure handling methods calls are **restricted**, i.e., can only be called by p
 
 .. _no-data-err:
 
-Missing Data in BTC-Relay
--------------------------
+Missing Data in BTC-Relay (No Data)
+-----------------------------------
 
 It was not possible to fetch transactional data for a block header submitted to :ref:`btc-relay`. 
 This can happen if a staked relayer detects a BTC header inside the BTC-Relay that the relayer does not yet have in its Bitcoin full node.

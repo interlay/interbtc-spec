@@ -427,7 +427,7 @@ executeReplace
 --------------
 
 The to-be-replaced vault finalizes the replace process by submitting a proof that it transferred the correct amount of BTC to the BTC address of the new vault, as specified in the ``ReplaceRequest``.
-This function calls *verifyTransactionInclusion* in :ref:`btc-relay`, proving a transaction inclusion proof (``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof``) as input, as well as *validateTransaction* proving the ``rawTx``, ``replaceId`` and the *newVault*'s Bitcoin address as parameters.
+This function calls *verifyTransactionInclusion* in :ref:`btc-relay`, proving a transaction inclusion proof (``txid``, ``txBlockHeight``, and ``merkleProof``) as input, as well as *validateTransaction* proving the ``rawTx``, ``replaceId`` and the *newVault*'s Bitcoin address as parameters.
 
 
 Specification
@@ -435,7 +435,7 @@ Specification
 
 *Function Signature*
 
-``executeReplace(newVault, replaceId, txId, txBlockHeight, txIndex, merkleProof, rawTx)``
+``executeReplace(newVault, replaceId, txId, txBlockHeight, merkleProof, rawTx)``
 
 *Parameters*
 
@@ -543,15 +543,13 @@ Function Sequence
 
 2. Check that the current Parachain block height minus the ``ReplacePeriod`` is greater than the ``opentime`` of the ``ReplaceRequest``. Throw ``ERR_PERIOD_NOT_EXPIRED`` if false.
 
-3. Retrieve the ``Vault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such vault can be found.
+3. Transfer the *oldVault*'s griefing collateral associated with this ``ReplaceRequests`` to the *newVault* by calling :ref:`slashCollateral` and passing the ``oldVault``, ``newVault`` and ``griefingCollateral`` as parameters.
 
-4. Transfer the *oldVault*'s griefing collateral associated with this ``ReplaceRequests`` to the *newVault* by calling :ref:`slashCollateral` and passing the ``oldVault``, ``newVault`` and ``griefingCollateral`` as parameters.
+4. Call the :ref:`decreaseToBeRedeemedTokens` function in the VaultRegistry for the *oldVault*.
 
-5. Call the :ref:`decreaseToBeRedeemedTokens` function in the VaultRegistry for the *oldVault*.
+5. Remove the ``ReplaceRequest`` from ``ReplaceRequests``.
 
-6. Remove the ``ReplaceRequest`` from ``ReplaceRequests``.
-
-7. Emit a ``CancelReplace(newVault, oldVault, replaceId)`` event.
+6. Emit a ``CancelReplace(newVault, oldVault, replaceId)`` event.
  
 
 Events

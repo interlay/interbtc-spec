@@ -283,4 +283,4 @@ Errors
 
 * **Message**: "The sender's collateral balance is below the requested amount."
 * **Function**: :ref:`releaseCollateral` | :ref:`slashCollateral`
-* **Cause**: he ``sender`` has less collateral stored than the requested ``amount``.
+* **Cause**: the ``sender`` has less collateral stored than the requested ``amount``.
