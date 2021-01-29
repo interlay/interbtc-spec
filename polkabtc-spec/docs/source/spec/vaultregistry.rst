@@ -323,7 +323,7 @@ Function Sequence
 
 .. _registerAddress:
 
-RegisterAddress
+registerAddress
 ---------------
 
 Add a new BTC address to the vault's wallet.
@@ -353,7 +353,7 @@ Function Sequence
  
 .. _updatePublicKey:
 
-UpdatePublicKey
+updatePublicKey
 ---------------
 
 The vault adds a new public key as a basis for the :ref:`okd`.
@@ -1138,7 +1138,7 @@ Emit an event stating how much new (``newCollateral``), total collateral (``tota
 
 *Functions*
 
-* ref:`lockAdditionalCollateral`
+* :ref:`lockAdditionalCollateral`
 
 .. *Substrate* ::
 
