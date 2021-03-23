@@ -33,17 +33,18 @@ The data access and state changes to the vault registry are documented in :numre
 
     The issue protocol interacts with three functions in the vault registry that handle updating the different token balances.
 
+Fee Model
+---------
+
+Following additions are added if the fee model is integrated.
+
+- Issue fees are paid by users in PolkaBTC when executing the request. The fees are transferred to the Parachain Fee Pool.
+- If an issue request is executed, the user’s griefing collateral is returned.
+- If an issue request is canceled, the vault assigned to this issue request receives the griefing collateral.
+
 
 Data Model
 ~~~~~~~~~~
-
-.. .. todo:: We need to handle replay attacks. Idea: include a short unique hash, e.g. the ``issueId`` and the ``RedeemId`` in the BTC transaction in the ``OP_RETURN`` field. That way, we can check if it is the correct transaction.
-
-.. .. todo:: The hash creation for ``issueId`` and ``RedeemId`` must be unique. Proposal: use a combination of Substrate's ``random_seed()`` method together with a ``nonce`` and the ``AccountId`` of a CbA-user and CbA-Redeemer. 
-
-.. .. warning:: Substrate's built in module to generate random data needs 80 blocks to actually generate random data.
-
-
 
 Scalars
 -------

@@ -47,6 +47,14 @@ The data access and state changes to the vault registry are documented in :numre
     
     The replace module interacts with three functions in the vault registry to handle updating token balances of vaults.
 
+Fee Model
+---------
+
+Following additions are added if the fee model is integrated.
+
+- If a replace request is canceled, the griefing collateral is transferred to the new_vault.
+- If a replace request is executed, the griefing collateral is transferred to the old_vault.
+
 Data Model
 ~~~~~~~~~~
 

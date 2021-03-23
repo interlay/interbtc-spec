@@ -36,6 +36,17 @@ The data access and state changes to the vault registry are documented in :numre
 
     The redeem module interacts through three different functions with the vault registry.
 
+Fee Model
+---------
+
+Following additions are added if the fee model is integrated.
+
+- Redeem fees are paid by users in PolkaBTC when executing the request. The fees are transferred to Parachain Fee Pool.
+- If a redeem request is canceled, the user has two choices: 
+    - If the user selects to reimburse, the DOT equivalent of PolkaBTC at the current exchange rate plus the punishment fee is deducted from the vault and transferred to the user. 
+    - If the user does not reimburse, the punishment fee is deducted from the vaults collateral and transferred to the user.
+    - NOTE: with the SLA model additions, the punishment fee paid to the user stays constant (i.e., the user always receives the punishment fee of e.g. 10%). However, vaults may be slashed more than the punishment fee, as determined by the SLA. The surplus slashed collateral is routed into the Parachain Fee pool and handled like regular fee income. For example, if the vault is punished with 20%, 10% punishment fee is paid to the user and 10% is paid to the fee pool.
+
 Data Model
 ~~~~~~~~~~
 
