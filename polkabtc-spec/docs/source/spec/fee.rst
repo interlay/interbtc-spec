@@ -162,10 +162,14 @@ Function Sequence
 distributeRelayerRewards
 ------------------------
 
-Specifies the distribution of fees in the Staked Relayer fee pool among individual Staked Relayers.
+Specifies the distribution of fees in the Staked Relayer fee pool among individual Staked Relayers. This function can implement different reward distributions. We differentiate if the BTC-Parachain operates with the SLA model or without.
 
-- Initial values:
+- SLA model deactivated: 
     - 100% of Staked Relayer fees distributed among active relayers proportional to their locked stake. 
+- SLA model activated: 
+    - We distribute rewards to Staked Relayers, based on a scoring system which takes into account their SLA and locked stake. 
+    - :math:`\text{score(relayer)} = \text{relayer.sla} * \text{relayer.stake}`
+    - :math:`\text{reward(relayer)} = \text{totalReward} / \text{totalRelayerScore} * \text{relayer.score}` where totalReward is the amount of fees currently distributed and totalRelayerScore is the sum of the scores of all active Staked Relayers.
 
 Specification
 .............
@@ -179,7 +183,7 @@ Function Sequence
 .................
 
 1. Calculate the fees assigned to all Staked Relayers using the `ParachainFeePool` and the `StakedRelayerRewards`.
-2. Calculate the fees for every Staked Relayer according to the initial values.
+2. Calculate the fees for every Staked Relayer according to the reward distribution mode (SLA model activated/deactivated).
 3. Update the `TotalRewards` mapping for the Staked Relayer.
 
 .. _withdrawFees:

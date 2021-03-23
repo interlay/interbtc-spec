@@ -21,10 +21,6 @@ GRANULARITY
 
 The granularity of the ``SecureCollateralThreshold``, ``AuctionCollateralThreshold``, ``LiquidationCollateralThreshold``, and ``PunishmentFee``.
 
-.. *Substrate* ::
-
-  GRANULARITY: u128 = 5;
-
 
 Scalars
 -------
@@ -36,10 +32,6 @@ The minimum collateral (DOT) a vault needs to provide to participate in the issu
 
 .. note:: This is a protection against spamming the protocol with very small collateral amounts.
 
-.. *Substrate* :: 
-
-    MinimumCollateralVault: Balance;
-
 
 PunishmentFee
 .............
@@ -49,18 +41,10 @@ The punishment is the equivalent value of BTC in DOT (valued at the current exch
 For example, if the ``PunishmentFee`` is set to 50000, it is equivalent to 50%.
 
 
-.. *Substrate* ::
-
-  PunishmentFee: u128;
-
 PunishmentDelay
 .................
 
 If a vault fails to execute a correct redeem or replace, it is *temporarily* banned from further issue, redeem or replace requests. 
-
-.. *Substrate* ::
-
-  PunishmentDelay: BlockNumber;
 
 
 RedeemPremiumFee
@@ -68,10 +52,6 @@ RedeemPremiumFee
 
 If a vault is running low on collateral and falls below ``PremiumRedeemThreshold``, users are allocated a premium in DOT when redeeming with the vault - as defined by this parameter.
 For example, if the ``RedeemPremiumFee`` is set to 5000, it is equivalent to 5%.
-
-.. *Substrate* ::
-
-  RedeemPremiumFee: u128;
 
 SecureCollateralThreshold
 ..........................
@@ -85,10 +65,6 @@ The maximum amount of PolkaBTC a vault is able to support during the issue proce
 
 .. note:: As an example, assume we use ``DOT`` as collateral, we issue ``PolkaBTC`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureCollateralThreshold`` is 200%, i.e. a vault has to provide two-times the amount of collateral to back an issue request. Now let's say the vault deposits 400 ``DOT`` as collateral. Then this vault can back at most 2.5 PolkaBTC as: :math:`400 * (1/80) / 2 = 2.5`.
 
-
-.. *Substrate* :: 
-    
-    SecureCollateralThreshold: u128;
 
 AuctionCollateralThreshold
 ..........................
