@@ -41,6 +41,14 @@ Welcome to the BTC Parachain documentation!
 
 .. toctree::
    :maxdepth: 2
+   :caption: Economics
+
+   economics/incentives
+   economics/fees
+   economics/SLA
+
+.. toctree::
+   :maxdepth: 2
    :caption: All the rest
    
    other/license
