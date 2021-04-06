@@ -51,7 +51,7 @@ Scalars
 IssuePeriod
 ............
 
-The time difference in number of blocks between an issue request is created and required completion time by a user. The issue period has an upper limit to prevent griefing of vault collateral.
+The time difference between when an issue request is created and required completion time by a user. Concretely, this period is the amount by which :ref:`activeBlockCount` is allowed to increase before the issue is considered to be expired. The period has an upper limit to prevent griefing of vault collateral.
 
 .. *Substrate* ::
 
@@ -246,7 +246,7 @@ Function Sequence
 .. note:: Ideally the ``SecureCollateralThreshold`` in the VaultRegistry should be high enough to prevent the vault from entering into the liquidation or auction state in-between the request and execute.
 
 1. Checks if the ``issueId`` exists. Return ``ERR_ISSUE_ID_NOT_FOUND`` if not found. Else, loads the according issue request struct as ``issue``.
-2. Checks if the current block height minus the ``IssuePeriod`` is smaller than the ``issue.opentime``. If this condition is false, throws ``ERR_COMMIT_PERIOD_EXPIRED``.
+2. Checks if the issue has expired by calling :ref:`hasExpired` in the Security module. If true, this throws ``ERR_COMMIT_PERIOD_EXPIRED``.
 3. Verify the transaction.
 
     a. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
@@ -302,7 +302,7 @@ Function Sequence
 
 1. Check if an issue with id ``issueId`` exists. If not, throw ``ERR_ISSUE_ID_NOT_FOUND``. Otherwise, load the issue request  as ``issue``.
 
-2. Check if the expiry time of the issue request is up, i.e., ``issue.opentime + IssuePeriod < now``. If the time is not up, throw ``ERR_TIME_NOT_EXPIRED``.
+2. Check if the issue has expired by calling :ref:`hasExpired` in the Security module, and throw ``ERR_TIME_NOT_EXPIRED`` if not.
 
 3. Check if the ``issue.completed`` field is set to true. If yes, throw ``ERR_ISSUE_COMPLETED``.
 

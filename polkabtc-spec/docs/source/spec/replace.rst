@@ -69,7 +69,8 @@ The minimum collateral (DOT) a vault requesting a replacement needs to provide a
 ReplacePeriod
 .............
 
-The time difference in number of blocks between a replace request is accepted by another vault and the transfer of BTC (and submission of the transaction inclusion proof) by the to-be-replaced Vault. The replace period has an upper limit to prevent griefing of vault collateral.
+The time difference between a replace request is accepted by another vault and the transfer of BTC (and submission of the transaction inclusion proof) by the to-be-replaced Vault. Concretely, this period is the amount by which :ref:`activeBlockCount` is allowed to increase before the redeem is considered to be expired. The replace period has an upper limit to prevent griefing of vault collateral.
+
 
 .. *Substrate* ::
 
@@ -475,7 +476,7 @@ Function Sequence
 
 1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_REPLACE_ID_NOT_FOUND`` error if no such ``ReplaceRequest`` request was found.
 
-2. Check that the current Parachain block height minus the ``ReplacePeriod`` is smaller than the ``opentime`` of the ``ReplaceRequest``. Throw ``ERR_REPLACE_PERIOD_EXPIRED`` if false.
+2. Check if the replace has expired by calling :ref:`hasExpired` in the Security module. Throw ``ERR_REPLACE_PERIOD_EXPIRED`` if true.
 
 3. Retrieve the ``Vault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such vault can be found.
 
@@ -541,7 +542,7 @@ Function Sequence
 
 .. note:: If a replace request has been executed successfully, it has been deleted and this error will be thrown.
 
-2. Check that the current Parachain block height minus the ``ReplacePeriod`` is greater than the ``opentime`` of the ``ReplaceRequest``. Throw ``ERR_PERIOD_NOT_EXPIRED`` if false.
+2. Check if the replace has expired by calling :ref:`hasExpired` in the Security module. Throw ``ERR_PERIOD_NOT_EXPIRED`` if false.
 
 3. Transfer the *oldVault*'s griefing collateral associated with this ``ReplaceRequests`` to the *newVault* by calling :ref:`slashCollateral` and passing the ``oldVault``, ``newVault`` and ``griefingCollateral`` as parameters.
 
