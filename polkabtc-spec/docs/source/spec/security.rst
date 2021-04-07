@@ -6,6 +6,7 @@ Security
 The Security module is responsible for tracking the status of the BTC Parachain, flagging failures such as liveness and safety failures of :ref:`btc-relay` or crashes of the :ref:`oracle`.
 Specifically, this module provides a central interface for all other modules to check whether specific features should be disabled to prevent financial damage to users (e.g. stop :ref:`issue-protocol` if no reliable price data is available).
 In addition, the Security module provides functions to handle security critical operations, such as generating secure identifiers for replay protection in :ref:`issue-protocol`, :ref:`redeem-protocol`, and :ref:`replace-protocol`. 
+Finally, the Security module keeps track of the ``active_block_number``, which is a counter variable that increments in every block where there are no active errors. This variable is used throughout the project to keep track of durations,
 
 
 Overview
@@ -138,7 +139,12 @@ Integer increment-only counter, used to prevent collisions when generating ident
   Nonce: U256;
 
 
+.. _activeBlockCount:
 
+ActiveBlockCount
+................
+
+A counter variable that increments every block where the parachain status is ``RUNNING:0``. This variable is used to keep track of durations, such as issue/redeem/replace expiry. This is used instead of the block number because if the parachain status is not ``RUNNING:0``, no payment proofs can be submitted, so it would not be fair towards users and vaults to continue counting down the (expiry) periods. 
 
 
 Functions
@@ -206,6 +212,39 @@ Function Sequence
 
 1. ``StatusCounter++``
 2. Return ``StatusCounter``
+
+
+.. _hasExpired:
+
+hasExpired
+----------------
+
+Checks if the given period has expired since the given starting point. This calculation is based on the :ref:`activeBlockCount`.
+
+Specification
+.............
+
+*Function Signature*
+
+``has_expired(opentime, period)``
+
+*Parameters*
+
+* ``opentime``: the :ref:`activeBlockCount` at the time the issue/redeem/replace was opened.
+
+* ``period``: the number of blocks the user or vault has to complete the action.
+
+
+*Returns*
+
+* ``true`` if the period has expired
+
+Function Sequence
+.................
+
+1. Add the ``opentime`` and ``period``.
+2. Compare this against :ref:`activeBlockCount`.
+
 
 
 Events

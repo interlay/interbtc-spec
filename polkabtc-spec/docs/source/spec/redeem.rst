@@ -45,7 +45,7 @@ Scalars
 RedeemPeriod
 ............
 
-The time difference in number of blocks between a redeem request is created and required completion time by a vault. The redeem period has an upper limit to ensure the user gets his BTC in time and to potentially punish a vault for inactivity or stealing BTC.
+The time difference between when an redeem request is created and required completion time by a vault. Concretely, this period is the amount by which :ref:`activeBlockCount` is allowed to increase before the redeem is considered to be expired. The period has an upper limit to ensure the user gets his BTC in time and to potentially punish a vault for inactivity or stealing BTC.
 
 .. *Substrate* ::
 
@@ -270,7 +270,7 @@ Function Sequence
 
 1. Check if the ``vault`` is the ``redeem.vault``. Return ``ERR_UNAUTHORIZED`` if called by any account other than the associated ``redeem.vault``.
 2. Check if the ``redeemId`` exists. Return ``ERR_REDEEM_ID_NOT_FOUND`` if not found.
-3. Check if the current block height minus the ``RedeemPeriod`` is smaller than the ``opentime`` specified in the ``Redeem`` struct. If this condition is false, throws ``ERR_REDEEM_PERIOD_EXPIRED``.
+3. Check if the redeem has expired by calling :ref:`hasExpired` in the Security module. If true, throws ``ERR_REDEEM_PERIOD_EXPIRED``.
 4. Verify the transaction.
 
     - Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txId``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
@@ -330,7 +330,7 @@ Function Sequence
 
 1. Check if an redeem with id ``redeemId`` exists. If not, throw ``ERR_REDEEM_ID_NOT_FOUND``. Otherwise, load the redeem request ``redeem = RedeemRequests[redeemId]``.
 
-2. Check if the expiry time of the redeem request is up, i.e ``redeem.opentime + RedeemPeriod < now``. If the time is not up, throw ``ERR_REDEEM_PERIOD_NOT_EXPIRED``.
+2. Check if the redeem has expired by calling :ref:`hasExpired` in the Security module. If false, throw ``ERR_REDEEM_PERIOD_NOT_EXPIRED``.
 
 3. Retrieve the current BTC-DOT exchange rate (``exchangeRate``) via :ref:`getExchangeRate` from the :ref:`oracle`.
 
