@@ -33,16 +33,21 @@ Undesired Actions
 
 - **Fail Redeem**: redeem not executed on time (or at all) or with the incorrect amount (more specific: fail to provide inclusion proof for BTC payment to BTC-Relay on time)
 
-
-
 Staked Relayers
 ---------------
 
 Desired Actions
 ...............
 
+- **Submit BTC block header**: submit a valid Bitcoin block header, that later becomes (**TODO:**define delay to not punish "good" fork submissions) part of the main chain. 
+  - [Optional]: even if the block header already is stored, an additional confirmation is treated as beneficial action. This needs to be **time-bounded**. Otherwise, resubmitting old blocks allows to improve SLA, while adding no security and spamming the Parachain)
+- **Correctly report theft**: correctly report a Vault for moving BTC outside of the protocol rules (i.e., viewed as theft attempt). 
+  - Note: TX inclusion proof must pass (TODO: check how this is currently implemented). 
+
 Undesired Actions
 .................
+
+No actions with SLA impact.
 
 Non-SLA Actions
 ~~~~~~~~~~~~~~~
@@ -73,14 +78,32 @@ Undesired Actions
 - **Repeated Failed Redeem**: repeated failed redeem requests can incur a higher SLA deduction#
 - **Repeated Failed Replace**: repeated failed replace requests can incur a higher SLA deduction
 
-
-
 Staked Relayers
 ---------------
 
 Desired Actions
 ...............
 
+- **Correctly report NO_DATA**: report/vote a block as NO_DATA in case of a majority vote passed
+- **Correctly report INVALID**: report/vote a block as INVALID in case of a majority vote passed
+- **Correct report LIQUIDATION**: report a Vault for being below the *Liquidation Collateral Threshold* and trigger automatic liquidation. 
+- **Correctly report ORACLE_OFFLINE**: correctly report that the/an oracle has not reported data for a pre-defined amount of time (i.e., considered offline).
+- **Majority on status update vote**: participate in a status update vote on the **majority** side.
+  - Exception: NO_DATA votes are rewarded no matter how the vote was cast. Reason: since NO_DATA does not incur slashing of minority votes, being on the "majority" side must not yield additional benefits here, otherwise this incentivizes "herd" behavior without actually performing checks.  
+
 Undesired Actions
 .................
 
+- **Ignore vote**: do not participate in a status update vote.
+- **Ignore NO_DATA**: do note vote in a NO_DATA vote at all.
+- **Ignore INVALID**: do note vote in an INVALID vote at all.
+- **Wrong INVALID report/vote**: report or vote on the **minority** (and persumably wrong side) of an INVALID vote
+- **Governance punishment**: the governance mechanism can reduce the SLA of a Vault (e.g. if majority did not vote INVALID, but there was indeed an invalid block, i.e. an attack)
+
+- [Optional] **Minority on status update vote**: vote on the **minority** side. 
+  - Since this will also slash collateral in most cases, e.g. INVALID votes (exception: NO_DATA), there may be no need for this extra SLA reduction. 
+- [Optional] **Offline**: do not perform **any** of the desired actions within a certain time frame, while being registered. Time needs to be defined. 
+- [Optional] **Wrong theft report**: report Vault theft but the BTC transaction turns out to be valid / according to protocol rules.
+  - If a such wrong call will automatically fail in the parachain, then there is probably no need for SLA reduction here.  
+- [Optional] **Wrong ORCALE_OFFLINE report**: oracle reported offline but was online. A such wrong call will fail in the parachain, so there is probably no need for SLA reduction here. 
+- [Optional]: **Wrong LIQUIDATION report**: wrongly report a Vault for being below the *Liquidation Collateral Threshold*.  A such wrong call will fail in the parachain, so there is probably no need for SLA reduction here. 
