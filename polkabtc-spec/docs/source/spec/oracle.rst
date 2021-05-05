@@ -296,6 +296,31 @@ Emits the new exchange rate when it is updated by the oracle.
 
     SetExchangeRate(AccountId, u128);
 
+.. _recoverFromORACLEOFFLINE:
+
+recoverFromORACLEOFFLINE
+-------------------------
+
+Internal function. Recovers the BTC Parachain state from a ``ORACLE_OFFLINE`` error and sets ``ParachainStatus`` to ``RUNNING`` if there are no other errors.
+
+.. attention:: Can only be called from :ref:`oracle`.
+
+Specification
+.............
+
+*Function Signature*
+
+``recoverFromORACLEOFFLINE()``
+
+*Events*
+
+* ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries,, and ``msg`` the detailed reason for the status update. 
+
+.. *Substrate* ::
+
+  fn recoverFromORACLEOFFLINE() -> Result {...}
+
+
 Error Codes
 ~~~~~~~~~~~~
 

@@ -104,7 +104,7 @@ LiquidationVault
 Account identifier of an artificial vault maintained by the VaultRegistry to handle polkaBTC balances and DOT collateral of liquidated Vaults. That is, when a vault is liquidated, its balances are transferred to ``LiquidationVault`` and claims are later handled via the ``LiquidationVault``.
 
 
-.. note:: A Vault's token balances and DOT collateral are transferred to the ``LiquidationVault`` as a result of :ref:`reportVaultUndercollateralized` and :ref:`reportVaultTheft`.
+.. note:: A Vault's token balances and DOT collateral are transferred to the ``LiquidationVault`` as a result of automated liquidations and :ref:`reportVaultTheft`.
 
 .. *Substrate* ::
 
@@ -935,8 +935,6 @@ Function Sequence
 3. Transfer the ``LiquidationVault``'s DOT collateral to the ``redeemer`` by calling :ref:`slashCollateral` and passing ``LiquidationVault``, ``redeemer`` and ``redeemDOTinBTC *`` :ref:`getExchangeRate` as parameters.
 
 5. Emit ``RedeemTokensLiquidation(redeemer, redeemDOTinBTC)`` event.
-
-6. If ``LiquidationVault.issuedTokens == 0`` (i.e., no more tokens need to be reimbursed in DOT for re-balancing), call :ref:`recoverFromLIQUIDATION` to recover the BTC Parachain from ``LIQUIDATION`` error.
 
 .. _replaceTokens:
 
