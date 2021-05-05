@@ -180,9 +180,11 @@ Function Sequence
 .................
 
 1. Increment the ``Nonce``.
-2. Concatenate ``account``, ``Nonce``, and ``random_seed()``.
+2. Concatenate ``account``, ``Nonce``, and ``parent_hash()``.
 3. SHA256 hash the result of step 1.
 4. Return the resulting hash.
+
+.. note:: The funtion ``parent_hash()`` is assumed to return the hash of the parachain's parent block - which precedes the block this function is called in.
 
 .. _getStatusCounter:
 
