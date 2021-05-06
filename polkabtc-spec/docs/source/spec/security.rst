@@ -1,13 +1,13 @@
 .. _security:
 
 Security
-======== 
+========
 
-The Security module is responsible for tracking the status of the BTC Parachain, flagging failures such as liveness and safety failures of :ref:`btc-relay` or crashes of the :ref:`oracle`.
-Specifically, this module provides a central interface for all other modules to check whether specific features should be disabled to prevent financial damage to users (e.g. stop :ref:`issue-protocol` if no reliable price data is available).
-In addition, the Security module provides functions to handle security critical operations, such as generating secure identifiers for replay protection in :ref:`issue-protocol`, :ref:`redeem-protocol`, and :ref:`replace-protocol`. 
-Finally, the Security module keeps track of the ``active_block_number``, which is a counter variable that increments in every block where there are no active errors. This variable is used throughout the project to keep track of durations,
+The Security module is responsible for (1) tracking the status of the BTC Parachain, (2) the "active" blocks of the BTC Parachain, and (3) generating secure identifiers.
 
+1. **BTC Parachain Status**: The BTC Parachain has three distinct states: ``Running``, ``Error``, and ``Shutdown`` which determine which functions can be used.
+2. **Active Blocks**: When the BTC Parachain is not in the ``Running`` state, certain operations are restricted. In order to prevent impact on the users and vaults for the core issue, redeem, and replace operations, the BTC Parachain only considers Active Blocks for the Issue, Redeem, and Replace Periods.
+3. **Secure Identifiers**: As part of the :ref:`op_return` scheme to prevent replay attacks, the security module generates unique identifiers that are used to identify transactions. 
 
 Overview
 ~~~~~~~~
@@ -15,48 +15,16 @@ Overview
 Failure Modes
 -------------
 
-The BTC Parachain can enter into different failure modes, depending on the occurred error.
+The BTC Parachain can enter into an ERROR and SHUTDOWN state, depending on the occurred error.
 An overview is provided in the figure below.
 
 .. figure:: ../figures/failureModes.png
-    :alt: State machine showing BTC-Relay failure modes
+    :alt: State machine showing BTC Parachain failure modes
 
-    (Informal) State machine showing the operational and failure modes of BTC-Relay, and how to recover from or flag failures. Note: within the ``ERROR`` state, ``ErrorCode`` states are only exclusive within a single module (i.e., BTC-Relay ``NO_DATA_BTC_RELAY`` and ``INVALID_BTC_RELAY`` are exclusive, but there can be an ``ORACLE_OFFLINE`` or ``LIQUIDATION`` error in parallel).
+    (Informal) State machine showing the operational and failure modes and how to recover from or flag failures.
 
-
-More details on the exact failure states and error codes are provided in the Specification part of this module description.
 
 Failure handling methods calls are **restricted**, i.e., can only be called by pre-determined roles.
-
-.. _no-data-err:
-
-Missing Data in BTC-Relay (No Data)
------------------------------------
-
-It was not possible to fetch transactional data for a block header submitted to :ref:`btc-relay`. 
-This can happen if a staked relayer detects a BTC header inside the BTC-Relay that the relayer does not yet have in its Bitcoin full node.
-
-**Error code:** ``NO_DATA_BTC_RELAY``
-
-.. _invalid-btc-relay-err:
-
-Invalid BTC-Relay
------------------
-
-An invalid transaction was detected in a block header submitted to :ref:`btc-relay`. 
-
-**Error code:** ``INVALID_BTC_RELAY``
-
-
-.. _liquidation-err:
-
-Liquidation
------------
-
-The entire system collateralization is below the ``LiquidationCollateralThreshold``.
-
-**Error code:** ``LIQUIDATION``
-
 
 .. _oracle-offline-err:
 
@@ -64,9 +32,18 @@ Oracle Offline
 --------------
 
 The :ref:`oracle` experienced a liveness failure (no up-to-date exchange rate available).
+The frequency of the oracle updates is defined in the Oracle module.
 
 **Error code:** ``ORACLE_OFFLINE``
 
+BTC-Relay Offline
+-----------------
+
+The :ref:`btc-relay` has less blocks stored than defined as the ``STABLE_BITCOIN_CONFIRMATIONS``.
+
+This is the initial state of the BTC-Parachain. After more than the ``STABLE_BITCOIN_CONFIRMATIONS`` BTC blocks have been stored in BTC-Relay, the BTC Parachain cannot decide if or not it is behind in terms of Bitcoin blocks since we make no assumption about the frequency of BTC blocks being produced.
+
+**Error code:** ``BTC_RELAY_OFFLINE``
 
 Data Model
 ~~~~~~~~~~
@@ -92,13 +69,9 @@ Enum specifying error codes tracked in ``Errors``.
 
 * ``NONE: 0``
 
-* ``NO_DATA_BTC_RELAY: 1``
+* ``ORACLE_OFFLINE: 1``
 
-* ``INVALID_BTC_RELAY: 2``
-
-* ``ORACLE_OFFLINE: 3``
-
-* ``LIQUIDATION: 4``
+* ``BTC_RELAY_OFFLINE: 2``
 
 
 Data Storage
@@ -108,36 +81,21 @@ Scalars
 --------
 
 ParachainStatus
-.................
+...............
 
 Integer/Enum (see ``StatusCode`` below). Defines the current state of the BTC Parachain. 
-
-.. *Substrate* ::
-
-  ParachainStatus: StatusCode;
 
 
 Errors
 ........
 
-Set of error codes (``ErrorCode`` enums), indicating the reason for the error. The ``ErrorCode`` entries included in this set specify how to react to the failure (e.g. shutdown transaction verification in :ref:`btc-relay`).
-
-
-.. *Substrate* ::
-
-  Errors: BTreeSet<ErrorCode>;
-
+Set of error codes (``ErrorCode`` enums), indicating the reason for the error. The ``ErrorCode`` entries included in this set specify how to react to the failure.
 
 
 Nonce
 .....
 
-Integer increment-only counter, used to prevent collisions when generating identifiers for e.g. issue, redeem or replace requests (for OP_RETURN field in Bitcoin).
-
-.. *Substrate* ::
-
-  Nonce: U256;
-
+Integer increment-only counter, used to prevent collisions when generating identifiers for e.g., redeem or replace requests (for OP_RETURN field in Bitcoin).
 
 .. _activeBlockCount:
 
@@ -172,10 +130,6 @@ Specification
 
 * ``hash``: a cryptographic hash generated via a secure hash function.
 
-.. *Substrate* ::
-
-  fn generateSecureId(account: AccountId) -> T::H256 {...}
-
 Function Sequence
 .................
 
@@ -186,40 +140,11 @@ Function Sequence
 
 .. note:: The funtion ``parent_hash()`` is assumed to return the hash of the parachain's parent block - which precedes the block this function is called in.
 
-.. _getStatusCounter:
-
-getStatusCounter
-----------------
-
-Increments the current ``StatusCounter`` and returns the new value.
-
-Specification
-.............
-
-*Function Signature*
-
-``getStatusCounter()``
-
-
-*Returns*
-
-* ``U256``: the new value of the ``StatusCounter``.
-
-.. *Substrate* ::
-
-  fn getStatusCounter() -> U256 {...}
-
-Function Sequence
-.................
-
-1. ``StatusCounter++``
-2. Return ``StatusCounter``
-
 
 .. _hasExpired:
 
 hasExpired
-----------------
+----------
 
 Checks if the given period has expired since the given starting point. This calculation is based on the :ref:`activeBlockCount`.
 
@@ -248,13 +173,72 @@ Function Sequence
 2. Compare this against :ref:`activeBlockCount`.
 
 
+.. _setParachainStatus:
+
+setParachainStatus
+------------------
+
+Governance sets a status code for the BTC Parachain manually.
+
+Specification
+.............
+
+*Function Signature*
+
+``setParachainStatus(StatusCode)``
+
+*Parameters*
+
+* ``StatusCode``: the new StatusCode of the BTC-Parachain.
+
+.. _insertParachainError:
+
+insertParachainError
+--------------------
+
+Governance inserts an error for the BTC Parachain manually.
+
+Specification
+.............
+
+*Function Signature*
+
+``insertParachainError(ErrorCode)``
+
+*Parameters*
+
+* ``ErrorCode``: the ErrorCode to be added to the set of errors of the BTC-Parachain.
+
+.. _removeParachainError:
+
+removeParachainError
+--------------------
+
+Governance removes an error for the BTC Parachain manually.
+
+Specification
+.............
+
+*Function Signature*
+
+``removeParachainError(ErrorCode)``
+
+*Parameters*
+
+* ``ErrorCode``: the ErrorCode to be removed from the set of errors of the BTC-Parachain.
+
 
 Events
 ~~~~~~~
 
-No events are emitted by this module.
+RecoverFromErrors
+-----------------
 
-Error Codes
-~~~~~~~~~~~
+*Event Signature*
 
-No erros are throws by this module.
+``RecoverFromErrors(StatusCode, ErrorCode[])``
+
+*Parameters*
+
+* ``StatusCode``: the new StatusCode of the BTC Parachain
+* ``ErrorCode[]``: the list of current errors 
