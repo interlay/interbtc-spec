@@ -7,7 +7,7 @@ The Security module is responsible for (1) tracking the status of the BTC Parach
 
 1. **BTC Parachain Status**: The BTC Parachain has three distinct states: ``Running``, ``Error``, and ``Shutdown`` which determine which functions can be used.
 2. **Active Blocks**: When the BTC Parachain is not in the ``Running`` state, certain operations are restricted. In order to prevent impact on the users and vaults for the core issue, redeem, and replace operations, the BTC Parachain only considers Active Blocks for the Issue, Redeem, and Replace Periods.
-3. **Secure Identifiers**: As part of the :ref:`op_return` scheme to prevent replay attacks, the security module generates unique identifiers that are used to identify transactions. 
+3. **Secure Identifiers**: As part of the :ref:`op-return` scheme to prevent replay attacks, the security module generates unique identifiers that are used to identify transactions. 
 
 Overview
 ~~~~~~~~

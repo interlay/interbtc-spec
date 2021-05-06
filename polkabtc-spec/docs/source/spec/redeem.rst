@@ -8,7 +8,7 @@ Overview
 
 The redeem module allows a user to receive BTC on the Bitcoin chain in return for destroying an equivalent amount of PolkaBTC on the BTC Parachain. The process is initiated by a user requesting a redeem with a vault. The vault then needs to send BTC to the user within a given time limit. Next, the vault has to finalize the process by providing a proof to the BTC Parachain that he has send the right amount of BTC to the user. If the vault fails to deliver a valid proof within the time limit, the user can claim an equivalent amount of DOT from the vault's locked collateral to reimburse him for his loss in BTC.
 
-Moreover, as part of the liquidation procedure, users are able to directly exchange PolkaBTC for DOT. To this end, a user is able to execute a special liquidation redeem if one or multiple vaults have been liquidated (:ref:`liquidation-err`).
+Moreover, as part of the liquidation procedure, users are able to directly exchange PolkaBTC for DOT. To this end, a user is able to execute a special liquidation redeem if one or multiple vaults have been liquidated.
 
 Step-by-step
 ------------
