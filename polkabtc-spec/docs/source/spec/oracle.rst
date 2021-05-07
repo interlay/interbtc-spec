@@ -22,10 +22,6 @@ GRANULARITY
 
 The granularity of the exchange rate. The granularity is set to :math:`10^{-5}`.
 
-.. *Substrate* ::
-
-  GRANULARITY: u128 = 5;
-
 
 Scalars
 -------
@@ -38,45 +34,28 @@ The BTC in DOT exchange rate. This exchange rate is used to determine how much c
 .. note:: If the ``ExchangeRate`` is set to 1238763, it translates to :math:`12.38763` as the last five digits are used for the floating point (as defined by the ``GRANULARITY``).
 
 
-.. *Substrate* ::
-
-    ExchangeRateBtcInDot: u128;
-
 SatoshiPerBytesFast
 ...................
 
 The estimated Satoshis per bytes required to get a Bitcoin transaction included in the next block.
 
-.. *Substrate* ::
-
-    SatoshiPerBytesFast: u32;
 
 SatoshiPerBytesMedium
 .....................
 
 The estimated Satoshis per bytes required to get a Bitcoin transaction included in the next three blocks (about 30 min).
 
-.. *Substrate* ::
-
-    SatoshiPerBytesMedium: u32;
 
 SatoshiPerBytesSlow
 ...................
 
 The estimated Satoshis per bytes required to get a Bitcoin transaction included in the six blocks (about 1 hour).
 
-.. *Substrate* ::
-
-    SatoshiPerBytesSlow: u32;
 
 MaxDelay
 ........
 
 The maximum delay in seconds between incoming calls providing exchange rate data. If the Exchange Rate Oracle receives no data for more than this period, the BTC Parachain enters an ``Error`` state with a ``ORACLE_OFFLINE`` error cause.
-
-.. *Substrate* ::
-
-  MaxDelay: U128;
 
 
 LastExchangeRateTime
@@ -84,10 +63,6 @@ LastExchangeRateTime
 
 UNIX timestamp indicating when the last exchange rate data was received. 
 
-
-.. *Substrate* ::
-
-  LastExchangeRateTime: U32;
 
 Enums
 -----
@@ -110,10 +85,6 @@ AuthorizedOracles
 .................
 
 The account(s) of the oracle. Returns true if registered as an oracle.
-
-.. *Substrate* ::
-
-  AuthorizedOracle: map AccountId => bool;
 
 
 Functions
@@ -292,10 +263,6 @@ Emits the new exchange rate when it is updated by the oracle.
 
 :ref:`setExchangeRate`
 
-.. *Substrate* ::
-
-    SetExchangeRate(AccountId, u128);
-
 .. _recoverFromORACLEOFFLINE:
 
 recoverFromORACLEOFFLINE
@@ -315,10 +282,6 @@ Specification
 *Events*
 
 * ``ExecuteStatusUpdate(newStatusCode, addErrors, removeErrors, msg)`` - emits an event indicating the status change, with ``newStatusCode`` being the new ``StatusCode``, ``addErrors`` the set of to-be-added ``ErrorCode`` entries (if the new status is ``Error``), ``removeErrors`` the set of to-be-removed ``ErrorCode`` entries,, and ``msg`` the detailed reason for the status update. 
-
-.. *Substrate* ::
-
-  fn recoverFromORACLEOFFLINE() -> Result {...}
 
 
 Error Codes

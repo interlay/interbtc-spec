@@ -58,10 +58,6 @@ RedeemPeriod
 
 The time difference between when an redeem request is created and required completion time by a vault. Concretely, this period is the amount by which :ref:`activeBlockCount` is allowed to increase before the redeem is considered to be expired. The period has an upper limit to ensure the user gets his BTC in time and to potentially punish a vault for inactivity or stealing BTC.
 
-.. *Substrate* ::
-
-  RedeemPeriod: T::BlockNumber;
-
 Maps
 ----
 
@@ -69,10 +65,6 @@ RedeemRequests
 ...............
 
 Users create redeem requests to receive BTC in return for PolkaBTC. This mapping provides access from a unique hash ``redeemId`` to a ``Redeem`` struct. ``<redeemId, Redeem>``.
-
-.. *Substrate* ::
-
-  RedeemRequests map T::H256 => Redeem<T::AccountId, T::BlockNumber, T::Balance>
 
 
 Structs
@@ -418,10 +410,6 @@ Emit an event when a redeem request is created. This event needs to be monitored
 
 * ref:`requestRedeem`
 
-.. *Substrate* ::
-
-  RequestRedeem(H256, AccountId, Balance, H160, AccountId);
-
 LiquidationRedeem
 -----------------
 
@@ -461,9 +449,6 @@ Emit an event when a redeem request is successfully executed by a vault.
 
 * ref:`executeRedeem`
 
-.. *Substrate* ::
-
-  ExecuteRedeem(AccountId, H256, Balance, AccountId);
 
 CancelRedeem
 ------------
@@ -482,11 +467,6 @@ Emit an event when a user cancels a redeem request that has not been fulfilled a
 *Functions*
 
 * ref:`cancelRedeem`
-
-.. *Substrate* ::
-
-  CancelRedeem(AccountId, H256);
-
 
 Error Codes
 ~~~~~~~~~~~

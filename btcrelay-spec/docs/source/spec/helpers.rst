@@ -374,10 +374,6 @@ Specification
 
 * ``chainCounter``: the new integer value of the ``ChainCounter``.
 
-.. *Substrate* ::
-
-  fn incrementChainCounter() -> U256 {...}
-
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 

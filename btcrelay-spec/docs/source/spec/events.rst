@@ -21,9 +21,6 @@ If the first block header was stored successfully, emit an event with the stored
 
 * :ref:`initialize`
 
-.. *Substrate* ::
-
-  Initialized(U256, H256);
 
 StoreMainChainHeader
 --------------------
@@ -43,9 +40,6 @@ If the block header was stored successfully, emit an event with the stored block
 
 * :ref:`storeBlockHeader`
 
-.. *Substrate* ::
-
-  StoreMainChainHeader(U256, H256);
 
 StoreForkHeader
 ---------------
@@ -66,9 +60,6 @@ If the submitted block header is on a fork, emit an event with the fork’s id, 
 
 * :ref:`storeBlockHeader`
 
-.. *Substrate* ::
-
-  StoreForkHeader(U256, U256, H256);
 
 ChainReorg
 ---------- 
@@ -89,9 +80,6 @@ If the submitted block header on a fork results in a reorganization (fork longer
 
 * :ref:`storeBlockHeader`
 
-.. *Substrate* ::
-
-  ChainReorg(H256, U256, U256);
 
 VerifyTransaction
 -----------------
@@ -111,13 +99,6 @@ If the verification of the transaction inclusion proof was successful, emit an e
 *Functions*
 
 * :ref:`verifyTransactionInclusion`
-
-.. *Substrate* ::
-
-  VerifyTransaction(H256, U256, U256);
-
-
-
 
 
 ValidateTransaction
@@ -139,9 +120,4 @@ If parsing and validation of the given raw transaction was successful, emit an e
 *Functions*
 
 * :ref:`validateTransaction`
-
-.. *Substrate* ::
-
-  ValidateTransaction(H256, U256, H160, H256);
-
 

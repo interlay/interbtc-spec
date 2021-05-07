@@ -31,9 +31,6 @@ TotalCollateral
 
 The total collateral provided.
 
-.. *Substrate* ::
-
-  TotalCollateral: Balance;
 
 .. Enums
 .. -----
@@ -44,12 +41,7 @@ The total collateral provided.
 .. Types of accepted collateral. 
 .. 
 .. .. note:: For now, only DOT is accepted as collateral.
-.. 
-.. .. *Substrate* ::
-.. 
-..   enum CollateralType {
-..     DOT = 0,
-..   }
+
 
 Maps
 ----
@@ -59,9 +51,6 @@ CollateralBalances
 
 Mapping from accounts to their collateral balances.
 
-.. *Substrate* ::
-
-  CollateralBalances: map T::AccountId => Balance;
 
 Functions
 ~~~~~~~~~
@@ -89,10 +78,6 @@ Specification
 *Events*
 
 * ``LockCollateral(sender, amount)``: Issues an event when collateral is locked.
-
-.. *Substrate* ::
-
-  fn lockCollateral(sender: AccountId, amount: Balance) -> Result {...}
 
 Precondition
 ............
@@ -133,10 +118,6 @@ Specification
 *Errors*
 
 * ``ERR_INSUFFICIENT_COLLATERAL_AVAILABLE``: The ``sender`` has less collateral stored than the requested ``amount``.
-
-.. *Substrate* ::
-
-  fn releaseCollateral(sender: AccountId, amount: Balance) -> Result {...}
 
 Precondition
 ............
@@ -185,9 +166,6 @@ Specification
 
 * ``ERR_INSUFFICIENT_COLLATERAL_AVAILABLE``: The ``sender`` has less collateral stored than the requested ``amount``.
 
-.. *Substrate* ::
-
-  fn slashCollateral(sender: AccountId, receiver: AccountId, amount: Balance) -> Result {...}
 
 Precondition
 ............
@@ -227,9 +205,6 @@ Emit a ``LockCollateral`` event when a sender locks collateral.
 
 * :ref:`lockCollateral`
 
-.. *Substrate* ::
-
-  LockCollateral(AccountId, Balance);
 
 ReleaseCollateral
 -----------------
@@ -249,9 +224,6 @@ Emit a ``ReleaseCollateral`` event when a sender releases collateral.
 
 * :ref:`releaseCollateral`
 
-.. *Substrate* ::
-
-  ReleaseCollateral(AccountId, Balance);
 
 SlashCollateral
 ----------------
@@ -271,10 +243,6 @@ Emit a ``SlashCollateral`` event when a sender's collateral is slashed and trans
 *Function*
 
 * :ref:`slashCollateral`
-
-.. *Substrate* ::
-
-  SlashCollateral(AccountId, AccountId, Balance);
 
 Errors
 ~~~~~~
