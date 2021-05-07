@@ -93,8 +93,8 @@ If the submitted block header on a fork results in a reorganization (fork longer
 
   ChainReorg(H256, U256, U256);
 
-VerifyTransaction
------------------
+VerifyTransactionInclusion
+--------------------------
 
 If the verification of the transaction inclusion proof was successful, emit an event for the given transaction identifier (``txId``), block height (``txBlockHeight``), and the specified number of ``confirmations``.
 
@@ -132,9 +132,9 @@ If parsing and validation of the given raw transaction was successful, emit an e
 *Parameters*
 
 * ``txId``: the hash of the transaction.
-* ``paymentValue``: integer value of BTC sent in the (first) *Payment UTXO* of transaction.
-* ``recipientBtcAddress``: 20 byte Bitcoin address of recipient of the BTC in the (first) *Payment UTXO*.
-* ``opReturnId``: 32 byte hash identifier expected in OP_RETURN (replay protection).
+* ``paymentValue``: integer value of BTC sent in the transaction.
+* ``recipientBtcAddress``: Bitcoin address (hash) of recipient.
+* ``opReturnId``: [Optional] 32 byte hash identifier expected in OP_RETURN (replay protection).
 
 *Functions*
 

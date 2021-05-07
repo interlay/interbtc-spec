@@ -252,16 +252,13 @@ Specification
 
 *Function Signature*
 
-``proveValidBTCAddress(registrationID, txid, txBlockHeight, txIndex, merkleProof, transactionBytes)``
+``proveValidBTCAddress(registrationID, merkleProof, rawTx)``
 
 *Parameters*
 
 * ``registrationID``: identifier of the RegisterRequest
-* ``txid``: Hash identifier of the to-be-verified transaction
-* ``txBlockHeight``: Block height at which transaction is supposedly included.
-* ``txIndex``:  Index of transaction in the block’s tx Merkle tree.
-* ``merkleProof``: Merkle tree path (concatenated LE sha256 hashes).
-* ``transactionBytes``: Raw Bitcoin transaction 
+* ``merkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
+* ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
 
 *Events*
@@ -289,7 +286,7 @@ Function Sequence
 
   a) Throw ``ERR_INVALID_REGISTER_ID`` error if no active RegisterRequest ``registerID`` can be found in ``RegisterRequests``.
 
-2. Call ``verifyTransactionInclusion(txid, txBlockHeight, txIndex, merkleProof)``. If this call returns an error, abort and return the error.
+2. Call ``verifyTransactionInclusion(txId, merkleProof)``. If this call returns an error, abort and return the error.
 
 3. Call ``validateTransactionInclusion`` providing the ``rawTx``, ``registerID`` and the vault's Bitcoin address as parameters. If this call returns an error, abort and return the error.
 

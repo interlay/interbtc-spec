@@ -249,14 +249,13 @@ Specification
 
 *Function Signature*
 
-``executeRedeem(vault, redeemId, txId, merkleProof, rawTx)``
+``executeRedeem(vault, redeemId, merkleProof, rawTx)``
 
 *Parameters*
 
 * ``vault``: the vault responsible for executing this redeem request.
-* ``redeemId``: the unique hash created during the ``requestRedeem`` function,
-* ``txId``: The hash of the Bitcoin transaction.
-* ``MerkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
+* ``redeemId``: the unique hash created during the ``requestRedeem`` function.
+* ``merkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
 
