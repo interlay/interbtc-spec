@@ -189,13 +189,12 @@ Specification
 
 *Function Signature*
 
-``executeIssue(requester, issueId, txId, txBlockHeight, txIndex, merkleProof, rawTx)``
+``executeIssue(requester, issueId, merkleProof, rawTx)``
 
 *Parameters*
 
 * ``requester``: the account of the user.
-* ``issueId``: the unique hash created during the ``requestIssue`` function,
-* ``txId``: The hash of the Bitcoin transaction.
+* ``issueId``: the unique hash created during the ``requestIssue`` function.
 * ``merkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
@@ -229,7 +228,7 @@ Function Sequence
 2. Checks if the issue has expired by calling :ref:`hasExpired` in the Security module. If true, this throws ``ERR_COMMIT_PERIOD_EXPIRED``.
 3. Verify the transaction.
 
-    a. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
+    a. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing the ``txId``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
     b. Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-issued BTC (``issue.amount``), the ``vault``'s Bitcoin address (``issue.btcAddress``), and the ``issueId`` as parameters. If this call returns an error, abort and return the received error. 
 
 4. Call the :ref:`issueTokens` with the ``issue.vault`` and the ``amount`` to decrease the ``toBeIssuedTokens`` and increase the ``issuedTokens``.

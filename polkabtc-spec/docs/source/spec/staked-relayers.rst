@@ -270,7 +270,7 @@ Function Sequence
 
 3. Check if this ``vault`` has already been liquidated. If this is the case, return ``ERR_ALREADY_LIQUIDATED`` (no point in duplicate reporting).
 
-4. Check if the given Bitcoin transaction is already associated with an entry in ``TheftReports`` (use calculate ``txId`` from ``rawTx`` as key for lookup). If yes, check if the specified ``vault`` is already listed in the associated set of Vaults. If the vault is already in the set, return ``ERR_ALREADY_REPORTED``. 
+4. Check if the given Bitcoin transaction is already associated with an entry in ``TheftReports`` (calculate ``txId`` from ``rawTx`` as key for lookup). If yes, check if the specified ``vault`` is already listed in the associated set of Vaults. If the vault is already in the set, return ``ERR_ALREADY_REPORTED``. 
 
 5. Extract the ``outputs`` from ``rawTx`` using `extractOutputs` from the BTC-Relay.
 

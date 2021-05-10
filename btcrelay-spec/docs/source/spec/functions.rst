@@ -339,13 +339,11 @@ Specification
 
 *Function Signature*
 
-``verifyTransactionInclusion(txId, txBlockHeight, txindex, merkleProof, confirmations, insecure)``
+``verifyTransactionInclusion(txId, merkleProof, confirmations, insecure)``
 
 *Parameters*
 
 * ``txId``: 32 byte hash identifier of the transaction.
-* ``txBlockHeight``: integer block height at which transaction is supposedly included.
-* ``txIndex``: integer index of transaction in the block's tx Merkle tree.
 * ``merkleProof``: Merkle tree path (concatenated LE sha256 hashes, dynamic sized).
 * ``confirmations``: integer number of confirmation required.
 * ``insecure``: boolean parameter indicating whether to check against the recommended ``STABLE_BITCOIN_CONFIRMATIONS`` 
@@ -441,7 +439,7 @@ Given a raw Bitcoin transaction, this function
 1) Parses and extracts 
 
    a. the value and recipient address of the *Payment UTXO*, 
-   b. the OP_RETURN value of the *Data UTXO*.
+   b. [Optionally] the OP_RETURN value of the *Data UTXO*.
 
 2) Validates the extracted values against the function parameters.
 
@@ -459,7 +457,7 @@ Specification
 * ``rawTx``:  raw Bitcoin transaction including the transaction inputs and outputs.
 * ``paymentValue``: integer value of BTC sent in the (first) *Payment UTXO* of transaction.
 * ``recipientBtcAddress``: 20 byte Bitcoin address of recipient of the BTC in the (first) *Payment UTXO*.
-* ``opReturnId``: 32 byte hash identifier expected in OP_RETURN (see :ref:`replace-attacks`).
+* ``opReturnId``: [Optional] 32 byte hash identifier expected in OP_RETURN (see :ref:`replace-attacks`).
 
 *Returns*
 

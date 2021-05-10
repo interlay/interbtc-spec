@@ -412,7 +412,7 @@ executeReplace
 --------------
 
 The to-be-replaced vault finalizes the replace process by submitting a proof that it transferred the correct amount of BTC to the BTC address of the new vault, as specified in the ``ReplaceRequest``.
-This function calls *verifyTransactionInclusion* in :ref:`btc-relay`, proving a transaction inclusion proof (``txid``, ``txBlockHeight``, and ``merkleProof``) as input, as well as *validateTransaction* proving the ``rawTx``, ``replaceId`` and the *newVault*'s Bitcoin address as parameters.
+This function calls *verifyTransactionInclusion* in :ref:`btc-relay`, proving a transaction inclusion proof (``txId`` and ``merkleProof``) as input, as well as *validateTransaction* proving the ``rawTx``, ``replaceId`` and the *newVault*'s Bitcoin address as parameters.
 
 
 Specification
@@ -420,16 +420,13 @@ Specification
 
 *Function Signature*
 
-``executeReplace(newVault, replaceId, txId, txBlockHeight, merkleProof, rawTx)``
+``executeReplace(newVault, replaceId, merkleProof, rawTx)``
 
 *Parameters*
 
 * ``newVault``: Account identifier of the vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
 * ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
-* ``txId``: The hash of the Bitcoin transaction.
-* ``txBlockHeight``: Bitcoin block height at which the transaction is supposedly included.
-* ``txIndex``: Index of transaction in the Bitcoin block’s transaction Merkle tree.
-* ``MerkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
+* ``merkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
 *Events*
@@ -460,7 +457,7 @@ Function Sequence
 
 3. Retrieve the ``Vault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such vault can be found.
 
-4. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txid``, ``txBlockHeight``, ``txIndex``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
+4. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txId`` and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
 
 5. Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-replaced BTC (``Replace.amount``), the ``newVault``'s Bitcoin address (``Vault.btcAddress``), and the ``replaceId`` as parameters. If this call returns an error, abort and return the received error. 
 
