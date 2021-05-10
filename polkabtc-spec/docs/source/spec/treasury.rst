@@ -34,9 +34,6 @@ TotalSupply
 
 The total supply of PolkaBTC.
 
-.. *Substrate* :: 
-
-    TotalSupply: Balance;
 
 Maps
 ----
@@ -46,9 +43,6 @@ Balances
 
 Mapping from accounts to their balance.
 
-.. *Substrate* :: 
-    
-    Balances: map T::AccountId => Balance;
 
 Locked Balances
 ...............
@@ -58,9 +52,6 @@ Mapping from accounts to their balance of locked tokens. Locked tokens serve two
 1. Locked tokens cannot be transferred. Once a user locks the token, the token needs to be unlocked to become spendable.
 2. Locked tokens are the only tokens that can be burned in the redeem procedure.
 
-.. *Substrate* ::
-
-  LockedBalances: map T::AccountId => Balance;
 
 Functions
 ~~~~~~~~~
@@ -182,9 +173,6 @@ Specification
 
 * ``ERR_INSUFFICIENT_FUNDS``: User has not enough PolkaBTC to lock coins.
 
-.. *Substrate* ::
-
-  fn lock(redeemer: AccountId, amount: Balance) -> Result {...}
 
 Precondition
 ............
@@ -265,9 +253,6 @@ Issues an event when a transfer of funds was successful.
 
 * :ref:`transfer`
 
-.. *Substrate* ::
-
-  Transfer(AccountId, AccountId, Balance);
 
 Mint
 ----
@@ -287,9 +272,6 @@ Issue an event when new PolkaBTC are minted.
 
 * :ref:`mint`
 
-.. *Substrate* ::
-
-  Mint(AccountId, Balance);
 
 Lock
 ----
@@ -309,9 +291,6 @@ Emits newly locked amount of PolkaBTC by a user.
 
 * :ref:`lock`
 
-.. *Substrate* ::
-
-  Lock(AccountId, Balance);
 
 Burn
 ----
@@ -331,9 +310,6 @@ Issue an event when the amount of PolkaBTC is successfully destroyed.
 
 * :ref:`burn`
 
-.. *Substrate* ::
-
-  Burn(AccountId, Balance);
 
 Errors
 ~~~~~~

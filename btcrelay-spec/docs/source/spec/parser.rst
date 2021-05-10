@@ -212,9 +212,6 @@ Specification
 
 * ``outputs``: A list of variable byte size encoded outputs of the given transaction.
 
-.. *Substrate* ::
-
-  fn extractOutputs(rawTransaction: T::Vec<u8>) -> T::Vec<T::Vec<u8>> {...}
 
 Function Sequence
 .................
@@ -257,10 +254,6 @@ Extracts the starting index of the outputs in a transaction (i.e., skips over th
 
 .. note:: Currently, the transaction version can be 1 or 2. See `transaction format details <https://bitcoin.org/en/developer-reference#raw-transaction-format>`_ in the Bitcoin Developer Reference. 
 
-.. *Substrate* ::
-
-  fn getOutputStartIndex(origin, ) -> Result {...}
-
 
 Function Sequence
 .................
@@ -299,11 +292,6 @@ Determines the length of the Bitcoin CompactSize Unsigned Integers (other term f
 *Returns*
 
 * ``varInt``: integer length of the VarInt (excluding flag).
-
-
-.. *Substrate* ::
-
-  fn determineVarIntDataLength(varIntFlag: T::Vec<u8>) -> u8 {...}
 
 
 Function Sequence
@@ -345,10 +333,6 @@ Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used t
 
 * ``ERR_NOT_OP_RETURN = "Expecting OP_RETURN output, but got another type.``: The given output was not an OP_RETURN output.
 
-.. *Substrate* ::
-
-  fn extractOpreturn(output: T::Vec<u8>) -> T::Vec<u8> {...}
-
 
 Function Sequence
 .................
@@ -380,10 +364,6 @@ Extracts the value of the given output.
 *Returns*
 
 * ``value``: value of the output.
-
-.. *Substrate* ::
-
-  fn extractOutputValue(output: T::Vec<u8>) -> u64 {...}
 
 
 Function Sequence
@@ -417,10 +397,6 @@ Extracts the value of the given output.
 *Errors*
 
 * ``ERR_INVALID_OUTPUT_SCRIPT = "Invalid or malformed output script"``: The script of the given output is invalid or malformed. 
-
-.. *Substrate* ::
-
-  fn extractOutputAddress(output: T::Vec<u8>) -> T::H160 {...}
 
 
 Function Sequence

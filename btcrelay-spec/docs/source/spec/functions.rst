@@ -545,9 +545,6 @@ Specification
 * ``ERR_BLOCK_NOT_FOUND  = "No Bitcoin block header found with the given block hash"``: No ``RichBlockHeader`` entry exists with the given block hash.
 * ``ERR_ALREADY_REPORTED = "This error has already been reported for the given block hash and is pending confirmation"``: The error reported for the given block hash is currently pending a vote by Staked Relayers.
 
-.. *Substrate* ::
-
-  fn flagBlockError(blockHash: H256, errorCode: ErrorCode) -> DispatchResult {...}
 
 Function Sequence
 .................
@@ -604,9 +601,6 @@ Specification
 * ``ERR_BLOCK_NOT_FOUND  = "No Bitcoin block header found with the given block hash"``: No ``RichBlockHeader`` entry exists with the given block hash.
 * ``ERR_ALREADY_REPORTED = "This error has already been reported for the given block hash and is pending confirmation"``: The error reported for the given block hash is currently pending a vote by Staked Relayers.
 
-.. *Substrate* ::
-
-  fn reportBTCRelayFailure(chainId: U256, errors: Vec<ErrorCode>) -> DispatchResult {...}
 
 Function Sequence
 .................
