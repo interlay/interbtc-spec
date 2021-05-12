@@ -23,6 +23,7 @@ Welcome to the BTC Parachain documentation!
    spec/fee
    spec/oracle
    spec/issue
+   spec/nomination
    spec/redeem
    spec/refund
    spec/replace

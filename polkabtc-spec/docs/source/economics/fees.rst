@@ -19,7 +19,7 @@ The BTC-Parachain features three assets:
 Actors: Income and Real/Opportunity Costs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The main question when designing the fee model for PolkaBTC is: When are feed paid, by whom, and how much?
+The main question when designing the fee model for PolkaBTC is: When are fees paid, by whom, and how much?
 
 .. figure:: ../figures/taxable-actions.png
   :alt: Taxable actions
