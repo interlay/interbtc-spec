@@ -14,9 +14,6 @@ See the Bitcoin Developer Reference for details on the `block header <https://bi
 Block Header 
 ------------
 
-
-
-
 .. _extractHashPrevBlock:
 
 extractHashPrevBlock
