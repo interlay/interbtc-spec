@@ -64,7 +64,6 @@ Desired Actions
 - **Execute Redeem**: execute redeem, on time with the correct amount.
 - **Collateralization**: Maintain a collateralization rate above the *Secure Collateral Threshold*. 
 - **Execute Replace**: if requested replace, transfer the correct amount of BTC to the new Vault on time.
-- **Auction Replace**: force-replace an undercollateralized Vault in an Auction
 
 Undesired Actions
 .................
@@ -72,7 +71,6 @@ Undesired Actions
 - **Fail Replace**: replace protocol (BTC transfer) not executed on time (or at all) or with the incorrect amount.
 - **Undercollateralization**: Collateralization rate below  *Secure Collateral Threshold*. 
 - **Strong Undercollateralization**:  Collateralization rate below  *Premium Collateral Threshold*. 
-- **Critical Undercollateralization**:  Collateralization rate below  *Auction Collateral Threshold*.
 - **Liquidation**:   Collateralization rate below  *Liquidation Collateral Threshold*, which triggers liquidation of the Vault.
 - **Theft**: the Vault transfers BTC from its UTXO(s) outside of the protocol rules. There is a dedicated check for this in the BTC-Parachain: only redeem, replace and registered migration of assets are allowed and these are clearly defined. 
 - **Repeated Failed Redeem**: repeated failed redeem requests can incur a higher SLA deduction#

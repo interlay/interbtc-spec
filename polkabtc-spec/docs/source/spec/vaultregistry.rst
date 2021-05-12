@@ -19,7 +19,7 @@ Constants
 GRANULARITY
 ...........
 
-The granularity of the ``SecureCollateralThreshold``, ``AuctionCollateralThreshold``, ``LiquidationCollateralThreshold``, and ``PunishmentFee``.
+The granularity of the ``SecureCollateralThreshold``, ``LiquidationCollateralThreshold``, and ``PunishmentFee``.
 
 
 Scalars
@@ -64,14 +64,6 @@ The maximum amount of PolkaBTC a vault is able to support during the issue proce
 :math:`\text{max(PolkaBTC)} = \text{collateral} * \text{ExchangeRate} / \text{SecureCollateralThreshold}`.
 
 .. note:: As an example, assume we use ``DOT`` as collateral, we issue ``PolkaBTC`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureCollateralThreshold`` is 200%, i.e. a vault has to provide two-times the amount of collateral to back an issue request. Now let's say the vault deposits 400 ``DOT`` as collateral. Then this vault can back at most 2.5 PolkaBTC as: :math:`400 * (1/80) / 2 = 2.5`.
-
-
-AuctionCollateralThreshold
-..........................
-
-Determines the rate for the collateral rate of Vaults, at which the BTC backed by the vault are opened up for auction to other Vaults. 
-That is, if the vault does not increase its collateral rate, it can be forced to execute the Replace protocol with another vault, which bids sufficient DOT collateral to cover the issued PolkaBTC tokens.
-Must to be strictly greater than ``100000``, ``PremiumRedeemThreshold``, and ``LiquidationCollateralThreshold``.
 
 
 PremiumRedeemThreshold

@@ -216,8 +216,6 @@ withdrawReplaceRequest
 
 The *OldVault* withdraws an existing ReplaceRequest that is made.
 
-.. note:: If a vault is under the ``AuctionCollateralThreshold``, the vault cannot withdraw a replace request. 
-
 
 Specification
 .............
@@ -255,18 +253,16 @@ Function Sequence
 1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_REPLACE_ID_NOT_FOUND`` error if no such ``ReplaceRequest`` was found.
 
 2. Check that caller of the function is indeed the to-be-replaced vault as specified in the ``ReplaceRequest``. Return ``ERR_UNAUTHORIZED`` error if this check fails.
-
-3. Check that the collateral rate of the vault is not under the ``AuctionCollateralThreshold`` as defined in the VaultRegistry. If it is under the ``AuctionCollateralThreshold`` return ``ERR_UNAUTHORIZED``. 
    
-4. Check that the ``ReplaceRequest`` was not yet accepted by another Vault. Return ``ERR_CANCEL_ACCEPTED_REQUEST`` error if this check fails.
+3. Check that the ``ReplaceRequest`` was not yet accepted by another Vault. Return ``ERR_CANCEL_ACCEPTED_REQUEST`` error if this check fails.
 
-5. Release the *oldVault*'s griefing collateral associated with this ``ReplaceRequests`` by calling :ref:`releaseCollateral` and passing the ``oldVault`` and ``griefingCollateral`` as parameters.
+4. Release the *oldVault*'s griefing collateral associated with this ``ReplaceRequests`` by calling :ref:`releaseCollateral` and passing the ``oldVault`` and ``griefingCollateral`` as parameters.
 
-6. Call the :ref:`decreaseToBeRedeemedTokens` function in the VaultRegistry to allow the vault to be part of other redeem or replace requests again.
+5. Call the :ref:`decreaseToBeRedeemedTokens` function in the VaultRegistry to allow the vault to be part of other redeem or replace requests again.
 
-7. Remove the ``ReplaceRequest`` from ``ReplaceRequests``.
+6. Remove the ``ReplaceRequest`` from ``ReplaceRequests``.
 
-8. Emit a ``WithdrawReplaceRequest(oldVault, replaceId)`` event.
+7. Emit a ``WithdrawReplaceRequest(oldVault, replaceId)`` event.
  
 .. _acceptReplace:
 
@@ -332,79 +328,6 @@ Function Sequence
 
 7. Emit a ``AcceptReplace(newVault, replaceId, collateral)`` event.
 
-
-.. _auctionReplace:
-
-auctionReplace
---------------
-
-A *NewVault* enforces the replace of an *oldVault*. This is possible when the *oldVault* is below the ``AuctionCollateralThreshold``. The function creates a replace request that cannot be withdrawn by the *oldVault*.
-
-.. note:: When issuing tokens, we increase the ``toBeIssuedTokens`` by a vault. Also, when a vault locks collateral via the ``registerVault`` and ``lockCollateral`` function in the VaultRegistry, we would add collateral to the ``collateral`` field of a vault. However, we are *not* updating the ``collateral`` and ``toBeIssuedTokens`` tokens here. if a vault decides to provide a very high collateral rate, way over the ``SecureCollateralThreshold`` and wants to back the replace with that, we are not interferring with this. If we would lock his collateral in the ``collateral`` field in the VaultRegistry, as user could block part of this collateral with an issue request.
-
-
-Specification
-.............
-
-*Function Signature*
-
-``auctionReplace(newVault, oldVault, btcAmount, collateral)``
-
-*Parameters*
-
-* ``newVault``: Account identifier of the vault auctioning the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
-* ``oldVault``: Account identifier of the vault to be replaced (as tracked in Vaults in :ref:`vault-registry`).
-* ``btcAmount``: Integer amount of BTC / PolkaBTC to be replaced.
-* ``collateral``: DOT collateral provided to match the replace request (i.e., for backing the locked BTC). Can be more than the necessary amount.
-
-*Events*
-
-* ``RequestReplace(oldVault, btcAmount, timeout, replaceId)``
-* ``AuctionReplace(newVault, replaceId, collateral)``: emits an event stating which vault (``newVault``) has auctioned the ``ReplaceRequest`` request (``requestId``), and how much collateral in DOT it provided (``collateral``).
-
-*Errors*
-
-* ``ERR_SUFFICIENT_COLLTERAL_RATE``: The *oldVault* is not below the ``AuctionCollateralThreshold``.
-* ``ERR_INSUFFICIENT_COLLATERAL``: The provided collateral is insufficient to match the replace request. 
-* ``ERR_VAULT_NOT_FOUND``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
-
-Preconditions
-...............
-
-The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
-
-
-Function Sequence
-..................
-
-1. Retrieve the ``newVault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such vault can be found.
-
-2. Retrieve the ``oldVault`` as per the ``oldVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such vault can be found.
-
-3. Check that the ``oldVault`` is below the ``AuctionCollateralThreshold`` by calculating his current ``oldVault.issuedTokens`` and the ``oldVault.collateral``. If not throw ``ERR_SUFFICIENT_COLLATERAL_RATE``.
-
-4. Check that the provided ``collateral`` exceeds the necessary amount, i.e., ``collateral >= SecureCollateralThreshold * btcAmount``. Return ``ERR_INSUFFICIENT_COLLATERAL`` error if this check fails.
-
-5. Lock the *newVault*'s collateral by calling :ref:`lockCollateral` and providing ``newVault`` and ``collateral`` as parameters.
-
-6. Call the :ref:`increaseToBeRedeemedTokens` function with the ``oldVault`` and the ``btcAmount`` to ensure that the oldVault’s tokens cannot be redeemed when a replace procedure is happening.
-
-7. Generate a ``replaceId`` by hashing a random seed, a nonce, and the address of the ``newVault``.
-
-8. Create a new ``ReplaceRequest`` named ``replace`` entry:
-
-  * ``replace.newVault = newVault``,
-  * ``replace.oldVault = oldVault``,
-  * ``replace.openTime`` = current Parachain time, 
-  * ``replace.acceptTime`` = current Parachain time,
-  * ``replace.amount = btcAmount``,
-  * ``replace.griefingCollateral = 0``,
-  * ``replace.btcAddress = newVault.btcAddress`` (new Vault's BTC address),
-  * ``replace.collateral = collateral`` (DOT collateral locked by new Vault).
-
-9. Emit a ``AuctionReplace(newVault, replaceId, collateral)`` event.
-
-10. Emit a ``RequestReplace(oldVault, btcAmount, timeout, replaceId)`` event.
 
 .. _executeReplace: 
 
@@ -548,7 +471,6 @@ Emit an event when a replace request is made by an *oldVault*.
 *Functions*
 
 * :ref:`requestReplace`
-* :ref:`auctionReplace`
 
 WithdrawReplaceRequest
 ----------------------
@@ -587,26 +509,6 @@ Emits an event stating which vault (``newVault``) has accepted the ``ReplaceRequ
 *Functions*
 
 * ref:`acceptReplace`
-
-
-AuctionReplace
---------------
-
-Emits an event stating which vault (``newVault``) has auctioned the ``ReplaceRequest`` request (``requestId``), and how much collateral in DOT it provided (``collateral``).
-
-*Event Signature*
-
-``AuctionReplace(newVault, replaceId, collateral)``
-
-*Parameters*
-
-* ``newVault``: Account identifier of the vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
-* ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
-* ``collateral``: DOT collateral provided to match the replace request (i.e., for backing the locked BTC). Can be more than the necessary amount.
-
-*Functions*
-
-* ref:`auctionReplace`
 
 
 ExecuteReplace
@@ -678,20 +580,14 @@ Error Codes
 ``ERR_INSUFFICIENT_COLLATERAL``
 
 * **Message**: "The provided collateral is too low."
-* **Function**: :ref:`acceptReplace` | :ref:`auctionReplace`
+* **Function**: :ref:`acceptReplace`
 * **Cause**: The provided collateral is insufficient to match the replace request. 
 
 ``ERR_VAULT_NOT_FOUND``
 
 * **Message**: "The ``vault`` cannot be found."
-* **Function**: :ref:`requestReplace` | :ref:`acceptReplace` | :ref:`auctionReplace` | :ref:`cancelReplace`
+* **Function**: :ref:`requestReplace` | :ref:`acceptReplace` | :ref:`cancelReplace`
 * **Cause**: The vault was not found in the existing ``Vaults`` list in ``VaultRegistry``.
-
-``ERR_SUFFICIENT_COLLTERAL_RATE``
-
-* **Message**: "The to-be-replaced vault is not below the ``AuctionCollateralThreshold``."
-* **Function**: :ref:`auctionReplace`
-* **Cause**: The *oldVault* is not below the ``AuctionCollateralThreshold``.
 
 ``ERR_REPLACE_PERIOD_EXPIRED``
 

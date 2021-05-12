@@ -91,14 +91,6 @@ Fee for users to premium redeem (as percentage). If users execute a redeem with 
 - Paid in DOT
 - Initial value: 5%
 
-AuctionReplaceFee
-.................
-
-Fee paid to Vaults to auction/force-replace undercollateralized Vaults. Slashed from the replaced Vault’s collateral.
-
-- Paid in DOT
-- Initial value: 5%
-
 PunishmentFee
 .............
 

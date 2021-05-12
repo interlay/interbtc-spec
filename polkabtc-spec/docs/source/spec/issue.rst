@@ -222,7 +222,7 @@ Preconditions
 Function Sequence
 .................
 
-.. note:: Ideally the ``SecureCollateralThreshold`` in the VaultRegistry should be high enough to prevent the vault from entering into the liquidation or auction state in-between the request and execute.
+.. note:: Ideally the ``SecureCollateralThreshold`` in the VaultRegistry should be high enough to prevent the vault from entering into the liquidation state in-between the request and execute.
 
 1. Checks if the ``issueId`` exists. Return ``ERR_ISSUE_ID_NOT_FOUND`` if not found. Else, loads the according issue request struct as ``issue``.
 2. Checks if the issue has expired by calling :ref:`hasExpired` in the Security module. If true, this throws ``ERR_COMMIT_PERIOD_EXPIRED``.
