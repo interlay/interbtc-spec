@@ -46,7 +46,7 @@ The value and recipient address (``btcAddress``) of the *Payment UTXO* and the `
 Case 2: Regular P2PKH / P2WPKH / P2SH / P2WSH Transactions
 ----------------------------------------------------------
 
-We accept regular `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_, `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_, `P2SH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2SH(P2WSH)-Transactions>`_, and `P2WSH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WSH-Transactions>`_ transactions as part of the issue requests.
+We accept regular `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_, `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_, `P2SH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2SH(P2WSH)-Transactions>`_, and `P2WSH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WSH-Transactions>`_ transactions.
 We ensure that the recipient address is unique via the On-Chain Key Derivation Scheme.
 
 Many Bitcoin wallets automatically order UTXOs. We require that the *Payment UTXO* is included within the first three indexes (index 0 - 2).
@@ -70,4 +70,4 @@ Inputs                        Outputs
 
 ============================  ===========================================================
 
-The recipient address (``btcAddress``) of the *Payment UTXO* is a address derived from the public key the vault submiotted to the BTC-Parachain.
+The recipient address (``btcAddress``) of the *Payment UTXO* is a address derived from the public key the vault submitted to the BTC-Parachain.
