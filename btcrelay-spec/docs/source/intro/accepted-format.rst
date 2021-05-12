@@ -1,7 +1,7 @@
 .. _accepted-tx-format:
 
 Accepted Bitcoin Transaction Format
-====================================
+===================================
 
 The :ref:`parser` module of BTC-Relay can in theory be used to parse arbitrary Bitcoin transactions. 
 However, the PolkaBTC component of the BTC Parachain restricts the format of Bitcoin transactions to ensure consistency and prevent protocol failure due to parsing errors. 

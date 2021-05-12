@@ -1,8 +1,7 @@
 .. _data-model:
 
-
 Data Model
-============
+===========
 
 The BTC-Relay, as opposed to Bitcoin SPV clients, only stores a subset of information contained in block headers and does not store transactions. 
 Specifically, only data that is absolutely necessary to perform correct verification of block headers and transaction inclusion is stored. 
@@ -14,7 +13,6 @@ RawBlockHeader
 ..............
 
 An 80 bytes long Bitcoin blockchain header.
-
 
 Constants
 ~~~~~~~~~
@@ -109,18 +107,6 @@ Parameter               Type         Description
 ``blockHeader``         BlockHeader  Associated parsed ``BlockHeader`` struct 
 ======================  ===========  ========================================================================
 
-.. *Substrate*::
-
-    #[derive(Encode, Decode, Default, Clone, PartialEq)]
-    #[cfg_attr(feature = "std", derive(Debug))]
-    pub struct RichBlockHeader<H256, U256, Timestamp> {
-        block_height: U256,
-        chain_ref: U256,
-        block_header: BlockHeader<H256, U256, Timestamp>,
-    }
-
-
-
 BlockChain
 ..........
 
@@ -138,20 +124,6 @@ Parameter               Type            Description
 ``noData``              Vec<U256>       List of block heights in ``chain`` referencing block hashes of ``RichBlockHeader`` entries in ``BlockHeaders`` which have been flagged as ``noData`` by Staked Relayers.
 ``invalid``             Vec<U256>       List of block heights in ``chain`` referencing block hashes of ``RichBlockHeader`` entries in ``BlockHeaders`` which have been flagged as ``invalid`` by Staked Relayers.
 ======================  ==============  ========================================================================
-
-.. *Substrate*::
-
-    #[derive(Encode, Decode, Default, Clone, PartialEq)]
-    #[cfg_attr(feature = "std", derive(Debug))]
-    pub struct RichBlockHeader<H256, Timestamp> {
-        chainId: U256,
-        chain: BTreeMap<U256,H256>,
-        startHeight: U256,
-        maxHeight: U256,
-        noData: Vec<U256>, 
-        invalid: Vec<U256>
-    }
-
 
 Data Structures
 ~~~~~~~~~~~~~~~
