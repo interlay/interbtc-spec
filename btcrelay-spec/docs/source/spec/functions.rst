@@ -24,36 +24,27 @@ Specification
 
 *Parameters*
 
-* ``blockHeaderBytes``: 80 byte raw Bitcoin block header.
+* ``relayer``: the account submitting the block
+* ``blockHeaderBytes``: 80 byte raw Bitcoin block header
 * ``blockHeight``: integer Bitcoin block height of the submitted block header 
 
 *Events*
 
-* ``Initialized(blockHeight, blockHash)``: if the first block header was stored successfully, emit an event with the stored block's height (``blockHeight``) and the (PoW) block hash (``blockHash``).
+* ``Initialized(blockHeight, blockHash, relayer)``: if the first block header was stored successfully, emit an event with the stored block's height (``blockHeight``) and the (PoW) block hash (``blockHash``).
 
 *Errors*
 
 * ``ERR_ALREADY_INITIALIZED = "Already initialized"``: return error if this function is called after BTC-Relay has already been initialized.
-
-.. *Substrate*::
-
-  fn initialize(origin, blockHeaderBytes: Vec<u8>, blockHeight: U256) -> DispatchResult {...}
 
 Preconditions
 ~~~~~~~~~~~~~
 
 * This is the first time this function is called, i.e., when BTC-Relay is being deployed. 
 
-.. note:: Calls to ``initialize`` will likely be restricted through the Governance Mechanism of the BTC Parachain. This is to be defined.  
-
-
-
 Function sequence
 ~~~~~~~~~~~~~~~~~
 
-The ``initialize`` function takes as input an 80 byte raw Bitcoin block header and the corresponding Bitcoin block height, and follows the sequence below:
-
-1. Check if ``initialize`` is called for the first time. This can be done by checking if ``BestBlock == None``. Return ``ERR_ALREADY_INITIALIZED`` if BTC-Relay has already been initialized. 
+1. Check if ``initialize`` is called for the first time. Return ``ERR_ALREADY_INITIALIZED`` if BTC-Relay has already been initialized. 
 
 2. Parse ``blockHeaderBytes``, extracting  the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` and :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash (``hashCurrentBlock``) using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
 
@@ -72,7 +63,7 @@ The ``initialize`` function takes as input an 80 byte raw Bitcoin block header a
 
 6. Set ``BestBlock = hashCurrentBlock`` and ``BestBlockHeight = blockHeight``.
 
-7. Emit a ``Initialized`` event using ``height`` and ``hashCurrentBlock`` as input (``Initialized(height, hashCurrentBlock)``). 
+7. Emit a ``Initialized`` event using ``height`` and ``hashCurrentBlock`` as input.
 
 .. warning:: Attention: the Bitcoin block header submitted to ``initialize`` must be in the Bitcoin main chain - this must be checked outside of the BTC Parachain **before** making this function call! A wrong initialization will cause the entire BTC Parachain to fail, since verification requires that all submitted blocks **must** (indirectly) point to the initialized block (i.e., have it as ancestor, just like the actual Bitcoin genesis block).
 
@@ -80,6 +71,7 @@ The ``initialize`` function takes as input an 80 byte raw Bitcoin block header a
 
 storeBlockHeader
 ----------------
+
 Method to submit block headers to the BTC-Relay. This function calls  :ref:`verifyBlockHeader` providing the 80 bytes Bitcoin block header as input, and, if the latter returns ``True``, extracts from the block header and stores the hash, height and Merkle tree root of the given block header in ``BlockHeaders``.
 If the block header extends an existing ``BlockChain`` entry in ``Chains``, it appends the block hash to the ``chains`` mapping and increments the ``maxHeight``. Otherwise, a new ``Blockchain`` entry is created.
 
@@ -88,25 +80,17 @@ Specification
 
 *Function Signature*
 
-``storeBlockHeader(blockHeaderBytes)``
+``storeBlockHeader(relayer, blockHeaderBytes)``
 
 *Parameters*
 
+* ``relayer``: the account submitting the block
 * ``blockHeaderBytes``: 80 byte raw Bitcoin block header.
 
 *Events*
 
-* ``StoreMainChainHeader(blockHeight, blockHash)``: if the block header was successful appended to the currently longest chain (*main chain*) emit an event with the stored block's height (``blockHeight``) and the (PoW) block hash (``blockHash``).
-* ``StoreForkHeader(forkId, blockHeight, blockHash)``: f the block header was successful appended to a new or existing fork, emit an event with the block height (``blockHeight``) and the (PoW) block hash (``blockHash``).
-
-
-*Errors*
-
-* ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the Governance Mechanism.
-
-.. *Substrate*::
-
-  fn storeBlockHeader(origin, blockHeaderBytes: Vec<u8>) -> DispatchResult {...}
+* ``StoreMainChainHeader(blockHeight, blockHash, relayer)``: if the block header was successful appended to the currently longest chain (*main chain*) emit an event with the stored block's height (``blockHeight``) and the (PoW) block hash (``blockHash``).
+* ``StoreForkHeader(forkId, blockHeight, blockHash, relayer)``: if the block header was successful appended to a new or existing fork, emit an event with the block height (``blockHeight``) and the (PoW) block hash (``blockHash``).
 
 Preconditions
 ~~~~~~~~~~~~~
@@ -121,12 +105,9 @@ Preconditions
 Function sequence
 ~~~~~~~~~~~~~~~~~
 
+1. Call :ref:`verifyBlockHeader` passing ``blockHeaderBytes`` as function parameter. If this call **returns an error** , then abort and return the raised error. If successful, this call returns a parsed ``BlockHeader`` (``BlockHeader``) struct.
 
-1. Check if the BTC Parachain status is set to ``SHUTDOWN``. If true, return ``ERR_SHUTDOWN``. 
-
-2. Call :ref:`verifyBlockHeader` passing ``blockHeaderBytes`` as function parameter. If this call **returns an error** , then abort and return the raised error. If successful, this call returns a parsed ``BlockHeader`` (``BlockHeader``) struct.
-
-3. Determine which ``BlockChain`` entry in ``Chains`` this block header is extending, or if it is a new fork and hence a new ``BlockChain`` entry needs to be created. For this, get the ``prevBlockHeader`` (``RichBlockHeader``) stored in ``BlockHeaders`` with ``BlockHeader.hashPrevBlock`` and use ``prevBlockHeader.chainRef`` to lookup the associated ``BlockChain`` struct in ``ChainsIndex``. Then, check if the  ``prevBlockHeader.blockHeight`` (as referenced by ``hashPrevBlock``) is equal  to ``BlockChain.maxHeight``.
+2. Determine which ``BlockChain`` entry in ``Chains`` this block header is extending, or if it is a new fork and hence a new ``BlockChain`` entry needs to be created. For this, get the ``prevBlockHeader`` (``RichBlockHeader``) stored in ``BlockHeaders`` with ``BlockHeader.hashPrevBlock`` and use ``prevBlockHeader.chainRef`` to lookup the associated ``BlockChain`` struct in ``ChainsIndex``. Then, check if the  ``prevBlockHeader.blockHeight`` (as referenced by ``hashPrevBlock``) is equal  to ``BlockChain.maxHeight``.
 
    a. If not equal (can only be less in this case), then the current submission is creating a **new fork**. 
      
@@ -144,13 +125,13 @@ Function sequence
 
     ii ) Check if a blockchain reorganization is necessary. For this, call :ref:`checkAndDoReorg` passing the pointer to ``BlockChain`` as parameter.
   
-4. Check if ``BlockChain`` is the main chain, i.e. check if ``chainId == MAIN_CHAIN_ID``.
+3. Check if ``BlockChain`` is the main chain, i.e. check if ``chainId == MAIN_CHAIN_ID``.
 
    a. If ``BlockChain`` **is not** the main chain (``chainId =/= MAIN_CHAIN_ID``) and  ``BlockChain.maxHeight > nextBestForkHeight`` set ``nextBestForkHeight = BlockChain.maxHeight``.
 
    b. If ``BlockChain`` **is** the main chain (``chainId == MAIN_CHAIN_ID``) set ``BestBlock = hashCurrentBlock``  and ``BestBlockHeight = BlockChain.maxHeight``.
 
-5. Create a new ``RichBlockHeader`` and initalize as follows:
+4. Create a new ``RichBlockHeader`` and initalize as follows:
 
   * ``RichBlockHeader.blockHeight = prevBlock.blockHeight + 1``,
   * ``RichBlockHeader.chainRef = BlockChain.chainId``,
@@ -159,9 +140,9 @@ Function sequence
   * ``RichBlockHeader.timestamp = BlockHeader.timestamp``,
   * ``RichBlockHeader.hashPrevBlock = BlockHeader.hashPrevBlock``
 
-6. Insert ``RichBlockHeader`` into ``BlockHeaders`` using ``hashCurrentBlock`` as key. 
+5. Insert ``RichBlockHeader`` into ``BlockHeaders`` using ``hashCurrentBlock`` as key. 
 
-7. Emit event. 
+6. Emit event. 
 
    a. If submission was to *main chain* (``BlockChain`` with ``chainId == MAIN_CHAIN_ID``), emit ``StoreMainChainBlockHeader`` event using ``height`` and ``hashCurrentBlock`` as input (``StoreMainChainHeader(height, hashCurrentBlock)``). 
 
@@ -197,11 +178,6 @@ Specification
 *Events*
 
 *  ``ChainReorg(newChainTip, blockHeight, forkDepth)``: if the submitted block header on a fork results in a reorganization (fork longer than current main chain), emit an event with the block hash of the new highest block (``newChainTip``), the new maximum block height (``blockHeight``) and the depth of the fork (``forkDepth``).
-
-.. *Substrate*::
-
-  fn checkAndDoReorg(fork: &BlockChain) -> DispatchResult {...}
-
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
@@ -253,15 +229,7 @@ Function Sequence
 
   h. Emit a ``ChainReorg(newChainTip, blockHeight, forkDepth)``, where ``newChainTip`` is the new ``BestBlock``, ``blockHeight`` is the new ``BestBlockHeight``, and ``forkDepth`` is the depth of the fork (``fork.maxHeight - fork.startHeight``).
 
-.. todo:: We will want to execute the re-writing of the main chain only when a new fork is at least ``k`` blocks ahead.
-
-
-
-.. note:: The exact implementation of :ref:`checkAndDoReorg` depends on the data structure used for ``Chains``.
-
 .. note:: We may want to track the ``mainChain`` identifier separately for quicker access (same main chain updated in case of forks).
-
-
 
 .. _verifyBlockHeader:
 
@@ -272,8 +240,6 @@ The ``verifyBlockHeader`` function parses and verifies Bitcoin block headers.
 If all checks are successful, returns a ``BlockHeader`` representation of the 80 byte raw block header given as input.
 
 .. note:: This function does not check whether the submitted block header extends the main chain or a fork. This check is performed in :ref:`storeBlockHeader`.
-
-
 
 Specification
 ~~~~~~~~~~~~~~
@@ -325,8 +291,6 @@ Function Sequence
     Sequence diagram showing the function sequence of :ref:`verifyBlockHeader`.
 
 
-
-
 .. _verifyTransactionInclusion:
 
 verifyTransactionInclusion
@@ -346,10 +310,8 @@ Specification
 * ``txId``: 32 byte hash identifier of the transaction.
 * ``merkleProof``: Merkle tree path (concatenated LE sha256 hashes, dynamic sized).
 * ``confirmations``: integer number of confirmation required.
-* ``insecure``: boolean parameter indicating whether to check against the recommended ``STABLE_BITCOIN_CONFIRMATIONS`` 
 
 .. note:: The Merkle proof for a Bitcoin transaction can be retrieved using the ``bitcoin-rpc`` `gettxoutproof <https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/gettxoutproof/>`_ method and dropping the first 170 characters. The Merkle proof thereby consists of a list of SHA256 hashes, as well as an indicator in which order the hash concatenation is to be applied (left or right).
-
 
 *Returns*
 
@@ -362,59 +324,36 @@ Specification
 
 *Errors*
 
-* ``ERR_INVALID = "BTC-Relay has detected an invalid block in the current main chain, and has been halted"``: the BTC Parachain has been halted because Staked Relayers reported an invalid block.
-* ``ERR_NO_DATA = "BTC-Relay has a NO_DATA failure and the requested block cannot be verified reliably": the ``txBlockHeight`` is greater or equal to the hight of a ``RichBlockHeader`` which is flagged with ``NO_DATA_BTC_RELAY``.
 * ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the Governance Mechanism.
 * ``ERR_MALFORMED_TXID = "Malformed transaction identifier"``: return error if the transaction identifier (``txId``) is malformed.
 * ``ERR_CONFIRMATIONS = "Transaction has less confirmations than requested"``: return error if the block in which the transaction specified by ``txId`` was included has less confirmations than requested.
 * ``ERR_INVALID_MERKLE_PROOF = "Invalid Merkle Proof"``: return error if the Merkle proof is malformed or fails verification (does not hash to Merkle root).
 * ``ERR_ONGOING_FORK = "Verification disabled due to ongoing fork"``: return error if the ``mainChain`` is not at least ``STABLE_BITCOIN_CONFIRMATIONS`` ahead of the next best fork. 
 
-.. *Substrate*::
-
-  fn verifyTransactionInclusion(txId: H256, txBlockHeight: U256, txindex: u32, merkleProof: Vec<u8>, confirmations: u32, insecure: bool) -> DispatchResult {...}
-
 Preconditions
 ~~~~~~~~~~~~~
 
-* If the BTC Parachain status is set to ``ERROR: 1``, transaction verification is disabled:
-  * For the latest blocks in case ``Errors`` in the ``Security`` module contains ``NO_DATA_BTC_RELAY``
-  * Completely in case ``Errors`` in the ``Security`` module contains ``INVALID_BTC_RELAY``
 * The BTC Parachain status must not be set to ``SHUTDOWN: 3``. If ``SHUTDOWN`` is set, all transaction verification is disabled.
 
 
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 
-1. Check if the BTC Parachain status is set to ``SHUTDOWN``. If true, return ``ERR_SHUTDOWN`` and return. 
+1. Check that ``txId`` is 32 bytes long. Return ``ERR_MALFORMED_TXID`` error if this check fails. 
 
-2. Check if the BTC Parachain status is set to ``ERROR``. If yes, retrieve ``Errors`` from the *Security* module of PolkaBTC.
-
-3. If ``Errors`` contains ``INVALID_BTC_RELAY``, abort and return a ``ERR_INVALID`` error.
-
-4. If ``Errors`` contains ``NO_DATA_BTC_RELAY``, lookup the first block flagged with ``NO_DATA_BTC_RELAY`` in the ``chain`` map of this ``BlockChain``. For this, 
-
-  a. Retrieve the top-most ``BlockChain`` entry from ``Chains``,
-
-  b. Retrieve the lowest block height from the ``noData`` list in this ``BlockChain``.
-
-  c. If ``txBlockHeight`` is greater or equal to the block height of the lowest ``noData`` block, abort and return ``ERR_NO_DATA``.
-
-5. Check that ``txId`` is 32 bytes long. Return ``ERR_MALFORMED_TXID`` error if this check fails. 
-
-6. Check that the current ``BestBlockHeight`` exceeds ``txBlockHeight`` by the requested confirmations.  Return ``ERR_CONFIRMATIONS`` if this check fails. 
+2. Check that the current ``BestBlockHeight`` exceeds ``txBlockHeight`` by the requested confirmations.  Return ``ERR_CONFIRMATIONS`` if this check fails. 
 
   a. If ``insecure == True``, check against user-defined ``confirmations`` only
 
   b. If ``insecure == True``, check against ``max(confirmations, STABLE_BITCOIN_CONFIRMATIONS)``.
 
-7. Check if the Bitcoin block was stored for a sufficient number of blocks (on the parachain) to ensure that staked relayers had the time to flag the block as potentially invalid. Check performed against ``STABLE_PARACHAIN_CONFIRMATIONS``.
+3. Check if the Bitcoin block was stored for a sufficient number of blocks (on the parachain) to ensure that staked relayers had the time to flag the block as potentially invalid. Check performed against ``STABLE_PARACHAIN_CONFIRMATIONS``.
 
-8. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``Chains`` at the passed ``txBlockHeight``.  
+4. Extract the block header from ``BlockHeaders`` using the ``blockHash`` tracked in ``Chains`` at the passed ``txBlockHeight``.  
 
-9. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Return ``ERR_INVALID_MERKLE_PROOF`` if one of these checks fails.
+5. Check that the first 32 bytes of ``merkleProof`` are equal to the ``txId`` and the last 32 bytes are equal to the ``merkleRoot`` of the specified block header. Also check that the ``merkleProof`` size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Return ``ERR_INVALID_MERKLE_PROOF`` if one of these checks fails.
 
-10. Call :ref:`computeMerkle` passing ``txId``, ``txIndex`` and ``merkleProof`` as parameters. 
+6. Call :ref:`computeMerkle` passing ``txId``, ``txIndex`` and ``merkleProof`` as parameters. 
 
   a. If this call returns the ``merkleRoot``, emit a ``VerifyTransaction(txId, txBlockHeight, confirmations)`` event and return ``True``.
   
@@ -424,10 +363,6 @@ Function Sequence
     :alt: verifyTransactionInclusion sequence diagram
 
     The steps to verify a transaction in the :ref:`verifyTransactionInclusion` function.
-
-
-
-
 
 .. _validateTransaction:
 
@@ -470,16 +405,10 @@ Specification
 
 *Errors*
 
-* ``ERR_SHUTDOWN = "BTC Parachain has shut down"``: the BTC Parachain has been shutdown by a manual intervention of the Governance Mechanism.
-* ``ERR_INVALID = "BTC-Relay has detected an invalid block in the current main chain, and has been halted"``: the BTC Parachain has been halted because Staked Relayers reported an invalid block.
 * ``ERR_INSUFFICIENT_VALUE = "Value of payment below requested amount"``: return error the value of the (first) *Payment UTXO* is lower than ``paymentValue``.
 * ``ERR_TX_FORMAT = "Transaction has incorrect format"``: return error if the transaction has an incorrect format (see :ref:`accepted-tx-format`).
 * ``ERR_WRONG_RECIPIENT = "Incorrect recipient Bitcoin address"``: return error if the recipient specified in the (first) *Payment UTXO* does not match the given ``recipientBtcAddress``.
 * ``ERR_INVALID_OPRETURN = "Incorrect identifier in OP_RETURN field"``: return error if the OP_RETURN field of the (second) *Data UTXO* does not match the given ``opReturnId``.
-
-.. *Substrate*::
-
-  fn validateTransaction(rawTx: Vec<u8>, paymentValue: Balance, recipientBtcAddress: H160, opReturnId: H256) -> DispatchResult {...}
 
 Preconditions
 ~~~~~~~~~~~~~
@@ -491,21 +420,51 @@ Function Sequence
 
 See the `raw Transaction Format section in the Bitcoin Developer Reference <https://bitcoin.org/en/developer-reference#raw-transaction-format>`_ for a full specification of Bitcoin's transaction format (and how to extract inputs, outputs etc. from the raw transaction format). 
 
-1. Check if the BTC Parachain status is set to ``SHUTDOWN``. If true, return ``ERR_SHUTDOWN`` and return. 
+1. Extract the ``outputs`` from ``rawTx`` using :ref:`extractOutputs`.
 
-2. Check if the BTC Parachain status is set to ``ERROR``. If yes, retrieve ``Errors`` from the *Security* module of PolkaBTC is set to ``INVALID_BTC_RELAY``. If ``Errors`` contains ``INVALID_BTC_RELAY``, abort and return a ``ERR_INVALID`` error.
+  a. Check that the transaction (``rawTx``) has at least 2 outputs. One output (*Payment UTXO*) must be a `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_ or `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_ output. Another output (*Data UTXO*) must be an `OP_RETURN <https://bitcoin.org/en/transactions-guide#term-null-data>`_ output. Raise ``ERR_TX_FORMAT`` if this check fails.
 
-4. Extract the ``outputs`` from ``rawTx`` using :ref:`extractOutputs`.
+2. Extract the value of the *Payment UTXO* using :ref:`extractOutputValue` and check that it is equal (or greater) than ``paymentValue``. Return ``ERR_INSUFFICIENT_VALUE`` if this check fails. 
 
-  a. Check that the transaction (``rawTx``) has at least 2 outputs. One output (*Payment UTXO*) must be a `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_ or `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_ output. Another output (*Data UTXO*) must be an `OP_RETURN <https://bitcoin.org/en/transactions-guide#term-null-data>`_ output. Raise ``ERR_TX_FORMAT`` if this check fails. 
+3. Extract the Bitcoin address specified as recipient in the *Payment UTXO* using :ref:`extractOutputAddress` and check that it matches ``recipientBtcAddress``. Return ``ERR_WRONG_RECIPIENT`` if this check fails, or the error returned by :ref:`extractOutputAddress` (if the output was malformed).
 
-5. Extract the value of the *Payment UTXO* using :ref:`extractOutputValue` and check that it is equal (or greater) than ``paymentValue``. Return ``ERR_INSUFFICIENT_VALUE`` if this check fails. 
+4. Extract the OP_RETURN value from the *Data UTXO* using :ref:`extractOPRETURN` and check that it matches ``opReturnId``. Return ``ERR_INVALID_OPRETURN`` error if this check fails, or the error returned by :ref:`extractOPRETURN` (if the output was malformed).
 
-6. Extract the Bitcoin address specified as recipient in the *Payment UTXO* using :ref:`extractOutputAddress` and check that it matches ``recipientBtcAddress``. Return ``ERR_WRONG_RECIPIENT`` if this check fails, or the error returned by :ref:`extractOutputAddress` (if the output was malformed).
+.. _verifyAndValidateTransaction:
 
-7. Extract the OP_RETURN value from the *Data UTXO* using :ref:`extractOPRETURN` and check that it matches ``opReturnId``. Return ``ERR_INVALID_OPRETURN`` error if this check fails, or the error returned by :ref:`extractOPRETURN` (if the output was malformed).
+verifyAndValidateTransaction
+----------------------------
 
-8. Return ``True``.
+The ``verifyAndValidateTransaction`` function is a wrapper around the :ref:`verifyTransactionInclusion` and the :ref:`validateTransaction` functions. It adds an additional check to verify that the validated transaction is the one included in the specified block.
+
+Specification
+~~~~~~~~~~~~~
+
+*Function Signature*
+
+``verifyAndValidateTransaction(merkleProof, confirmations, rawTx, paymentValue, recipientBtcAddress, opReturnId)``
+
+*Parameters*
+
+* ``txId``: 32 byte hash identifier of the transaction.
+* ``merkleProof``: Merkle tree path (concatenated LE sha256 hashes, dynamic sized).
+* ``confirmations``: integer number of confirmation required.
+* ``rawTx``:  raw Bitcoin transaction including the transaction inputs and outputs.
+* ``paymentValue``: integer value of BTC sent in the (first) *Payment UTXO* of transaction.
+* ``recipientBtcAddress``: 20 byte Bitcoin address of recipient of the BTC in the (first) *Payment UTXO*.
+* ``opReturnId``: [Optional] 32 byte hash identifier expected in OP_RETURN (see :ref:`replace-attacks`).
+
+*Returns*
+
+* ``True``: If the same transaction has been verified and validated.
+* Error otherwise.
+
+Function Sequence
+~~~~~~~~~~~~~~~~~
+
+#. Parse the ``rawTx`` to get the tx id.
+#. Call :ref:`verifyTransactionInclusion` with the applicable parameters.
+#. Call :ref:`validateTransaction` with the applicable parameters.
 
 
 .. _flagBlockError:
@@ -564,7 +523,6 @@ Function Sequence
 6. Return
 
 
-
 .. _clearBlockError:
 
 clearBlockError
@@ -581,7 +539,6 @@ Specification
 *Function Signature*
 
 ``flagBlockError(blockHash, errors)``
-
 
 *Parameters*
 

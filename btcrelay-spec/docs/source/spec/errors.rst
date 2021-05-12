@@ -1,7 +1,7 @@
 .. _errors:
 
 Error Codes
-===================
+===========
 
 A summary of error codes raised in exceptions by BTC-Relay, and their meanings, are provided below.
 

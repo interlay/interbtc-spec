@@ -5,35 +5,6 @@ Functions: Utils
 
 There are several helper methods available that abstract Bitcoin internals away in the main function implementation.
 
-
-.. .. _getChainId:
-.. 
-.. getChainId
-.. ----------
-.. 
-.. Increments ``ChainId`` and returns the new value. Called when a new entry is being added to ``Chains`` (fork submission to BTC-Relay).
-.. 
-.. *Function Signature*
-.. 
-.. ``getChainId()``
-.. 
-.. *Returns*
-.. 
-.. * ``chainId``: the next value of ``ChainId``.
-.. 
-.. .. *Substrate*
-.. 
-.. ::
-.. 
-..   fn getChainId() -> U256 {...}
-..   
-.. Function Sequence
-.. ~~~~~~~~~~~~~~~~~
-.. 
-.. 1. ``ChainId++``
-.. 2. Return ``ChainId``
-
-
 .. _sha256d:
 
 sha256d
@@ -55,10 +26,6 @@ Bitcoin uses a double SHA256 hash to protect against `"length-extension" attacks
 
 * ``hash``: the double SHA256 hash encodes as a bytes from ``data``.
 
-.. *Substrate*::
-
-  fn sha256d(data: String) -> H256 {...}
-  
 Function Sequence
 ~~~~~~~~~~~~~~~~~
 

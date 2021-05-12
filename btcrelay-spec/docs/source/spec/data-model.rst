@@ -1,8 +1,7 @@
 .. _data-model:
 
-
 Data Model
-============
+===========
 
 The BTC-Relay, as opposed to Bitcoin SPV clients, only stores a subset of information contained in block headers and does not store transactions. 
 Specifically, only data that is absolutely necessary to perform correct verification of block headers and transaction inclusion is stored. 
@@ -14,7 +13,6 @@ RawBlockHeader
 ..............
 
 An 80 bytes long Bitcoin blockchain header.
-
 
 Constants
 ~~~~~~~~~
@@ -109,18 +107,6 @@ Parameter               Type         Description
 ``blockHeader``         BlockHeader  Associated parsed ``BlockHeader`` struct 
 ======================  ===========  ========================================================================
 
-.. *Substrate*::
-
-    #[derive(Encode, Decode, Default, Clone, PartialEq)]
-    #[cfg_attr(feature = "std", derive(Debug))]
-    pub struct RichBlockHeader<H256, U256, Timestamp> {
-        block_height: U256,
-        chain_ref: U256,
-        block_header: BlockHeader<H256, U256, Timestamp>,
-    }
-
-
-
 BlockChain
 ..........
 
@@ -138,20 +124,6 @@ Parameter               Type            Description
 ``noData``              Vec<U256>       List of block heights in ``chain`` referencing block hashes of ``RichBlockHeader`` entries in ``BlockHeaders`` which have been flagged as ``noData`` by Staked Relayers.
 ``invalid``             Vec<U256>       List of block heights in ``chain`` referencing block hashes of ``RichBlockHeader`` entries in ``BlockHeaders`` which have been flagged as ``invalid`` by Staked Relayers.
 ======================  ==============  ========================================================================
-
-.. *Substrate*::
-
-    #[derive(Encode, Decode, Default, Clone, PartialEq)]
-    #[cfg_attr(feature = "std", derive(Debug))]
-    pub struct RichBlockHeader<H256, Timestamp> {
-        chainId: U256,
-        chain: BTreeMap<U256,H256>,
-        startHeight: U256,
-        maxHeight: U256,
-        noData: Vec<U256>, 
-        invalid: Vec<U256>
-    }
-
 
 Data Structures
 ~~~~~~~~~~~~~~~
@@ -180,11 +152,9 @@ The exact choice of data structure is left to the developer. We recommend to use
 
 .. note:: The assumption for ``Chains`` is that, in the majority of cases, block headers will be appended to the *main chain* (longest chain), i.e., the ``BlockChain`` entry at the most significant position in the queue/heap. Similarly, transaction inclusion proofs (:ref:`verifyTransactionInclusion`) are only checked against the *main chain*. This means, in the average case lookup complexity will be O(1). Furthermore, block headers can only be appended if they (i) have a valid PoW and (ii) do not yet exist in ``BlockHeaders`` - hence, spamming is very costly and unlikely. Finally, blockchain forks and re-organizations occur infrequently, especially in Bitcoin. In principle, optimizing lookup costs should be prioritized, ideally O(1), while inserting of new items and re-balancing can even be O(n). 
 
-.. attention:: ``PriorityQueue`` is **currently not** natively supported in Substrate. A Rust implementation can be found `here <https://docs.rs/priority-queue/0.7.0/priority_queue/>`_, which has O(1) lookup and O(log(n)) re-balancing. This functionality can be emulated using a ``LinkedList`` by maintaining ordering upon insertion (worst case O(n), but will be O(1) is most cases as explained above). In theory, this can also be implemented using a ``BinaryHeap`` by deleting and re-inserting ``BlockChain`` entries when necessary.
-
 
 ChainsIndex
-............
+...........
 
 Auxiliary mapping of ``BlockChain`` structs to unique identifiers, for faster read access / lookup ``<U256, BlockChain>``, 
 

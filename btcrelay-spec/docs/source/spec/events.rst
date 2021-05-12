@@ -4,7 +4,7 @@ Events
 ======
 
 Initialized
---------------------
+-----------
 
 If the first block header was stored successfully, emit an event with the stored block’s height and the (PoW) block hash.
 
