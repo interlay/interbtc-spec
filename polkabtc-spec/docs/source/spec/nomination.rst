@@ -36,7 +36,7 @@ Security Assumptions and Considerations
 #. Vaults are always-online agents, who can promptly react to system updates.
 #. A Nominator may expose the Vault and the other Nominators to additional economic risk by withdrawing nominated collateral during an exchange rate spike. Similarly, the Vault may expose its Nominators to additional economic risk by withdrawing excess collateral.
    
-   * Note: in the usual case, this should be handled by having the different collateral thresholds (secure, premium redeem, auction, liquidation). But in extreme cases (very high exchange rate volatility), it might cause concern.
+   * Note: in the usual case, this should be handled by having the different collateral thresholds (secure, premium redeem, liquidation). But in extreme cases (very high exchange rate volatility), it might cause concern.
 
 
 

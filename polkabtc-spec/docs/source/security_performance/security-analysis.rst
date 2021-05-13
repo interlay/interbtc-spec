@@ -135,7 +135,6 @@ To this end, the PolkaBTC component must enforce that either (i) no fees can be 
 
 .. Collateral thresholds>
 .. * Secure
-.. * Auction
 .. * PremiumRedeem
 .. * Liquidation
 

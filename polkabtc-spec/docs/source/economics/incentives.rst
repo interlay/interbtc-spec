@@ -27,12 +27,6 @@ Vaults
 - **Economics** Vaults hold DOT and thus have exposure to the DOT price against other assets. Vaults inherently make a bet that DOT will increase in value against other assets – otherwise they would simply exchange DOT against their preferred asset(s). This is a simplified view of the underlying problem. In reality, we need to additionally consider nominated vaults as well as vault pooling. Moreover, the inflation of DOT will play a major role in selection of the asset that fees should be paid in.
 - **Risks** A Vault backs a set of PolkaBTC with DOT collateral. If the exchange rate of the DOT/BTC pair drops the Vault stands at risk to not be able to keep the required level of over-collateralization. This risk can be elevated by a shortage of liquidity.
 
-Keepers
--------
-
-- **Protocol role** Keepers are Vaults that take on an additional role. When a Vault falls under the auction collateralization threshold a Keeper can replace this Vault by providing the required amount of DOT.
-- **Economics** When replacing a Vault during an auction, a Keeper earns an auction fee in DOT – deducted from the Vault’s collateral (still over-collateralized). Their incentive is to profit from Vaults that are unable or unwilling to increase their DOT supply to back their insured PolkaBTC.
-- **Risks** When Vaults are being replaced due to a significant price ﬂuctuation, Keepers need to decide if they can actually keep the collateralization above the auction threshold. Otherwise, they stand to pay a punishment fee as well and might get replaced once they have taken over a position.
 
 Staked Relayers
 ---------------
@@ -79,15 +73,6 @@ A user can retry to redeem with other Vaults in case a redeem request is not ful
 4. The Vault proves correct redeem with the BTC Parachain and unlocks the DOT collateral in return. 
 5. The Vault can decide to keep the DOT collateral in the BTC Parachain to participate in issue requests or withdraw the collateral.
  
-Auction process 
----------------
-
-Last, Keepers are supposed to safe-guard the system from Vaults that fall below the auction collateral threshold. A Vault might fall below the threshold when the DOT price drops relative to BTC. A Keeper will provide additional DOT to replace the current Vault and earn a auction replace fee that is deducted from the replaced Vault’s DOT collateral (the remaining collateral is released to the undercollateralized Vault).
-
-1. A Vault falls below the auction threshold after a DOT price drop relative to BTC. 
-2. A Keeper replaces the Vault by providing more DOT than the original Vault to be above the auction threshold. The Keeper receives a fee deducted from the initial Vault.
-
-The received fee must be higher than the expected further price drop. In a bear market, Keepers are only incentivised to replace Vaults if the expected return through the punishment fee outperforms the expected price drop.
 
 PolkaBTC interest process
 -------------------------
@@ -99,7 +84,7 @@ All participants are able to withdraw their accumulated fees at any time.
 DOT interest process
 --------------------
 
-Fees paid in DOT (Auction Replace) are forwarded to a fee pool.
+Fees paid in DOT are forwarded to a fee pool.
 The fee pool then distributes the PolkaBTC fees to all Vaults, Staked Relayers, Maintainers, and Collators according to a configurable distribution, and, if implemented, depending on the SLA score.
 All participants are able to withdraw their accumulated fees at any time.
 
@@ -114,7 +99,7 @@ Price decoupling of BTC and PolkaBTC, in turn, can be used by arbitrage traders.
 Constraints
 ~~~~~~~~~~~
 
-We sketched above how each agent can be motivated to participate based on their incentive. However, determining the fee model, including how much a user should pay in BTC fees, the interest earned in DOT or PolkaBTC by Vaults and Staked Relayers, as well as the punishment fee for being replaced through an auction, requires careful consideration. These numbers depend on certain constraints than can be roughly categorized in two parts:
+We sketched above how each agent can be motivated to participate based on their incentive. However, determining the fee model, including how much a user should pay in BTC fees or the interest earned in DOT or PolkaBTC by Vaults and Staked Relayers, requires careful consideration. These numbers depend on certain constraints than can be roughly categorized in two parts:
  
 1. **Inherent risks**: Each agent takes on different risks that include, for example, giving up custody of their BTC, exchange rate risk on the DOT/BTC pair, costs to maintain the infrastructure to operate Vault and Staked Relayer clients, as well as trusting the BTC Parachain to operate correctly and as designed. 
 2. **Opportunity costs**: Each agent might decide to take an alternative path to receive the desired incentives. For example, users might pick a different platform or bridge to utilize their BTC. Also Vaults, Staked Relayers, and Keepers might pick other protocols to earn interest on their DOT holdings.
