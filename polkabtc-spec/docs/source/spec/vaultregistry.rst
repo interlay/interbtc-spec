@@ -26,26 +26,10 @@ The minimum collateral a vault needs to provide to participate in the issue proc
 
 .. note:: This is a protection against spamming the protocol with very small collateral amounts. Vaults are still able to withdraw the collateral after registration, but at least it requires an additional transaction fee, and it provides protection against accidental registration with very low amounts of collateral.
 
-
-PunishmentFee
-.............
-
-If a vault misbehaves in either the redeem or replace protocol by failing to prove that it sent the correct amount of BTC to the correct address within the time limit, a vault is punished.
-The punishment is the equivalent value of BTC in DOT (valued at the current exchange rate via :ref:`getExchangeRate`) plus a fixed ``PunishmentFee`` that is added as a percentage on top to compensate the damaged party for its loss.
-For example, if the ``PunishmentFee`` is set to 50000, it is equivalent to 50%.
-
-
 PunishmentDelay
 .................
 
-If a vault fails to execute a correct redeem or replace, it is *temporarily* banned from further issue, redeem or replace requests. 
-
-
-RedeemPremiumFee
-.................
-
-If a vault is running low on collateral and falls below ``PremiumRedeemThreshold``, users are allocated a premium in DOT when redeeming with the vault - as defined by this parameter.
-For example, if the ``RedeemPremiumFee`` is set to 5000, it is equivalent to 5%.
+If a vault fails to execute a correct redeem or replace, it is *temporarily* banned from further issue, redeem or replace requests. This value configured how long the vault will be banned for.
 
 SecureCollateralThreshold
 ..........................
@@ -59,10 +43,6 @@ The maximum amount of PolkaBTC a vault is able to support during the issue proce
 
 .. note:: As an example, assume we use ``DOT`` as collateral, we issue ``PolkaBTC`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureCollateralThreshold`` is 200%, i.e. a vault has to provide two-times the amount of collateral to back an issue request. Now let's say the vault deposits 400 ``DOT`` as collateral. Then this vault can back at most 2.5 PolkaBTC as: :math:`400 * (1/80) / 2 = 2.5`.
 
-<<<<<<< HEAD
-
-=======
->>>>>>> fix: update vault registry spec
 PremiumRedeemThreshold
 ......................
 
@@ -163,7 +143,9 @@ Specification
 *Postconditions*
 
 * The provided ``collateral`` is locked.
-* A new vault is added to ``Vaults``, with ``backing_collateral`` set to ``collateral``, and with ``btcPublicKey`` as the public key in the wallet. The status is set to ``Active(true)``, meaning the new vault accepts new issues. The rest of the variables (``issuedTokens``, ``toBeIssuedTokens``, etc) are zero-initialized. 
+* A new vault is added to ``Vaults``, with ``backing_collateral`` set to ``collateral``, and with ``btcPublicKey`` as the public key in the wallet. 
+* The status is set to ``Active(true)``, meaning the new vault accepts new issues. 
+* The rest of the variables (``issuedTokens``, ``toBeIssuedTokens``, etc) are zero-initialized. 
 
 .. _registerAddress:
 
@@ -228,7 +210,7 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
-* The vault must exist.
+* The vault MUST exist.
 
 *Postconditions*
 
@@ -293,8 +275,7 @@ Specification
 
 *Preconditions*
 
-* The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN:2``.
-* The oracle status MUST be ``ONLINE``.
+* The BTC Parachain status in the :ref:`security` component MUST be set to ``RUNNING:0``.
 * The collatalization rate of the vault MUST remain above ``SecureCollateralThreshold`` after the withdrawal of ``withdrawAmount``.
 
 *Postconditions*
@@ -340,8 +321,7 @@ Specification
 
 *Preconditions*
 
-* The BTC Parachain status in the :ref:`security` component MUST NOT set to ``SHUTDOWN:0``.
-* The oracle status MUST be ``ONLINE``.
+* The BTC Parachain status in the :ref:`security` component MUST be set to ``RUNNING:0``.
 * The vault MUST have sufficient collateral to remain above the ``SecureCollateralThreshold`` after issuing ``tokens``.
 * The vault status MUST be `Active(true)`
 * The vault MUST NOT be banned
@@ -375,13 +355,14 @@ Specification
 
 *Preconditions*
 
-* The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
-* If the vault is not liquidated, it must have at least ``tokens`` . If it *is* liquidated, the liquidation vault must have at least ``tokens`` ``toBeIssuedTokens``.
+* The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* If the vault is not liquidated, it MUST have at least ``tokens`` ``toBeIssuedTokens``. 
+* If the vault *is* liquidated, it MUST have at least ``tokens`` ``toBeIssuedTokens``.
 
 *Postconditions*
 
-* If the vault is not liquidated, its ``toBeIssuedTokens`` are decreased by an amount of ``tokens``. Otherwise, the liquidation vault's ``toBeIssuedTokens`` are decreased by ``tokens``.
-
+* If the vault is *not* liquidated, its ``toBeIssuedTokens`` is decreased by an amount of ``tokens``. 
+* If the vault *is* liquidated, the liquidation vault's ``toBeIssuedTokens`` is decreased by an amount of ``tokens``. 
 
 .. _issueTokens:
 
@@ -601,9 +582,8 @@ Specification
 
 *Preconditions*
 
-* The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
-* The oracle status MUST be ``ONLINE``.
-* The liquidation vault MUST have sufficient tokens, i.e. ``tokens`` must be less than or equal to its ``issuedTokens - toBeRedeemedTokens``.
+* The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* The liquidation vault MUST have sufficient tokens, i.e. ``tokens`` MUST be less than or equal to its ``issuedTokens - toBeRedeemedTokens``.
 
 *Postconditions*
 
