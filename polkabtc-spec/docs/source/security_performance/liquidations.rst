@@ -37,7 +37,6 @@ In detail, the punishment fee is calculated as follows:
 Liquidations (Safety Failures)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
 When a Vault is liquidated, its ``issued`` and ``toBeIssued`` tokens are *moved* to the Liquidation Vault.
 In contrast, the Vault's ``toBeRedeemed`` tokens are *copied* over.
 The Vault loses access to at least part of its backing collateral: 
@@ -105,7 +104,6 @@ Implementation Notes
 
 - In ``cancelIssue``, when the griefing collateral is slashed, it is forwarded to the fee pool.
 - In ``cancelReplace``, when the griefing collateral is slashed, it is forwarded to the backing collateral to the Vault. In case the Vault is liquidated, it is forwarded to the free balance of the Vault.
-- In issue/redeem/replace, when funds are slashed to the Vault (e.g., griefing collateral), they are locked as backing collateral.
 - In ``premiumRedeem``, the griefing collateral is set as 0.
 - In ``executeReplace``, the ``oldVault``'s griefing collateral is released, regardless of whether or not it is liquidated.
 
