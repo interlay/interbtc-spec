@@ -194,7 +194,7 @@ Function Sequence
 
 7. Lock the *oldVault*'s griefing collateral by calling :ref:`lockCollateral` and passing ``oldVault`` and ``griefingCollateral`` as parameters.
 
-8. Call the :ref:`increaseToBeRedeemedTokens` function with the ``oldVault`` and the ``btcAmount`` to ensure that the oldVault's tokens cannot be redeemed when a replace procedure is happening.
+8. Call the :ref:`tryIncreaseToBeRedeemedTokens` function with the ``oldVault`` and the ``btcAmount`` to ensure that the oldVault's tokens cannot be redeemed when a replace procedure is happening.
 
 9. Generate a ``replaceId`` by hashing a random seed, a nonce, and the address of the Requester.
 

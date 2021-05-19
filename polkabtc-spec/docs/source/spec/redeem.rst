@@ -153,7 +153,7 @@ Function Sequence
 
 5. Check that the ``amountPolkaBTC`` is above the Bitcoin dust limit.
 
-6. Call the :ref:`vault-registry` :ref:`increaseToBeRedeemedTokens` function with the ``amountBTC`` of tokens to be redeemed and the ``vault`` identified by its address.
+6. Call the :ref:`vault-registry` :ref:`tryIncreaseToBeRedeemedTokens` function with the ``amountBTC`` of tokens to be redeemed and the ``vault`` identified by its address.
 
 7. Call the :ref:`lock` function in the Treasury to lock the PolkaBTC ``amount`` of the user.
 
@@ -280,10 +280,7 @@ Function Sequence
 
 5. Call the :ref:`burn` function in the Treasury to burn the ``redeem.amount`` of PolkaBTC of the user.
 
-6. Check ``redeem.premiumDOT > 0``:
-   
-   a. If ``True``, call :ref:`redeemTokensPremium` in the VaultRegistry to release the Vault's collateral with the ``redeem.vault`` and the ``redeem.amount``, and ``redeemer`` and ``premiumDOT`` to allocate the DOT premium to the redeemer using the Vault's released collateral.
-   b. Else call :ref:`redeemTokens` function in the VaultRegistry to release the Vault's collateral with the ``redeem.vault`` and the ``redeem.amount``.
+6. If ``True``, call :ref:`redeemTokens` in the VaultRegistry to release the Vault's collateral with the ``redeem.vault`` and the ``redeem.amount``, and ``redeemer`` and ``premiumDOT`` to allocate the DOT premium to the redeemer using the Vault's released collateral.
 
 7. Remove ``redeem`` from ``RedeemRequests``.
 8. Emit an ``ExecuteRedeem`` event with the user's address, the redeemId, the amount, and the Vault's address.
