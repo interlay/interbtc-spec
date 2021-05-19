@@ -16,7 +16,7 @@ A safety failure occurs in two cases:
 
 In both cases, the Vault’s entire BTC holdings are liquidated and its DOT collateral is slashed - up to 150% (secure collateral threshold) of the liquidated BTC value.
 
-Consequently, the PolkaBTC bridge initiates a Burn Event to restore the 1:1 balance between BTC and PolkaBTC.
+Consequently, the bridge offers users to burn ("Burn Event") their tokens to restore the 1:1 balance between the issued (e.g., PolkaBTC) and locked asset (e.g., BTC).
 
 Crash Failures
 ~~~~~~~~~~~~~~
@@ -24,7 +24,7 @@ Crash Failures
 If Vaults go offline and fail to execute redeem, they are:
 
 * **Penalized** (punishment fee slashed) and
-* **Temporarily banned for 24 hours** from accepting further redeem requests.
+* **Temporarily banned for 24 hours** from accepting further issue, redeem, and replace requests.
 
 The punishment fee is calculated based on the Vault’s SLA (Service Level Agreement) level, which is a value between 0 and 100. The higher the Vault’s SLA, the lower the punishment for a failed redeem.
 
@@ -49,7 +49,7 @@ The Vault loses access to at least part of its backing collateral:
 When the Liquidation Vault contains tokens, users can do a liquidation_redeem ("burn event"). Users can call this function to burn PolkaBTC and receive DOT in return. 
 
 * The user receives ``liquidationVault.collateral * (burnedTokens / (issued + toBeIssued)`` in its free balance. 
-* At most ``liquidationVault.toBeRedeemed - liquidationVault.issued`` tokens can be burned.
+* At most ``liquidationVault.issued - liquidationVault.toBeRedeemed`` tokens can be burned.
 
 Vault liquidation affects Vault interactions is the following ways:
 
@@ -103,7 +103,9 @@ Replace
 Implementation Notes
 --------------------
 
-- In issue/redeem/replace, when funds are slashed to the Vault (e.g., griefing collateral, auction replace fee), they are locked as backing collateral.
+- In ``cancelIssue``, when the griefing collateral is slashed, it is forwarded to the fee pool.
+- In ``cancelReplace``, when the griefing collateral is slashed, it is forwarded to the backing collateral to the Vault. In case the Vault is liquidated, it is forwarded to the free balance of the Vault.
+- In issue/redeem/replace, when funds are slashed to the Vault (e.g., griefing collateral), they are locked as backing collateral.
 - In ``premiumRedeem``, the griefing collateral is set as 0.
 - In ``executeReplace``, the ``oldVault``'s griefing collateral is released, regardless of whether or not it is liquidated.
 
