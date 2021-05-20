@@ -37,6 +37,7 @@ Welcome to the BTC Parachain documentation!
    :maxdepth: 2
    :caption: Security and Performance
 
+   security_performance/liquidations
    security_performance/security-analysis
    security_performance/performance
 
