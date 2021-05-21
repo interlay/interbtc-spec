@@ -29,13 +29,14 @@ The minimum collateral a vault needs to provide to participate in the issue proc
 PunishmentDelay
 .................
 
-If a vault fails to execute a correct redeem or replace, it is *temporarily* banned from further issue, redeem or replace requests. This value configured how long the vault will be banned for.
+If a Vault fails to execute a correct redeem or replace, it is *temporarily* banned from further issue, redeem or replace requests. This value configures the duration of this ban (in number of blocks) .
+
+.. _SecureCollateralThreshold:
 
 SecureCollateralThreshold
 ..........................
 
-Determines the over-collareralization rate for DOT collateral locked by Vaults, necessary for issuing PolkaBTC. 
-Must to be strictly greater than ``100000`` and ``LiquidationCollateralThreshold``.
+Determines the over-collateralization rate for collateral locked by Vaults, necessary for issuing tokens. This threshold should be greater than the LiquidationCollateralThreshold, and typically it should be greater than the PremiumRedeemThreshold as well.
 
 The vault can take on issue requests depending on the collateral it provides and under consideration of the ``SecureCollateralThreshold``.
 The maximum amount of PolkaBTC a vault is able to support during the issue process is based on the following equation:
@@ -46,15 +47,12 @@ The maximum amount of PolkaBTC a vault is able to support during the issue proce
 PremiumRedeemThreshold
 ......................
 
-Determines the rate for the collateral rate of Vaults, at which users receive a premium in DOT, allocated from the Vault's collateral, when performing a :ref:`redeem-protocol` with this Vault. 
-Must to be strictly greater than ``100000`` and ``LiquidationCollateralThreshold``.
-
+Determines the rate for the collateral rate of Vaults, at which users receive a premium, allocated from the Vault's collateral, when performing a :ref:`redeem-protocol` with this Vault. This threshold should be greater than the LiquidationCollateralThreshold. Typically this value should be greater than the LiquidationCollateralThreshold.
 
 LiquidationCollateralThreshold
 ..............................
 
-Determines the lower bound for the collateral rate in PolkaBTC. Must be strictly greater than ``100000``. If a Vault's collateral rate drops below this, automatic liquidation (forced Redeem) is triggered. 
-
+Determines the lower bound for the collateral rate in issued tokens. If a Vault’s collateral rate drops below this, automatic liquidation is triggered.
 
 LiquidationVault
 .................
@@ -74,12 +72,6 @@ Vaults
 Mapping from accounts of Vaults to their struct. ``<Account, Vault>``.
 
 
-RegisterRequests (Optional)
-.............................
-
-Mapping from registerIDs of RegisterRequest to their structs. ``<U256, RegisterRequest>``.
-
-
 Structs
 -------
 
@@ -97,7 +89,10 @@ Parameter                  Type                Description
 ``issuedTokens``           PolkaBTC            Number of PolkaBTC tokens actively issued by this Vault.
 ``toBeRedeemedTokens``     PolkaBTC            Number of PolkaBTC tokens reserved by pending redeem and replace requests. 
 ``collateral``             DOT                 Total amount of collateral provided by this vault (note: "free" collateral is calculated on the fly and updated each time new exchange rate data is received).
-``btcAddress``             Wallet<BtcAddress>  A set of Bitcoin address(es) of this vault, to be used for issuing of PolkaBTC tokens.
+``toBeReplacedTokens``     PolkaBTC            Number of PolkaBTC tokens requested for replacement.
+``replaceCollateral``      DOT                 Griefing collateral to be used for accepted replace requests.
+``backingCollateral``      DOT                 The total amount of collateral the vault uses as insurance for the issued tokens.
+``wallet``                 Wallet<BtcAddress>  A set of Bitcoin address(es) of this vault, used for theft detection. Additionally, it contains the btcPublicKey used for generating deposit addresses in the issue process. 
 ``bannedUntil``            u256                Block height until which this vault is banned from being used for Issue, Redeem (except during automatic liquidation) and Replace . 
 ``status``                 VaultStatus         Current status of the vault (Active, Liquidated, CommittedTheft)
 =========================  ==================  ========================================================
@@ -135,10 +130,11 @@ Specification
 
 *Preconditions*
 
+* The function call MUST be signed by ``vaultId``.
 * The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
-* The vault is not registered yet
-* The vault has sufficient funds to lock the collateral
-* ``collateral > MinimumCollateralVault``, i.e., the vault provided sufficient collateral (above the spam protection threshold).
+* The vault MUST NOT be registered yet
+* The vault MUST have sufficient funds to lock the collateral
+* ``collateral > MinimumCollateralVault``, i.e., the vault MUST provide sufficient collateral (above the spam protection threshold).
 
 *Postconditions*
 
@@ -152,7 +148,7 @@ Specification
 registerAddress
 ---------------
 
-Add a new BTC address to the vault's wallet.
+Add a new BTC address to the vault's wallet. Typically this function is called by the vault client to register a return-to-self address, prior to making redeem/replace payments. If a vault makes a payment to an address that is not registered, nor is a valid redeem/replace payment, it will be marked as theft.
 
 Specification
 .............
@@ -174,9 +170,9 @@ Specification
 
 Precondition
 
-* A vault with id ``vaultId`` MUST be registered.
-* The function call is signed by ``vaultId``.
+* The function call MUST be signed by ``vaultId``.
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* A vault with id ``vaultId`` MUST NOT be registered.
 
 *Postconditions*
 
@@ -209,8 +205,9 @@ Specification
 
 *Preconditions*
 
+* The function call MUST be signed by ``vaultId``.
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
-* The vault MUST exist.
+* A vault with id ``vaultId`` MUST be registered.
 
 *Postconditions*
 
@@ -228,21 +225,23 @@ Specification
 
 *Function Signature*
 
-``lockCollateral(Vault, collateral)``
+``lockCollateral(vaultId, collateral)``
 
 *Parameters*
 
-* ``Vault``: The account of the vault locking collateral.
+* ``vaultId``: The account of the vault locking collateral.
 * ``collateral``: to-be-locked collateral.
 
 *Events*
 
-* ``DepositCollateral(Vault, newCollateral, totalCollateral, freeCollateral)``: emit an event stating how much new (``newCollateral``), total collateral (``totalCollateral``) and freely available collateral (``freeCollateral``) the vault calling this function has locked.
+* ``DepositCollateral(vaultId, newCollateral, totalCollateral, freeCollateral)``: emit an event stating how much new (``newCollateral``), total collateral (``totalCollateral``) and freely available collateral (``freeCollateral``) the vault calling this function has locked.
 
 Precondition
 ............
 
+* The function call MUST be signed by ``vaultId``.
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* A vault with id ``vaultId`` MUST be registered.
 * The vault MUST have sufficient unlocked collateral to lock.
 
 *Postconditions*
@@ -262,20 +261,22 @@ Specification
 
 *Function Signature*
 
-``withdrawCollateral(vault, withdrawAmount)``
+``withdrawCollateral(vaultId, withdrawAmount)``
 
 *Parameters*
 
-* ``vault``: The account of the vault withdrawing collateral.
+* ``vaultId``: The account of the vault withdrawing collateral.
 * ``withdrawAmount``: To-be-withdrawn collateral.
 
 *Events*
 
-* ``WithdrawCollateral(Vault, withdrawAmount, totalCollateral)``: emit emit an event stating how much collateral was withdrawn by the vault and total collateral a vault has left.
+* ``WithdrawCollateral(vaultId, withdrawAmount, totalCollateral)``: emit emit an event stating how much collateral was withdrawn by the vault and total collateral a vault has left.
 
 *Preconditions*
 
+* The function call MUST be signed by ``vaultId``.
 * The BTC Parachain status in the :ref:`security` component MUST be set to ``RUNNING:0``.
+* A vault with id ``vaultId`` MUST be registered.
 * The collatalization rate of the vault MUST remain above ``SecureCollateralThreshold`` after the withdrawal of ``withdrawAmount``.
 
 *Postconditions*
@@ -316,12 +317,13 @@ Specification
 
 *Events*
 
-* ``tryIncreaseToBeIssuedTokens(vaultId, tokens)``
+* ``IncreaseToBeIssuedTokens(vaultId, tokens)``
 
 
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST be set to ``RUNNING:0``.
+* A vault with id ``vaultId`` MUST be registered.
 * The vault MUST have sufficient collateral to remain above the ``SecureCollateralThreshold`` after issuing ``tokens``.
 * The vault status MUST be `Active(true)`
 * The vault MUST NOT be banned
@@ -356,6 +358,7 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* A vault with id ``vaultId`` MUST be registered.
 * If the vault is not liquidated, it MUST have at least ``tokens`` ``toBeIssuedTokens``. 
 * If the vault *is* liquidated, it MUST have at least ``tokens`` ``toBeIssuedTokens``.
 
@@ -392,6 +395,7 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* A vault with id ``vaultId`` MUST be registered.
 * If the vault is *not* liquidated, its ``toBeIssuedTokens`` MUST be greater than or equal to ``tokens``.
 * If the vault *is* liquidated, the ``toBeIssuedTokens`` of the liquidation vault MUST be greater than or equal to ``tokens``.
 
@@ -428,6 +432,7 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* A vault with id ``vaultId`` MUST be registered.
 * The vault MUST NOT be liquidated.
 * The vault MUST have sufficient tokens to reserve, i.e. ``tokens`` must be less than or equal to ``issuedTokens - toBeRedeemedTokens``.
 
@@ -462,6 +467,7 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
+* A vault with id ``vaultId`` MUST be registered.
 * If the vault is *not* liquidated, its ``toBeRedeemedTokens`` MUST be greater than or equal to ``tokens``.
 * If the vault *is* liquidated, the ``toBeRedeemedTokens`` of the liquidation vault MUST be greater than or equal to ``tokens``.
 
@@ -500,6 +506,7 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component must not be set to ``SHUTDOWN: 2``.
+* A vault with id ``vaultId`` MUST be registered.
 * If the vault is *not* liquidated, its ``toBeRedeemedTokens`` and ``issuedTokens`` MUST be greater than or equal to ``tokens``.
 * If the vault *is* liquidated, the ``toBeRedeemedTokens`` and ``issuedTokens`` of the liquidation vault MUST be greater than or equal to ``tokens``.
 
@@ -543,6 +550,7 @@ One of:
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* A vault with id ``vaultId`` MUST be registered.
 * If the vault is *not* liquidated:
    * The vault's ``toBeRedeemedTokens`` must be greater than or equal to ``tokens``.
    * If ``premium > 0``, then the vault's ``backingCollateral`` must be greater than or equal to ``premium``.
@@ -621,6 +629,7 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* A vault with id ``vaultId`` MUST be registered.
 * The vault MUST NOT be liquidated.
 * The vault's increased ``toBeReplaceedTokens`` MUST NOT exceed ``issuedTokens - toBeRedeemedTokens``.
 
@@ -658,6 +667,7 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* A vault with id ``vaultId`` MUST be registered.
 
 *Postconditions*
 
@@ -698,6 +708,8 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* A vault with id ``oldVault`` MUST be registered.
+* A vault with id ``newVault`` MUST be registered.
 * If ``oldVault`` is *not* liquidated, its ``toBeRedeemedTokens`` and ``issuedTokens`` MUST be greater than or equal to ``tokens``.
 * If ``oldVault`` *is* liquidated, the liquidation vault's ``toBeRedeemedTokens`` and ``issuedTokens`` MUST be greater than or equal to ``tokens``.
 * If ``newVault`` is *not* liquidated, its ``toBeIssuedTokens`` MUST be greater than or equal to ``tokens``.
@@ -741,6 +753,8 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* A vault with id ``oldVault`` MUST be registered.
+* A vault with id ``newVault`` MUST be registered.
 * If ``oldVault`` is *not* liquidated, its ``toBeRedeemedTokens`` MUST be greater than or equal to ``tokens``.
 * If ``oldVault`` *is* liquidated, the liquidation vault's ``toBeRedeemedTokens`` MUST be greater than or equal to ``tokens``.
 * If ``newVault`` is *not* liquidated, its ``toBeIssuedTokens`` MUST be greater than or equal to ``tokens``.
@@ -848,17 +862,53 @@ Emit emit an event stating how much collateral was withdrawn by the vault and to
 
 *Functions*
 
-* ref:`withdrawCollateral`
+* :ref:`withdrawCollateral`
+
+RegisterAddress
+---------------
+
+Emit an event stating that a vault (``vault``) registered a new address (``address``).
+
+*Event Signature*
+
+``RegisterAddress(vault, address)``
+
+*Parameters*
+
+* ``vault``: The account of the vault to be registered.
+* ``address``: The added address
+
+*Functions*
+
+* :ref:`registerAddress`
 
 
-tryIncreaseToBeIssuedTokens
+UpdatePublicKey
+---------------
+
+Emit an event stating that a vault (``vault``) registered a new address (``address``).
+
+*Event Signature*
+
+``UpdatePublicKey(vaultId, publicKey)``
+
+*Parameters*
+
+* ``vaultId``: the account of the vault.
+* ``publicKey``: the new BTC public key of the vault.
+
+*Functions*
+
+* :ref:`updatePublicKey`
+
+IncreaseToBeIssuedTokens
 ---------------------------
 
 Emit 
 
 *Event Signature*
 
-``tryIncreaseToBeIssuedTokens(vaultId, tokens)``
+``IncreaseToBeIssuedTokens(vaultId, tokens)``
 
 *Parameters*
 
@@ -868,7 +918,7 @@ Emit
 
 *Functions*
 
-* ref:``tryIncreaseToBeIssuedTokens``
+* :ref:`tryIncreaseToBeIssuedTokens`
 
 
 DecreaseToBeIssuedTokens
@@ -888,7 +938,7 @@ Emit
 
 *Functions*
 
-* ref:``decreaseToBeIssuedTokens``
+* :ref:`decreaseToBeIssuedTokens`
 
 
 IssueTokens
@@ -907,7 +957,7 @@ Emit an event when an issue request is executed.
 
 *Functions*
 
-* ref:``issueTokens``
+* :ref:`issueTokens`
 
 
 IncreaseToBeRedeemedTokens
@@ -926,7 +976,7 @@ Emit an event when a redeem request is requested.
 
 *Functions*
 
-* ref:``increaseToBeRedeemedTokens``
+* :ref:`tryIncreaseToBeRedeemedTokens`
 
 
 DecreaseToBeRedeemedTokens
@@ -945,7 +995,7 @@ Emit an event when a replace request cannot be completed because the vault has t
 
 *Functions*
 
-* ref:``decreaseToBeRedeemedTokens``
+* :ref:`decreaseToBeRedeemedTokens`
 
 
 DecreaseTokens
@@ -966,7 +1016,7 @@ Emit an event if a redeem request cannot be fulfilled.
 
 *Functions*
 
-* ref:``decreaseTokens``
+* :ref:`decreaseTokens`
 
 
 RedeemTokens
@@ -985,7 +1035,7 @@ Emit an event when a redeem request successfully completes.
 
 *Functions*
 
-* ref:``redeemTokens``
+* :ref:`redeemTokens`
 
 
 RedeemTokensPremium
@@ -1006,8 +1056,7 @@ Emit an event when a user is executing a redeem request that includes a premium.
 
 *Functions*
 
-* ref:``redeemTokensPremium``
-
+* :ref:`redeemTokens`
 
 
 RedeemTokensLiquidation
@@ -1026,7 +1075,30 @@ Emit an event when a redeem is executed under the ``LIQUIDATION`` status.
 
 *Functions*
 
-* ref:``redeemTokensLiquidation``
+* :ref:`redeemTokensLiquidation`
+
+
+
+RedeemTokensLiquidatedVault
+---------------------------
+
+Emit an event when a redeem is executed on a liquidated vault.
+
+*Event Signature*
+
+``RedeemTokensLiquidation(redeemer, tokens, unlockedCollateral)``
+
+*Parameters*
+
+* ``redeemer`` : The account of the user redeeming polkaBTC.
+* ``tokens``: The amount of PolkaBTC that have been refeemed.
+* ``unlockedCollateral``: The amount of collateral that has been unlocked for the vault for this redeem.
+
+
+*Functions*
+
+* :ref:`redeemTokens`
+
 
 
 ReplaceTokens
@@ -1047,7 +1119,7 @@ Emit an event when a replace requests is successfully executed.
 
 *Functions*
 
-* ref:``replaceTokens``
+* :ref:`replaceTokens`
 
 
 LiquidateVault
@@ -1065,44 +1137,60 @@ Emit an event indicating that the vault with ``vault`` account identifier has be
 
 *Functions*
 
-* ref:``liquidateVault``
+* :ref:`liquidateVault`
 
 
 Error Codes
 ~~~~~~~~~~~
 
-``ERR_MIN_AMOUNT``
+``InsufficientVaultCollateralAmount``
 
 * **Message**: "The provided collateral was insufficient - it must be above ``MinimumCollateralVault``."
-* **Function**: :ref:`registerVault` | :ref:`withdrawCollateral`
 * **Cause**: The vault provided too little collateral, i.e. below the MinimumCollateralVault limit.
 
-``ERR_VAULT_NOT_FOUND``
+``VaultNotFound``
 
-* **Message**: "The specified vault does not exist. ."
-* **Function**: :ref:`depositCollateral`
+* **Message**: "The specified vault does not exist."
 * **Cause**: vault could not be found in ``Vaults`` mapping.
 
 ``ERR_INSUFFICIENT_FREE_COLLATERAL``
 
 * **Message**: "Not enough free collateral available."
-* **Function**: :ref:`withdrawCollateral`
 * **Cause**: The vault is trying to withdraw more collateral than is currently free. 
-
-``ERR_UNAUTHORIZED``
-
-* **Message**: "Origin of the call mismatches authorization."
-* **Function**: :ref:`withdrawCollateral`
-* **Cause**: The caller of the withdrawal is not the specified vault, and hence not authorized to withdraw funds.
 
 ``ERR_EXCEEDING_VAULT_LIMIT``
 
 * **Message**: "Issue request exceeds vault collateral limit."
-* **Function**: :ref:`tryIncreaseToBeIssuedTokens`
 * **Cause**: The collateral provided by the vault combined with the exchange rate forms an upper limit on how much PolkaBTC can be issued. The requested amount exceeds this limit.
 
 ``ERR_INSUFFICIENT_TOKENS_COMMITTED``
 
-* **Message**: "The requested amount of ``tokens`` exceeds the amount by this vault."
-* **Function**: :ref:`decreaseToBeIssuedTokens` | :ref:`issueTokens` | :ref:`tryIncreaseToBeRedeemedTokens` | :ref:`decreaseToBeRedeemedTokens` | :ref:`decreaseTokens` | :ref:`redeemTokens` | :ref:`redeemTokensLiquidation` | :ref:`replaceTokens` | :ref:`liquidateVault`
-* **Cause**: A user tries to cancel/execute an issue request or create a replace request for a vault that has less than the reserved tokens committed.
+* **Message**: "The requested amount of ``tokens`` exceeds the amount available to vault."
+* **Cause**: A user requests a redeem with an amount exceeding the vault's tokens, or the vault is requesting replacement for more tokens than it has available.
+
+``ERR_VAULT_BANNED``
+
+* **Message**: "Action not allowed on banned vault."
+* **Cause**: An illegal operation is attempted on a banned vault, e.g. an issue or redeem request.
+
+``ERR_ALREADY_REGISTERED``
+
+* **Message**: "A vault with the given accountId is already registered."
+* **Cause**: A vault tries to register a vault that is already registered.
+
+``ERR_RESERVED_DEPOSIT_ADDRESS``
+
+* **Message**: "Deposit address is already registered."
+* **Cause**: A vault tries to register a deposit address that is already in the system.
+
+``ERR_VAULT_NOT_BELOW_LIQUIDATION_THRESHOLD``
+
+* **Message**: "Attempted to liquidate a vault that is not undercollateralized."
+* **Cause**: A vault has been reported for being undercollateralized, but at the moment of execution, it is no longer undercollateralized.
+
+``ERR_INVALID_PUBLIC_KEY``
+
+* **Message**: "Deposit address could not be generated with the given public key."
+* **Cause**: An error occurred while attempting to generate a new deposit address for an issue request.
+
+.. note:: These are the errors defined in this pallet. It is possible that functions in this pallet return errors defined in other pallets.
