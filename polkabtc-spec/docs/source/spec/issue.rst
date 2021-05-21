@@ -161,7 +161,7 @@ Function Sequence
 
 4. Lock the user's griefing collateral by calling the :ref:`lockCollateral` function with the ``requester`` as the sender and the ``griefingCollateral`` as the amount.
 
-5. Call the VaultRegistry :ref:`increaseToBeIssuedTokens` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. This function returns a unique ``btcAddress`` that the user should send Bitcoin to.
+5. Call the VaultRegistry :ref:`tryIncreaseToBeIssuedTokens` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. This function returns a unique ``btcAddress`` that the user should send Bitcoin to.
 
 6. Generate an ``issueId`` via :ref:`generateSecureId`.
 

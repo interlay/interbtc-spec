@@ -6,7 +6,9 @@ Replace
 Overview
 ~~~~~~~~~
 
-The Replace module allows a vault (*OldVault*) be replaced by transferring the BTC it is holding locked to another vault (*NewVault*), which provides the necessary DOT collateral. As a result, the DOT collateral of the *OldVault*, corresponding to the amount of replaced BTC, is unlocked. The *OldVault* must thereby provide some amount of collateral to protect against griefing attacks, where the *OldVault* never finalizes the Replace protocol and the *NewVault* hence temporarily locked DOT collateral for nothing.
+The Replace module allows a vault (*OldVault*) to be replaced by transferring the BTC it is holding locked to another vault (*NewVault*), which provides the necessary DOT collateral. As a result, the DOT collateral of the *OldVault*, corresponding to the amount of replaced BTC, is unlocked. The *OldVault* must thereby provide some amount of collateral to protect against griefing attacks, where the *OldVault* never finalizes the Replace protocol and the *NewVault* hence temporarily locked DOT collateral for nothing.
+
+The *OldVault* is responsible for ensuring that it has sufficient BTC to pay for the transaction fees.
 
 Conceptually, the Replace protocol resembles a SPV atomic cross-chain swap.
 
@@ -17,18 +19,20 @@ Step-by-Step
 
 2. *OldVault* submits a replacement request, indicating how much BTC is to be migrated by calling the :ref:`requestReplace` function. 
 
-   * *OldVault* is required to lock some amount of DOT collateral (``ReplaceGriefingCollateral``) as griefing protection, to prevent *OldVault* from holding *NewVault*'s DOT collateral locked in the BTC Parachain without ever finalizing the redeem protocol (transfer of BTC). 
+   * *OldVault* is required to lock some amount of DOT collateral (:ref:`ReplaceGriefingCollateral`) as griefing protection, to prevent *OldVault* from holding *NewVault*'s DOT collateral locked in the BTC Parachain without ever finalizing the redeem protocol (transfer of BTC). 
 
-3. Optional: If an *OldVault* has changed its mind or can't find a *NewVault* to replace it, it can call the :ref:`withdrawReplaceRequest` function to invalidate its request. If the request is already accepted (step 4), then this function cannot be invoked.
+3. Optional: If an *OldVault* has changed its mind or can't find a *NewVault* to replace it, it can call the :ref:`withdrawReplaceRequest` function to withdraw the request of some amount. For example, if *OldVault* requested a replacement for 10 tokens, and 2 tokens have been accepted by some *NewVault*, then it can withdraw up to 8 tokens from being replaced. 
 
-4. A new candidate vault (*NewVault*), commits to executing the replacement by locking up the necessary DOT collateral to back the to-be-transferred BTC (according to the ``SecureCollateralThreshold``) by calling the :ref:`acceptReplace` function.. 
+4. A new candidate vault (*NewVault*), commits to accepting the replacement by locking up the necessary DOT collateral to back the to-be-transferred BTC (according to the ``SecureCollateralThreshold``) by calling the :ref:`acceptReplace` function.. 
+
+   * Note: from the *OldVault*'s perspective a redeem is very similar to an accepted replace. That is, its goal is to get rid of tokens, and it is not important if this is achieved by a user redeeming, or by a vault accepting the replace request. As such, when a user requests a redeem with a vault that has requested a replacement, the *OldVault*'s ``toBeReplacedTokens`` is decreased by the amount of tokens redeemed by the user. The reserved griefing collateral for this replace is then released.
 
 5. Within a pre-defined delay, *OldVault* must release the BTC on Bitcoin to *NewVault*'s BTC address, and submit a valid transaction inclusion proof by calling the :ref:`executeReplace` function (call to ``verifyTransactionInclusion`` in :ref:`btc-relay`). If *OldVault* releases the BTC to *NewVault* correctly and submits the transaction inclusion proof to Replace module on time, *OldVault*'s DOT collateral is released - *NewVault* has now replaced *OldVault*.
 
-  * Note: to prevent *OldVault* from trying to re-use old transactions (or other payments to *NewVaults* on Bitcoin) as fake proofs, we require *OldVault* to include a ``nonce`` in an OP_RETURN output of the transfer transaction on Bitcoin.
+   * Note: as with redeems, to prevent *OldVault* from trying to re-use old transactions (or other payments to *NewVaults* on Bitcoin) as fake proofs, we require *OldVault* to include a ``nonce`` in an OP_RETURN output of the transfer transaction on Bitcoin.
 
 
-6. Optional: If *OldVault* fails to provide the correct transaction inclusion proof on time, the *NewVault*'s ``collateral`` is unlocked and *OldVault*'s ``griefingCollateral`` is sent to the *NewVault* as reimbursement for the opportunity costs of locking up DOT collateral via the :ref:`cancelReplace` function. 
+6. Optional: If *OldVault* fails to provide the correct transaction inclusion proof on time, the *NewVault*'s ``collateral`` is unlocked and *OldVault*'s ``griefingCollateral`` is sent to the *NewVault* as reimbursement for the opportunity costs of locking up DOT collateral via the :ref:`cancelReplace`. 
 
 Security
 --------
@@ -45,7 +49,7 @@ The data access and state changes to the vault registry are documented in :numre
 .. figure:: ../figures/VaultRegistry-Replace.png
     :alt: vault-registry-replace
     
-    The replace module interacts with three functions in the vault registry to handle updating token balances of vaults.
+    The replace module interacts with functions in the vault registry to handle updating token balances of vaults. The green lines indicate an increase, the red lines a decrease.
 
 Fee Model
 ---------
@@ -61,18 +65,10 @@ Data Model
 Scalars
 -------
 
-ReplaceGriefingCollateral
-.........................
+ReplaceBtcDustValue
+...................
 
-The minimum collateral (DOT) a vault requesting a replacement needs to provide as griefing protection. 
-
-.. note:: Requiring a vault to add DOT collateral for executing replace may be a problem for Vaults which trigger this process due to low collateralization rates. We can potentially slash some of the Vault's existing collateral instead - this will result in reducing the collateralization rate and move the vault closer to liquidation.
-
-.. *Substrate*::
-
-  ReplaceGriefingCollateral: Balance;
-
-
+The minimum amount a *newVault* can accept - this is to ensure the *oldVault* is able to make the bitcoin transfer. Furthermore, it puts a limit on the transaction fees that the *oldVault* needs to pay.
 
 ReplacePeriod
 .............
@@ -102,17 +98,18 @@ Stores the status and information about a single replace request.
 ======================  ==========  =======================================================	
 Parameter               Type        Description                                            
 ======================  ==========  =======================================================
-``oldVault``            Account     BTC Parachain account of the vault that is to be replaced.
-``opentime``            u256        Block height of opening the request.
-``amount``              PolkaBTC    Amount of BTC / PolkaBTC to be replaced.
-``griefingCollateral``  DOT         Griefing protection collateral locked by ``oldVault``.
+``oldVault``            Account     Account of the vault that is to be replaced.
 ``newVault``            Account     Account of the new vault, which accepts the replace request.
+``amount``              PolkaBTC    Amount of BTC / PolkaBTC to be replaced.
+``griefingCollateral``  DOT         Griefing protection collateral locked by *oldVault*.
 ``collateral``          DOT         DOT collateral locked by the new Vault.
 ``acceptTime``          u256        Block height at which this replace request was accepted by a new Vault. Serves as start for the countdown until when the old vault must transfer the BTC.
 ``btcAddress``          bytes[20]   Base58 encoded Bitcoin public key of the new Vault.  
+``btcHeight``           bytes[20]   Height of newest bitcoin block in the relay at the time the request is accepted. This is used by the clients upon startup, to determine how many blocks of the bitcoin chain they need to inspect to know if a payment has been made already.
+``status``              Enum        Status of the request: Pending, Completed or Cancelled
 ======================  ==========  =======================================================
 
-.. note:: The ``btcAddress`` parameter is not to be set the the new vault, but is extracted from the ``Vaults`` mapping in ``VaultRegistry`` for the account of the new Vault.  
+.. note:: The ``btcAddress`` parameter is not to be set by the new vault, but is extracted from the ``Vaults`` mapping in ``VaultRegistry`` for the account of the new Vault.  
 
 .. *Substrate*::
   
@@ -137,7 +134,7 @@ Functions
 requestReplace
 --------------
 
-An *OldVault* (to-be-replaced Vault) submits a request to be (partially) replaced. 
+An *OldVault* (to-be-replaced Vault) submits a request to be (partially) replaced. If it requests more than it can fulfil (i.e. the sum of ``toBeReplacedTokens`` and ``toBeRedeemedTokens`` exceeds its ``issuedTokens``, then the request amount is reduced such that the sum of ``toBeReplacedTokens`` and ``toBeRedeemedTokens`` is exactly equal to ``issuedTokens``.
 
 
 Specification
@@ -145,76 +142,41 @@ Specification
 
 *Function Signature*
 
-``requestReplace(oldVault, btcAmount, timeout, griefingCollateral)``
+``requestReplace(oldVault, btcAmount, griefingCollateral)``
 
 *Parameters*
 
 * ``oldVault``: Account identifier of the vault to be replaced (as tracked in ``Vaults`` in :ref:`vault-registry`).
 * ``btcAmount``: Integer amount of BTC / PolkaBTC to be replaced.
-* ``timeout``: Time in blocks after which this request expires.
-* ``griefingCollateral``: collateral locked by the ``oldVault`` as griefing protection
-
-*Returns*
-
-* ``replaceID``: A unique hash identifying the replace request. 
+* ``griefingCollateral``: collateral locked by the *oldVault* as griefing protection
 
 *Events*
 
-* ``RequestReplace(oldVault, btcAmount, timeout, replaceId)``:
+* ``RequestReplace(oldVault, btcAmount, replaceId)``
 
-*Errors*
+*Preconditions*
 
-* ``ERR_VAULT_NOT_FOUND = "There exists no vault with the given account id"``: The specified vault does not exist. 
-* ``ERR_MIN_AMOUNT``: The remaining DOT collateral (converted from the requested BTC replacement value given the current exchange rate) would be below the ``MinimumCollateralVault`` as defined in ``VaultRegistry``.
-* ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated Vault``: The caller of this function is not the associated vault, and hence not authorized to take this action.
-* ``ERR_VAULT_BANNED = "The selected vault has been temporarily banned."``: Executing replace requests is not possible with temporarily banned Vaults.
+* The function call MUST be signed by *oldVault*.
+* The vault MUST be registered
+* The vault MUST NOT be banned
+* The BTC Parachain status in the :ref:`security` component MUST be set to ``RUNNING:0``.
+* The vault MUST provide sufficient ``griefingCollateral`` such that the ratio of all of its ``toBeReplacedTokens`` and ``replaceCollateral`` is above :ref:`ReplaceGriefingCollateral`.
+* The vault MUST request sufficient tokens to be replaced such that its total is above ``ReplaceBtcDustValue``.
 
 
-Preconditions
-...............
+*Postconditions*
 
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+* The vault's ``toBeReplaceedTokens`` is increased by ``tokenIncrease = min(btcAmount, vault.toBeIssuedTokens - vault.toBeRedeemedTokens)``. 
+* An amount of ``griefingCollateral * (tokenIncrease / btcAmount)`` is locked by this transaction.
+* The vault's ``replaceCollateral`` is increased by the amount of collateral locked in this transaction.
 
-Function Sequence
-.................
-
-1. Check that caller of the function is indeed the to-be-replaced Vault. Return ``ERR_UNAUTHORIZED`` error if this check fails.
-
-2. Retrieve the ``vault`` as per the ``oldVault`` account identifier from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` if no vault can be found.
-
-3. Check that the ``vault`` is currently not banned, i.e., ``vault.bannedUntil == None`` or ``vault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
-
-4. Check that the requested ``btcAmount`` is equal to or lower than ``vault.issuedTokens`` mins the ``vault.toBeRedeemedTokens``.
-
-  a. If ``btcAmount > vault.issuedTokens`` set ``btcAmount = vault.issuedTokens`` (i.e., the request is for the entire BTC holdings of the Vault).
-
-5. If the request is not for the entire BTC holdings, check that the remaining DOT collateral of the vault is higher than ``MinimumCollateralVault`` as defined in ``VaultRegistry``. Return ``ERR_MIN_AMOUNT`` error if this check fails.
-
-6. Check that the ``griefingCollateral`` is greater or equal ``ReplaceGriefingCollateral``
-
-7. Lock the *oldVault*'s griefing collateral by calling :ref:`lockCollateral` and passing ``oldVault`` and ``griefingCollateral`` as parameters.
-
-8. Call the :ref:`increaseToBeRedeemedTokens` function with the ``oldVault`` and the ``btcAmount`` to ensure that the oldVault's tokens cannot be redeemed when a replace procedure is happening.
-
-9. Generate a ``replaceId`` by hashing a random seed, a nonce, and the address of the Requester.
-
-10. Create new ``ReplaceRequest`` entry:
-
-   * ``Replace.oldVault = vault``,
-   * ``Replace.opentime`` = current time on Parachain,
-   * ``Replace.amount = amount``,
-   * ``Replace.griefingCollateral = griefingCollateral``.
-   
-11. Emit ``RequestReplace(vault, btcAmount, timeout, replaceId)`` event.  
-
-12. Return the ``replaceId``.
 
 .. _withdrawReplaceRequest:
 
 withdrawReplaceRequest
 -----------------------
 
-The *OldVault* withdraws an existing ReplaceRequest that is made.
+The *OldVault* decreases its ``toBeReplacedTokens``.
 
 
 Specification
@@ -222,56 +184,38 @@ Specification
 
 *Function Signature*
 
-``withdrawReplaceRequest(oldVault, replaceId)``
+``withdrawReplaceRequest(oldVault, tokens)``
 
 *Parameters*
 
 * ``oldVault``: Account identifier of the vault withdrawing it's replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
-* ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
+* ``tokens``: The amount of ``to_be_replaced_tokens`` to withdraw.
 
 *Events*
 
-* ``WithdrawReplaceRequest(oldVault, replaceId)``: emits an event stating that a vault (``oldVault``) has withdrawn an existing replace request (``requestId``).
+``WithdrawReplaceRequest(oldVault, withdrawnTokens, withdrawnGriefingCollateral)``: emits an event stating that a vault (*oldVault*) has withdrawn some amount of ``toBeReplacedTokens``.
 
-*Errors*
+*Preconditions*
+
+* The function call MUST be signed by *oldVault*.
+* The vault MUST be registered
+* The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* The vault MUST have a non-zero amount of ``toBeReplaceedTokens``.
+
+*Postconditions*
+
+* The vault's ``toBeReplacedTokens`` is decrease by an amount of ``tokenDecrease = min(toBeReplacedTokens, tokens)``
+* The vault's ``replaceCollateral`` is decreased by the amount ``releasedCollateral = replaceCollateral * (tokenDecrease / toBeReplacedTokens)``.
+* The ``releasedCollateral`` is unlocked.
 
 
-* ``ERR_REPLACE_ID_NOT_FOUND =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
-* ``ERR_UNAUTHORIZED = Unauthorized: Caller must be associated Vault``: The caller of this function is not the associated vault, and hence not authorized to take this action.
-* ``ERR_CANCEL_ACCEPTED_REQUEST = Cannot cancel the ReplaceRequest as it was already accepted by a Vault``: The ``ReplaceRequest`` was already accepted by another vault and can hence no longer be withdrawn.
 
-
-Preconditions
-...............
-
-The ReplaceRequest must have not yet been accepted by another Vault.
-
-
-Function Sequence
-..................
-
-1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_REPLACE_ID_NOT_FOUND`` error if no such ``ReplaceRequest`` was found.
-
-2. Check that caller of the function is indeed the to-be-replaced vault as specified in the ``ReplaceRequest``. Return ``ERR_UNAUTHORIZED`` error if this check fails.
-   
-3. Check that the ``ReplaceRequest`` was not yet accepted by another Vault. Return ``ERR_CANCEL_ACCEPTED_REQUEST`` error if this check fails.
-
-4. Release the *oldVault*'s griefing collateral associated with this ``ReplaceRequests`` by calling :ref:`releaseCollateral` and passing the ``oldVault`` and ``griefingCollateral`` as parameters.
-
-5. Call the :ref:`decreaseToBeRedeemedTokens` function in the VaultRegistry to allow the vault to be part of other redeem or replace requests again.
-
-6. Remove the ``ReplaceRequest`` from ``ReplaceRequests``.
-
-7. Emit a ``WithdrawReplaceRequest(oldVault, replaceId)`` event.
- 
 .. _acceptReplace:
 
 acceptReplace
 --------------
 
-A *NewVault* accepts an existing replace request, locking the necessary DOT collateral.
-
-.. note:: When issuing tokens, we increase the ``toBeIssuedTokens`` by a vault. Also, when a vault locks collateral via the ``registerVault`` and ``lockCollateral`` function in the VaultRegistry, we would add collateral to the ``collateral`` field of a vault. However, we are *not* updating the ``collateral`` and ``toBeIssuedTokens`` tokens here. if a vault decides to provide a very high collateral rate, way over the ``SecureCollateralThreshold`` and wants to back the replace with that, we are not interferring with this. If we would lock his collateral in the ``collateral`` field in the VaultRegistry, as user could block part of this collateral with an issue request.
+A *NewVault* accepts an existing replace request. It can optionally lock additional DOT collateral specifically for this replace. If the replace is cancelled, this amount will be unlocked again.
 
 
 Specification
@@ -279,7 +223,7 @@ Specification
 
 *Function Signature*
 
-``acceptReplace(newVault, replaceId, collateral)``
+``acceptReplace(newVault, oldVault, btcAmount, collateral, btcAddress)``
 
 *Parameters*
 
@@ -289,44 +233,29 @@ Specification
 
 *Events*
 
-* ``AcceptReplace(newVault, replaceId, collateral)``: emits an event stating which vault (``newVault``) has accepted the ``ReplaceRequest`` request (``requestId``), and how much collateral in DOT it provided (``collateral``).
+``AcceptReplace(replaceId, oldVault, newVault, btcAmount, collateral, btcAddress)``: emits an event with data that the *oldVault* needs to execute the replace.
 
-*Errors*
+*Preconditions*
 
+* The function call MUST be signed by *newVault*.
+* *oldVault* and *newVault* MUST be registered
+* *oldVault* MUST NOT be equal to *newVault*
+* The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
+* *newVault*'s free balance MUST be enough to lock ``collateral``
+* *newVault* MUST have lock sufficient collateral to remain above the :ref:`SecureCollateralThreshold` after accepting ``btcAmount``.
+* The replaced tokens MUST be at least``ReplaceBtcDustValue``.
 
-* ``ERR_REPLACE_ID_NOT_FOUND =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
-* ``ERR_INSUFFICIENT_COLLATERAL``: The provided collateral is insufficient to match the replace request. 
-* ``ERR_VAULT_NOT_FOUND``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
-* ``ERR_VAULT_BANNED = "The selected vault has been temporarily banned."``: Executing replace requests is not possible with temporarily banned Vaults.
+*Postconditions*
 
-Preconditions
-...............
-
-The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
-
-
-Function Sequence
-..................
+The actual amount of replaced tokens is calculated to be ``consumedTokens = min(oldVault.toBeReplacedTokens, btcAmount)``. The amount of griefingCollateral used is ``consumedGriefingCollateral = oldVault.replaceCollateral * (consumedTokens / oldVault.toBeReplacedTokens)``.
 
 
-1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from  ``ReplaceRequests``. Return ``ERR_REPLACE_ID_NOT_FOUND`` error if no such ``ReplaceRequest`` was found.
-
-2. Retrieve the vault as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such vault can be found.
-
-3. Check that the ``newVault`` is currently not banned, i.e., ``newVault.bannedUntil == None`` or ``newVault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
-
-4. Check that the provided ``collateral`` exceeds the necessary amount, i.e., ``collateral >= SecureCollateralThreshold * Replace.btcAmount``. Return ``ERR_INSUFFICIENT_COLLATERAL`` error if this check fails.
-
-5. Lock the *newVault*'s collateral by calling :ref:`lockCollateral` and providing ``newVault`` and ``collateral`` as parameters.
-
-6. Update the ``ReplaceRequest`` entry:
-
-  * ``Replace.newVault = newVault``,
-  * ``Replace.acceptTime`` = current Parachain time, 
-  * ``Replace.btcAddress = btcAddress`` (new Vault's BTC address),
-  * ``Replace.collateral = collateral`` (DOT collateral locked by new Vault).
-
-7. Emit a ``AcceptReplace(newVault, replaceId, collateral)`` event.
+* The *oldVault*'s ``replaceCollateral`` is decreased by ``consumedGriefingCollateral``. 
+* The *oldVault*'s ``toBeReplacedTokens`` is decreased by ``consumedTokens``. 
+* The *oldVault*'s ``toBeRedeemedTokens`` is increased by ``consumedTokens``. 
+* The *newVault*'s ``toBeIssuedTokens`` is increased by ``consumedTokens``. 
+* The *newVault* locks additional collateral; its ``backingCollateral`` is increased by ``collateral * (consumedTokens / oldVault.toBeReplacedTokens)``. 
+* A new ``ReplaceRequest`` is added to storage. The amount is set to ``consumedTokens``, ``griefingCollateral`` to ``consumedGriefingCollateral``, ``collateral`` to the ``collateral`` argument, ``accept_time`` to the current active block number, ``period`` to the current ``ReplacePeriod``, ``btcAddress`` to the ``btcAddress`` argument, ``btc_height`` to the current height of the btc-relay, and ``status`` to ``pending``.
 
 
 .. _executeReplace: 
@@ -334,8 +263,7 @@ Function Sequence
 executeReplace
 --------------
 
-The to-be-replaced vault finalizes the replace process by submitting a proof that it transferred the correct amount of BTC to the BTC address of the new vault, as specified in the ``ReplaceRequest``.
-This function calls *verifyTransactionInclusion* in :ref:`btc-relay`, proving a transaction inclusion proof (``txId`` and ``merkleProof``) as input, as well as *validateTransaction* proving the ``rawTx``, ``replaceId`` and the *newVault*'s Bitcoin address as parameters.
+The to-be-replaced vault finalizes the replace process by submitting a proof that it transferred the correct amount of BTC to the BTC address of the new vault, as specified in the ``ReplaceRequest``. This function calls *verifyAndValidateTransaction* in :ref:`btc-relay`.
 
 
 Specification
@@ -343,57 +271,34 @@ Specification
 
 *Function Signature*
 
-``executeReplace(newVault, replaceId, merkleProof, rawTx)``
+``executeReplace(oldVault, replaceId, merkleProof, rawTx)``
 
 *Parameters*
 
-* ``newVault``: Account identifier of the vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``oldVault``: Account identifier of the vault making this call.
 * ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
 * ``merkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
 *Events*
 
-* ``ExecuteReplace(oldVault, newVault, replaceId)``: emits an event stating that the old vault (``oldVault``) has executed the BTC transfer to the new vault (``newVault``), finalizing the ``ReplaceRequest`` request (``requestId``).
+* ``ExecuteReplace(oldVault, newVault, replaceId)``: emits an event stating that the old vault (*oldVault*) has executed the BTC transfer to the new vault (*newVault*), finalizing the ``ReplaceRequest`` request (``requestId``).
 
-*Errors*
+*Preconditions*
 
+* The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN:2``.
+* *oldVault* MUST be registered as a vault
+* A pending ``ReplaceRequest`` MUST exist with an id equal to ``replaceId``.
+* The request MUST NOT have expired.
+* The ``rawTx`` MUST decode to a valid transaction that transfers at least the amount specified in the ``ReplaceRequest`` struct. It MUST be a transaction to the correct address, and provide the expected OP_RETURN, based on the ``ReplaceRequest``.
+* The ``merkleProof`` MUST match the ``rawTX``.
+* The bitcoin payment MUST have been submitted to the relay chain, and MUST have sufficient confirmations.
 
-* ``ERR_REPLACE_ID_NOT_FOUND =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
-* ``ERR_VAULT_NOT_FOUND = No vault with given Account identifier found``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
-* ``ERR_REPLACE_PERIOD_EXPIRED = Replace request expired``: 
-* See errors returned by *verifyTransactionInclusion* and *validateTransaction* in :ref:`btc-relay`.
+*Postconditions*
 
-
-Preconditions
-...............
-
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
-* The to-be-replaced vault transferred the correct amount of BTC to the BTC address of the new vault on Bitcoin, and has generated a transaction inclusion proof. 
-
-Function Sequence
-..................
-
-1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_REPLACE_ID_NOT_FOUND`` error if no such ``ReplaceRequest`` request was found.
-
-2. Check if the replace has expired by calling :ref:`hasExpired` in the Security module. Throw ``ERR_REPLACE_PERIOD_EXPIRED`` if true.
-
-3. Retrieve the ``Vault`` as per the ``newVault`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_VAULT_NOT_FOUND`` error if no such vault can be found.
-
-4. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing ``txId`` and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
-
-5. Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-replaced BTC (``Replace.amount``), the ``newVault``'s Bitcoin address (``Vault.btcAddress``), and the ``replaceId`` as parameters. If this call returns an error, abort and return the received error. 
-
-6. Call the :ref:`replaceTokens` function in the VaultRegistry with the ``newVault``, ``oldVault``, ``amount``, and the ``collateral`` to increase the ``issuedTokens`` amount of the ``newVault`` as well as its ``collateral``. Further, this decreases the ``issuedTokens`` and ``toBeRedeemedTokens`` of the ``oldVault``.
-
-7. Call the :ref:`releaseCollateral` function to release the ``oldVaults`` griefing collateral ``griefingCollateral``.
-
-8. Emit the ``ExecuteReplace(oldVault, newVault, replaceId)`` event.
-
-9. Remove the ``ReplaceRequest`` from ``ReplaceRequests``.
-
-.. note:: It can be the case that the to-be-replaced *OldVault* controls a significant numbers of Bitcoin UTXOs with user funds, making it impossible to execute the migration of funds to the *NewVault* within a single Bitcoin transaction. As a result, it may be necessary to "merge" these UTXOs using multiple "merge transactions" on Bitcoin, i.e., transactions which takes as input multiple UTXOs controlled by the *OldVault* and create a single UTXO controlled (again) by the *OldVault*. Once the UTXOs produced by "merge transactions" can be merged by a single, final transaction, the *OldVault* moves the funds to the *NewVault*. (An alternative is to allow the *OldVault* to submit multiple transaction inclusion proofs when calling ``executeReplace``, although this significantly increases the complexity of transaction parsing on the BTC Parachain side).
-
+* :ref:`replaceTokens` has been called, providing the ``oldVault``, ``newVault``, ``replaceRequest.amount``, and ``replaceRequest.collateral`` as arguments. 
+* The griefing collateral as specifified in the ``ReplaceRequest`` is unlocked to *oldVault*.
+* ``replaceRequest.status`` is set to ``Completed``.
 
 .. _cancelReplace:
 
@@ -417,37 +322,27 @@ Specification
 
 *Events*
 
-* ``CancelReplace(newVault, oldVault, replaceId)``: emits an event stating that the old vault (``oldVault``) has not completed the replace request and the new vault (``newVault``) cancelled the ``ReplaceRequest`` request (``requestId``).
-
-*Errors*
+* ``CancelReplace(replaceId, newVault, oldVault, slashedCollateral)``: emits an event stating that the old vault (*oldVault*) has not completed the replace request, that the new vault (*newVault*) cancelled the ``ReplaceRequest`` request (``requestId``), and that ``slashedCollateral`` has been slashed from *oldVault* to *newVault*.
 
 
-* ``ERR_REPLACE_ID_NOT_FOUND =  No ReplaceRequest with given identifier found``: The provided ``replaceId`` was not found in ``ReplaceRequests``.
-* ``ERR_VAULT_NOT_FOUND = No vault with given Account identifier found``: The caller of the function was not found in the existing ``Vaults`` list in ``VaultRegistry``.
-* ``ERR_PERIOD_NOT_EXPIRED = Replace request not yet expired``: The old vault can still fulfil the replace request.
 
-Preconditions
-...............
+*Preconditions*
 
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN:2``.
+* *oldVault* MUST be registered as a vault
+* A pending ``ReplaceRequest`` MUST exist with an id equal to ``replaceId``.
+* ``newVault`` MUST be equal to the *newVault* specified in the ``ReplaceRequest``. That is, this function can only be can only be called by the *newVault*.
+* The request MUST have expired.
 
-Function Sequence
-..................
+*Postconditions*
 
-1. Retrieve the ``ReplaceRequest`` as per the ``replaceId`` parameter from ``Vaults`` in the ``VaultRegistry``. Return ``ERR_REPLACE_ID_NOT_FOUND`` error if no such ``ReplaceRequest`` request was found.
+* :ref:`cancelReplaceTokens` has been called, providing the ``oldVault``, ``newVault``, ``replaceRequest.amount``, and ``replaceRequest.amount``. 
+* If *newVault* is *not* liquidated:
+   * the griefing collateral is slashed from the *oldVault* to the new vault's ``backingCollateral``.
+   * If unlocking ``replaceRequest.collateral`` does not put the collaterlization rate of the *newVault* below ``SecureCollateralThreshold``, the collateral is unlocked and its ``backingCollateral`` decreases by the same amount.
+* If *newVault* *is* liquidated, the griefing collateral is slashed from the *oldVault* to the new vault's free balance.
+* ``replaceRequest.status`` is set to ``Cancelled``.
 
-.. note:: If a replace request has been executed successfully, it has been deleted and this error will be thrown.
-
-2. Check if the replace has expired by calling :ref:`hasExpired` in the Security module. Throw ``ERR_PERIOD_NOT_EXPIRED`` if false.
-
-3. Transfer the *oldVault*'s griefing collateral associated with this ``ReplaceRequests`` to the *newVault* by calling :ref:`slashCollateral` and passing the ``oldVault``, ``newVault`` and ``griefingCollateral`` as parameters.
-
-4. Call the :ref:`decreaseToBeRedeemedTokens` function in the VaultRegistry for the *oldVault*.
-
-5. Remove the ``ReplaceRequest`` from ``ReplaceRequests``.
-
-6. Emit a ``CancelReplace(newVault, oldVault, replaceId)`` event.
- 
 
 Events
 ~~~~~~~
@@ -458,14 +353,12 @@ RequestReplace
 Emit an event when a replace request is made by an *oldVault*.
 
 *Event Signature*
-
-``ReplaceRequested(oldVault, btcAmount, timeout, replaceId)``
+* ``RequestReplace(oldVault, btcAmount, replaceId)``
 
 *Parameters*
 
 * ``oldVault``: Account identifier of the vault to be replaced (as tracked in ``Vaults`` in :ref:`vault-registry`).
 * ``btcAmount``: Integer amount of BTC / PolkaBTC to be replaced.
-* ``timeout``: Time in blocks after which this request expires.
 * ``replaceId``: The unique identified of a replace request.
 
 *Functions*
@@ -475,16 +368,17 @@ Emit an event when a replace request is made by an *oldVault*.
 WithdrawReplaceRequest
 ----------------------
 
-Emits an event stating that a vault (``oldVault``) has withdrawn an existing replace request (``requestId``).
+Emits an event stating that a vault (*oldVault*) has withdrawn some amount of ``toBeReplacedTokens``.
 
 *Event Signature*
 
-``WithdrawReplaceRequest(oldVault, replaceId)``
+``WithdrawReplaceRequest(oldVault, withdrawnTokens, withdrawnGriefingCollateral)``
 
 *Parameters*
 
-* ``oldVault``: Account identifier of the vault withdrawing it's replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
-* ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
+* ``oldVault``: Account identifier of the vault requesting the replace (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``withdrawnTokens``: The amount by which ``toBeReplacedTokens`` has decreased.
+* ``withdrawnGriefingCollateral``: The amount of griefing collateral unlocked.
 
 *Functions*
 
@@ -494,17 +388,20 @@ Emits an event stating that a vault (``oldVault``) has withdrawn an existing rep
 AcceptReplace
 -------------
 
-Emits an event stating which vault (``newVault``) has accepted the ``ReplaceRequest`` request (``requestId``), and how much collateral in DOT it provided (``collateral``).
+Emits an event stating which vault (*newVault*) has accepted the ``ReplaceRequest`` request (``requestId``), and how much collateral in DOT it provided (``collateral``).
 
 *Event Signature*
 
-``AcceptReplace(newVault, replaceId, collateral)``
+``AcceptReplace(replaceId, oldVault, newVault, btcAmount, collateral, btcAddress)``
 
 *Parameters*
 
-* ``newVault``: Account identifier of the vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
 * ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
-* ``collateral``: DOT collateral provided to match the replace request (i.e., for backing the locked BTC). Can be more than the necessary amount.
+* ``oldVault``: Account identifier of the vault being replaced (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``newVault``: Account identifier of the vault that accepted the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``btcAmount``: Amount of tokens the *newVault* just accepted.
+* ``collateral``: Amount of collateral the *newVault* locked for this replace.
+* ``btcAddress``: The address that *oldVault* should transfer the btc to.
 
 *Functions*
 
@@ -514,7 +411,7 @@ Emits an event stating which vault (``newVault``) has accepted the ``ReplaceRequ
 ExecuteReplace
 --------------
 
-Emits an event stating that the old vault (``oldVault``) has executed the BTC transfer to the new vault (``newVault``), finalizing the ``ReplaceRequest`` request (``requestId``).
+Emits an event stating that the old vault (*oldVault*) has executed the BTC transfer to the new vault (*newVault*), finalizing the ``ReplaceRequest`` request (``requestId``).
 
 *Event Signature*
 
@@ -522,8 +419,8 @@ Emits an event stating that the old vault (``oldVault``) has executed the BTC tr
 
 *Parameters*
 
-* ``oldVault``: Account identifier of the vault withdrawing it's replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
-* ``newVault``: Account identifier of the vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``oldVault``: Account identifier of the vault being replaced (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``newVault``: Account identifier of the vault that accepted the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
 * ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
 
 *Functions*
@@ -534,17 +431,18 @@ Emits an event stating that the old vault (``oldVault``) has executed the BTC tr
 CancelReplace
 -------------
 
-Emits an event stating that the old vault (``oldVault``) has not completed the replace request and the new vault (``newVault``) cancelled the ``ReplaceRequest`` request (``requestId``).
+Emits an event stating that the old vault (*oldVault*) has not completed the replace request, that the new vault (*newVault*) cancelled the ``ReplaceRequest`` request (``requestId``), and that ``slashedCollateral`` has been slashed from *oldVault* to *newVault*.
 
 *Event Signature*
 
-``CancelReplace(newVault, oldVault, replaceId)``
+``CancelReplace(replaceId, newVault, oldVault, slashedCollateral)``
 
 *Parameters*
 
-* ``oldVault``: Account identifier of the vault withdrawing it's replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
-* ``newVault``: Account identifier of the vault accepting the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
 * ``replaceId``: The identifier of the replace request in ``ReplaceRequests``.
+* ``oldVault``: Account identifier of the vault being replaced (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``newVault``: Account identifier of the vault that accepted the replace request (as tracked in ``Vaults`` in :ref:`vault-registry`)
+* ``slashedCollateral``: Amount of griefingCollateral slashed to *newVault*.
 
 *Functions*
 
@@ -553,41 +451,17 @@ Emits an event stating that the old vault (``oldVault``) has not completed the r
 Error Codes
 ~~~~~~~~~~~
 
-``ERR_MIN_AMOUNT``
-
-* **Message**: "Remaining collateral below ``MinimCollateralVaul`` limit."
-* **Function**: :ref:`requestReplace` 
-* **Cause**: The remaining DOT collateral (converted from the requested BTC replacement value given the current exchange rate) would be below the ``MinimumCollateralVault`` as defined in ``VaultRegistry``.
-
 ``ERR_UNAUTHORIZED``
 
-* **Message**: "Unauthorized: Caller must be associated vault."
-* **Function**: :ref:`requestReplace` | :ref:`withdrawReplaceRequest`
-* **Cause**: The caller of this function is not the associated vault, and hence not authorized to take this action.
-
-``ERR_REPLACE_ID_NOT_FOUND``
-
-* **Message**: "The ``replaceId`` cannot be found."
-* **Function**: :ref:`withdrawReplaceRequest` | :ref:`acceptReplace` | :ref:`executeReplace` | :ref:`cancelReplace`
-* **Cause**: The ``replaceId`` in the ``ReplaceRequests`` mapping returned ``None``.
-
-``ERR_CANCEL_ACCEPTED_REQUEST``
-
-* **Message**: "Cannot cancel the ReplaceRequest as it was already accepted by a Vault."
-* **Function**: :ref:`withdrawReplaceRequest` 
-* **Cause**: The ``ReplaceRequest`` was already accepted by another vault and can hence no longer be withdrawn.
+* **Message**: "Unauthorized: Caller must be *newVault*."
+* **Function**: :ref:`cancelReplace`
+* **Cause**: The caller of this function is not the associated *newVault*, and hence not authorized to take this action.
 
 ``ERR_INSUFFICIENT_COLLATERAL``
 
 * **Message**: "The provided collateral is too low."
-* **Function**: :ref:`acceptReplace`
-* **Cause**: The provided collateral is insufficient to match the replace request. 
-
-``ERR_VAULT_NOT_FOUND``
-
-* **Message**: "The ``vault`` cannot be found."
-* **Function**: :ref:`requestReplace` | :ref:`acceptReplace` | :ref:`cancelReplace`
-* **Cause**: The vault was not found in the existing ``Vaults`` list in ``VaultRegistry``.
+* **Function**: :ref:`requestReplace`
+* **Cause**: The provided collateral is insufficient to match the amount of tokens requested for replacement. 
 
 ``ERR_REPLACE_PERIOD_EXPIRED``
 
@@ -599,6 +473,48 @@ Error Codes
 
 * **Message**: "The period to complete the replace request is not yet expired."
 * **Function**: :ref:`cancelReplace`
-* **Cause**:  Raises an error if the time limit to call ``executeReplace`` has not yet passed.
+* **Cause**:  A vault tried to cancel a replace before it expired.
 
+``ERR_AMOUNT_BELOW_BTC_DUST_VALUE``
 
+* **Message**: "To be replaced amount is too small."
+* **Function**: :ref:`requestReplace`, :ref:`acceptReplace`
+* **Cause**:  The vault requests or accepts an insufficient number of tokens.
+
+``ERR_NO_PENDING_REQUEST``
+
+* **Message**: "Could not withdraw to-be-replaced tokens because it was already zero."
+* **Function**: :ref:`requestReplace` | :ref:`acceptReplace`
+* **Cause**:  The vault requests or accepts an insufficient number of tokens.
+
+``ERR_REPLACE_SELF_NOT_ALLOWED``
+
+* **Message**: "Vaults can not accept replace request created by themselves."
+* **Function**: :ref:`acceptReplace`
+* **Cause**:  A vault tried to accept a replace that it itself had created.
+
+``ERR_REPLACE_COMPLETED``
+
+* **Message**: "Request is already completed."
+* **Function**: :ref:`executeReplace` | :ref:`cancelReplace`
+* **Cause**:  A vault tried to operate on a request that already completed.
+
+``ERR_REPLACE_CANCELLED``
+
+* **Message**: "Request is already cancelled."
+* **Function**: :ref:`executeReplace` | :ref:`cancelReplace`
+* **Cause**:  A vault tried to operate on a request that already cancelled.
+
+``ERR_REPLACE_ID_NOT_FOUND``
+
+* **Message**: "Invalid replace ID"
+* **Function**: :ref:`executeReplace` | :ref:`cancelReplace`
+* **Cause**:  An invalid replaceID was given - it is not found in the ``ReplaceRequests`` map.
+
+``ERR_VAULT_NOT_FOUND``
+
+* **Message**: "The ``vault`` cannot be found."
+* **Function**: :ref:`requestReplace` | :ref:`acceptReplace` | :ref:`cancelReplace`
+* **Cause**: The vault was not found in the existing ``Vaults`` list in ``VaultRegistry``.
+
+.. note:: It is possible that functions in this pallet return errors defined in other pallets.

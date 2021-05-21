@@ -107,6 +107,8 @@ Time period in which a vault cannot participate in issue, redeem or replace requ
 - Measured in Parachain blocks
 - Initial value: 1 day (Parachain constant)
 
+.. _ReplaceGriefingCollateral:
+
 ReplaceGriefingCollateral
 .........................
 
