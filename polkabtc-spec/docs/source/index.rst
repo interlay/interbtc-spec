@@ -31,7 +31,7 @@ Welcome to the BTC Parachain documentation!
    spec/sla
    spec/staked-relayers
    spec/treasury
-   spec/vaultregistry
+   spec/vault-registry
 
 .. toctree::
    :maxdepth: 2
