@@ -159,7 +159,7 @@ Specification
 * The function call MUST be signed by *oldVault*.
 * The vault MUST be registered
 * The vault MUST NOT be banned
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+* The BTC Parachain status in the :ref:`security` component MUST be set to ``RUNNING:0``.
 * The vault MUST provide sufficient ``griefingCollateral`` such that the ratio of all of its ``toBeReplacedTokens`` and ``replaceCollateral`` is above :ref:`ReplaceGriefingCollateral`.
 * The vault MUST request sufficient tokens to be replaced such that its total is above ``ReplaceBtcDustValue``.
 
