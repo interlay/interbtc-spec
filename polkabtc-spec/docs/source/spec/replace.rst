@@ -49,7 +49,7 @@ The data access and state changes to the vault registry are documented in :numre
 .. figure:: ../figures/VaultRegistry-Replace.png
     :alt: vault-registry-replace
     
-    The replace module interacts with three functions in the vault registry to handle updating token balances of vaults.
+    The replace module interacts with functions in the vault registry to handle updating token balances of vaults. The green lines indicate an increase, the red lines a decrease.
 
 Fee Model
 ---------
