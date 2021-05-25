@@ -75,6 +75,9 @@ Default griefing collateral (in DOT) as a percentage of the locked collateral of
 - Paid in DOT
 - Initial value: 0.005%
 
+
+.. _RedeemFee:
+
 RedeemFee
 .........
 
@@ -83,6 +86,8 @@ Redeem fee share (configurable parameter, as percentage) that users need to pay 
 - Paid in PolkaBTC.
 - Initial value: 0.5%
 
+.. _PremiumRedeemFee:
+
 PremiumRedeemFee
 ................
 
@@ -90,6 +95,8 @@ Fee for users to premium redeem (as percentage). If users execute a redeem with 
 
 - Paid in DOT
 - Initial value: 5%
+
+.. _PunishmentFee:
 
 PunishmentFee
 .............
