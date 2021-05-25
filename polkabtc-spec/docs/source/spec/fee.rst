@@ -10,12 +10,11 @@ The fee model crate implements the fee model outlined in :ref:`fee_model`.
 Step-by-step
 ------------
 
-1. Fees are paid by Users and forwarded to a common Fee Pool from e.g., issue and redeem requests.
-2. Fees are then split to multiple smaller fee pools for the Vaults, Staked Relayers, Maintainers, and Collators.
-3. The individual fee pools (Vaults, Staked Relayers, Maintainers, and Collators) are then split among the actors based on individual distribution criteria.
-4. Each actor can withdraw fees from their individual pool.
-5. Fees can be paid both in `PolkaBTC` and `DOT`.
-
+1. Fees are paid by Users (e.g., during issue and redeem requests) and forwarded to a reward pool.
+2. Fees are then split between Vaults, Staked Relayers, Maintainers, and Collators.
+3. Network participants can claim these rewards from the pool based on their stake.
+4. Stake is determined by their participation in the network - through incentivized actions.
+5. Rewards may be paid in multiple currencies.
 
 Data Model
 ~~~~~~~~~~
@@ -62,41 +61,41 @@ Scalars (Fees)
 IssueFee
 ........
 
-Issue fee share (configurable parameter, as percentage) that users need to pay upon execute issuing PolkaBTC. 
+Issue fee share (configurable parameter, as percentage) that users need to pay upon execute issuing wrapped tokens. 
 
-- Paid in PolkaBTC
+- Paid in wrapped tokens
 - Initial value: 0.5%
 
 IssueGriefingCollateral
 .......................
 
-Default griefing collateral (in DOT) as a percentage of the locked collateral of a vault a user has to lock to issue PolkaBTC. 
+Default griefing collateral as a percentage of the locked collateral of a vault a user has to lock to issue wrapped tokens. 
 
-- Paid in DOT
+- Paid in collateral
 - Initial value: 0.005%
 
 RedeemFee
 .........
 
-Redeem fee share (configurable parameter, as percentage) that users need to pay upon request redeeming PolkaBTC. 
+Redeem fee share (configurable parameter, as percentage) that users need to pay upon request redeeming wrapped tokens. 
 
-- Paid in PolkaBTC.
+- Paid in wrapped tokens
 - Initial value: 0.5%
 
 PremiumRedeemFee
 ................
 
-Fee for users to premium redeem (as percentage). If users execute a redeem with a Vault flagged for premium redeem, they earn a DOT premium,  slashed from the Vault’s collateral. 
+Fee for users to premium redeem (as percentage). If users execute a redeem with a Vault flagged for premium redeem, they earn a premium slashed from the Vault’s collateral. 
 
-- Paid in DOT
+- Paid in collateral
 - Initial value: 5%
 
 PunishmentFee
 .............
 
-Fee (as percentage) that a vault has to pay if it fails to execute redeem requests (for redeem, on top of the slashed BTC-in-DOT value of the request). The fee is paid in DOT based on the PolkaBTC amount at the current exchange rate.
+Fee (as percentage) that a vault has to pay if it fails to execute redeem requests (for redeem, on top of the slashed value of the request). The fee is paid in collateral based on the wrapped token amount at the current exchange rate.
 
-- Paid in DOT
+- Paid in collateral
 - Initial value: 10%
 
 PunishmentDelay
@@ -112,121 +111,84 @@ Time period in which a vault cannot participate in issue, redeem or replace requ
 ReplaceGriefingCollateral
 .........................
 
-Default griefing collateral (in DOT) as a percentage of the to-be-locked DOT collateral of the new vault,  vault has to lock to be replaced by another vault. This collateral will be slashed and allocated to the replacing Vault if the to-be-replaced Vault does not transfer BTC on time.
+Default griefing collateral as a percentage of the to-be-locked collateral of the new vault, vault has to lock to be replaced by another vault. This collateral will be slashed and allocated to the replacing Vault if the to-be-replaced Vault does not transfer BTC on time.
 
-- Paid in DOT
+- Paid in collateral
 - Initial value: 0.005%
-
-Maps
-----
-
-TotalRewards
-.............
-
-Mapping from accounts to their reward balances.
 
 
 Functions
 ~~~~~~~~~
 
-distributeVaultRewards
-----------------------
+distributeRewards
+-----------------
 
-Specifies the distribution of fees in the Vault fee pool among individual Vaults.
+Specifies the distribution of fees among incentivised network participants.
 
-- Initial values:
-    - 90% of Vault fees according to: Vault issued PolkaBTC / total issued PolkaBTC. 
-    - 10% of Vault fees according to: Vault locked DOT / total locked DOT
 
 Specification
 .............
 
 *Function Signature*
 
-``distributeVaultRewards()``
+``distributeRewards()``
 
 
 Function Sequence
 .................
 
-1. Calculate the fees assigned to all Vaults using the `ParachainFeePool` and the `VaultRewards`.
-2. Calculate the fees for every Vault according to the initial values.
-3. Update the `TotalRewards` mapping for the Vault.
+1. Calculate the total fees for all Vaults using the `VaultRewards` percentage.
+2. Calculate the total fees for all Staked Relayers using the `StakedRelayerRewards` percentage.
+3. Calculate the total fees for all Collators using the `CollatorRewards` percentage.
+4. Send the remaining fees to the Maintainer fund.
 
-distributeRelayerRewards
-------------------------
 
-Specifies the distribution of fees in the Staked Relayer fee pool among individual Staked Relayers. This function can implement different reward distributions. We differentiate if the BTC-Parachain operates with the SLA model or without.
+.. _withdrawRewards:
 
-- SLA model deactivated: 
-    - 100% of Staked Relayer fees distributed among active relayers proportional to their locked stake. 
-- SLA model activated: 
-    - We distribute rewards to Staked Relayers, based on a scoring system which takes into account their SLA and locked stake. 
-    - :math:`\text{score(relayer)} = \text{relayer.sla} * \text{relayer.stake}`
-    - :math:`\text{reward(relayer)} = \text{totalReward} / \text{totalRelayerScore} * \text{relayer.score}` where totalReward is the amount of fees currently distributed and totalRelayerScore is the sum of the scores of all active Staked Relayers.
+withdrawRewards
+---------------
+
+A function that allows Staked Relayers, Vaults and Collators to withdraw the fees earned.
 
 Specification
 .............
 
 *Function Signature*
 
-``distributeRelayerRewards()``
-
-
-Function Sequence
-.................
-
-1. Calculate the fees assigned to all Staked Relayers using the `ParachainFeePool` and the `StakedRelayerRewards`.
-2. Calculate the fees for every Staked Relayer according to the reward distribution mode (SLA model activated/deactivated).
-3. Update the `TotalRewards` mapping for the Staked Relayer.
-
-.. _withdrawFees:
-
-withdrawFees
-------------
-
-A function that allows staked relayers, vaults, collators and maintainers to withdraw the fees earned.
-
-Specification
-.............
-
-*Function Signature*
-
-``withdrawFees(account, currency, amount)``
+``withdrawRewards(account, currency, amount)``
 
 *Parameters*
 
-* ``account``: the account withdrawing fees
-* ``currency``: the currency of the fee to withdraw
-* ``amount``: the amount to withdraw
+* ``account``: the account withdrawing rewards
+* ``currency``: the currency of the reward to withdraw
 
 *Events*
 
-* ``WithdrawFees(account, currency, amount)``
+* ``WithdrawRewards(account, currency, amount)``
 
 Function Sequence
 .................
 
-1. Transfer the request amount to the account in case the balance is sufficient.
-2. Update the `TotalRewards` of the account.
+1. Compute the rewards based on the account's stake.
+2. Transfer all rewards to the account.
 
 Events
 ~~~~~~
 
-WithdrawFees
-------------
+WithdrawRewards
+---------------
 
 *Event Signature*
 
-``WithdrawFees(account, currency, amount)``
+``WithdrawRewards(account, currency, amount)``
 
 *Parameters*
 
-* ``account``: the account withdrawing fees
-* ``currency``: the currency of the fee to withdraw
-* ``amount``: the amount to withdraw
+* ``account``: the account withdrawing rewards
+* ``currency``: the currency of the reward to withdraw
+* ``amount``: the amount withdrawn
 
 *Functions*
 
-* :ref:`withdrawFees`
+* :ref:`withdrawRewards`
 
