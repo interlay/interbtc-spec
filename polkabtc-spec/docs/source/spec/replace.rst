@@ -70,10 +70,12 @@ ReplaceBtcDustValue
 
 The minimum amount a *newVault* can accept - this is to ensure the *oldVault* is able to make the bitcoin transfer. Furthermore, it puts a limit on the transaction fees that the *oldVault* needs to pay.
 
+.. _ReplacePeriod:
+
 ReplacePeriod
 .............
 
-The time difference between a replace request is accepted by another vault and the transfer of BTC (and submission of the transaction inclusion proof) by the to-be-replaced Vault. Concretely, this period is the amount by which :ref:`activeBlockCount` is allowed to increase before the redeem is considered to be expired. The replace period has an upper limit to prevent griefing of vault collateral.
+The time difference between a replace request is accepted by another vault and the transfer of BTC (and submission of the transaction inclusion proof) by the to-be-replaced Vault. Concretely, this period is the amount by which :ref:`activeBlockCount` is allowed to increase before the redeem is considered to be expired. The replace period has an upper limit to prevent griefing of vault collateral. Each accepted replace request records the value of this field upon creation, and when checking the expiry, the maximum of the current ReplacePeriod and the value as recorded in the ReplaceRequest is used. This way, vaults are not negatively impacted by a change in the value.
 
 
 Maps
@@ -103,9 +105,10 @@ Parameter               Type        Description
 ``amount``              PolkaBTC    Amount of BTC / PolkaBTC to be replaced.
 ``griefingCollateral``  DOT         Griefing protection collateral locked by *oldVault*.
 ``collateral``          DOT         DOT collateral locked by the new Vault.
-``acceptTime``          u256        Block height at which this replace request was accepted by a new Vault. Serves as start for the countdown until when the old vault must transfer the BTC.
+``acceptTime``          u32         The :ref:`activeBlockCount` when the replace request was accepted by a new Vault. Serves as start for the countdown until when the old vault must transfer the BTC.
 ``btcAddress``          bytes[20]   Base58 encoded Bitcoin public key of the new Vault.  
-``btcHeight``           bytes[20]   Height of newest bitcoin block in the relay at the time the request is accepted. This is used by the clients upon startup, to determine how many blocks of the bitcoin chain they need to inspect to know if a payment has been made already.
+``btcHeight``           u32         Height of newest bitcoin block in the relay at the time the request is accepted. This is used by the clients upon startup, to determine how many blocks of the bitcoin chain they need to inspect to know if a payment has been made already.
+``period``              u32         Value of :ref:`ReplacePeriod` when the redeem request was made, in case that value changes while this replace is pending. 
 ``status``              Enum        Status of the request: Pending, Completed or Cancelled
 ======================  ==========  =======================================================
 
@@ -291,7 +294,7 @@ Specification
 * A pending ``ReplaceRequest`` MUST exist with an id equal to ``replaceId``.
 * The request MUST NOT have expired.
 * The ``rawTx`` MUST decode to a valid transaction that transfers at least the amount specified in the ``ReplaceRequest`` struct. It MUST be a transaction to the correct address, and provide the expected OP_RETURN, based on the ``ReplaceRequest``.
-* The ``merkleProof`` MUST match the ``rawTX``.
+* The ``merkleProof`` MUST contain a valid proof of of ``rawTX``.
 * The bitcoin payment MUST have been submitted to the relay chain, and MUST have sufficient confirmations.
 
 *Postconditions*

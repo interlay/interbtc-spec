@@ -34,7 +34,7 @@ If a Vault fails to execute a correct redeem or replace, it is *temporarily* ban
 .. _SecureCollateralThreshold:
 
 SecureCollateralThreshold
-..........................
+.........................
 
 Determines the over-collateralization rate for collateral locked by Vaults, necessary for issuing tokens. This threshold should be greater than the LiquidationCollateralThreshold, and typically it should be greater than the PremiumRedeemThreshold as well.
 
@@ -44,10 +44,14 @@ The maximum amount of PolkaBTC a vault is able to support during the issue proce
 
 .. note:: As an example, assume we use ``DOT`` as collateral, we issue ``PolkaBTC`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureCollateralThreshold`` is 200%, i.e. a vault has to provide two-times the amount of collateral to back an issue request. Now let's say the vault deposits 400 ``DOT`` as collateral. Then this vault can back at most 2.5 PolkaBTC as: :math:`400 * (1/80) / 2 = 2.5`.
 
+.. _PremiumCollateralThreshold:
+
 PremiumRedeemThreshold
 ......................
 
 Determines the rate for the collateral rate of Vaults, at which users receive a premium, allocated from the Vault's collateral, when performing a :ref:`redeem-protocol` with this Vault. This threshold should be greater than the LiquidationCollateralThreshold. Typically this value should be greater than the LiquidationCollateralThreshold.
+
+.. _LiquidationCollateralThreshold:
 
 LiquidationCollateralThreshold
 ..............................
@@ -489,19 +493,18 @@ Specification
 
 *Function Signature*
 
-``decreaseTokens(vaultId, user, tokens, collateral)``
+``decreaseTokens(vaultId, user, tokens)``
 
 *Parameters*
 
 * ``vaultId``: The BTC Parachain address of the Vault.
 * ``userId``: The BTC Parachain address of the user that made the redeem request.
 * ``tokens``: The amount of PolkaBTC that were not redeemed.
-* ``collateral``: The amount of collateral assigned to this request.
 
 
 *Events*
 
-* ``DecreaseTokens(vaultId, userId, tokens, collateral)``: Emit an event if a redeem request cannot be fulfilled.
+* ``DecreaseTokens(vaultId, userId, tokens)``: Emit an event if a redeem request cannot be fulfilled.
 
 *Preconditions*
 
