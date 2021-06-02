@@ -6,16 +6,13 @@ SLA
 Overview
 ~~~~~~~~
 
-The SLA implements the scheme outline in the :ref:`service_level_agreements`. Its main purpose is to store and compute Vault and Staked Relayer SLAs.
+The SLA module implements the scheme outline in the :ref:`service_level_agreements`. Its main purpose is to compute the delta used to increase or decrease the reward stake.
 
-We define an SLA value as a real number between 0 and 100: :math:`\text{SLA} = [0, 100)`
+We define an SLA score to be a real number between 0 and 100: :math:`\text{SLA} = [0, 100)`. The delta is a rational number.
 
-Initially, all vaults and staked relayer have an SLA of 0 (lowest SLA). Through the performance of predefined “desired actions”, they can increase their SLA to a maximum of 100 (highest SLA).
+SLAs are used to compute the rewards earned by a participant through the performance of predefined “desired actions”.
 
-SLAs are used twofold:
-
-- **Vaults:** Vaults with high SLAs avoid having their entire collateral slashed in case they fail to correctly execute a Redeem request (i.e., only the minimum amount of collateral is slashed, defined by the LiquidationThreshold)
-- **Staked Relayers:** For Staked Relayers, the SLA has a direct impact on the earned fees.
+Additionally, Vaults with high SLAs avoid having their entire collateral slashed in case they fail to correctly execute a Redeem request (i.e., only the minimum amount of collateral is slashed, defined by the LiquidationThreshold).
 
 
 Step-by-step
@@ -23,7 +20,7 @@ Step-by-step
 
 1. Vault and Staked Relayers interact with the BTC-Parachain.
 2. Certain actions have an impact on their SLA. If this is the case, the function updates the SLA score of the Vault or Staked Relayer accordingly.
-3. The SLA is stored for each Vault and Staked Relayer to impact collateral slashing for Vaults and for fee allocation to Staked Relayers.
+3. The SLA is stored for each Vault and Staked Relayer to impact collateral slashing for Vaults and for fee allocation.
 
 
 Data Model
@@ -75,40 +72,11 @@ Block Submission (Increase)
 
 - Initial value: +1
 
-Correct NoData Report/Vote (Increase)
-.....................................
-
-- Initial value: +1
-
-Correct Invalid Report/Vote (Increase)
-......................................
-
-- Initial value: +10
-
 Correct Theft Report (Increase)
 ...............................
 
 - Initial value: +1
 
-Correct Oracle Offline Report (Increase)
-........................................
-
-- Initial value: +1
-
-False NoData Report/Vote (Decrease)
-...................................
-
-- Initial value: -10
-
-False Invalid Report/Vote (Decrease)
-....................................
-
-- Initial value: -100
-
-Ignored Vote (Decrease)
-.......................
-
-- Initial value: -10
 
 Maps
 ----
