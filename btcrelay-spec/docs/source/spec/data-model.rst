@@ -117,12 +117,11 @@ Representation of a Bitcoin blockchain / fork.
 ======================  ==============  ========================================================================
 Parameter               Type            Description
 ======================  ==============  ========================================================================
-``chainId``             U256            Unique identifier for faster lookup in ``ChainsIndex``
-``chain``               Map<U256,H256>  Mapping of ``blockHeight`` to ``blockHash``, which points to a ``RichBlockHeader`` entry in ``BlockHeaders``.
-``startHeight``         U256            Starting/lowest block height in the ``chain`` mapping. Used to determine the forking point during chain reorganizations.
-``maxHeight``           U256            Max. block height in the ``chain`` mapping. Used for ordering in the ``Chains`` priority queue.
-``noData``              Vec<U256>       List of block heights in ``chain`` referencing block hashes of ``RichBlockHeader`` entries in ``BlockHeaders`` which have been flagged as ``noData`` by Staked Relayers.
-``invalid``             Vec<U256>       List of block heights in ``chain`` referencing block hashes of ``RichBlockHeader`` entries in ``BlockHeaders`` which have been flagged as ``invalid`` by Staked Relayers.
+``chainId``             u32             Unique identifier for faster lookup in ``ChainsIndex``
+``startHeight``         u32             Lowest block number in this chain. Used to determine the forking point during chain reorganizations.
+``maxHeight``           u32             Max. block height in this chain.
+``noData``              Set<u32>        Set of block heights, indicating blocks that have been flagged as ``noData``.
+``invalid``             Set<u32>        Set of block heights, indicating blocks that have been flagged as ``invalid``.
 ======================  ==============  ========================================================================
 
 Data Structures
