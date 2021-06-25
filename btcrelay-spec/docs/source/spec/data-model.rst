@@ -6,6 +6,8 @@ Data Model
 The BTC-Relay, as opposed to Bitcoin SPV clients, only stores a subset of information contained in block headers and does not store transactions. 
 Specifically, only data that is absolutely necessary to perform correct verification of block headers and transaction inclusion is stored. 
 
+Note that the structs used to represent bitcoin transactions and blocks is slightly different from the :ref:`bitcoin-data-model`. For example, no ``tx_in count`` is required, since this information is implicitly stored in the vector of inputs.
+
 Types
 ~~~~~
 
@@ -73,7 +75,9 @@ Structs
 BlockHeader
 ...........
 
-Representation of a Bitcoin block header, constructed by the parachain from the :ref:`RawBlockHeader`. In addition to decoded fields, it contains the hash of the block header.
+Representation of a Bitcoin block header, constructed by the parachain from the :ref:`RawBlockHeader`. The main differences compared to the :ref:`bitcoinBlockHeader` in :ref:`bitcoin-data-model` is that this contains the unpacked ``target`` constructed from ``nBits``, and an additional ``hash`` of the ``BlockHeader`` for convenience.
+
+
 
 .. note:: Fields marked as [Optional] are not critical for the secure operation of BTC-Relay, but can be stored anyway, at the developers discretion. We omit these fields in the rest of this specification. 
 
@@ -82,11 +86,11 @@ Representation of a Bitcoin block header, constructed by the parachain from the 
 ======================  =========  ========================================================================
 Parameter               Type       Description
 ======================  =========  ========================================================================
-``merkleRoot``          byte32     Root of the Merkle tree referencing transactions included in the block.
+``merkleRoot``          H256Le     Root of the Merkle tree referencing transactions included in the block.
 ``target``              u256       Difficulty target of this block (converted from ``nBits``, see `Bitcoin documentation <https://bitcoin.org/en/developer-reference#target-nbits>`_.).
 ``timestamp``           timestamp  UNIX timestamp indicating when this block was mined in Bitcoin.
-``hashPrevBlock``       byte32     Block hash of the predecessor of this block.
-``hash``                byte32     Block hash of of this block.
+``hashPrevBlock``       H256Le     Block hash of the predecessor of this block.
+``hash``                H256Le     Block hash of of this block.
 .                       .          .
 ``version``             i32        [Optional] Version of the submitted block.
 ``nonce``               u32        [Optional] Nonce used to solve the PoW of this block. 
@@ -107,7 +111,7 @@ Parameter               Type         Description
 ``blockHeight``         u32          Height of this block in the Bitcoin main chain.
 ``chainRef``            u32          Pointer to the ``BlockChain`` struct in which this block header is contained.
 ``blockHeader``         BlockHeader  Associated parsed ``BlockHeader`` struct.
-``para_height``         u32          The ``activeBlockCount`` at the time the block header was submitted to the relay. See the security pallet for more information.
+``paraHeight``          u32          The ``activeBlockCount`` at the time the block header was submitted to the relay. See the security pallet for more information.
 ======================  ===========  ========================================================================
 
 BlockChain
@@ -123,9 +127,95 @@ Parameter               Type            Description
 ``chainId``             u32             Unique identifier for faster lookup in ``ChainsIndex``
 ``startHeight``         u32             Lowest block number in this chain. Used to determine the forking point during chain reorganizations.
 ``maxHeight``           u32             Max. block height in this chain.
-``noData``              Set<u32>        Set of block heights, indicating blocks that have been flagged as ``noData``.
-``invalid``             Set<u32>        Set of block heights, indicating blocks that have been flagged as ``invalid``.
 ======================  ==============  ========================================================================
+
+Transaction
+...........
+
+Representation of a Bitcoin Transaction. It differs from the one specified in :ref:`bitcoin-data-model` in that it does not contain in lengths of the input and output vectors, because this data is implicit in the vector. Furthermore, we use different types for the inputs and outputs. The segregated witnesses and ``flags``, if any, are placed inside the inputs.
+
+.. tabularcolumns:: |l|l|L|
+
+======================  =============================  ========================================================================
+Parameter               Type                           Description
+======================  =============================  ========================================================================
+``version``             i32                            Transaction version number.
+``inputs``              Vec<:ref:`TransactionInput`>   Vector of transaction inputs.
+``output``              Vec<:ref:`TransactionOutput`>  Vector of transaction inputs.
+``lockTime``            :ref:`LockTime`                A Unix timestamp OR block number.
+======================  =============================  ========================================================================
+
+.. _TransactionInput:
+
+TransactionInput
+................
+
+Representation of a Bitcoin transaction input. It differs from the one specified in :ref:`bitcoin-data-model` in that it contains ``flags`` and the segregated witnesses. Furthermore, it contains dedicated fields for coinbase transactions.
+
+.. tabularcolumns:: |l|l|L|
+
+======================  ==============         ========================================================================
+Parameter               Type                   Description
+======================  ==============         ========================================================================
+``previousHash``        H256Le,                The hash of the transaction to spend from.
+``previousIndex``       u32,                   The index of the output within the transaction pointed to by ``previousHash`` to spend from.
+``coinbase``            bool,                  True if the transaction input is the newly mined funds.
+``height``              Option<u32>,           An optional blockheight used in the coinbase transaction. See https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki
+``script``              Vec<u8>,               The script satisfying the output's script.
+``sequence``            u32,                   Sequence number (default ``0xffffffff``).
+``flags``               u8,                    The flags set in ``Transaction`` that indicates a Segrated Witness transaction. If none were set in the transaction, this value is 0.
+``witness``             Vec<Vec<u8>>,          The witness scripts of the transaction. See  See https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki
+======================  ==============         ========================================================================
+
+.. _TransactionOutput:
+
+TransactionOutput
+.................
+
+Representation if a Bitcoin transaction output
+
+.. tabularcolumns:: |l|l|L|
+
+======================  ==============         ========================================================================
+Parameter               Type                   Description
+======================  ==============         ========================================================================
+``value``               i64,                   The number of satoshis to transfer to this output.
+``script``              :ref:`Script`          The spending condition of the output.
+======================  ==============         ========================================================================
+
+.. _Script:
+
+Script
+......
+
+Representation if a Bitcoin transaction output
+
+.. tabularcolumns:: |l|l|L|
+
+======================  ==============         ========================================================================
+Parameter               Type                   Description
+======================  ==============         ========================================================================
+``bytes``               Vec<u8>,               The spending condition of the output.
+======================  ==============         ========================================================================
+
+Enums
+~~~~~
+
+.. _LockTime: 
+
+LockTime
+...........
+
+Represents either a unix timestamp OR a blocknumber. See the `Bitcoin source <https://github.com/bitcoin/bitcoin/blob/7fcf53f7b4524572d1d0c9a5fdc388e87eb02416/src/script/script.h#L39>`_.
+
+.. tabularcolumns:: |l|L|
+
+======================  ========================================================================
+Discriminant            Description
+======================  ========================================================================
+``Time(u32)``           Lock time interpreted as a unix timestamp.
+``BlockHeight(u32)``    Lock time interpreted as a block number.
+======================  ========================================================================
 
 Data Structures
 ~~~~~~~~~~~~~~~
