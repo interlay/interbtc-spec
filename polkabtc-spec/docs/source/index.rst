@@ -18,6 +18,7 @@ Welcome to the BTC Parachain documentation!
    :maxdepth: 2
    :caption: Specification
 
+   spec/introduction
    spec/btc-relay
    spec/collateral
    spec/fee
