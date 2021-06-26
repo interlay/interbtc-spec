@@ -11,7 +11,7 @@ As such, Bitcoin transactions for which transaction inclusion proofs are submitt
 Case 1: OP_RETURN Transactions
 ------------------------------
 
-The `OP_RETURN <https://bitcoin.org/en/transactions-guide#term-null-data>`_ field can be used to store `40 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in PolkaBTC.
+The `OP_RETURN <https://en.bitcoin.it/wiki/OP_RETURN>`_ field can be used to store `40 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in PolkaBTC.
 
 Many Bitcoin wallets automatically order UTXOs. We require that the *Payment UTXO* and the *Data UTXO* are made within the first three indexes (index 0 - 2).
 We *do not* require any specific ordering of those outputs.
