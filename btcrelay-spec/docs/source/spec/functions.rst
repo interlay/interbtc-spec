@@ -12,7 +12,7 @@ Initializes BTC-Relay with the first Bitcoin block to be tracked and initializes
 
 .. note:: BTC-Relay **does not** have to be initialized with Bitcoin's genesis block! The first block to be tracked can be selected freely. 
 
-.. warning:: Caution when setting the first block in BTC-Relay: only succeeding blocks can be submitted and **predecessors will be rejected**!
+.. warning:: Caution when setting the first block in BTC-Relay: only succeeding blocks can be submitted and **predecessors and blocks from other chains will be rejected**! Similarly, caution is required with the initial block height argument, since if an incorrect value is used, all subsequently reported block heights will be incorrect.
 
 
 Specification
@@ -20,12 +20,12 @@ Specification
 
 *Function Signature*
 
-``initialize(blockHeaderBytes, blockHeight)``
+``initialize(relayer, rawBlockHeader, blockHeight)``
 
 *Parameters*
 
 * ``relayer``: the account submitting the block
-* ``blockHeaderBytes``: 80 byte raw Bitcoin block header
+* ``rawBlockHeader``: 80 byte raw Bitcoin block header, see :ref:`RawBlockHeader`.
 * ``blockHeight``: integer Bitcoin block height of the submitted block header 
 
 *Events*
@@ -36,36 +36,29 @@ Specification
 
 * ``ERR_ALREADY_INITIALIZED = "Already initialized"``: return error if this function is called after BTC-Relay has already been initialized.
 
-Preconditions
-~~~~~~~~~~~~~
+*Preconditions*
 
 * This is the first time this function is called, i.e., when BTC-Relay is being deployed. 
+* The blockheader MUST be parsable.
+* ``blockHeight`` MUST match the height on the bitcoin chain. Note that the parachain can not check this - it's the caller's responsability!
+* ``rawBlockHeader`` MUST match a block on the bitcoin main chain. Note that the parachain can not check this - it's the caller's responsability!
 
-Function sequence
-~~~~~~~~~~~~~~~~~
+*Postconditions*
 
-1. Check if ``initialize`` is called for the first time. Return ``ERR_ALREADY_INITIALIZED`` if BTC-Relay has already been initialized. 
+Let ``blockHeader`` be the parsed ``rawBlockHeader``. Then:
 
-2. Parse ``blockHeaderBytes``, extracting  the ``merkleRoot`` (:ref:`extractMerkleRoot`), ``timestamp`` (:ref:`extractTimestamp`) and ``target`` (:ref:`extractNBits` and :ref:`nBitsToTarget`) from ``blockHeaderBytes``, and compute the block hash (``hashCurrentBlock``) using :ref:`sha256d` (passing ``blockHeaderBytes`` as parameter).
+* ``ChainsIndex[0]`` MUST be set to a new ``BlockChain`` value, where ``BlockChain.chainId = 0`` and``BlockChain.startHeight = BlockChain.maxHeight = blockHeight``
+* A value ``block`` of type ``RichBlockHeader`` MUST be added to ``BlockHeaders``, where:
+  
+  * ``block.basic_block_header = blockHeader``
+  * ``block.chainRef = 0``
+  * ``block.paraHeight`` is the current activeBlockCount (see the Security module)
+  * ``block.blockHeight = blockHeight``
 
-3. Create a new ``BlockChain`` entry in ``Chains``:
-
-    - ``chainId =``:ref:`getChainsCounter`
-    - ``startHeight = blockHeight``
-    - ``maxHeight = blockHeight``
-    - ``noData = Vec::new()``
-    - ``invalid = Vec::new()``
-    - Insert ``hashCurrentBlock`` in the ``chain`` mapping using ``blockHeight`` as key. 
-
-4. Insert a pointer to ``BlockChain`` into ``ChainsIndex`` using  ``chainId`` as key.
-
-5. Store a new ``RichBlockHeader`` struct containing ``merkleRoot``, ``blockHeight``, ``timestamp``, ``target``, and a pointer (``chainRef``) to the ``BlockChain`` struct - as associated with this block header - in ``BlockHeaders``, using ``hashCurrentBlock`` as key. 
-
-6. Set ``BestBlock = hashCurrentBlock`` and ``BestBlockHeight = blockHeight``.
-
-7. Emit a ``Initialized`` event using ``height`` and ``hashCurrentBlock`` as input.
-
-.. warning:: Attention: the Bitcoin block header submitted to ``initialize`` must be in the Bitcoin main chain - this must be checked outside of the BTC Parachain **before** making this function call! A wrong initialization will cause the entire BTC Parachain to fail, since verification requires that all submitted blocks **must** (indirectly) point to the initialized block (i.e., have it as ancestor, just like the actual Bitcoin genesis block).
+* ``BestBlockHeight`` MUST be ``ChainsIndex[0].maxHeight``
+* ``BestBlock`` MUST be ``blockHeader.hash``
+* ``StartBlockHeight`` MUST be set to ``blockHeight``
+  
 
 .. _storeBlockHeader:
 
