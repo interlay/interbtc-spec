@@ -111,7 +111,8 @@ Specification
 * A block chain ``prevBlockchain`` MUST be stored in ``ChainsIndex[prevHeader.chainRef]``.
 * :ref:`VerifyBlockHeader` MUST return ``Ok`` when called with ``blockHeader``, ``prevHeader.blockHeight + 1`` and ``prevHeader``.
 * If ``prevHeader`` is the last element a chain (i.e. ``blockHeader`` does not create a new fork), then:
-   * ``prevBlockChain`` MUST NOT already contain a block of height ``prevHeader.blockHeight + 1``. TODO: this seems to covered by the earlier precondition - can we remove the DuplicateBlock check in ``extend_blockchain``?
+   * ``prevBlockChain`` MUST NOT already contain a block of height ``prevHeader.blockHeight + 1``.
+   * If ``prevBlockChain.chain_id`` is _not_ zero (i.e. the block is being added to a fork rather than the main chain), and the fork is ``STABLE_BITCOIN_CONFIRMATIONS`` blocks ahead of the main chain, then calling :ref:`swapMainBlockchain` with this fork MUST return ``Ok``.
 
 *Postconditions*
 
@@ -127,14 +128,7 @@ Specification
     
   * If ``prevBlockChain.chain_id`` is _not_ zero (i.e. the block is being added to a fork rather than the main chain), then:
 
-    * If the fork is ``STABLE_BITCOIN_CONFIRMATIONS`` blocks ahead of the main chain, i.e. ``prevHeader.blockHeight + 1 >= BestBlockHeight + STABLE_BITCOIN_CONFIRMATIONS``, then the fork is moved to the mainchain:
-
-      * For each ancestor ``a`` of ``blockHeader`` MUST move to the main chain, i.e. ``a.chainRef`` MUST be set to ``MAIN_CHAIN_ID``. 
-      * ``ChainsIndex[MAIN_CHAIN_ID].maxHeight`` MUST be set to ``blockHeader.blockHeight``.
-      * Each fork ``fork`` except the main chain that contains an ancestor of ``blockHeader`` MUST set ``fork.startHeight`` to the lowest ``blockHeight`` in the fork that is not an ancestor of ``blockHeader``.
-      * Each block ``b`` in the mainchain that is not an acestor of ``blockHeader`` MUST move to ``prevBlockChain``, i.e. ``b.chainRef = prevBlockChain.chainId``. 
-      * ``prevBlockChain.startHeight`` MUST be set to the lowest ``blockHeight`` of all blocks ``b`` that have ``b.chainRef == prevBlockChain.chainId``.
-      * ``prevBlockChain.maxHeight`` MUST be set to the highest ``blockHeight`` of all blocks ``b`` that have ``b.chainRef == prevBlockChain.chainId``.
+    * If the fork is ``STABLE_BITCOIN_CONFIRMATIONS`` blocks ahead of the main chain, i.e. ``prevHeader.blockHeight + 1 >= BestBlockHeight + STABLE_BITCOIN_CONFIRMATIONS``, then the fork is moved to the mainchain. That is, :ref:`swapMainBlockchain` MUST be called with the fork as argument.
 
   * A new ``RichBlockHeader`` MUST be stored in ``BlockHeaders`` that is constructed as follows:
 
