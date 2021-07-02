@@ -31,10 +31,10 @@ btcrelay:
     except:
     - master
 
-polkabtc:
+interbtc:
     stage: test
     script:
-    - cd polkabtc-spec/docs; make html
+    - cd interbtc-spec/docs; make html
     - sphinx-build -b latex source build/latex
     - make -C build/latex    
     only:
@@ -52,12 +52,12 @@ pages:
     - mv build/html/ ../../public/btcrelay-spec/
     - mv build/latex/BTCRelay.pdf ../../public/btcrelay-spec.pdf
     - cd ../..
-    - cd polkabtc-spec/docs
+    - cd interbtc-spec/docs
     - make html
     - sphinx-build -b latex source build/latex
     - make -C build/latex
     - mv build/html/* ../../public/
-    - mv build/latex/PolkaBTC.pdf ../../public/polkabtc-spec.pdf
+    - mv build/latex/interBTC.pdf ../../public/interbtc-spec.pdf
     artifacts:
         paths:
         - public

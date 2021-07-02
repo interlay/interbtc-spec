@@ -3,7 +3,7 @@ SPEC=$1
 
 if [ $SPEC -z ]
 then
-    SPECS=(btcrelay-spec polkabtc-spec)
+    SPECS=(btcrelay-spec interbtc-spec)
 else
     SPECS=($SPEC)
 fi

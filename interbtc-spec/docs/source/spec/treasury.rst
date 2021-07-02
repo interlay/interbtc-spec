@@ -6,16 +6,16 @@ Treasury
 Overview
 ~~~~~~~~
 
-The treasury serves as the central storage for all PolkaBTC.
-It exposes the :ref:`transfer` function to any user. With the transfer functions users can send PolkaBTC to and from each other.
+The treasury serves as the central storage for all interbtc.
+It exposes the :ref:`transfer` function to any user. With the transfer functions users can send interbtc to and from each other.
 Further, the treasury exposes three internal functions for the :ref:`issue-protocol` and the :ref:`redeem-protocol`. 
 
 Step-by-step
 ------------
 
-* **Transfer**: A user sends an amount of PolkaBTC to another user by calling the :ref:`transfer` function.
-* **Issue**: The issue module calls into the treasury when an issue request is completed and the user has provided a valid proof that he transferred the required amount of BTC to the correct vault. The issue module calls the :ref:`mint` function to grant the user the PolkaBTC token.
-* **Redeem**: The redeem protocol requires two calls to the treasury module. First, a user requests a redeem via the :ref:`requestRedeem` function. This invokes a call to the :ref:`lock` function that locks the requested amount of tokens for this user. Second, when a redeem request is completed and the vault has provided a valid proof that it transferred the required amount of BTC to the correct user, the redeem module calls the :ref:`burn` function to destroy the previously locked PolkaBTC.
+* **Transfer**: A user sends an amount of interbtc to another user by calling the :ref:`transfer` function.
+* **Issue**: The issue module calls into the treasury when an issue request is completed and the user has provided a valid proof that he transferred the required amount of BTC to the correct vault. The issue module calls the :ref:`mint` function to grant the user the interbtc token.
+* **Redeem**: The redeem protocol requires two calls to the treasury module. First, a user requests a redeem via the :ref:`requestRedeem` function. This invokes a call to the :ref:`lock` function that locks the requested amount of tokens for this user. Second, when a redeem request is completed and the vault has provided a valid proof that it transferred the required amount of BTC to the correct user, the redeem module calls the :ref:`burn` function to destroy the previously locked interbtc.
 
 Data Model
 ~~~~~~~~~~
@@ -23,7 +23,7 @@ Data Model
 Constants
 ---------
 
-- ``NAME``: ``PolkaBTC``
+- ``NAME``: ``interbtc``
 - ``SYMBOL``: ``pBTC``
 
 Scalars
@@ -32,7 +32,7 @@ Scalars
 TotalSupply
 ...........
 
-The total supply of PolkaBTC.
+The total supply of interbtc.
 
 
 Maps
@@ -61,7 +61,7 @@ Functions
 transfer
 --------
 
-Transfers a specified amount of PolkaBTC from a Sender to a Receiver on the BTC Parachain.
+Transfers a specified amount of interbtc from a Sender to a Receiver on the BTC Parachain.
 
 Specification
 .............
@@ -72,9 +72,9 @@ Specification
 
 *Parameters*
 
-* ``sender``: An account with enough funds to send the ``amount`` of PolkaBTC to the ``receiver``.
-* ``receiver``: Account receiving an amount of PolkaBTC.
-* ``amount``: The number of PolkaBTC being sent in the transaction.
+* ``sender``: An account with enough funds to send the ``amount`` of interbtc to the ``receiver``.
+* ``receiver``: Account receiving an amount of interbtc.
+* ``amount``: The number of interbtc being sent in the transaction.
 
 
 *Events*
@@ -83,7 +83,7 @@ Specification
 
 *Errors*
 
-* ``ERR_INSUFFICIENT_FUNDS``: The sender does not have a high enough balance to send an ``amount`` of PolkaBTC.
+* ``ERR_INSUFFICIENT_FUNDS``: The sender does not have a high enough balance to send an ``amount`` of interbtc.
 
 .. *Substrate*
 
@@ -106,9 +106,9 @@ The ``transfer`` function takes as input the sender, the receiver, and an amount
 mint
 ----
 
-In the BTC Parachain new PolkaBTC can be created by leveraging the :ref:`issue-protocol`.
-However, to separate concerns and access to data, the Issue module has to call the ``mint`` function to complete the issue process in the PolkaBTC component.
-The function increases the ``totalSupply`` of PolkaBTC.
+In the BTC Parachain new interbtc can be created by leveraging the :ref:`issue-protocol`.
+However, to separate concerns and access to data, the Issue module has to call the ``mint`` function to complete the issue process in the interbtc component.
+The function increases the ``totalSupply`` of interbtc.
 
 .. warning:: This function can *only* be called from the Issue module.
 
@@ -121,13 +121,13 @@ Specification
 
 *Parameters*
 
-* ``requester``: The account of the requester of PolkaBTC.
-* ``amount``: The amount of PolkaBTC to be added to an account.
+* ``requester``: The account of the requester of interbtc.
+* ``amount``: The amount of interbtc to be added to an account.
 
 
 *Events*
 
-* ``Mint(requester, amount)``: Issue an event when new PolkaBTC are minted.
+* ``Mint(requester, amount)``: Issue an event when new interbtc are minted.
 
 .. *Substrate*
 
@@ -150,7 +150,7 @@ Function Sequence
 lock
 ----
 
-During the redeem process, a user needs to be able to lock PolkaBTC. Locking transfers coins from the ``Balances`` mapping to the ``LockedBalances`` mapping to prevent users from transferring the coins.
+During the redeem process, a user needs to be able to lock interbtc. Locking transfers coins from the ``Balances`` mapping to the ``LockedBalances`` mapping to prevent users from transferring the coins.
 
 Specification
 .............
@@ -161,17 +161,17 @@ Specification
 
 *Parameters*
 
-* ``redeemer``: The Redeemer wishing to lock a certain amount of PolkaBTC.
-* ``amount``: The amount of PolkaBTC that should be locked.
+* ``redeemer``: The Redeemer wishing to lock a certain amount of interbtc.
+* ``amount``: The amount of interbtc that should be locked.
 
 
 *Events*
 
-* ``Lock(redeemer, amount)``: Emits newly locked amount of PolkaBTC by a user.
+* ``Lock(redeemer, amount)``: Emits newly locked amount of interbtc by a user.
 
 *Errors*
 
-* ``ERR_INSUFFICIENT_FUNDS``: User has not enough PolkaBTC to lock coins.
+* ``ERR_INSUFFICIENT_FUNDS``: User has not enough interbtc to lock coins.
 
 
 Precondition
@@ -191,7 +191,7 @@ Function Sequence
 burn
 ----
 
-During the :ref:`redeem-protocol`, users first lock and then "burn" (i.e. destroy) their PolkaBTC to receive BTC. Users can only burn tokens once they are locked to prevent transaction ordering dependencies. This means a user first needs to move his tokens from the ``Balances`` to the ``LockedBalances`` mapping via the :ref:`lock` function.
+During the :ref:`redeem-protocol`, users first lock and then "burn" (i.e. destroy) their interbtc to receive BTC. Users can only burn tokens once they are locked to prevent transaction ordering dependencies. This means a user first needs to move his tokens from the ``Balances`` to the ``LockedBalances`` mapping via the :ref:`lock` function.
 
 .. warning:: This function is only internally callable by the Redeem module.
 
@@ -204,13 +204,13 @@ Specification
 
 *Parameters*
 
-* ``redeemer``: The Redeemer wishing to burn a certain amount of PolkaBTC.
-* ``amount``: The amount of PolkaBTC that should be destroyed.
+* ``redeemer``: The Redeemer wishing to burn a certain amount of interbtc.
+* ``amount``: The amount of interbtc that should be destroyed.
 
 
 *Events*
 
-* ``Burn(redeemer, amount)``: Issue an event when the amount of PolkaBTC is successfully destroyed.
+* ``Burn(redeemer, amount)``: Issue an event when the amount of interbtc is successfully destroyed.
 
 *Errors*
 
@@ -245,9 +245,9 @@ Issues an event when a transfer of funds was successful.
 
 *Parameters*
 
-* ``sender``: An account with enough funds to send the ``amount`` of PolkaBTC to the ``receiver``.
-* ``receiver``: Account receiving an amount of PolkaBTC.
-* ``amount``: The number of PolkaBTC being sent in the transaction.
+* ``sender``: An account with enough funds to send the ``amount`` of interbtc to the ``receiver``.
+* ``receiver``: Account receiving an amount of interbtc.
+* ``amount``: The number of interbtc being sent in the transaction.
 
 *Function*
 
@@ -257,7 +257,7 @@ Issues an event when a transfer of funds was successful.
 Mint
 ----
   
-Issue an event when new PolkaBTC are minted.
+Issue an event when new interbtc are minted.
 
 *Event Signature*
 
@@ -265,8 +265,8 @@ Issue an event when new PolkaBTC are minted.
 
 *Parameters*
 
-* ``requester``: The account of the requester of PolkaBTC.
-* ``amount``: The amount of PolkaBTC to be added to an account.
+* ``requester``: The account of the requester of interbtc.
+* ``amount``: The amount of interbtc to be added to an account.
 
 *Function*
 
@@ -276,7 +276,7 @@ Issue an event when new PolkaBTC are minted.
 Lock
 ----
 
-Emits newly locked amount of PolkaBTC by a user.
+Emits newly locked amount of interbtc by a user.
 
 *Event Signature*
 
@@ -284,8 +284,8 @@ Emits newly locked amount of PolkaBTC by a user.
 
 *Parameters*
 
-* ``redeemer``: The Redeemer wishing to lock a certain amount of PolkaBTC.
-* ``amount``: The amount of PolkaBTC that should be locked.
+* ``redeemer``: The Redeemer wishing to lock a certain amount of interbtc.
+* ``amount``: The amount of interbtc that should be locked.
 
 *Function*
 
@@ -295,7 +295,7 @@ Emits newly locked amount of PolkaBTC by a user.
 Burn
 ----
 
-Issue an event when the amount of PolkaBTC is successfully destroyed.
+Issue an event when the amount of interbtc is successfully destroyed.
 
 *Event Signature*
 
@@ -303,8 +303,8 @@ Issue an event when the amount of PolkaBTC is successfully destroyed.
 
 *Parameters*
 
-* ``redeemer``: The Redeemer wishing to burn a certain amount of PolkaBTC.
-* ``amount``: The amount of PolkaBTC that should be burned.
+* ``redeemer``: The Redeemer wishing to burn a certain amount of interbtc.
+* ``amount``: The amount of interbtc that should be burned.
 
 *Function*
 

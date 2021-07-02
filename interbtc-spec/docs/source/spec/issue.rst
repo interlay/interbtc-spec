@@ -6,15 +6,15 @@ Issue
 Overview
 ~~~~~~~~
 
-The Issue module allows as user to create new PolkaBTC tokens. The user needs to request PolkaBTC through the :ref:`requestIssue` function, then send BTC to a vault, and finally complete the issuing of PolkaBTC by calling the :ref:`executeIssue` function. If the user does not complete the process in time, the vault can cancel the issue request and receive a griefing collateral from the user by invoking the :ref:`cancelIssue` function. Below is a high-level step-by-step description of the protocol.
+The Issue module allows as user to create new interbtc tokens. The user needs to request interbtc through the :ref:`requestIssue` function, then send BTC to a vault, and finally complete the issuing of interbtc by calling the :ref:`executeIssue` function. If the user does not complete the process in time, the vault can cancel the issue request and receive a griefing collateral from the user by invoking the :ref:`cancelIssue` function. Below is a high-level step-by-step description of the protocol.
 
 Step-by-step
 ------------
 
 1. Precondition: a vault has locked collateral as described in the :ref:`Vault-registry`.
-2. A user executes the :ref:`requestIssue` function to open an issue request on the BTC Parachain. The issue request includes the amount of PolkaBTC the user wants to issue, the selected vault, and a small collateral to prevent :ref:`griefing`.
-3. A user sends the equivalent amount of BTC that he wants to issue as PolkaBTC to the vault on the Bitcoin blockchain. 
-4. The user or a vault acting on behalf of the user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain. The user or a vault acting on behalf of the user executes the :ref:`executeIssue` function on the BTC Parachain. The issue function requires a reference to the issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of PolkaBTC into his account.
+2. A user executes the :ref:`requestIssue` function to open an issue request on the BTC Parachain. The issue request includes the amount of interbtc the user wants to issue, the selected vault, and a small collateral to prevent :ref:`griefing`.
+3. A user sends the equivalent amount of BTC that he wants to issue as interbtc to the vault on the Bitcoin blockchain. 
+4. The user or a vault acting on behalf of the user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain. The user or a vault acting on behalf of the user executes the :ref:`executeIssue` function on the BTC Parachain. The issue function requires a reference to the issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of interbtc into his account.
 5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``IssuePeriod``), the vault is able to call the :ref:`cancelIssue` function to cancel the issue request adn will receive the griefing collateral locked by the user.
 
 Security
@@ -38,7 +38,7 @@ Fee Model
 
 Following additions are added if the fee model is integrated.
 
-- Issue fees are paid by users in PolkaBTC when executing the request. The fees are transferred to the Parachain Fee Pool.
+- Issue fees are paid by users in interbtc when executing the request. The fees are transferred to the Parachain Fee Pool.
 - If an issue request is executed, the user’s griefing collateral is returned.
 - If an issue request is canceled, the vault assigned to this issue request receives the griefing collateral.
 
@@ -68,7 +68,7 @@ Maps
 IssueRequests
 .............
 
-Users create issue requests to issue PolkaBTC. This mapping provides access from a unique hash ``IssueId`` to a ``Issue`` struct. ``<IssueId, Issue>``.
+Users create issue requests to issue interbtc. This mapping provides access from a unique hash ``IssueId`` to a ``Issue`` struct. ``<IssueId, Issue>``.
 
 
 Structs
@@ -87,9 +87,9 @@ Parameter               Type        Description
 ``vault``               Account     The BTC Parachain address of the vault responsible for this commit request.
 ``opentime``            u256        Block height of opening the request.
 ``griefingCollateral``  DOT         Collateral provided by a user.
-``amount``              PolkaBTC    Amount of PolkaBTC to be issued.
-``fee``                 PolkaBTC    Fee charged to the user for issuing.
-``requester``           Account     User account receiving PolkaBTC upon successful issuing.
+``amount``              interbtc    Amount of interbtc to be issued.
+``fee``                 interbtc    Fee charged to the user for issuing.
+``requester``           Account     User account receiving interbtc upon successful issuing.
 ``btcAddress``          bytes[20]   Base58 encoded Bitcoin public key of the Vault.  
 ``completed``           bool        Indicates if the issue has been completed.
 ``cancelled``           bool        Indicates if the issue request was cancelled.
@@ -99,11 +99,11 @@ Parameter               Type        Description
   
   #[derive(Encode, Decode, Default, Clone, PartialEq)]
   #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct Issue<AccountId, BlockNumber, PolkaBTC, DOT> {
+  pub struct Issue<AccountId, BlockNumber, interbtc, DOT> {
         vault: AccountId,
         opentime: BlockNumber,
         griefing_collateral: DOT,
-        amount: PolkaBTC,
+        amount: interbtc,
         requester: AccountId,
         btc_address: H160,
         completed: bool
@@ -117,8 +117,8 @@ Functions
 requestIssue
 ------------
 
-A user opens an issue request to create a specific amount of PolkaBTC. 
-When calling this function, a user provides her own parachain account identifier, the to be issued amount of PolkaBTC, and the vault she wants to use in this process (parachain account identifier). Further, she provides some (small) amount of DOT collateral (``griefingCollateral``) to prevent griefing.
+A user opens an issue request to create a specific amount of interbtc. 
+When calling this function, a user provides her own parachain account identifier, the to be issued amount of interbtc, and the vault she wants to use in this process (parachain account identifier). Further, she provides some (small) amount of DOT collateral (``griefingCollateral``) to prevent griefing.
 
 Specification
 .............
@@ -130,7 +130,7 @@ Specification
 *Parameters*
 
 * ``requester``: The user's BTC Parachain account.
-* ``amount``: The amount of PolkaBTC to be issued.
+* ``amount``: The amount of interbtc to be issued.
 * ``vault``: The BTC Parachain address of the vault involved in this issue request.
 * ``griefingCollateral``: The collateral amount provided by the user as griefing protection.
 
@@ -306,7 +306,7 @@ Emit a ``RequestIssue`` event if a user successfully open a issue request.
 
 * ``issueId``: A unique hash identifying the issue request. 
 * ``requester``: The user's BTC Parachain account.
-* ``amount``: The amount of PolkaBTC to be issued.
+* ``amount``: The amount of interbtc to be issued.
 * ``vault``: The BTC Parachain address of the vault involved in this issue request.
 * ``btcAddress``: The Bitcoin address of the vault.
 
@@ -325,7 +325,7 @@ ExecuteIssue
 
 * ``issueId``: A unique hash identifying the issue request. 
 * ``requester``: The user's BTC Parachain account.
-* ``amount``: The amount of PolkaBTC to be issued.
+* ``amount``: The amount of interbtc to be issued.
 * ``vault``: The BTC Parachain address of the vault involved in this issue request.
 
 *Functions*
@@ -383,13 +383,13 @@ Error Codes
 
 ``ERR_COMMIT_PERIOD_EXPIRED``
 
-* **Message**: "Time to issue PolkaBTC expired."
+* **Message**: "Time to issue interbtc expired."
 * **Function**: :ref:`executeIssue`
 * **Cause**: The user did not complete the issue request within the block time limit defined by the ``IssuePeriod``.
 
 ``ERR_TIME_NOT_EXPIRED``
 
-* **Message**: "Time to issue PolkaBTC not yet expired."
+* **Message**: "Time to issue interbtc not yet expired."
 * **Function**: :ref:`cancelIssue`
 * **Cause**: Raises an error if the time limit to call ``executeIssue`` has not yet passed.
 

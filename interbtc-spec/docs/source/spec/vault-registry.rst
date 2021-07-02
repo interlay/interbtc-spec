@@ -39,10 +39,10 @@ SecureCollateralThreshold
 Determines the over-collateralization rate for collateral locked by Vaults, necessary for issuing tokens. This threshold should be greater than the LiquidationCollateralThreshold, and typically it should be greater than the PremiumRedeemThreshold as well.
 
 The vault can take on issue requests depending on the collateral it provides and under consideration of the ``SecureCollateralThreshold``.
-The maximum amount of PolkaBTC a vault is able to support during the issue process is based on the following equation:
-:math:`\text{max(PolkaBTC)} = \text{collateral} * \text{ExchangeRate} / \text{SecureCollateralThreshold}`.
+The maximum amount of interbtc a vault is able to support during the issue process is based on the following equation:
+:math:`\text{max(interbtc)} = \text{collateral} * \text{ExchangeRate} / \text{SecureCollateralThreshold}`.
 
-.. note:: As an example, assume we use ``DOT`` as collateral, we issue ``PolkaBTC`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureCollateralThreshold`` is 200%, i.e. a vault has to provide two-times the amount of collateral to back an issue request. Now let's say the vault deposits 400 ``DOT`` as collateral. Then this vault can back at most 2.5 PolkaBTC as: :math:`400 * (1/80) / 2 = 2.5`.
+.. note:: As an example, assume we use ``DOT`` as collateral, we issue ``interbtc`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureCollateralThreshold`` is 200%, i.e. a vault has to provide two-times the amount of collateral to back an issue request. Now let's say the vault deposits 400 ``DOT`` as collateral. Then this vault can back at most 2.5 interbtc as: :math:`400 * (1/80) / 2 = 2.5`.
 
 .. _PremiumCollateralThreshold:
 
@@ -60,7 +60,7 @@ Determines the lower bound for the collateral rate in issued tokens. If a Vaultâ
 
 LiquidationVault
 .................
-Account identifier of an artificial vault maintained by the VaultRegistry to handle polkaBTC balances and DOT collateral of liquidated Vaults. That is, when a vault is liquidated, its balances are transferred to ``LiquidationVault`` and claims are later handled via the ``LiquidationVault``.
+Account identifier of an artificial vault maintained by the VaultRegistry to handle interbtc balances and DOT collateral of liquidated Vaults. That is, when a vault is liquidated, its balances are transferred to ``LiquidationVault`` and claims are later handled via the ``LiquidationVault``.
 
 
 .. note:: A Vault's token balances and DOT collateral are transferred to the ``LiquidationVault`` as a result of automated liquidations and :ref:`reportVaultTheft`.
@@ -89,11 +89,11 @@ Stores the information of a Vault.
 =========================  ==================  ========================================================
 Parameter                  Type                Description
 =========================  ==================  ========================================================
-``toBeIssuedTokens``       PolkaBTC            Number of PolkaBTC tokens currently requested as part of an uncompleted issue request.
-``issuedTokens``           PolkaBTC            Number of PolkaBTC tokens actively issued by this Vault.
-``toBeRedeemedTokens``     PolkaBTC            Number of PolkaBTC tokens reserved by pending redeem and replace requests. 
+``toBeIssuedTokens``       interbtc            Number of interbtc tokens currently requested as part of an uncompleted issue request.
+``issuedTokens``           interbtc            Number of interbtc tokens actively issued by this Vault.
+``toBeRedeemedTokens``     interbtc            Number of interbtc tokens reserved by pending redeem and replace requests. 
 ``collateral``             DOT                 Total amount of collateral provided by this vault (note: "free" collateral is calculated on the fly and updated each time new exchange rate data is received).
-``toBeReplacedTokens``     PolkaBTC            Number of PolkaBTC tokens requested for replacement.
+``toBeReplacedTokens``     interbtc            Number of interbtc tokens requested for replacement.
 ``replaceCollateral``      DOT                 Griefing collateral to be used for accepted replace requests.
 ``backingCollateral``      DOT                 The total amount of collateral the vault uses as insurance for the issued tokens.
 ``wallet``                 Wallet<BtcAddress>  A set of Bitcoin address(es) of this vault, used for theft detection. Additionally, it contains the btcPublicKey used for generating deposit addresses in the issue process. 
@@ -257,7 +257,7 @@ Precondition
 withdrawCollateral
 ------------------
 
-A vault can withdraw its *free* collateral at any time, as long as the collateralization ratio remains above the ``SecureCollateralThreshold``. Collateral that is currently being used to back issued PolkaBTC remains locked until the vault is used for a redeem request (full release can take multiple redeem requests).
+A vault can withdraw its *free* collateral at any time, as long as the collateralization ratio remains above the ``SecureCollateralThreshold``. Collateral that is currently being used to back issued interbtc remains locked until the vault is used for a redeem request (full release can take multiple redeem requests).
 
 
 Specification
@@ -305,7 +305,7 @@ Functions called from other pallets
 tryIncreaseToBeIssuedTokens
 ---------------------------
 
-During an issue request function (:ref:`requestIssue`), a user must be able to assign a vault to the issue request. As a vault can be assigned to multiple issue requests, race conditions may occur. To prevent race conditions, a Vault's collateral is *reserved* when an ``IssueRequest`` is created - ``toBeIssuedTokens`` specifies how much PolkaBTC is to be issued (and the reserved collateral is then calculated based on :ref:`getExchangeRate`).
+During an issue request function (:ref:`requestIssue`), a user must be able to assign a vault to the issue request. As a vault can be assigned to multiple issue requests, race conditions may occur. To prevent race conditions, a Vault's collateral is *reserved* when an ``IssueRequest`` is created - ``toBeIssuedTokens`` specifies how much interbtc is to be issued (and the reserved collateral is then calculated based on :ref:`getExchangeRate`).
 
 Specification
 .............
@@ -317,7 +317,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of PolkaBTC to be locked.
+* ``tokens``: The amount of interbtc to be locked.
 
 *Events*
 
@@ -353,7 +353,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of PolkaBTC to be unreserved.
+* ``tokens``: The amount of interbtc to be unreserved.
 
 *Events*
 
@@ -388,7 +388,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of PolkaBTC that were just issued.
+* ``tokens``: The amount of interbtc that were just issued.
 
 
 *Events*
@@ -427,7 +427,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of PolkaBTC to be redeemed.
+* ``tokens``: The amount of interbtc to be redeemed.
 
 *Events*
 
@@ -461,7 +461,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of PolkaBTC not to be redeemed.
+* ``tokens``: The amount of interbtc not to be redeemed.
 
 
 *Events*
@@ -499,7 +499,7 @@ Specification
 
 * ``vaultId``: The BTC Parachain address of the Vault.
 * ``userId``: The BTC Parachain address of the user that made the redeem request.
-* ``tokens``: The amount of PolkaBTC that were not redeemed.
+* ``tokens``: The amount of interbtc that were not redeemed.
 
 
 *Events*
@@ -584,8 +584,8 @@ Specification
 
 *Parameters*
 
-* ``redeemerId`` : The account of the user redeeming polkaBTC.
-* ``tokens``: The amount of PolkaBTC to be burned, in exchange for collateral.
+* ``redeemerId`` : The account of the user redeeming interbtc.
+* ``tokens``: The amount of interbtc to be burned, in exchange for collateral.
 
 *Events*
 
@@ -618,7 +618,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: Account identifier of the vault to be replaced.
-* ``tokens``: The amount of PolkaBTC replaced.
+* ``tokens``: The amount of interbtc replaced.
 * ``collateral``: The extra collateral provided by the new vault as griefing collateral for potential accepted replaces. 
 
 *Returns*
@@ -660,7 +660,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: Account identifier of the vault to be replaced.
-* ``tokens``: The amount of PolkaBTC replaced.
+* ``tokens``: The amount of interbtc replaced.
 
 *Returns*
 
@@ -687,7 +687,7 @@ Specification
 replaceTokens
 -------------
 
-When a replace request successfully completes, the ``toBeRedeemedTokens`` and the ``issuedToken`` balance must be reduced to reflect that removal of PolkaBTC from the ``oldVault``.Consequently, the ``issuedTokens`` of the ``newVault`` need to be increased by the same amount.
+When a replace request successfully completes, the ``toBeRedeemedTokens`` and the ``issuedToken`` balance must be reduced to reflect that removal of interbtc from the ``oldVault``.Consequently, the ``issuedTokens`` of the ``newVault`` need to be increased by the same amount.
 
 Specification
 .............
@@ -700,7 +700,7 @@ Specification
 
 * ``oldVault``: Account identifier of the vault to be replaced.
 * ``newVault``: Account identifier of the vault accepting the replace request.
-* ``tokens``: The amount of PolkaBTC replaced.
+* ``tokens``: The amount of interbtc replaced.
 * ``collateral``: The collateral provided by the new vault. 
 
 
@@ -747,7 +747,7 @@ Specification
 
 * ``oldVault``: Account identifier of the vault to be replaced.
 * ``newVault``: Account identifier of the vault accepting the replace request.
-* ``tokens``: The amount of PolkaBTC replaced.
+* ``tokens``: The amount of interbtc replaced.
 
 *Events*
 
@@ -841,7 +841,7 @@ Emit an event stating how much new (``newCollateral``), total collateral (``tota
 * ``Vault``: The account of the vault locking collateral.
 * ``newCollateral``: to-be-locked collateral in DOT.
 * ``totalCollateral``: total collateral in DOT.
-* ``freeCollateral``: collateral not "occupied" with PolkaBTC in DOT.
+* ``freeCollateral``: collateral not "occupied" with interbtc in DOT.
 
 *Functions*
 
@@ -916,7 +916,7 @@ Emit
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of PolkaBTC to be locked.
+* ``tokens``: The amount of interbtc to be locked.
 
 
 *Functions*
@@ -936,7 +936,7 @@ Emit
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of PolkaBTC to be unreserved.
+* ``tokens``: The amount of interbtc to be unreserved.
 
 
 *Functions*
@@ -956,7 +956,7 @@ Emit an event when an issue request is executed.
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of PolkaBTC that were just issued.
+* ``tokens``: The amount of interbtc that were just issued.
 
 *Functions*
 
@@ -975,7 +975,7 @@ Emit an event when a redeem request is requested.
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of PolkaBTC to be redeemed.
+* ``tokens``: The amount of interbtc to be redeemed.
 
 *Functions*
 
@@ -994,7 +994,7 @@ Emit an event when a replace request cannot be completed because the vault has t
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of PolkaBTC not to be replaced.
+* ``tokens``: The amount of interbtc not to be replaced.
 
 *Functions*
 
@@ -1014,7 +1014,7 @@ Emit an event if a redeem request cannot be fulfilled.
 
 * ``vault``: The BTC Parachain address of the Vault.
 * ``user``: The BTC Parachain address of the user that made the redeem request.
-* ``tokens``: The amount of PolkaBTC that were not redeemed.
+* ``tokens``: The amount of interbtc that were not redeemed.
 * ``collateral``: The amount of collateral assigned to this request.
 
 *Functions*
@@ -1034,7 +1034,7 @@ Emit an event when a redeem request successfully completes.
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of PolkaBTC redeemed.
+* ``tokens``: The amount of interbtc redeemed.
 
 *Functions*
 
@@ -1053,7 +1053,7 @@ Emit an event when a user is executing a redeem request that includes a premium.
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of PolkaBTC redeemed.
+* ``tokens``: The amount of interbtc redeemed.
 * ``premiumDOT``: The amount of DOT to be paid to the user as a premium using the Vault's released collateral.
 * ``redeemer``: The user that redeems at a premium.
 
@@ -1073,8 +1073,8 @@ Emit an event when a redeem is executed under the ``LIQUIDATION`` status.
 
 *Parameters*
 
-* ``redeemer`` : The account of the user redeeming polkaBTC.
-* ``redeemDOTinBTC``: The amount of PolkaBTC to be redeemed in DOT with the ``LiquidationVault``, denominated in BTC.
+* ``redeemer`` : The account of the user redeeming interbtc.
+* ``redeemDOTinBTC``: The amount of interbtc to be redeemed in DOT with the ``LiquidationVault``, denominated in BTC.
 
 *Functions*
 
@@ -1093,8 +1093,8 @@ Emit an event when a redeem is executed on a liquidated vault.
 
 *Parameters*
 
-* ``redeemer`` : The account of the user redeeming polkaBTC.
-* ``tokens``: The amount of PolkaBTC that have been refeemed.
+* ``redeemer`` : The account of the user redeeming interbtc.
+* ``tokens``: The amount of interbtc that have been refeemed.
 * ``unlockedCollateral``: The amount of collateral that has been unlocked for the vault for this redeem.
 
 
@@ -1117,7 +1117,7 @@ Emit an event when a replace requests is successfully executed.
 
 * ``oldVault``: Account identifier of the vault to be replaced.
 * ``newVault``: Account identifier of the vault accepting the replace request.
-* ``tokens``: The amount of PolkaBTC replaced.
+* ``tokens``: The amount of interbtc replaced.
 * ``collateral``: The collateral provided by the new vault. 
 
 *Functions*
@@ -1164,7 +1164,7 @@ Error Codes
 ``ERR_EXCEEDING_VAULT_LIMIT``
 
 * **Message**: "Issue request exceeds vault collateral limit."
-* **Cause**: The collateral provided by the vault combined with the exchange rate forms an upper limit on how much PolkaBTC can be issued. The requested amount exceeds this limit.
+* **Cause**: The collateral provided by the vault combined with the exchange rate forms an upper limit on how much interbtc can be issued. The requested amount exceeds this limit.
 
 ``ERR_INSUFFICIENT_TOKENS_COMMITTED``
 

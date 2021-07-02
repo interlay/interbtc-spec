@@ -1,4 +1,4 @@
-# PolkaBTC Spec
+# interBTC Spec
 
 ## Autobuild
 

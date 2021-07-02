@@ -13,13 +13,13 @@ Currencies
 The BTC-Parachain features three assets: 
 
 - `BTC` - the backing-asset (locked on Bitcoin)
-- `PolkaBTC` - the issued cryptocurrency-backed asset (on Polkadot)
+- `interbtc` - the issued cryptocurrency-backed asset (on Polkadot)
 - `DOT` - the currency used as collateral (`DOT` used initially but may later be replaced with a stablecoin, currency-set, or similar)
 
 Actors: Income and Real/Opportunity Costs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The main question when designing the fee model for PolkaBTC is: When are fees paid, by whom, and how much?
+The main question when designing the fee model for interbtc is: When are fees paid, by whom, and how much?
 
 .. figure:: ../figures/taxable-actions.png
   :alt: Taxable actions
@@ -40,7 +40,7 @@ Users
 - **Income**
 
   - Slashed collateral
-  - Use of PolkaBTC in applications
+  - Use of interbtc in applications
 
 - **Internal Cost**
 
@@ -155,24 +155,24 @@ We detail the payment flows in the figure below:
 Challenges Around Economic Efficiency 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To ensure security of PolkaBTC, i.e., that users never face financial damage, XCLAIM relies on collateral. However, in the current design, this leads to the following economic challenges:  
+To ensure security of interbtc, i.e., that users never face financial damage, XCLAIM relies on collateral. However, in the current design, this leads to the following economic challenges:  
 
-- **Over-collateralization**. Vaults must lock up significantly (e.g. 200%) more collateral than minted PolkaBTC to ensure security against exchange rate fluctuations. Dynamically modifying the exchange rate could only marginally reduce this requirement, at a high computational overhead. As such, to issue 1 PolkaBTC, one must lock up 1 BTC, as well as the 2 BTC worth of collateral (e.g. in DOT), resulting in a 300% collateralization. 
+- **Over-collateralization**. Vaults must lock up significantly (e.g. 200%) more collateral than minted interbtc to ensure security against exchange rate fluctuations. Dynamically modifying the exchange rate could only marginally reduce this requirement, at a high computational overhead. As such, to issue 1 interbtc, one must lock up 1 BTC, as well as the 2 BTC worth of collateral (e.g. in DOT), resulting in a 300% collateralization. 
 
-- **Non-deterministic Collateral Lockup**. When a Vault locks collateral to secure PolkaBTC, it does not know for how long this collateral will remain locked up. As such, it nearly impossible to determine a fair price for the premium charged to the user, without putting either the user or the Vault at a disadvantage. 
+- **Non-deterministic Collateral Lockup**. When a Vault locks collateral to secure interbtc, it does not know for how long this collateral will remain locked up. As such, it nearly impossible to determine a fair price for the premium charged to the user, without putting either the user or the Vault at a disadvantage. 
 
 - **Limited Chargeable Events**. The Vault only has two events during which it can charge fees: (1) fulfillment of and issue request and (2) fulfillment of a redeem request. Thereby, the fees charged for the redeem request must be **upper-bounded** for security reasons (to prevent extortion by the Vault via sky-rocketing redeem fees). 
 
 
 As such, an open research question is: 
 
-*What is the value of a Vault's locked collateral at any given point in time, considering the value of the collateral currency, the value of locked BTC, the value of PolkaBTC (if different from BTC), as well as the projected earning from fees over time?*
+*What is the value of a Vault's locked collateral at any given point in time, considering the value of the collateral currency, the value of locked BTC, the value of interbtc (if different from BTC), as well as the projected earning from fees over time?*
 
 Subsidizing Vault Collateral Costs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- **Higher user fees for issue/redeem** to ensure sufficiently good economic performance of Vaults to incentivize participation. Ideally, this would be combined with a supply/demand-based market for PolkaBTC, driven by Parachains/applications on Polkadot (see below). The risk for (both) this model is that high fees may impede adoption if users revert to cheaper, yet centralized solutions. 
-- **XCMP fees from other Parachains**. Charge Parachains additional fees for getting access to PolkaBTC, creating an supply/demand-based market for PolkaBTC access. The more demand for PolkaBTC, the higher the market price, the more BTC will be locked to mint PolkaBTC. However, this (i) impedes adoption by other Parachains and (ii) results in clear price deviations between PolkaBTC and BTC in times of PolkaBTC shortage. The latter may not be a bad thing per se, yet may have an unexpected effect for applications using PolkaBTC. 
+- **Higher user fees for issue/redeem** to ensure sufficiently good economic performance of Vaults to incentivize participation. Ideally, this would be combined with a supply/demand-based market for interbtc, driven by Parachains/applications on Polkadot (see below). The risk for (both) this model is that high fees may impede adoption if users revert to cheaper, yet centralized solutions. 
+- **XCMP fees from other Parachains**. Charge Parachains additional fees for getting access to interbtc, creating an supply/demand-based market for interbtc access. The more demand for interbtc, the higher the market price, the more BTC will be locked to mint interbtc. However, this (i) impedes adoption by other Parachains and (ii) results in clear price deviations between interbtc and BTC in times of interbtc shortage. The latter may not be a bad thing per se, yet may have an unexpected effect for applications using interbtc. 
 - **Polkadot treasury subsidy** to Vaults (and Staked Relayers) on a on a continuous basis, subject to correct operation / collateral usage, to account for the opportunity costs of the Vault accrued through locking up collateral. 
 - **Governance token model**, where tokens are allocated to Vaults on a continuous basis, subject to correct operation / collateral usage. The token model, however, needs careful consideration and a clear use case (in addition to voting). 
 - **On-demand collateral model via XCLAIM-Commit**, where Vaults lock up collateral only for short, deterministic periods and can hence compute an accurate fee model. In addition, users can request additional collateralization for specific periods and pay for collateral on demand. However, XCLAIM-Commit is still WIP and incurs stricter liveness requirements and a significantly more involved process for maintaining the secure 1:1 backing for Vaults. 

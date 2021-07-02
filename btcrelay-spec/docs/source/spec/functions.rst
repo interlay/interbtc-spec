@@ -429,7 +429,7 @@ Flags tracked Bitcoin block headers when Staked Relayers report and agree on a `
 
 .. attention:: This function **does not** validate the Staked Relayers accusation. Instead, it is put up to a majority vote among all Staked Relayers in the form of a  
 
-.. note:: This function can only be called from the *Security* module of PolkaBTC, after Staked Relayers have achieved a majority vote on a BTC Parachain status update indicating a BTC-Relay failure.
+.. note:: This function can only be called from the *Security* module of interBTC, after Staked Relayers have achieved a majority vote on a BTC Parachain status update indicating a BTC-Relay failure.
 
 Specification
 ~~~~~~~~~~~~~~
@@ -483,7 +483,7 @@ clearBlockError
 
 Clears ``ErrorCode`` entries given as parameters from the status of a ``RichBlockHeader``.  Can be ``NO_DATA_BTC_RELAY`` or ``INVALID_BTC_RELAY`` failure.
 
-.. note:: This function can only be called from the *Security* module of PolkaBTC, after Staked Relayers have achieved a majority vote on a BTC Parachain status update indicating that a ``RichBlockHeader`` entry no longer has the specified errors.
+.. note:: This function can only be called from the *Security* module of interBTC, after Staked Relayers have achieved a majority vote on a BTC Parachain status update indicating that a ``RichBlockHeader`` entry no longer has the specified errors.
 
 
 Specification

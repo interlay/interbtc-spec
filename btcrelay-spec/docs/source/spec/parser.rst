@@ -184,7 +184,7 @@ Function Sequence
 Transactions 
 -------------
 
-.. todo:: The parser functions used for transaction processing (called by other modules) will be added on demand. See PolkaBTC specification for more details.
+.. todo:: The parser functions used for transaction processing (called by other modules) will be added on demand. See interBTC specification for more details.
 
 
 .. _extractOutputs:
@@ -312,7 +312,7 @@ extractOPRETURN
 
 Extracts the OP_RETURN of a given transaction. The OP_RETURN field can be used to store `80 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. 
 
-.. note:: The OP_RETURN field is used to include replay protection data in the PolkaBTC *Issue*, *Redeem*, and *Replace* protocols.
+.. note:: The OP_RETURN field is used to include replay protection data in the interBTC *Issue*, *Redeem*, and *Replace* protocols.
 
 *Function Signature*
 

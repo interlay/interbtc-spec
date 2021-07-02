@@ -29,8 +29,8 @@ The idea of CbAs is that an asset is locked on a *backing blockchain* and issued
 
 XCLAIM introduces three protocols to achieve decentralized, transparent, consistent, atomic, and censorship resistant cross-blockchain swaps:
 
-- **Issue**: Create Bitcoin-backed tokens, so-called *PolkaBTC* on the BTC Parachain.
-- **Transfer**: Transfer PolkaBTC to others within the Polkadot ecosystem.
+- **Issue**: Create Bitcoin-backed tokens, so-called *interbtc* on the BTC Parachain.
+- **Transfer**: Transfer interbtc to others within the Polkadot ecosystem.
 - **Redeem**: Burn Bitcoin-backed tokens on the BTC Parachain and receive 1:1 of the amount of Bitcoin in return.
 
 The basic intuition of the protocol is as below:
