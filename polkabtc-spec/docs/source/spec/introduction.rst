@@ -16,6 +16,6 @@ Preconditions are condition that must hold before the function is executed. Unle
 Errors and Events
 ~~~~~~~~~~~~~~~~~
 
-Error listed in the function specification are not necessarily exhaustive - a function MAY return errors not listed. Similarly,events listed in the function specification are not necessarily exhaustive - a function MAY emit other events.
+Error listed in the function specification are not necessarily exhaustive - a function MAY return errors not listed. Similarly, events listed in the function specification are not necessarily exhaustive - a function MAY emit other events.
 
 
