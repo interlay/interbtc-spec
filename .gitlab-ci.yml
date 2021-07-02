@@ -57,7 +57,7 @@ pages:
     - sphinx-build -b latex source build/latex
     - make -C build/latex
     - mv build/html/* ../../public/
-    - mv build/latex/interBTC.pdf ../../public/interbtc-spec.pdf
+    - mv build/latex/interbtc.pdf ../../public/interbtc-spec.pdf
     artifacts:
         paths:
         - public
