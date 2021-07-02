@@ -7,5 +7,5 @@ Interlay is co-founded by Imperial College London researchers `Alexei Zamyatin <
 
 Since the invention of XCLAIM in 2018, the team has been busy making the framework even more secure via more robust cryptographic primitives, scalable via payment channels and usable by reducing collateral requirements.
 
-.. figure:: ../figures/interlay-medium.png
+.. figure:: ../figures/Interlay_Logo.png
     :alt: Interlay

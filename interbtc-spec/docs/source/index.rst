@@ -1,4 +1,4 @@
-.. PolkaBTC documentation master file
+.. interbtc documentation master file
 
 Welcome to the BTC Parachain documentation!
 ============================================

@@ -10,7 +10,7 @@ Further, it is able to handle forks and follows the chain with the most accumula
 
 The correct operation of BTC-Relay is crucial: should BTC-Relay cease to operate, the bridge between Polkadot and Bitcoin is interrupted.
 
-.. figure:: ../figures/polkaBTC-btcrelay.png
+.. figure:: ../figures/interBTC-btcrelay.png
     :alt: Overview of BTC-Relay as a component of the BTC Parachain
 
     BTC-Relay (highlighted in blue) is a key component of the BTC Parachain: it is necessary to verify and keep track of the state of Bitcoin. 

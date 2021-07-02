@@ -19,7 +19,7 @@ Overview
 
 
 Staked Relayers are overseen by the Parachain **Governance Mechanism**. 
-The Governance Mechanism also votes on critical changes to the architecture or unexpected failures, e.g. hard forks or detected 51% attacks (if a fork exceeds the specified security parameter *k*, see `Security Parameter k <https://interlay.gitlab.io/polkabtc-spec/btcrelay-spec/security_performance/security.html#security-parameter-k>`_.). 
+The Governance Mechanism also votes on critical changes to the architecture or unexpected failures, e.g. hard forks or detected 51% attacks (if a fork exceeds the specified security parameter *k*, see `Security Parameter k <https://interlay.gitlab.io/interbtc-spec/btcrelay-spec/security_performance/security.html#security-parameter-k>`_.). 
 
 
 

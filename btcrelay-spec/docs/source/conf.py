@@ -19,15 +19,12 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'Polkadot BTC-Relay Spec'
+project = u'Polkadot BTC-Relay Specification'
 copyright = u'2021, Interlay'
 author = u'Interlay'
 
 # The short X.Y version
-version = u'v3.3.0'
-# The full version, including alpha/beta/rc tags
-release = u'v3.3.0'
-
+version = u'v4.0.0'
 
 # -- General configuration ---------------------------------------------------
 
@@ -152,7 +149,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'BTCRelay.tex', u'PolkaBTC Documentation: BTCRelay',
+    (master_doc, 'BTCRelay.tex', u'interBTC Documentation: BTCRelay',
      u'Interlay', 'manual'),
 ]
 
@@ -162,7 +159,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'polkabtc', u'PolkaBTC Documentation: BTCRelay',
+    (master_doc, 'interbtc', u'interBTC Documentation: BTCRelay',
      [author], 1)
 ]
 
@@ -173,7 +170,7 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'BTCRelay', u'PolkaBTC Documentation: BTCRelay',
+    (master_doc, 'BTCRelay', u'interBTC Documentation: BTCRelay',
      author, 'BTCRelay', 'One line description of project.',
      'Miscellaneous'),
 ]

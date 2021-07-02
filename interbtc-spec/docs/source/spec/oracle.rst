@@ -8,7 +8,7 @@ Exchange Rate Oracle
 
 The Exchange Rate Oracle receives a continuous data feed on the exchange rate between BTC and DOT.
 
-The implementation of the oracle **is not part of this specification**. PolkaBTC assumes the oracle operates correctly and that the received data is reliable. 
+The implementation of the oracle **is not part of this specification**. interbtc assumes the oracle operates correctly and that the received data is reliable. 
 
 
 Data Model
@@ -29,7 +29,7 @@ Scalars
 ExchangeRateBtcInDot
 ....................
 
-The BTC in DOT exchange rate. This exchange rate is used to determine how much collateral is required to issue a specific amount of PolkaBTC. 
+The BTC in DOT exchange rate. This exchange rate is used to determine how much collateral is required to issue a specific amount of interbtc. 
 
 .. note:: If the ``ExchangeRate`` is set to 1238763, it translates to :math:`12.38763` as the last five digits are used for the floating point (as defined by the ``GRANULARITY``).
 
@@ -301,4 +301,4 @@ Error Codes
 * **Function**: :ref:`setExchangeRate` 
 * **Cause**: The caller of the function was not the authorized oracle. 
 
-.. todo:: Halt PolkaBTC if the exchange rate oracle fails: liveness failure if no more data is incoming, as well as safety failure if the Governance Mechanism flags incorrect exchange rates.
+.. todo:: Halt interbtc if the exchange rate oracle fails: liveness failure if no more data is incoming, as well as safety failure if the Governance Mechanism flags incorrect exchange rates.

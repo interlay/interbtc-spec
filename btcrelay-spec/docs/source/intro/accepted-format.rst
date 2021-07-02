@@ -4,20 +4,20 @@ Accepted Bitcoin Transaction Format
 ===================================
 
 The :ref:`parser` module of BTC-Relay can in theory be used to parse arbitrary Bitcoin transactions. 
-However, the PolkaBTC component of the BTC Parachain restricts the format of Bitcoin transactions to ensure consistency and prevent protocol failure due to parsing errors. 
+However, the interBTC component of the BTC Parachain restricts the format of Bitcoin transactions to ensure consistency and prevent protocol failure due to parsing errors. 
 
-As such, Bitcoin transactions for which transaction inclusion proofs are submitted to BTC-Relay as part of the in the PolkaBTC *Issue*, *Redeem*, and *Replace* protocols must be `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_ or `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_ transactions and follow the format below.
+As such, Bitcoin transactions for which transaction inclusion proofs are submitted to BTC-Relay as part of the in the interBTC *Issue*, *Redeem*, and *Replace* protocols must be `P2PKH <https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash>`_ or `P2WPKH <https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions>`_ transactions and follow the format below.
 
 Case 1: OP_RETURN Transactions
 ------------------------------
 
-The `OP_RETURN <https://en.bitcoin.it/wiki/OP_RETURN>`_ field can be used to store `40 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in PolkaBTC.
+The `OP_RETURN <https://en.bitcoin.it/wiki/OP_RETURN>`_ field can be used to store `40 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in interBTC.
 
 Many Bitcoin wallets automatically order UTXOs. We require that the *Payment UTXO* and the *Data UTXO* are made within the first three indexes (index 0 - 2).
 We *do not* require any specific ordering of those outputs.
 The reason behind checking for the first three outputs is that wallets like Electrum might insert the UTXOs returning part of the spent input at index 1.
 
-.. note:: Please refer to the PolkaBTC specification for more details on the *Refund*, *Redeem* and *Replace* protocols. 
+.. note:: Please refer to the interBTC specification for more details on the *Refund*, *Redeem* and *Replace* protocols. 
 
 
 .. tabularcolumns:: |l|L|
@@ -37,7 +37,7 @@ Inputs                        Outputs
 
 ============================  ===========================================================
 
-The value and recipient address (``btcAddress``) of the *Payment UTXO* and the ``identifier`` in the *Data UTXO* (OP_RETURN) depend on the executed PolkaBTC protocol:
+The value and recipient address (``btcAddress``) of the *Payment UTXO* and the ``identifier`` in the *Data UTXO* (OP_RETURN) depend on the executed interBTC protocol:
 
   + In *Refund* ``btcAddress`` is the Bitcoin address of the user for the refunding process and ``identifier`` is the ``refundId`` of the ``RefundRequest`` in ``RefundRequests``.
   + In *Redeem* ``btcAddress`` is the Bitcoin address of the user who triggered the redeem process and ``identifier`` is the ``redeemId`` of the ``RedeemRequest`` in ``RedeemRequests``.
@@ -53,7 +53,7 @@ Many Bitcoin wallets automatically order UTXOs. We require that the *Payment UTX
 We *do not* require any specific ordering of those outputs.
 The reason behind checking for the first three outputs is that wallets like Electrum might insert the UTXOs returning part of the spent input at index 1.
 
-.. note:: Please refer to the PolkaBTC specification for more details on the *Issue* protocol. 
+.. note:: Please refer to the interBTC specification for more details on the *Issue* protocol. 
 
 .. tabularcolumns:: |l|L|
 

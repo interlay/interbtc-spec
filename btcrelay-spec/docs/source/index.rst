@@ -1,7 +1,7 @@
-.. PolkaBTC documentation master file
+.. interBTC documentation master file
 
-Welcome to the Polkadot BTC-Relay documentation!
-================================================
+Welcome to the BTC-Relay documentation!
+=======================================
 
 .. toctree::
    :maxdepth: 2

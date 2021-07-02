@@ -15,7 +15,7 @@ Conceptually, the Replace protocol resembles a SPV atomic cross-chain swap.
 Step-by-Step
 -------------
 
-1. Precondition: a vault (*OldVault*) has locked DOT collateral in the `Vault Registry <vault-registry>`_ and has issued PolkaBTC tokens, i.e., holds BTC on Bitcoin.
+1. Precondition: a vault (*OldVault*) has locked DOT collateral in the `Vault Registry <vault-registry>`_ and has issued interbtc tokens, i.e., holds BTC on Bitcoin.
 
 2. *OldVault* submits a replacement request, indicating how much BTC is to be migrated by calling the :ref:`requestReplace` function. 
 
@@ -102,7 +102,7 @@ Parameter               Type        Description
 ======================  ==========  =======================================================
 ``oldVault``            Account     Account of the vault that is to be replaced.
 ``newVault``            Account     Account of the new vault, which accepts the replace request.
-``amount``              PolkaBTC    Amount of BTC / PolkaBTC to be replaced.
+``amount``              interbtc    Amount of BTC / interbtc to be replaced.
 ``griefingCollateral``  DOT         Griefing protection collateral locked by *oldVault*.
 ``collateral``          DOT         DOT collateral locked by the new Vault.
 ``acceptTime``          u32         The :ref:`activeBlockCount` when the replace request was accepted by a new Vault. Serves as start for the countdown until when the old vault must transfer the BTC.
@@ -150,7 +150,7 @@ Specification
 *Parameters*
 
 * ``oldVault``: Account identifier of the vault to be replaced (as tracked in ``Vaults`` in :ref:`vault-registry`).
-* ``btcAmount``: Integer amount of BTC / PolkaBTC to be replaced.
+* ``btcAmount``: Integer amount of BTC / interbtc to be replaced.
 * ``griefingCollateral``: collateral locked by the *oldVault* as griefing protection
 
 *Events*
@@ -361,7 +361,7 @@ Emit an event when a replace request is made by an *oldVault*.
 *Parameters*
 
 * ``oldVault``: Account identifier of the vault to be replaced (as tracked in ``Vaults`` in :ref:`vault-registry`).
-* ``btcAmount``: Integer amount of BTC / PolkaBTC to be replaced.
+* ``btcAmount``: Integer amount of BTC / interbtc to be replaced.
 * ``replaceId``: The unique identified of a replace request.
 
 *Functions*

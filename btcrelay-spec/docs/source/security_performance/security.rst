@@ -34,7 +34,7 @@ The correct operation of BTC-Relay relies on receiving a steady stream of Bitcoi
 A high delay between block generation in Bitcoin and submission to BTC-Relay yields the system susceptible to attacks: an adversary can attempt to *poison* the relay by submitting a fork, even if the fork was not submitted to Bitcoin itself (see :ref:`relay-poisoning` below).
 
 While by design, any user can submit Bitcoin block headers to BTC-Relay, it is recommended to introduce an explicit set of participants for this task.
-These can be *Staked Relayers*, which already run Bitcoin full nodes for validation purposes, or *Vaults* which are used for the creation of Bitcoin-backed assets in the PolkaBTC component.
+These can be *Staked Relayers*, which already run Bitcoin full nodes for validation purposes, or *Vaults* which are used for the creation of Bitcoin-backed assets in the interBTC component.
 
 
 Safety Failures
