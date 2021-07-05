@@ -69,7 +69,7 @@ The ``TxId`` is obtained as the ``sha256d()`` of the ``rawTx``.
 
 *Events*
 
-* ``ReportVaultTheft(vaultId)`` - emits an event indicating that a vault (``vault``) has been caught displacing BTC without permission.
+* ``ReportVaultTheft(vaultId)`` - emits an event indicating that a vault has been caught displacing BTC without permission.
 
 *Preconditions*
 
@@ -84,6 +84,50 @@ The ``TxId`` is obtained as the ``sha256d()`` of the ``rawTx``.
 * The vault's status is set to ``CommittedTheft``. 
 * All accounting (``issuedTokens``, ``toBeIssuedTokens``, etc.) is moved to the system's ``LiquidationVault``.
 * ``TheftReports`` MUST contain the reported TxId.
+
+.. _reportVaultDoublePayment:
+
+reportVaultDoublePayment
+------------------------
+
+A relayer reports a double payment from a vault, this can destabalize the system if the vault holds less BTC than is reported by the :ref:`vault-registry`.
+
+Like in :ref:`reportVaultTheft`, if the vault actually misbehaved it is automatically liquidated.
+
+Specification
+.............
+
+*Function Signature*
+
+``reportVaultDoublePayment(vault, rawMerkleProof1, rawTx1, rawMerkleProof2, rawTx2)``
+
+*Parameters*
+
+* ``vaultId``: the account of the accused Vault.
+* ``rawMerkleProof1``: The first raw Merkle tree path.
+* ``rawTx1``: The first raw Bitcoin transaction.
+* ``rawMerkleProof2``: The second raw Merkle tree path.
+* ``rawTx2``: The second raw Bitcoin transaction.
+
+*Events*
+
+* ``ReportVaultTheft(vaultId)`` - emits an event indicating that a vault has been caught displacing BTC without permission.
+
+*Preconditions*
+
+* The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
+* A vault with id ``vaultId`` MUST be registered.
+* ``rawMerkleProof1`` MUST NOT equal ``rawMerkleProof2``.
+* ``rawTx1`` MUST NOT equal ``rawTx2``.
+* Both transactions MUST be included in the main chain - with ``k`` confirmations.
+* Both transactions MUST NOT be in ``TheftReports`` mapping.
+
+*Postconditions*
+
+* The vault MUST be liquidated if both transactions contain the same ``OP_RETURN`` value.
+* The vault's status is set to ``CommittedTheft``. 
+* All accounting (``issuedTokens``, ``toBeIssuedTokens``, etc.) is moved to the system's ``LiquidationVault``.
+* ``TheftReports`` MUST contain the reported transactions.
 
 Events
 ~~~~~~~
