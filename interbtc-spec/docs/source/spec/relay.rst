@@ -149,3 +149,35 @@ Emits an event when a vault has been accused of theft.
 
 * :ref:`reportVaultTheft`
 
+Errors
+~~~~~~~
+
+``ERR_ALREADY_REPORTED``
+
+* **Message**: "This TxId has already been logged as a theft by the given Vault"
+* **Function**: :ref:`reportVaultTheft`
+* **Cause**: This transaction / vault combination has already been reported.
+
+``ERR_VALID_REDEEM``
+
+* **Message**: "The given transaction is a valid Redeem execution by the accused Vault"
+* **Function**: :ref:`reportVaultTheft`
+* **Cause**: The given transaction is associated with a valid :ref:`redeem-protocol`.
+
+``ERR_VALID_REPLACE``
+
+* **Message**: "The given transaction is a valid Replace execution by the accused Vault"
+* **Function**: :ref:`reportVaultTheft`
+* **Cause**: The given transaction is associated with a valid :ref:`replace-protocol`.
+
+``ERR_VALID_REFUND``
+
+* **Message**: "The given transaction is a valid Refund execution by the accused Vault"
+* **Function**: :ref:`reportVaultTheft`
+* **Cause**: The given transaction is associated with a valid :ref:`refund-protocol`.
+
+``ERR_VALID_MERGE_TRANSACTION``
+
+* **Message**: "The given transaction is a valid 'UTXO merge' transaction by the accused Vault"
+* **Function**: :ref:`reportVaultTheft`
+* **Cause**: The given transaction represents an allowed "merging" of UTXOs by the accused vault (no BTC was displaced).
