@@ -1,7 +1,7 @@
 .. interbtc documentation master file
 
-Welcome to the BTC Parachain documentation!
-============================================
+Welcome to the interBTC Technical Specification!
+================================================
 
 .. note:: Please note that this specification is a living document. The actual implementation might deviate from the specification. In case of deviations in the code, the code has priority over the specification.
 
