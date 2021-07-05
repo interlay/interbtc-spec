@@ -65,7 +65,7 @@ Specification
 * ``rawMerkleProof``: Raw Merkle tree path (concatenated LE SHA256 hashes).
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
-The ``TxId`` is obtained as the ``sha256d()`` of the ``rawTx``.
+The ``txId`` is obtained as the ``sha256d()`` of the ``rawTx``.
 
 *Events*
 
@@ -75,15 +75,15 @@ The ``TxId`` is obtained as the ``sha256d()`` of the ``rawTx``.
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
 * A vault with id ``vaultId`` MUST be registered.
-* The TxId MUST NOT be in ``TheftReports`` mapping.
-* The TxId MUST be included in the main chain - with ``k`` confirmations.
+* The txId MUST NOT be in ``TheftReports`` mapping.
+* The ``verifyTransactionInclusion`` function in the :ref:`btc-relay` component must return true for the derived ``txId``.
 
 *Postconditions*
 
 * The vault MUST be liquidated.
-* The vault's status is set to ``CommittedTheft``. 
-* All accounting (``issuedTokens``, ``toBeIssuedTokens``, etc.) is moved to the system's ``LiquidationVault``.
-* ``TheftReports`` MUST contain the reported TxId.
+* The vault's status MUST be set to ``CommittedTheft``. 
+* All token accounts (``issuedTokens``, ``toBeIssuedTokens``, etc.) MUST be added to the existing system's ``LiquidationVault``.
+* ``TheftReports`` MUST contain the reported txId.
 
 .. _reportVaultDoublePayment:
 
@@ -119,14 +119,14 @@ Specification
 * A vault with id ``vaultId`` MUST be registered.
 * ``rawMerkleProof1`` MUST NOT equal ``rawMerkleProof2``.
 * ``rawTx1`` MUST NOT equal ``rawTx2``.
-* Both transactions MUST be included in the main chain - with ``k`` confirmations.
+* The ``verifyTransactionInclusion`` function in the :ref:`btc-relay` component must return true for the derived ``txId``.
 * Both transactions MUST NOT be in ``TheftReports`` mapping.
 
 *Postconditions*
 
 * The vault MUST be liquidated if both transactions contain the same ``OP_RETURN`` value.
-* The vault's status is set to ``CommittedTheft``. 
-* All accounting (``issuedTokens``, ``toBeIssuedTokens``, etc.) is moved to the system's ``LiquidationVault``.
+* The vault's status MUST be set to ``CommittedTheft``. 
+* All token accounts (``issuedTokens``, ``toBeIssuedTokens``, etc.) MUST be added to the existing system's ``LiquidationVault``.
 * ``TheftReports`` MUST contain the reported transactions.
 
 Events
@@ -148,13 +148,14 @@ Emits an event when a vault has been accused of theft.
 *Functions*
 
 * :ref:`reportVaultTheft`
+* :ref:`reportVaultDoublePayment`
 
 Errors
 ~~~~~~~
 
 ``ERR_ALREADY_REPORTED``
 
-* **Message**: "This TxId has already been logged as a theft by the given Vault"
+* **Message**: "This txId has already been logged as a theft by the given Vault"
 * **Function**: :ref:`reportVaultTheft`
 * **Cause**: This transaction / vault combination has already been reported.
 
