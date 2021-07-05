@@ -30,7 +30,7 @@ Welcome to the interBTC Technical Specification!
    spec/replace
    spec/security
    spec/sla
-   spec/staked-relayers
+   spec/relay
    spec/treasury
    spec/vault-registry
 
