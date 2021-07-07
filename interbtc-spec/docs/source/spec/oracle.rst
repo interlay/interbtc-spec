@@ -20,18 +20,18 @@ Scalars
 ExchangeRate
 ............
 
-The base exchange rate, i.e. Planck per Satoshi. This exchange rate is used to determine how much collateral is required to issue a specific amount of interbtc. 
+The base exchange rate MUST be stored in the smallest denomination of the currency pair (e.g., Planck per Satoshi). This exchange rate is used to determine how much collateral is required to issue a specific amount of interBTC.
 
 .. note:: If the exchange rate between BTC and DOT is 2308 (i.e. 1 BTC = 2308 DOT) then we can convert to the base rate as follows:
     ``planck_per_satoshi = dot_per_btc * (10**dot_decimals / 10**btc_decimals)``
     ``230800 = 2308 * (10**10 / 10**8)``
 
-Implementation specifics may vary, but it is recommended that this exchange rate is stored as a fixed point number.
+The exchange rate MUST be stored in a 128-bit unsigned fixed-point representation.
 
 SatoshiPerBytes
 ...............
 
-The estimated Satoshis per bytes required to get a Bitcoin transaction included - see the :ref:`txFeesPerByte`.
+The estimated Satoshis per bytes required to get a Bitcoin transaction included - see the :ref:`btcTxFeesPerByte`.
 
 MaxDelay
 ........
@@ -44,19 +44,19 @@ LastExchangeRateTime
 UNIX timestamp indicating when the last exchange rate data was received. 
 
 
-Enums
------
+Structs
+-------
 
-.. _txFeesPerByte:
+.. _btcTxFeesPerByte:
 
-TxFeesPerByte
-.............
+BtcTxFeesPerByte
+................
 
-The estimated inclusion time for a Bitcoin transaction in Satoshis per byte.
+The estimated inclusion time for a Bitcoin transaction MUST be stored in Satoshis per byte.
 
-* ``FAST: 0`` - the fee to include a BTC transaction within the next block.
-* ``MEDIUM: 1``- the fee to include a BTC transaction within the next three blocks (~30 min).
-* ``SLOW: 2`` - the fee to include a BTC transaction within the six blocks  (~60 min).
+* ``fast`` - the fee to include a BTC transaction within the next block.
+* ``half``- the fee to include a BTC transaction within the next three blocks (~30 min).
+* ``hour`` - the fee to include a BTC transaction within the six blocks  (~60 min).
 
 Maps
 ----
@@ -75,7 +75,7 @@ Functions
 setExchangeRate
 ---------------
 
-Set the latest base exchange rate. This function may invoke a check of vault collateral rates in the :ref:`vault-registry` component.
+This function sets the latest base exchange rate.
 
 Specification
 .............
@@ -103,12 +103,12 @@ Specification
 
 * The ``ExchangeRate`` MUST be set to the provided ``rate``.
 * The ``LastExchangeRateTime`` MUST be updated to the current time.
-* If the status in :ref:`security` is ``ERROR:1``, the system MUST recover.
+* If the status in :ref:`security` is ``ERROR:1``, the system MUST be set to ``RUNNING:0``.
 
-.. _setSatoshiPerBytes:
+.. _setBtcTxFeesPerByte:
 
-setSatoshiPerBytes
-------------------
+setBtcTxFeesPerByte
+-------------------
 
 Set the Satoshi per bytes fee rates.
 
@@ -117,16 +117,16 @@ Specification
 
 *Function Signature*
 
-``setSatoshiPerBytes(oracleId, txFeesPerByte)``
+``setBtcTxFeesPerByte(oracleId, btcTxFeesPerByte)``
 
 *Parameters*
 
 * ``oracleId``: the oracle account calling this function.
-* ``txFeesPerByte``: the estimated inclusion fees.
+* ``btcTxFeesPerByte``: the estimated inclusion fees.
 
 *Events*
 
-* ``SetSatoshiPerByte(oracleId, txFeesPerByte)``: Emits the new btc fee rates when updated by the oracle.
+* ``SetSatoshiPerByte(oracleId, btcTxFeesPerByte)``: Emits the new btc fee rates when updated by the oracle.
 
 *Preconditions*
 
@@ -136,7 +136,7 @@ Specification
 
 *Postconditions*
 
-* The ``SatoshiPerBytes`` MUST be set to the provided ``txFeesPerByte``.
+* The ``SatoshiPerBytes`` MUST be set to the provided ``btcTxFeesPerByte``.
 
 .. _getExchangeRate:
 
@@ -152,9 +152,13 @@ Specification
 
 ``getExchangeRate()``
 
-*Returns*
+*Preconditions*
 
-* Fixed point exchange rate value.
+* The ``LastExchangeRateTime`` MUST NOT be before the current time minus the ``MaxDelay``.
+
+*Postconditions*
+
+* MUST return the fixed point base exchange rate.
 
 .. _getLastExchangeRateTime:
 
@@ -170,9 +174,9 @@ Specification
 
 ``getLastExchangeRateTime()``
 
-*Returns*
+*Postconditions*
 
-* The 32-bit UNIX timestamp.
+* MUST return the 32-bit UNIX timestamp.
 
 
 Events
@@ -196,23 +200,23 @@ Emits the new exchange rate when it is updated by the oracle.
 
 * :ref:`setExchangeRate`
 
-setSatoshiPerBytes
-------------------
+setBtcTxFeesPerByte
+-------------------
 
 Emits the new tx fee rates when they are updated by the oracle.
 
 *Event Signature*
 
-``SetSatoshiPerByte(oracleId, txFeesPerByte)`` 
+``SetSatoshiPerByte(oracleId, btcTxFeesPerByte)`` 
 
 *Parameters*
 
 * ``oracleId``: the oracle account calling this function.
-* ``txFeesPerByte``: the estimated inclusion fees.
+* ``btcTxFeesPerByte``: the estimated inclusion fees.
 
 *Function*
 
-* :ref:`setSatoshiPerBytes`
+* :ref:`setBtcTxFeesPerByte`
 
 
 Error Codes
