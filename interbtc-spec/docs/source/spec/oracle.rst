@@ -54,9 +54,16 @@ BtcTxFeesPerByte
 
 The estimated inclusion time for a Bitcoin transaction MUST be stored in Satoshis per byte.
 
-* ``fast`` - the fee to include a BTC transaction within the next block.
-* ``half``- the fee to include a BTC transaction within the next three blocks (~30 min).
-* ``hour`` - the fee to include a BTC transaction within the six blocks  (~60 min).
+.. tabularcolumns:: |l|l|L|
+
+=========================  ==================  ========================================================
+Parameter                  Type                Description
+=========================  ==================  ========================================================
+``fast``                   u32                 The fee to include a BTC transaction within the next block.
+``half``                   u32                 The fee to include a BTC transaction within the next three blocks (~30 min).
+``hour``                   u32                 The fee to include a BTC transaction within the six blocks  (~60 min).
+=========================  ==================  ========================================================
+
 
 Maps
 ----
