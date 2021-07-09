@@ -122,14 +122,14 @@ Returns the nomination ratio, denoting the maximum amount of collateral that can
 - ``PremiumRedeemThreshold = 1.2 (120%)``
 - ``MaxNominationRatio = (1.5 / 1.2) - 1 = 0.25 (25%)``
 
-In this example, a vault with 10 DOT locked as collateral can only receive 2.5 DOT through nomination.
+In this example, a Vault with 10 DOT locked as collateral can only receive 2.5 DOT through nomination.
 
 .. _setNominationEnabled:
 
 setNominationEnabled
 --------------------
 
-Set the feature flag for vault nomination.
+Set the feature flag for Vault nomination.
 
 Specification
 .............
@@ -167,7 +167,7 @@ Specification
 
 *Parameters*
 
-* ``vaultId``: the id of the vault to enable nomination for.
+* ``vaultId``: the id of the Vault to enable nomination for.
 
 *Events*
 
@@ -176,12 +176,12 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST be ``RUNNING:0``.
-* A vault with id ``vaultId`` MUST be registered.
-* The vault MUST NOT be opted in.
+* A Vault with id ``vaultId`` MUST be registered.
+* The Vault MUST NOT be opted in.
 
 *Postconditions*
 
-* The vault MUST be allowed to receive nominated collateral.
+* The Vault MUST be allowed to receive nominated collateral.
 
 
 .. _optOutOfNomination:
@@ -200,7 +200,7 @@ Specification
 
 *Parameters*
 
-* ``vaultId``: the id of the vault to deregister from the nomination feature.
+* ``vaultId``: the id of the Vault to deregister from the nomination feature.
 
 *Events*
 
@@ -209,12 +209,12 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST be ``RUNNING:0``.
-* A vault with id ``vaultId`` MUST be registered.
-* A vault with id ``vaultId`` MUST exist in the ``Vaults`` mapping.
+* A Vault with id ``vaultId`` MUST be registered.
+* A Vault with id ``vaultId`` MUST exist in the ``Vaults`` mapping.
 
 *Postconditions*
 
-* The vault MUST be removed from the ``Vaults`` mapping.
+* The Vault MUST be removed from the ``Vaults`` mapping.
 
 .. _depositNominationCollateral:
 
@@ -232,7 +232,7 @@ Specification
 
 *Parameters*
 
-* ``vaultId``: the id of the vault to receive the nomination.
+* ``vaultId``: the id of the Vault to receive the nomination.
 * ``nominatorId``: the id of the user nominating collateral.
 * ``amount``: the amount of collateral to nominate.
 
@@ -244,13 +244,13 @@ Specification
 
 * The BTC Parachain status in the :ref:`security` component MUST be ``RUNNING:0``.
 * The global nomination flag MUST be enabled.
-* A vault with id ``vaultId`` MUST be registered.
-* A vault with id ``vaultId`` MUST exist in the ``Vaults`` mapping.
-* The vault MUST remain below the max nomination ratio.
+* A Vault with id ``vaultId`` MUST be registered.
+* A Vault with id ``vaultId`` MUST exist in the ``Vaults`` mapping.
+* The Vault MUST remain below the max nomination ratio.
 
 *Postconditions*
 
-* The vault's collateral MUST increase by the amount nominated.
+* The Vault's collateral MUST increase by the amount nominated.
 * The nominators balance MUST decrease by the amount nominated.
 
 .. _withdrawNominationCollateral:
@@ -269,7 +269,7 @@ Specification
 
 *Parameters*
 
-* ``vaultId``: the id of the previously nominated vault.
+* ``vaultId``: the id of the previously nominated Vault.
 * ``nominatorId``: the id of the user who nominated collateral.
 * ``amount``: the amount of collateral to withdraw.
 
@@ -281,14 +281,14 @@ Specification
 
 * The BTC Parachain status in the :ref:`security` component MUST be ``RUNNING:0``.
 * The global nomination flag MUST be enabled.
-* A vault with id ``vaultId`` MUST be registered.
-* A vault with id ``vaultId`` MUST exist in the ``Vaults`` mapping.
-* The vault MUST remain above the secure collateralization threshold.
+* A Vault with id ``vaultId`` MUST be registered.
+* A Vault with id ``vaultId`` MUST exist in the ``Vaults`` mapping.
+* The Vault MUST remain above the secure collateralization threshold.
 * Nominator MUST have nominated at least `amount`.
 
 *Postconditions*
 
-* The vault's collateral MUST decrease by the amount nominated.
+* The Vault's collateral MUST decrease by the amount nominated.
 * The nominators balance MUST increase by the amount nominated.
 
 
@@ -304,7 +304,7 @@ NominationOptIn
 
 *Parameters*
 
-* ``vaultId``: the id of the vault who opted in
+* ``vaultId``: the id of the Vault who opted in.
 
 *Functions*
 
@@ -320,7 +320,7 @@ NominationOptOut
 
 *Parameters*
 
-* ``vaultId``: the id of the vault who opted out
+* ``vaultId``: the id of the Vault who opted out.
 
 *Functions*
 
@@ -336,7 +336,7 @@ DepositCollateral
 
 *Parameters*
 
-* ``vaultId``: the id of the vault who receives the nomination.
+* ``vaultId``: the id of the Vault who receives the nomination.
 * ``nominatorId``: the id of the nominator who is depositing collateral.
 * ``amount``: the amount of nominated collateral.
 
@@ -354,7 +354,7 @@ WithdrawCollateral
 
 *Parameters*
 
-* ``vaultId``: the id of the previously nominated vault.
+* ``vaultId``: the id of the previously nominated Vault.
 * ``nominatorId``: the id of the nominator who is withdrawing collateral.
 * ``amount``: the amount of nominated collateral.
 
