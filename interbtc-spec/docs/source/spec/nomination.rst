@@ -168,7 +168,7 @@ Specification
 
 *Preconditions*
 
-* The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
+* The BTC Parachain status in the :ref:`security` component MUST be ``RUNNING:0``.
 * A vault with id ``vaultId`` MUST be registered.
 * The vault MUST NOT be opted in.
 
@@ -201,7 +201,7 @@ Specification
 
 *Preconditions*
 
-* The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
+* The BTC Parachain status in the :ref:`security` component MUST be ``RUNNING:0``.
 * A vault with id ``vaultId`` MUST be registered.
 * A vault with id ``vaultId`` MUST have nomination enabled.
 
