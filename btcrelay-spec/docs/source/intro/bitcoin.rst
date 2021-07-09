@@ -11,6 +11,8 @@ Block Headers
 ~~~~~~~~~~~~~
 The `80 bytes block header <https://en.bitcoin.it/wiki/Protocol_documentation#Block_Headers>`_ encodes the following information:
 
+.. note:: as per `bip64 <https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki#spv-clients>`_, blocks with a version number of less than 4 are rejected. As a consequence, blocks that were mined before December 2015 will not successfully parse in the bridge. This is acceptable, because the bridge is not expected to be initialized with such an old block as genesis.
+
 .. tabularcolumns:: |l|l|l|L|
 
 =====  ======================  =========  ======================================================================
