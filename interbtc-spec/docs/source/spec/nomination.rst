@@ -112,10 +112,17 @@ Functions
 getMaxNominationRatio
 ----------------------
 
-Returns the nomination ratio (as %), denoting the maximum amount of collateral that can be nominated to a particular Vault.
+Returns the nomination ratio, denoting the maximum amount of collateral that can be nominated to a particular Vault.
 
-- Example (current parameterization): ``(1.5 / 1.2) - 1 = 25%``
+- ``MaxNominationRatio = (SecureCollateralThreshold / PremiumRedeemThreshold) - 1)``
 
+*Example*
+
+- ``SecureCollateralThreshold = 1.5 (150%)``
+- ``PremiumRedeemThreshold = 1.2 (120%)``
+- ``MaxNominationRatio = (1.5 / 1.2) - 1 = 0.25 (25%)``
+
+In this example, a vault with 10 DOT locked as collateral can only receive 2.5 DOT through nomination.
 
 .. _setNominationEnabled:
 
