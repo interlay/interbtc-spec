@@ -203,14 +203,11 @@ Specification
 
 * The BTC Parachain status in the :ref:`security` component MUST be ``RUNNING:0``.
 * A vault with id ``vaultId`` MUST be registered.
-* A vault with id ``vaultId`` MUST have nomination enabled.
+* A vault with id ``vaultId`` MUST exist in the ``Vaults`` mapping.
 
 *Postconditions*
 
-* The vault MUST NOT be allowed to receive nominated collateral.
-* Previous nominators MUST NOT be allowed to receive more rewards.
-* Previous nominators MUST be allowed to withdraw their collateral.
-
+* The vault MUST be removed from the ``Vaults`` mapping.
 
 .. _depositNominationCollateral:
 
@@ -241,14 +238,13 @@ Specification
 * The BTC Parachain status in the :ref:`security` component MUST be ``RUNNING:0``.
 * The global nomination flag MUST be enabled.
 * A vault with id ``vaultId`` MUST be registered.
-* A vault with id ``vaultId`` MUST have nomination enabled.
+* A vault with id ``vaultId`` MUST exist in the ``Vaults`` mapping.
 * The vault MUST remain below the max nomination ratio.
 
 *Postconditions*
 
 * The vault's collateral MUST increase by the amount nominated.
-* The nominators MUST earn rewards equivalent to their collateral.
-
+* The nominators balance MUST decrease by the amount nominated.
 
 .. _withdrawNominationCollateral:
 
@@ -279,15 +275,14 @@ Specification
 * The BTC Parachain status in the :ref:`security` component MUST be ``RUNNING:0``.
 * The global nomination flag MUST be enabled.
 * A vault with id ``vaultId`` MUST be registered.
-* A vault with id ``vaultId`` MUST have nomination enabled.
+* A vault with id ``vaultId`` MUST exist in the ``Vaults`` mapping.
 * The vault MUST remain above the secure collateralization threshold.
 * Nominator MUST have nominated at least `amount`.
 
 *Postconditions*
 
-* The vault's collateral MUST decrease by the amount withdrawn.
-* The nominator MUST receive their collateral.
-* The nominators MUST earn rewards equivalent to their collateral.
+* The vault's collateral MUST decrease by the amount nominated.
+* The nominators balance MUST increase by the amount nominated.
 
 
 Events
