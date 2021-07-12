@@ -117,6 +117,8 @@ Specification
 
 *Preconditions*
 
+* There MUST be at least one registered Vault.
+
 *Postconditions*
 
 * The Vault reward pool MUST increase by ``amount * VaultRewards``.
@@ -127,7 +129,7 @@ Specification
 withdrawRewards
 ---------------
 
-A function that allows incentivised network participants to withdraw the fees earned.
+A function that allows incentivised network participants to withdraw all earned rewards.
 
 Specification
 .............
@@ -151,6 +153,7 @@ Specification
 *Postconditions*
 
 * The account's balance MUST increase by the available rewards.
+* The account's withdrawable rewards MUST decrease by the withdrawn rewards.
 
 Events
 ~~~~~~
