@@ -153,7 +153,7 @@ Specification
 
 *Preconditions*
 
-Let ``burnedTokens`` be ``amountinterbtc`` minus the result of the multiplication of :ref:`RedeemFee` and ``amountinterbtc``. Then:
+Let ``burnedTokens`` be ``amountinterbtc`` minus the result of the multiplication of :ref:`redeemFee` and ``amountinterbtc``. Then:
 
 * The function call MUST be signed by *redeemer*.
 * The BTC Parachain status in the :ref:`security` component MUST be set to ``RUNNING:0``.
@@ -165,7 +165,7 @@ Let ``burnedTokens`` be ``amountinterbtc`` minus the result of the multiplicatio
 
 *Postconditions*
 
-Let ``burnedTokens`` be ``amountinterbtc`` minus the result of the multiplication of :ref:`RedeemFee` and ``amountinterbtc``. Then:
+Let ``burnedTokens`` be ``amountinterbtc`` minus the result of the multiplication of :ref:`redeemFee` and ``amountinterbtc``. Then:
 
 * The vault's ``toBeRedeemedTokens`` MUST increase by ``burnedTokens``.
 * ``amountinterbtc`` of the redeemer's tokens MUST be locked by this transaction.
@@ -174,7 +174,7 @@ Let ``burnedTokens`` be ``amountinterbtc`` minus the result of the multiplicatio
    * 
    * ``redeem.vault`` is the requested ``vault``
    * ``redeem.opentime`` is the current :ref:`activeBlockCount`
-   * ``redeem.fee`` is :ref:`RedeemFee` multiplied by ``amountinterbtc``,
+   * ``redeem.fee`` is :ref:`redeemFee` multiplied by ``amountinterbtc``,
    * ``redeem.transferFeeBtc`` is the inclusion_fee, which is the multiplication of :ref:`RedeemTransactionSize` and the fee rate estimate reported by the oracle,
    * ``redeem.amount_btc`` is ``amountinterbtc - redeem.fee - redeem.transferFeeBtc``,
    * ``redeem.period`` is the current value of the :ref:`RedeemPeriod`,
@@ -183,7 +183,7 @@ Let ``burnedTokens`` be ``amountinterbtc`` minus the result of the multiplicatio
    * ``redeem.btc_height`` is the current height of the btc relay,
    * ``redeem.status`` is ``Pending``,
    * If the vault's collateralization rate is above the :ref:`PremiumCollateralThreshold`, then ``redeem.premium`` is ``0``,
-   * If the vault's collateralization rate is below the :ref:`PremiumCollateralThreshold`, then ``redeem.premium`` is :ref:`PremiumRedeemFee` multiplied by the worth of ``redeem.amount_btc``,
+   * If the vault's collateralization rate is below the :ref:`PremiumCollateralThreshold`, then ``redeem.premium`` is :ref:`premiumRedeemFee` multiplied by the worth of ``redeem.amount_btc``,
 
 .. _liquidationRedeem:
 
@@ -274,7 +274,7 @@ cancelRedeem
 If a redeem request is not completed on time, the redeem request can be cancelled.
 The user that initially requested the redeem process calls this function to obtain the Vault's collateral as compensation for not refunding the BTC back to his address.
 
-The failed vault is banned from further issue, redeem and replace requests for a pre-defined time period (``PunishmentDelay`` as defined in :ref:`vault-registry`).
+The failed vault is banned from further issue, redeem and replace requests for a pre-defined time period (:ref:`punishmentDelay` as defined in :ref:`vault-registry`).
 
 The user is able to choose between reimbursement and retrying. If the user chooses the retry, it gets back the tokens, and a punishment fee is transferred from the vault to the user. If the user chooses reimbursement, then he receives the equivalent worth of the tokens in collateral, plus a punishment fee. In this case, the tokens are transferred from the user to the vault. In either case, the vault may also be slashed an additional punishment that goes to the fee pool.
 
@@ -312,7 +312,7 @@ Let ``amountIncludingParachainFee`` be equal to the worth in collateral of ``red
 * If the vault is liquidated, the redeemer MUST be transferred part of the vault's collateral: an amount of  ``vault.backingCollateral * ((amountIncludingParachainFee) / vault.to_be_redeemed_tokens)``.
 * If the vault is *not* liquidated, the fellowing collateral changes are made:
    * If ``reimburse`` is true, the user SHOULD be reimbursed the worth of ``amountIncludingParachainFee`` in collateral. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
-   * A punishment fee SHOULD be tranferred from the vault's backing collateral to the reedeemer: an amount of :ref:`PunishmentFee` times the worth of ``amountIncludingParachainFee``. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
+   * A punishment fee SHOULD be tranferred from the vault's backing collateral to the reedeemer: an amount of :ref:`punishmentFee` times the worth of ``amountIncludingParachainFee``. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
    * An additional punishment fee SHOULD be transferred to the fee pool: an amount ranging from :ref:`LiquidationCollateralThreshold` to :ref:`PremiumCollateralThreshold` times the worth of ``amountIncludingParachainFee``, depending on the vault's SLA. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
 * If ``reimburse`` is true: 
    * ``redeem.fee`` MUST be transferred from the vault to the fee pool.
