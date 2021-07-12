@@ -42,7 +42,7 @@ Specification
 * The blockheader MUST be parsable.
 * ``blockHeight`` MUST match the height on the bitcoin chain. Note that the parachain can not check this - it's the caller's responsability!
 * ``rawBlockHeader`` MUST match a block on the bitcoin main chain. Note that the parachain can not check this - it's the caller's responsability!
-* ``rawBlockHeader`` MUST be a block mined after December 2015 - see :ref:`bitcoinBlockHeader`. This is NOT checked by the parachain - it's the caller's responsability!
+* ``rawBlockHeader`` MUST be a block mined after December 2015 - see :ref:`bitcoinBlockHeader`. This is NOT checked by the parachain - it's the caller's responsibility!
 
 *Postconditions*
 
