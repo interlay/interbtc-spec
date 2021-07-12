@@ -125,12 +125,12 @@ Specification
 
 *Preconditions*
 
-* MUST combine ``account``, ``Nonce`` and the hash of the parent block.
+* A parent block MUST exist (cannot be called on the parachain genesis block).
 
 *Postconditions*
 
 * Nonce MUST be incremented by one.
-* MUST return the 256-bit hash of the input fields.
+* MUST return the 256-bit hash of the ``account`, ``nonce``, and ``parent_hash`` (the hash of the previous block of this transaction).
 
 
 .. _hasExpired:
@@ -154,9 +154,11 @@ Specification
 
 *Preconditions*
 
+* The `ActiveBlockCount` MUST be greater than 0.
+
 *Postconditions*
 
-* MUST return true if ``opentime + period > ActiveBlockCount``.
+* MUST return ``True`` if ``opentime + period < ActiveBlockCount``, ``False`` otherwise.
 
 
 .. _setParachainStatus:
