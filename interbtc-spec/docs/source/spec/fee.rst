@@ -121,6 +121,8 @@ Specification
 
 *Postconditions*
 
+ .. todo:: link to reward pool
+ 
 * The Vault reward pool MUST increase by ``amount * VaultRewards``.
 * The Maintainer fund MUST increase by ``amount * MaintainerRewards``.
 
@@ -173,4 +175,3 @@ WithdrawRewards
 *Functions*
 
 * :ref:`withdrawRewards`
-
