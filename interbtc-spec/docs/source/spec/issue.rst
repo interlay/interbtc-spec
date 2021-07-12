@@ -6,16 +6,16 @@ Issue
 Overview
 ~~~~~~~~
 
-The Issue module allows as user to create new interbtc tokens. The user needs to request interbtc through the :ref:`requestIssue` function, then send BTC to a vault, and finally complete the issuing of interbtc by calling the :ref:`executeIssue` function. If the user does not complete the process in time, the vault can cancel the issue request and receive a griefing collateral from the user by invoking the :ref:`cancelIssue` function. Below is a high-level step-by-step description of the protocol.
+The Issue module allows as user to create new interBTC tokens. The user needs to request interBTC through the :ref:`requestIssue` function, then send BTC to a Vault, and finally complete the issuing of interBTC by calling the :ref:`executeIssue` function. If the user does not complete the process in time, the Vault can cancel the issue request and receive a griefing collateral from the user by invoking the :ref:`cancelIssue` function. Below is a high-level step-by-step description of the protocol.
 
 Step-by-step
 ------------
 
-1. Precondition: a vault has locked collateral as described in the :ref:`Vault-registry`.
-2. A user executes the :ref:`requestIssue` function to open an issue request on the BTC Parachain. The issue request includes the amount of interbtc the user wants to issue, the selected vault, and a small collateral to prevent :ref:`griefing`.
-3. A user sends the equivalent amount of BTC that he wants to issue as interbtc to the vault on the Bitcoin blockchain. 
-4. The user or a vault acting on behalf of the user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain. The user or a vault acting on behalf of the user executes the :ref:`executeIssue` function on the BTC Parachain. The issue function requires a reference to the issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of interbtc into his account.
-5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``IssuePeriod``), the vault is able to call the :ref:`cancelIssue` function to cancel the issue request adn will receive the griefing collateral locked by the user.
+1. Precondition: a Vault has locked collateral as described in the :ref:`Vault-registry`.
+2. A user executes the :ref:`requestIssue` function to open an issue request. The issue request includes the amount of interBTC the user wants to issue, the selected Vault, and a small collateral reserve to prevent :ref:`griefing`.
+3. A user sends the equivalent amount of BTC to issue as interBTC to the Vault on the Bitcoin blockchain. 
+4. The user or Vault acting on behalf of the user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain. The user or a Vault acting on behalf of the user executes the :ref:`executeIssue` function on the BTC Parachain. The issue function requires a reference to the issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of interBTC into his account.
+5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``IssuePeriod``), the Vault is able to call the :ref:`cancelIssue` function to cancel the issue request adn will receive the griefing collateral locked by the user.
 
 Security
 --------
@@ -25,23 +25,22 @@ Security
 Vault Registry
 --------------
 
-The data access and state changes to the vault registry are documented in :numref:`fig-vault-registry-issue` below.
+The data access and state changes to the Vault registry are documented in :numref:`fig-vault-registry-issue` below.
 
 .. _fig-vault-registry-issue:
 .. figure:: ../figures/VaultRegistry-Issue.png
-    :alt: vault-registry-issue
+    :alt: Vault-Registry Issue
 
-    The issue protocol interacts with three functions in the vault registry that handle updating the different token balances.
+    The issue protocol interacts with three functions in the :ref:`vault-registry` that handle updating the different token balances.
 
 Fee Model
 ---------
 
 Following additions are added if the fee model is integrated.
 
-- Issue fees are paid by users in interbtc when executing the request. The fees are transferred to the Parachain Fee Pool.
+- Issue fees are paid by users in interBTC when executing the request. The fees are transferred to the Parachain Fee Pool.
 - If an issue request is executed, the user’s griefing collateral is returned.
-- If an issue request is canceled, the vault assigned to this issue request receives the griefing collateral.
-
+- If an issue request is canceled, the Vault assigned to this issue request receives the griefing collateral.
 
 Data Model
 ~~~~~~~~~~
@@ -52,17 +51,19 @@ Scalars
 IssuePeriod
 ............
 
-The time difference between when an issue request is created and required completion time by a user. Concretely, this period is the amount by which :ref:`activeBlockCount` is allowed to increase before the issue is considered to be expired. The period has an upper limit to prevent griefing of vault collateral.
-
+The time difference between when an issue request is created and required completion time by a user.
+Concretely, this period is the amount by which :ref:`activeBlockCount` is allowed to increase before the issue is considered to be expired.
+The period has an upper limit to prevent griefing of Vault collateral.
 
 Maps
 ----
 
+.. _issueRequests:
+
 IssueRequests
 .............
 
-Users create issue requests to issue interbtc. This mapping provides access from a unique hash ``IssueId`` to a ``Issue`` struct. ``<IssueId, Issue>``.
-
+Users create issue requests to issue interBTC. This mapping provides access from a unique hash ``IssueId`` to a ``Issue`` struct. ``<IssueId, Issue>``.
 
 Structs
 -------
@@ -74,33 +75,21 @@ Stores the status and information about a single issue request.
 
 .. tabularcolumns:: |l|l|L|
 
-======================  ==========  =======================================================	
-Parameter               Type        Description                                            
-======================  ==========  =======================================================
-``vault``               Account     The BTC Parachain address of the vault responsible for this commit request.
-``opentime``            u256        Block height of opening the request.
-``griefingCollateral``  DOT         Collateral provided by a user.
-``amount``              interbtc    Amount of interbtc to be issued.
-``fee``                 interbtc    Fee charged to the user for issuing.
-``requester``           Account     User account receiving interbtc upon successful issuing.
-``btcAddress``          bytes[20]   Base58 encoded Bitcoin public key of the Vault.  
-``completed``           bool        Indicates if the issue has been completed.
-``cancelled``           bool        Indicates if the issue request was cancelled.
-======================  ==========  =======================================================
-
-.. *Substrate*::
-  
-  #[derive(Encode, Decode, Default, Clone, PartialEq)]
-  #[cfg_attr(feature = "std", derive(Debug))]
-  pub struct Issue<AccountId, BlockNumber, interbtc, DOT> {
-        vault: AccountId,
-        opentime: BlockNumber,
-        griefing_collateral: DOT,
-        amount: interbtc,
-        requester: AccountId,
-        btc_address: H160,
-        completed: bool
-  }
+======================  ============  =======================================================	
+Parameter               Type          Description                                            
+======================  ============  =======================================================
+``vault``               AccountId     The address of the Vault responsible for this issue request.
+``opentime``            BlockNumber   Block height of opening the request.
+``period``              BlockNumber   Block period at time of opening.
+``griefingCollateral``  DOT           Security deposit provided by a user.
+``amount``              interBTC      Amount of interBTC to be issued.
+``fee``                 interBTC      Fee charged to the user for issuing.
+``requester``           AccountId     User account receiving interBTC upon successful issuing.
+``btcAddress``          BtcAddress    Vault's P2WPKH Bitcoin deposit address.
+``btcPublicKey``        BtcPublicKey  Vault's Bitcoin public key used to generate the deposit address.
+``btcHeight``           u32           The highest recorded height of the relay at time of opening.
+``status``              Enum          Status of the request: Pending, Completed or Cancelled.
+======================  ============  =======================================================
 
 Functions
 ~~~~~~~~~
@@ -110,8 +99,8 @@ Functions
 requestIssue
 ------------
 
-A user opens an issue request to create a specific amount of interbtc. 
-When calling this function, a user provides her own parachain account identifier, the to be issued amount of interbtc, and the vault she wants to use in this process (parachain account identifier). Further, she provides some (small) amount of DOT collateral (``griefingCollateral``) to prevent griefing.
+A user opens an issue request to create a specific amount of interBTC. 
+When calling this function, a user provides their parachain account identifier, the to be issued amount of interBTC, and the Vault she wants to use in this process (parachain account identifier). Further, she provides some (small) amount of DOT collateral (``griefingCollateral``) to prevent griefing.
 
 Specification
 .............
@@ -122,112 +111,91 @@ Specification
 
 *Parameters*
 
-* ``requester``: The user's BTC Parachain account.
-* ``amount``: The amount of interbtc to be issued.
-* ``vault``: The BTC Parachain address of the vault involved in this issue request.
+* ``requester``: The user's account identifier.
+* ``amount``: The amount of interBTC to be issued.
+* ``vault``: The address of the Vault involved in this issue request.
 * ``griefingCollateral``: The collateral amount provided by the user as griefing protection.
 
 *Events*
 
-* ``RequestIssue(issueId, requester, amount, vault, btcAddress)``
+* :ref:`requestIssueEvent`
 
-*Errors*
+*Preconditions*
 
-* ``ERR_VAULT_NOT_FOUND = "There exists no vault with the given account id"``: The specified vault does not exist. 
-* ``ERR_VAULT_BANNED = "The selected vault has been temporarily banned."``: Issue requests are not possible with temporarily banned Vaults.
-* ``ERR_INSUFFICIENT_COLLATERAL``: The user did not provide enough griefing collateral.
+* The function call MUST be signed by ``requester``.
+* The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
+* The :ref:`btc-relay` MUST be initialized.
+* The Vault MUST be registered and active.
+* The ``griefingCollateral`` MUST exceed the value of request ``amount`` at the current exchange-rate, multiplied by :ref:`issueGriefingCollateral`.
 
+*Postconditions*
 
-Preconditions
-.............
-
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
-
-Function Sequence
-.................
-
-1. Retrieve the ``vault`` from :ref:`vault-registry`. Return ``ERR_VAULT_NOT_FOUND`` if no vault can be found.
-
-2. Check that the ``vault`` is currently not banned, i.e., ``vault.bannedUntil == None`` or ``vault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
-
-3. Check if the ``griefingCollateral`` is greater or equal :ref:`issueGriefingCollateral`. If this check fails, return ``ERR_INSUFFICIENT_COLLATERAL``.
-
-4. Lock the user's griefing collateral by calling the :ref:`lockCollateral` function with the ``requester`` as the sender and the ``griefingCollateral`` as the amount.
-
-5. Call the VaultRegistry :ref:`tryIncreaseToBeIssuedTokens` function with the ``amount`` of tokens to be issued and the ``vault`` identified by its address. This function returns a unique ``btcAddress`` that the user should send Bitcoin to.
-
-6. Generate an ``issueId`` via :ref:`generateSecureId`.
-
-7. Store a new ``Issue`` struct in the ``IssueRequests`` mapping as ``IssueRequests[issueId] = issue``, where ``issue`` is the ``Issue`` struct as:
-
-    - ``issue.vault`` is the ``vault``
-    - ``issue.opentime`` is the current block number
-    - ``issue.griefingCollateral`` is the griefing collateral provided by the user
-    - ``issue.amount`` is the ``amount`` provided as input
-    - ``issue.requester`` is the user's account
-    - ``issue.btcAddress`` the Bitcoin address of the vault as returned in step 3
-
-8. Issue the ``RequestIssue`` event with the ``issueId``, the ``requester`` account, ``amount``, ``vault``, and ``btcAddress``.
-
+* The Vault's ``to_be_issued_tokens`` MUST increase by ``amount``.
+* The Vault MUST generate and register a new deposit address.
+* The new issue request MUST be inserted into :ref:`issueRequests`.
+* The issue fee MUST equal ``amount`` multiplied by :ref:`issueFee`.
 
 .. _executeIssue:
 
 executeIssue
 ------------
 
-A user completes the issue request by sending a proof of transferring the defined amount of BTC to the vault's address.
+An executor completes the issue request by sending a proof of transferring the defined amount of BTC to the vault's address.
 
 Specification
 .............
 
 *Function Signature*
 
-``executeIssue(requester, issueId, merkleProof, rawTx)``
+``executeIssue(executorId, issueId, rawMerkleProof, rawTx)``
 
 *Parameters*
 
-* ``requester``: the account of the user.
+* ``executor``: the account of the user.
 * ``issueId``: the unique hash created during the ``requestIssue`` function.
-* ``merkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
+* ``rawMerkleProof``: Raw Merkle tree path (concatenated LE SHA256 hashes).
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
-
 
 *Events*
 
-* ``ExecuteIssue(issueId, requester, amount, vault)``: Emits an event with the information about the completed issue request.
+* :ref:`executeIssueEvent`
+* :ref:`issueAmountChangeEvent`
 
-*Errors*
+*Preconditions*
 
-* ``ERR_ISSUE_ID_NOT_FOUND``: The ``issueId`` cannot be found.
-* ``ERR_COMMIT_PERIOD_EXPIRED``: The time limit as defined by the ``IssuePeriod`` is not met.
-* ``ERR_UNAUTHORIZED_USER = Unauthorized: Caller must be associated user``: The caller of this function is not the associated user, and hence not authorized to take this action.
+* The function call MUST be signed by ``executor``.
+* The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
+* The issue request for ``issueId`` MUST exist in :ref:`issueRequests`.
+* The issue request for ``issueId`` MUST NOT have expired.
+* The ``rawTx`` MUST be valid and contain a payment to the Vault.
+* The ``rawMerkleProof`` MUST be valid and prove inclusion to the main chain.
+* The payment amount MUST include the fee calculated in :ref:`requestIssue`.
 
+*Postconditions*
 
-Preconditions
-.............
+* If the amount tranferred IS less than the expected amount:
 
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+    * The ``executor`` MUST be the account that made the issue request.
+    * The Vault's ``to_be_issued_tokens`` MUST decrease by the deficit.
+    * The Vault's free balance MUST increase by the ``griefingCollateral``.
+    * The issue request MUST contain the new amount.
 
-.. todo:: REJECT any Issue request where the sender BTC address belongs to an existing Vault.
+* If the amount transferred IS NOT less than the expected amount:
 
+    * The requester's free balance MUST increase by the ``griefingCollateral``.
+    * If the amount transferred IS greater than the expected amount:
 
+        * If the Vault IS NOT liquidated and has sufficient collateral:
 
-Function Sequence
-.................
+            * The Vault's ``to_be_issued_tokens`` MUST increase by the surplus.
 
-.. note:: Ideally the ``SecureCollateralThreshold`` in the VaultRegistry should be high enough to prevent the vault from entering into the liquidation state in-between the request and execute.
+        * If the Vault IS NOT liquidated and does not have sufficient collateral:
 
-1. Checks if the ``issueId`` exists. Return ``ERR_ISSUE_ID_NOT_FOUND`` if not found. Else, loads the according issue request struct as ``issue``.
-2. Checks if the issue has expired by calling :ref:`hasExpired` in the Security module. If true, this throws ``ERR_COMMIT_PERIOD_EXPIRED``.
-3. Verify the transaction.
+            * There MUST exist a :ref:`refund-protocol` request which references ``issueId``.
 
-    a. Call *verifyTransactionInclusion* in :ref:`btc-relay`, providing the ``txId``, and ``merkleProof`` as parameters. If this call returns an error, abort and return the received error. 
-    b. Call *validateTransaction* in :ref:`btc-relay`, providing ``rawTx``, the amount of to-be-issued BTC (``issue.amount``), the ``vault``'s Bitcoin address (``issue.btcAddress``), and the ``issueId`` as parameters. If this call returns an error, abort and return the received error. 
-
-4. Call the :ref:`issueTokens` with the ``issue.vault`` and the ``amount`` to decrease the ``toBeIssuedTokens`` and increase the ``issuedTokens``.
-5. Call the :ref:`mint` function in the Treasury with the ``amount`` and the user's address as the ``receiver``.
-6. Remove the ``IssueRequest`` from ``IssueRequests``.
-7. Emit an ``ExecuteIssue`` event with the user's address, the issueId, the amount, and the Vault's address.
+* The Vault's ``to_be_issued_tokens`` MUST decrease by the total amount.
+* The Vault's ``issued_tokens`` MUST increase by the total amount.
+* The user MUST receive interBTC in it's free balance.
 
 .. _cancelIssue:
 
@@ -241,101 +209,123 @@ Specification
 
 *Function Signature*
 
-``cancelIssue(sender, issueId)``
+``cancelIssue(requester, issueId)``
 
 *Parameters*
 
-* ``sender``: The sender of the cancel transaction.
+* ``requester``: The sender of the cancel transaction.
 * ``issueId``: the unique hash of the issue request.
-
 
 *Events*
 
-* ``CancelIssue(sender, issueId)``: Issues an event with the ``issueId`` that is cancelled.
+* :ref:`cancelIssueEvent`
 
-*Errors*
+*Preconditions*
 
-* ``ERR_ISSUE_ID_NOT_FOUND``: The ``issueId`` cannot be found.
-* ``ERR_TIME_NOT_EXPIRED``: Raises an error if the time limit to call ``executeIssue`` has not yet passed.
-* ``ERR_ISSUE_COMPLETED``: Raises an error if the issue is already completed.
+* The function call MUST be signed by ``requester``.
+* The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
+* The issue request for ``issueId`` MUST exist in :ref:`issueRequests`.
+* The issue request MUST have expired.
 
-Preconditions
-.............
+*Postconditions*
 
-* None.
+* If the vault IS liquidated:
 
+    * The requester's free balance MUST increase by the ``griefingCollateral``.
 
-Function Sequence
-.................
+* If the Vault IS NOT liquidated:
 
-1. Check if an issue with id ``issueId`` exists. If not, throw ``ERR_ISSUE_ID_NOT_FOUND``. Otherwise, load the issue request  as ``issue``.
+    * The vault's free balance MUST increase by the ``griefingCollateral``.
 
-2. Check if the issue has expired by calling :ref:`hasExpired` in the Security module, and throw ``ERR_TIME_NOT_EXPIRED`` if not.
-
-3. Check if the ``issue.completed`` field is set to true. If yes, throw ``ERR_ISSUE_COMPLETED``.
-
-4. Call the :ref:`decreaseToBeIssuedTokens` function in the VaultRegistry with the ``issue.vault`` and the ``issue.amount`` to release the vault's collateral.
-
-5. Call the :ref:`slashCollateral` function to transfer the ``griefingCollateral`` of the user requesting the issue to the vault assigned to this issue request with the ``issue.requester`` as sender, the ``issue.vault`` as receiver, and ``issue.griefingCollateral`` as amount.
-
-6. Remove the ``IssueRequest`` from ``IssueRequests``.
-
-8. Emit a ``CancelIssue`` event with the ``issueId``.
+* The issue status MUST be set to ``Cancelled``.
 
 
 Events
 ~~~~~~
 
+.. _requestIssueEvent:
+
 RequestIssue
 ------------
 
-Emit a ``RequestIssue`` event if a user successfully open a issue request.
+Emit an event if a user successfully open a issue request.
 
 *Event Signature*
 
-``RequestIssue(issueId, requester, amount, vault, btcAddress)``
+``RequestIssue(issueId, requester, amount, fee, griefingCollateral, vault, btcAddress, btcPublicKey)``
 
 *Parameters*
 
 * ``issueId``: A unique hash identifying the issue request. 
-* ``requester``: The user's BTC Parachain account.
-* ``amount``: The amount of interbtc to be issued.
-* ``vault``: The BTC Parachain address of the vault involved in this issue request.
-* ``btcAddress``: The Bitcoin address of the vault.
+* ``requester``: The user's account identifier.
+* ``amount``: The amount of interBTC requested.
+* ``fee``: The amount of interBTC to mint as fees.
+* ``griefingCollateral``: The security deposit provided by the user.
+* ``vault``: The address of the Vault involved in this issue request.
+* ``btcAddress``: The Bitcoin address of the Vault.
+* ``btcPublicKey``: The Bitcoin public key of the Vault.
 
 *Functions*
 
 * :ref:`requestIssue`
+
+.. _issueAmountChangeEvent:
+
+IssueAmountChange
+-----------------
+
+Emit an event if the issue amount changed for any reason.
+
+*Event Signature*
+
+``IssueAmountChange(issueId, amount, fee, griefingCollateral)``
+
+*Parameters*
+
+* ``issueId``: A unique hash identifying the issue request. 
+* ``amount``: The amount of interBTC requested.
+* ``fee``: The amount of interBTC to mint as fees.
+* ``griefingCollateral``: Confiscated griefing collateral.
+
+*Functions*
+
+* :ref:`executeIssue`
+
+.. _executeIssueEvent:
 
 ExecuteIssue
 ------------
 
 *Event Signature*
 
-``ExecuteIssue(issueId, requester, amount, vault)``
+``ExecuteIssue(issueId, requester, amount, vault, fee)``
 
 *Parameters*
 
 * ``issueId``: A unique hash identifying the issue request. 
-* ``requester``: The user's BTC Parachain account.
-* ``amount``: The amount of interbtc to be issued.
-* ``vault``: The BTC Parachain address of the vault involved in this issue request.
+* ``requester``: The user's account identifier.
+* ``amount``: The amount of interBTC issued to the user.
+* ``vault``: The address of the Vault involved in this issue request.
+* ``fee``: The amount of interBTC minted as fees.
 
 *Functions*
 
 * :ref:`executeIssue`
+
+.. _cancelIssueEvent:
 
 CancelIssue
 -----------
 
 *Event Signature*
 
-``CancelIssue(issueId, sender)``
+``CancelIssue(issueId, requester, griefingCollateral)``
 
 *Parameters*
 
 * ``issueId``: the unique hash of the issue request.
-* ``sender``: The sender of the cancel transaction.
+* ``requester``: The sender of the cancel transaction.
+* ``griefingCollateral``: The released griefing collateral.
 
 *Functions*
 
@@ -346,13 +336,13 @@ Error Codes
 
 ``ERR_VAULT_NOT_FOUND``
 
-* **Message**: "There exists no vault with the given account id."
+* **Message**: "There exists no Vault with the given account id."
 * **Function**: :ref:`requestIssue`
-* **Cause**: The specified vault does not exist.
+* **Cause**: The specified Vault does not exist.
 
 ``ERR_VAULT_BANNED``
 
-* **Message**: "The selected vault has been temporarily banned."
+* **Message**: "The selected Vault has been temporarily banned."
 * **Function**: :ref:`requestIssue`
 * **Cause**:  Issue requests are not possible with temporarily banned Vaults
 
@@ -376,13 +366,13 @@ Error Codes
 
 ``ERR_COMMIT_PERIOD_EXPIRED``
 
-* **Message**: "Time to issue interbtc expired."
+* **Message**: "Time to issue interBTC expired."
 * **Function**: :ref:`executeIssue`
 * **Cause**: The user did not complete the issue request within the block time limit defined by the ``IssuePeriod``.
 
 ``ERR_TIME_NOT_EXPIRED``
 
-* **Message**: "Time to issue interbtc not yet expired."
+* **Message**: "Time to issue interBTC not yet expired."
 * **Function**: :ref:`cancelIssue`
 * **Cause**: Raises an error if the time limit to call ``executeIssue`` has not yet passed.
 
