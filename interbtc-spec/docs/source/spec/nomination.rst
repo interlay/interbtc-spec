@@ -47,8 +47,8 @@ Vault Nomination Protocol
       
 #. Liquidation slashing is handled as follows:
 
-   #. In case the collateral managed by the Vault falls below the liquidation threshold, the Vault and Nominators are slashed proportionally to their collateral.
-   #. In case the Vault steals Bitcoin deposited at its address, the Vault and Nominators are slashed proportionally to their collateral.
+   #. In case the collateral managed by the Vault falls below the liquidation threshold, the Vault and its Nominators are slashed proportionally to their collateral.
+   #. In case the Vault steals Bitcoin deposited at its address, its collateral is used to cover as much of the slashed amount as possible. If the Vault's collateral was not enough to cover the entire amount, the Nominators are slashed proportionally for the remaining amount.
 
 #. Vaults may opt out of the Nomination protocol which force refunds Nominators if there is enough collateral over the ``SecureCollateralThreshold``.
 
