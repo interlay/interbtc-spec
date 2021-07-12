@@ -31,7 +31,7 @@ Security Assumptions and Considerations
 #. There is no transitive trust. If a user trusts Vault A and Vault A trusts Vault B, the user does not trust Vault B.
 #. Nominators are mostly-offline agents, who are slow to respond to system changes.
 #. Vaults are always-online agents, who can promptly react to system updates.
-
+#. A Nominator may expose the Vault and the other Nominators to additional economic risk by withdrawing nominated collateral during an exchange rate spike. Similarly, the Vault may expose its Nominators to additional economic risk by withdrawing excess collateral.
 
 Vault Nomination Protocol
 -------------------------
@@ -43,7 +43,7 @@ Vault Nomination Protocol
 
    #. Cannot be withdrawn by the Vault,
    #. Is locked on the parachain,
-   #. Is capped at a fraction of the Vault’s deposited collateral (:ref:`maxNominationRatio`). 
+   #. Is capped at a fraction of the Vault’s deposited collateral (:ref:`maxNominationRatio`) to bound the risk for both Vaults and Nominators. 
       
 #. Liquidation slashing is handled as follows:
 
@@ -60,7 +60,7 @@ Max Nomination Ratio
 This ratio prevents the Vault from withdrawing its entire collateral and only exposing Nominators to economic risk, or stealing without liquidation consequences.
 This means that a Vault can only withdraw collateral as long as the fraction of nominated collateral does not exceed the threshold cap.
 Capping Nominator collateral also prevents Vaults being “outnumbered” by Nominators and their relative fee earnings being marginalized.
-Returned by the :ref:`getMaxNominationRatio` function.
+The calculation is defined in :ref:`getMaxNominationRatio`.
 
 
 Data Model
@@ -75,7 +75,7 @@ NominationEnabled
 Flag indicating whether this feature is enabled. 
 
 - If set to ``True``, Vaults MAY opt-in to be nominated.
-- If set to ``FALSE``, Vaults MUST NOT be able to opt-in to nomination. Already nominated Vaults MUST keep being nominated as Vaults may have issued `interBTC` with nominated collateral when this feature was enabled.
+- If set to ``False``, Vaults MUST NOT be able to opt-in to nomination. Already nominated Vaults MUST keep being nominated as Vaults may have issued `interBTC` with nominated collateral when this feature was enabled.
 
 Maps
 ----
@@ -189,7 +189,7 @@ Specification
 optOutOfNomination
 ------------------
 
-Disallow the Vault from receiving nominated collateral and force refund nominators.
+Disallow the Vault from receiving nominated collateral and force refund Nominators.
 
 Specification
 .............
@@ -251,7 +251,7 @@ Specification
 *Postconditions*
 
 * The Vault's collateral MUST increase by the amount nominated.
-* The nominators balance MUST decrease by the amount nominated.
+* The Nominator's balance MUST decrease by the amount nominated.
 
 .. _withdrawNominationCollateral:
 
@@ -289,7 +289,7 @@ Specification
 *Postconditions*
 
 * The Vault's collateral MUST decrease by the amount nominated.
-* The nominators balance MUST increase by the amount nominated.
+* The Nominator's balance MUST increase by the amount nominated.
 
 
 Events
