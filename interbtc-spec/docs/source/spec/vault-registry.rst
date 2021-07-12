@@ -36,30 +36,40 @@ If a Vault fails to execute a correct redeem or replace, it is *temporarily* ban
 SecureCollateralThreshold
 .........................
 
-Determines the over-collateralization rate for collateral locked by Vaults, necessary for issuing tokens. This threshold should be greater than the LiquidationCollateralThreshold, and typically it should be greater than the PremiumRedeemThreshold as well.
+Determines the over-collateralization rate for collateral locked by Vaults, necessary for issuing tokens. 
 
-The vault can take on issue requests depending on the collateral it provides and under consideration of the ``SecureCollateralThreshold``.
+The Vault can take on issue requests depending on the collateral it provides and under consideration of the ``SecureCollateralThreshold``.
 The maximum amount of interbtc a vault is able to support during the issue process is based on the following equation:
+
 :math:`\text{max(interbtc)} = \text{collateral} * \text{ExchangeRate} / \text{SecureCollateralThreshold}`.
 
-.. note:: As an example, assume we use ``DOT`` as collateral, we issue ``interbtc`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e. one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureCollateralThreshold`` is 200%, i.e. a vault has to provide two-times the amount of collateral to back an issue request. Now let's say the vault deposits 400 ``DOT`` as collateral. Then this vault can back at most 2.5 interbtc as: :math:`400 * (1/80) / 2 = 2.5`.
+* The Secure Collateral Threshold MUST be greater than the Liquidation Threshold.
+* The Secure Collateral Threshold MUST be greater than the Premium Redeem Threshold.
+
+.. note:: As an example, assume we use ``DOT`` as collateral, we issue ``interBTC`` and lock ``BTC`` on the Bitcoin side. Let's assume the ``BTC``/``DOT`` exchange rate is ``80``, i.e., one has to pay 80 ``DOT`` to receive 1 ``BTC``. Further, the ``SecureCollateralThreshold`` is 200%, i.e., a vault has to provide two-times the amount of collateral to back an issue request. Now let's say the vault deposits 400 ``DOT`` as collateral. Then this vault can back at most 2.5 interBTC as: :math:`400 * (1/80) / 2 = 2.5`.
+
 
 .. _PremiumCollateralThreshold:
 
 PremiumRedeemThreshold
 ......................
 
-Determines the rate for the collateral rate of Vaults, at which users receive a premium, allocated from the Vault's collateral, when performing a :ref:`redeem-protocol` with this Vault. This threshold should be greater than the LiquidationCollateralThreshold. Typically this value should be greater than the LiquidationCollateralThreshold.
+Determines the rate for the collateral rate of Vaults, at which users receive a premium, allocated from the Vault's collateral, when performing a :ref:`redeem-protocol` with this Vault. 
 
-.. _LiquidationCollateralThreshold:
+* The Premium Redeem Threshold MUST be greater than the Liquidation Threshold.
 
-LiquidationCollateralThreshold
-..............................
+.. _LiquidationThreshold:
+
+LiquidationThreshold
+....................
 
 Determines the lower bound for the collateral rate in issued tokens. If a Vault’s collateral rate drops below this, automatic liquidation is triggered.
 
+* The Liquidation Threshold MUST be greater than 100% for any collateral asset.
+
 LiquidationVault
 .................
+
 Account identifier of an artificial vault maintained by the VaultRegistry to handle interbtc balances and DOT collateral of liquidated Vaults. That is, when a vault is liquidated, its balances are transferred to ``LiquidationVault`` and claims are later handled via the ``LiquidationVault``.
 
 

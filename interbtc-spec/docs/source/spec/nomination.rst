@@ -24,14 +24,19 @@ Step-by-step
 Protocol
 ~~~~~~~~
 
-Security Assumptions and Considerations
----------------------------------------
+Assumptions
+-----------
+
+**Security Assumptions** 
 
 #. The operating Vault is trusted by its Nominators not to steal the `interBTC` issued with their collateral.
 #. There is no transitive trust. If a user trusts Vault A and Vault A trusts Vault B, the user does not trust Vault B.
+
+**Liveness Assumptions**
+
 #. Nominators are mostly-offline agents, who are slow to respond to system changes.
 #. Vaults are always-online agents, who can promptly react to system updates.
-#. A Nominator may expose the Vault and the other Nominators to additional economic risk by withdrawing nominated collateral during an exchange rate spike. Similarly, the Vault may expose its Nominators to additional economic risk by withdrawing excess collateral.
+
 
 Vault Nomination Protocol
 -------------------------
@@ -47,8 +52,8 @@ Vault Nomination Protocol
       
 #. Liquidation slashing is handled as follows:
 
-   #. In case the collateral managed by the Vault falls below the liquidation threshold, the Vault and its Nominators are slashed proportionally to their collateral.
-   #. In case the Vault steals Bitcoin deposited at its address, its collateral is used to cover as much of the slashed amount as possible. If the Vault's collateral was not enough to cover the entire amount, the Nominators are slashed proportionally for the remaining amount.
+   #. **Proportional Slashing** In case the collateral managed by the Vault falls below the liquidation threshold, the Vault and its Nominators are slashed proportionally to their collateral.
+   #. **Vault First Slashing** In case the Vault steals Bitcoin deposited at its address, its collateral is used to cover as much of the slashed amount as possible. If the Vault's collateral was not enough to cover the entire amount, the Nominators are slashed proportionally for the remaining amount.
 
 #. Vaults may opt out of the Nomination protocol which force refunds Nominators if there is enough collateral over the ``SecureCollateralThreshold``.
 
@@ -61,6 +66,84 @@ This ratio prevents the Vault from withdrawing its entire collateral and only ex
 This means that a Vault can only withdraw collateral as long as the fraction of nominated collateral does not exceed the threshold cap.
 Capping Nominator collateral also prevents Vaults being “outnumbered” by Nominators and their relative fee earnings being marginalized.
 The calculation is defined in :ref:`getMaxNominationRatio`.
+
+.. _securityConsiderations:
+
+Security Considerations
+-----------------------
+
+The Vault Nomination protocol changes the economic incentive for Vaults to misbehave, i.e., violate the security of the XCLAIM protocol by stealing BTC.
+
+Economic Security without Vault Nomination
+..........................................
+
+Informally and not considering any SLA scores or rewards, a rational Vault should not steal BTC if the economic value of the collateral is above the value of the BTC held in custody.
+The *effective collateralization* rate at which Vaults should steal BTC is below 100%.
+More formally, we can express this as:
+
+.. math:: C > b
+
+Where :math:`C` is the value of the locked collateral (e.g., DOT) and :math:`b` is the value of the backing asset (e.g., BTC).
+Note, that we will add an extension to this model such that we account for the *expected* value from the perspective of the Vault for both assets.
+However, for this simple model, the above should suffice.
+
+As an aside, Vaults are liquidated before reaching 100% collateralization as defined by the :ref:`LiquidationThreshold`.
+
+
+Economic Security with Vault Nomination
+.......................................
+
+Introducing Vault Nomination changes the effective collateralization rate at which Vaults have an economic incentive to steal BTC.
+
+In both, the Vault First and Proportional Slashing, the effective collateralization rate at which Vaults should steal can be calculated by considering that if the value of *only* the Vault's collateral is below 100% of the locked BTC, a Vault has an incentive to steal BTC.
+We can then calculate the effective collateralization, under the assumption that a Vault is fully nominated, by taking the 100% collateralization provided by the Vault and adding the :ref:`maxNominationRatio`:
+
+.. math:: 100\% + (100\% * \text{maxNominationRatio})
+
+.. note:: If we take DOT as an example and use a secure collateral ratio of 150% and a premium redeem threshold of 135%, Vaults have an incentive to steal BTC if their collateralization falls below 125%.
+
+Above the effective collateralization rate to steal BTC, the incentives to violate the security of the system (i.e., being under-collateralized *or* steal BTC), are different depending on the slashing strategy.
+
+**Proportional Slashing**
+
+For the under-collateralization failure, both Nominators and Vaults need to be active to (1) add more collateral to prevent such a failure, (2) reduce the amount of backed tokens, i.e., the number of backed interBTC, or (3) a combination of 1 and 2.
+In this strategy each the Vault and its Nominators are punished proportionally to their collateral holdings.
+We visualize this with the example below:
+
+.. _fig-proportional:
+.. figure:: ../figures/nomination_proportional_slashing.png
+    :alt: proportional-slashing
+
+    The slashed collateral (in %) in Proportional Slashing of a Vault and its Nominators.
+
+
+.. note:: Assume the similar DOT example from above. Effective threshold when Vault has an incentive to steal Bitcoin: 100% + (100% * 25%) = 125% collateralization. In case of a liquidation, the Vault is slashed all collateral and the Nominators are slashed all collateral since we slash up to the secure collateral threshold. 
+
+.. note:: It is not recommended to use this strategy in case of Vault theft. If the Vault steals Bitcoin at collateralization of 187.5% (i.e., 150% + (150% * 25%)), the Vault's and Nominators' collateral are slashed proportionally such that 150%/187.5% = 80% of the collateral is slashed from both the Vault and its Nominators. Normally, the vault should not be motivated to steal but it might be the case if e.g., the DOT/BTC exchange rate drops, the exchange rate update is not yet reflected on chain, nominators are offline and cannot react, and the new exchange rate would bring the combined collateralization below 125% (such that Vault's future collateral is below 100%)).
+
+**Vault First Slashing**
+
+Nominators cannot control if Vaults decide to steal BTC. While Nominators trust Vaults (see Security Assumption 1 and 2), the protocol still tries to minimize this case by slashing Vaults first in case of theft.
+Therefore, in case of theft all of the Vaults available collateral are slashed before its Nominators.
+At the lower bound of :math:`100\% + (100\% * \text{maxNominationRatio})`, both Proportional Slashing and Vault First Slashing slash the same amount of collateral from a Vault and its Nominators. However, at higher collateralization rates, Vaults are comparatively more slashed.
+See the figure below for an illustration using the threshold examples as above:
+
+
+.. _fig-vault-first:
+.. figure:: ../figures/nomination_vault_first_slashing.png
+    :alt: vault-first-slashing
+
+    The slashed collateral (in %) in Vault First Slashing of a Vault and its Nominators.
+
+.. note:: Assume the similar DOT example from above. Effective threshold when Vault has an incentive to steal Bitcoin: 100% + (100% * 25%) = 125% collateralization. In case of theft, the vault is slashed all collateral, the nominators are slashed all collateral since we slash up to the secure collateral threshold. However, if the Vault steals Bitcoin at collateralization of 187.5% (i.e., 150% + (150% * 25%)), all of the vault's collateral are slashed and none of the nominators collateral is slashed. Normally, the vault should not be motivated to steal but it might be the case if e.g., you modify my example from the comment above (exchange rate drops, not yet reflected on chain, nominators are offline and cannot react, new exchange rate would bring combined collaterealization below 125% (such that vault's future collateral is below 100%)). In this case, the vault should steal BTC but in this case, we would only slash the vault for this.
+
+
+Risk Summary
+............
+
+#. **Increased Exchange Rate Risk on Collateral Withdrawal**: A Nominator may expose the Vault and the other Nominators to additional economic risk by withdrawing nominated collateral during an exchange rate spike. Similarly, the Vault may expose its Nominators to additional economic risk by withdrawing excess collateral.
+#. **Vaults Have an Increased Incentive to Commit Theft**: The effective collateralization rate at which Vault's should steal Bitcoin increases from 100% to :math::`100\% + (100\% * \text{maxNominationRatio})`.
+#. **Different Slashing Strategies Reduce the Impact of Theft for Nominators**: By applying Vault First Slashing, the impact of the slashed collateral for Nominators is reduced if the collateralization is :math:`> 100\% + (100\% * \text{maxNominationRatio})`.
 
 
 Data Model
