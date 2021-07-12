@@ -5,8 +5,8 @@ Security
 
 The Security module is responsible for (1) tracking the status of the BTC Parachain, (2) the "active" blocks of the BTC Parachain, and (3) generating secure identifiers.
 
-1. **BTC Parachain Status**: The BTC Parachain has three distinct states: ``Running``, ``Error``, and ``Shutdown`` which determine which functions can be used.
-2. **Active Blocks**: When the BTC Parachain is not in the ``Running`` state, certain operations are restricted. In order to prevent impact on the users and vaults for the core issue, redeem, and replace operations, the BTC Parachain only considers Active Blocks for the Issue, Redeem, and Replace Periods.
+1. **Status**: The BTC Parachain has three distinct states: ``Running``, ``Error``, and ``Shutdown`` which determine which functions can be used.
+2. **Active Blocks**: When the BTC Parachain is not in the ``Running`` state, certain operations are restricted. In order to prevent impact on the users and Vaults for the core issue, redeem, and replace operations, the BTC Parachain only considers Active Blocks for the Issue, Redeem, and Replace periods.
 3. **Secure Identifiers**: As part of the :ref:`op-return` scheme to prevent replay attacks, the security module generates unique identifiers that are used to identify transactions. 
 
 Overview
@@ -36,20 +36,14 @@ The frequency of the oracle updates is defined in the Oracle module.
 
 **Error code:** ``ORACLE_OFFLINE``
 
-BTC-Relay Offline
------------------
-
-The :ref:`btc-relay` has less blocks stored than defined as the ``STABLE_BITCOIN_CONFIRMATIONS``.
-
-This is the initial state of the BTC-Parachain. After more than the ``STABLE_BITCOIN_CONFIRMATIONS`` BTC blocks have been stored in BTC-Relay, the BTC Parachain cannot decide if or not it is behind in terms of Bitcoin blocks since we make no assumption about the frequency of BTC blocks being produced.
-
-**Error code:** ``BTC_RELAY_OFFLINE``
 
 Data Model
 ~~~~~~~~~~
 
 Enums
-------
+-----
+
+.. _statusCode:
 
 StatusCode
 ...........
@@ -61,6 +55,8 @@ Indicates ths status of the BTC Parachain.
 
 * ``SHUTDOWN: 2`` - BTC Parachain operation fully suspended. This can only be achieved via manual intervention by the Governance Mechanism.
 
+.. _errorCode:
+
 ErrorCode
 .........
 
@@ -70,8 +66,6 @@ Enum specifying error codes tracked in ``Errors``.
 * ``NONE: 0``
 
 * ``ORACLE_OFFLINE: 1``
-
-* ``BTC_RELAY_OFFLINE: 2``
 
 
 Data Storage
@@ -83,13 +77,13 @@ Scalars
 ParachainStatus
 ...............
 
-Integer/Enum (see ``StatusCode`` below). Defines the current state of the BTC Parachain. 
+Stores the status code (:ref:`statusCode`) which defines the current state of the BTC Parachain. 
 
 
 Errors
-........
+......
 
-Set of error codes (``ErrorCode`` enums), indicating the reason for the error. The ``ErrorCode`` entries included in this set specify how to react to the failure.
+Stores the set of error codes (:ref:`errorCode`), indicating the reason for the error.
 
 
 Nonce
@@ -97,12 +91,15 @@ Nonce
 
 Integer increment-only counter, used to prevent collisions when generating identifiers for e.g., redeem or replace requests (for OP_RETURN field in Bitcoin).
 
+
 .. _activeBlockCount:
 
 ActiveBlockCount
 ................
 
-A counter variable that increments every block where the parachain status is ``RUNNING:0``. This variable is used to keep track of durations, such as issue/redeem/replace expiry. This is used instead of the block number because if the parachain status is not ``RUNNING:0``, no payment proofs can be submitted, so it would not be fair towards users and vaults to continue counting down the (expiry) periods. 
+A counter variable that increments every block when the parachain status is ``RUNNING:0``. This variable is used to keep track of durations, such as issue/redeem/replace expiry.
+This is used instead of the block number because if the parachain status is not ``RUNNING:0``, no payment proofs can be submitted, so it would not be fair towards users and Vaults to continue counting down the (expiry) periods.
+This field MUST be set to the current block height on initialization.
 
 
 Functions
@@ -124,21 +121,16 @@ Specification
 
 *Parameters*
 
-* ``account``: Parachain account identifier (links this identifier to the AccountId associated with the process where this secure id is to be used, e.g., the user calling :ref:`requestIssue`).
+* ``account``: account identifier (links this identifier to the AccountId associated with the process where this secure id is to be used, e.g., the user calling :ref:`requestIssue`).
 
-*Returns*
+*Preconditions*
 
-* ``hash``: a cryptographic hash generated via a secure hash function.
+* MUST combine ``account``, ``Nonce`` and the hash of the parent block.
 
-Function Sequence
-.................
+*Postconditions*
 
-1. Increment the ``Nonce``.
-2. Concatenate ``account``, ``Nonce``, and ``parent_hash()``.
-3. SHA256 hash the result of step 1.
-4. Return the resulting hash.
-
-.. note:: The funtion ``parent_hash()`` is assumed to return the hash of the parachain's parent block - which precedes the block this function is called in.
+* Nonce MUST be incremented by one.
+* MUST return the 256-bit hash of the input fields.
 
 
 .. _hasExpired:
@@ -146,31 +138,25 @@ Function Sequence
 hasExpired
 ----------
 
-Checks if the given period has expired since the given starting point. This calculation is based on the :ref:`activeBlockCount`.
+Checks if the ``period`` has expired since the ``opentime``. This calculation is based on the :ref:`activeBlockCount`.
 
 Specification
 .............
 
 *Function Signature*
 
-``has_expired(opentime, period)``
+``hasExpired(opentime, period)``
 
 *Parameters*
 
 * ``opentime``: the :ref:`activeBlockCount` at the time the issue/redeem/replace was opened.
+* ``period``: the number of blocks the user or Vault has to complete the action.
 
-* ``period``: the number of blocks the user or vault has to complete the action.
+*Preconditions*
 
+*Postconditions*
 
-*Returns*
-
-* ``true`` if the period has expired
-
-Function Sequence
-.................
-
-1. Add the ``opentime`` and ``period``.
-2. Compare this against :ref:`activeBlockCount`.
+* MUST return true if ``opentime + period > ActiveBlockCount``.
 
 
 .. _setParachainStatus:
