@@ -22,17 +22,17 @@ Welcome to the interBTC Technical Specification!
    spec/btc-relay
    spec/collateral
    spec/fee
+   spec/sla
    spec/oracle
    spec/issue
-   spec/nomination
-   spec/redeem
    spec/refund
+   spec/redeem
    spec/replace
    spec/security
-   spec/sla
    spec/relay
    spec/treasury
    spec/vault-registry
+   spec/nomination
 
 .. toctree::
    :maxdepth: 2
