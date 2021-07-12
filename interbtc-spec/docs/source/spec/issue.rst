@@ -54,13 +54,6 @@ IssuePeriod
 
 The time difference between when an issue request is created and required completion time by a user. Concretely, this period is the amount by which :ref:`activeBlockCount` is allowed to increase before the issue is considered to be expired. The period has an upper limit to prevent griefing of vault collateral.
 
-IssueGriefingCollateral
-........................
-
-The minimum collateral (DOT) a user needs to provide as griefing protection. 
-
-.. note:: Serves as a measurement to disincentivize griefing attacks against a vault. A user could otherwise create an issue request, temporarily locking a vault's collateral and never execute the issue process.
-
 
 Maps
 ----
@@ -157,7 +150,7 @@ Function Sequence
 
 2. Check that the ``vault`` is currently not banned, i.e., ``vault.bannedUntil == None`` or ``vault.bannedUntil < current parachain block height``. Return ``ERR_VAULT_BANNED`` if this check fails.
 
-3. Check if the ``griefingCollateral`` is greater or equal ``IssueGriefingCollateral``. If this check fails, return ``ERR_INSUFFICIENT_COLLATERAL``.
+3. Check if the ``griefingCollateral`` is greater or equal :ref:`issueGriefingCollateral`. If this check fails, return ``ERR_INSUFFICIENT_COLLATERAL``.
 
 4. Lock the user's griefing collateral by calling the :ref:`lockCollateral` function with the ``requester`` as the sender and the ``griefingCollateral`` as the amount.
 
@@ -367,7 +360,7 @@ Error Codes
 
 * **Message**: "User provided collateral below limit."
 * **Function**: :ref:`requestIssue`
-* **Cause**: User provided griefingCollateral below ``IssueGriefingCollateral``.
+* **Cause**: User provided griefingCollateral below :ref:`issueGriefingCollateral`.
 
 ``ERR_UNAUTHORIZED_USER``
 
