@@ -26,10 +26,15 @@ The minimum collateral a vault needs to provide to participate in the issue proc
 
 .. note:: This is a protection against spamming the protocol with very small collateral amounts. Vaults are still able to withdraw the collateral after registration, but at least it requires an additional transaction fee, and it provides protection against accidental registration with very low amounts of collateral.
 
-PunishmentDelay
-.................
+.. _punishmentDelay:
 
-If a Vault fails to execute a correct redeem or replace, it is *temporarily* banned from further issue, redeem or replace requests. This value configures the duration of this ban (in number of blocks) .
+PunishmentDelay
+...............
+
+Time period in which a Vault cannot participate in issue, redeem or replace requests.
+
+- Measured in Parachain blocks
+- Initial value: 1 day (Parachain constant)
 
 .. _SecureCollateralThreshold:
 
