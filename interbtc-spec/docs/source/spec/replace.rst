@@ -239,7 +239,17 @@ The actual amount of replaced tokens is calculated to be ``consumedTokens = min(
 * The *oldVault*'s ``toBeRedeemedTokens`` MUST be increased by ``consumedTokens``. 
 * The *newVault*'s ``toBeIssuedTokens`` MUST be increased by ``consumedTokens``. 
 * The *newVault* locks additional collateral; its ``backingCollateral`` MUST be increased by ``collateral * (consumedTokens / oldVault.toBeReplacedTokens)``. 
-* A new ``ReplaceRequest`` MUST be added to storage. The amount is set to ``consumedTokens``, ``griefingCollateral`` to ``consumedGriefingCollateral``, ``collateral`` to the ``collateral`` argument, ``accept_time`` to the current active block number, ``period`` to the current ``ReplacePeriod``, ``btcAddress`` to the ``btcAddress`` argument, ``btc_height`` to the current height of the btc-relay, and ``status`` to ``pending``.
+* A new ``ReplaceRequest`` MUST be added to the replace request mapping under the `replaceId` key. 
+  * ``oldVault``: MUST be the ``oldVault``.
+  * ``newVault``: MUST be the ``newVault``.
+  * ``amount``: MUST be``consumedTokens``. 
+  * ``griefingCollateral``: MUST be ``consumedGriefingCollateral``
+  * ``collateral``: MUST be ``collateral``.
+  * ``accept_time``: MUST be the current active block number.
+  * ``period``: MUST be the current ``ReplacePeriod``.
+  * ``btcAddress``: MUST be the ``btcAddress`` argument.
+  * ``btcHeight``: UST be the current height of the btc-relay.
+  * ``status``: MUST be ``pending``.
 
 .. _executeReplace: 
 
