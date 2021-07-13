@@ -130,7 +130,7 @@ Specification
 
 *Postconditions*
 
-* The Vault's ``to_be_issued_tokens`` MUST increase by ``amount``.
+* The Vault's ``toBeIssuedTokens`` MUST increase by ``amount``.
 * The Vault MUST generate and register a new deposit address.
 * The new issue request MUST be inserted into :ref:`issueRequests`.
 * The issue fee MUST equal ``amount`` multiplied by :ref:`issueFee`.
@@ -176,7 +176,7 @@ Specification
 * If the amount tranferred IS less than the expected amount:
 
     * The ``executor`` MUST be the account that made the issue request.
-    * The Vault's ``to_be_issued_tokens`` MUST decrease by the deficit.
+    * The Vault's ``toBeIssuedTokens`` MUST decrease by the deficit.
     * The Vault's free balance MUST increase by the ``griefingCollateral``.
     * The issue request MUST contain the new amount.
 
@@ -187,14 +187,14 @@ Specification
 
         * If the Vault IS NOT liquidated and has sufficient collateral:
 
-            * The Vault's ``to_be_issued_tokens`` MUST increase by the surplus.
+            * The Vault's ``toBeIssuedTokens`` MUST increase by the surplus.
 
         * If the Vault IS NOT liquidated and does not have sufficient collateral:
 
             * There MUST exist a :ref:`refund-protocol` request which references ``issueId``.
 
-* The Vault's ``to_be_issued_tokens`` MUST decrease by the total amount.
-* The Vault's ``issued_tokens`` MUST increase by the total amount.
+* The Vault's ``toBeIssuedTokens`` MUST decrease by the total amount.
+* The Vault's ``issuedTokens`` MUST increase by the total amount.
 * The user MUST receive interBTC in it's free balance.
 
 .. _cancelIssue:
