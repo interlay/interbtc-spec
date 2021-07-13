@@ -254,7 +254,7 @@ Specification
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN:2``.
 * A *pending* ``RedeemRequest`` MUST exist with an id equal to ``redeemId``.
 * The request MUST NOT have expired.
-* * The ``rawTx`` MUST decode to a valid transaction that transfers at least the amount specified in the ``RedeemRequest`` struct. It MUST be a transaction to the correct address, and provide the expected OP_RETURN, based on the ``RedeemRequest``.
+* The ``rawTx`` MUST decode to a valid transaction that transfers the amount specified in the ``RedeemRequest`` struct. It MUST be a transaction to the correct address, and provide the expected OP_RETURN, based on the ``RedeemRequest``.
 * The ``merkleProof`` MUST contain a valid proof of of ``rawTX``.
 * The bitcoin payment MUST have been submitted to the relay chain, and MUST have sufficient confirmations.
 
