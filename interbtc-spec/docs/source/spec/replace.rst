@@ -240,7 +240,8 @@ The actual amount of replaced tokens is calculated to be ``consumedTokens = min(
 * The *newVault*'s ``toBeIssuedTokens`` MUST be increased by ``consumedTokens``. 
 * The *newVault* locks additional collateral; its ``backingCollateral`` MUST be increased by ``collateral * (consumedTokens / oldVault.toBeReplacedTokens)``. 
 * A unique `replaceId` must be generated from :ref:`generateSecureId`.
-* A new ``ReplaceRequest`` MUST be added to the replace request mapping under the `replaceId` key. 
+* A new ``ReplaceRequest`` MUST be added to the replace request mapping at the `replaceId` key. 
+
   * ``oldVault``: MUST be the ``oldVault``.
   * ``newVault``: MUST be the ``newVault``.
   * ``amount``: MUST be``consumedTokens``. 
