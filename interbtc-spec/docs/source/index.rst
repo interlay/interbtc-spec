@@ -33,6 +33,7 @@ Welcome to the interBTC Technical Specification!
    spec/treasury
    spec/vault-registry
    spec/nomination
+   spec/reward
 
 .. toctree::
    :maxdepth: 2
