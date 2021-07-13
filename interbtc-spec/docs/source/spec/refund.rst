@@ -79,3 +79,24 @@ Specification
 * The vault's free balance in the :ref:`treasury-module` MUST increase by ``fee``.
 * The vault's ``SLA`` MUST increase by the :ref:`sla` score of ``Refund``.
 * ``refundRequest.completed`` MUST be ``true``.
+
+
+Events
+~~~~~~
+
+.. _executeRefundEvent:
+
+ExecuteRefund
+-------------
+
+*Event Signature*
+
+``ExecuteRefund(refundId, issuer, vault, amount, fee)``
+
+*Parameters*
+
+* ``refundId``: the unique hash created during the internal ``requestRefund`` function.
+* ``issuer``: The user's account identifier.
+* ``vault``: The address of the Vault involved in this refund request.
+* ``amount``: The amount of interBTC refunded.
+* ``fee``: The amount of interBTC to mint as fees.
