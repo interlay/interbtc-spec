@@ -146,6 +146,7 @@ Specification
 * The BTC Parachain status in the :ref:`security` component MUST be set to ``RUNNING:0``.
 * The *oldVault* MUST be registered.
 * The *oldVault* MUST NOT be banned.
+* The *oldVault* MUST NOT be nominated (if :ref:`vault_nomination` is enabled).
 * The *oldVault* MUST provide sufficient ``griefingCollateral`` such that the ratio of all of its ``toBeReplacedTokens`` and ``replaceCollateral`` is above :ref:`replaceGriefingCollateral`.
 * The *oldVault* MUST request sufficient tokens to be replaced such that its total is above ``ReplaceBtcDustValue``.
 
