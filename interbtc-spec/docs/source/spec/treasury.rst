@@ -6,52 +6,54 @@ Treasury
 Overview
 ~~~~~~~~
 
-The treasury serves as the central storage for all interbtc.
-It exposes the :ref:`transfer` function to any user. With the transfer functions users can send interbtc to and from each other.
-Further, the treasury exposes three internal functions for the :ref:`issue-protocol` and the :ref:`redeem-protocol`. 
+The treasury serves as the central storage for all interBTC.
+It exposes the :ref:`transfer` function, which allows any user to transfer interBTC.
+Three additional internal functions are exposed for the :ref:`issue-protocol` and :ref:`redeem-protocol` components. 
 
 Step-by-step
 ------------
 
-* **Transfer**: A user sends an amount of interbtc to another user by calling the :ref:`transfer` function.
-* **Issue**: The issue module calls into the treasury when an issue request is completed and the user has provided a valid proof that he transferred the required amount of BTC to the correct vault. The issue module calls the :ref:`mint` function to grant the user the interbtc token.
-* **Redeem**: The redeem protocol requires two calls to the treasury module. First, a user requests a redeem via the :ref:`requestRedeem` function. This invokes a call to the :ref:`lock` function that locks the requested amount of tokens for this user. Second, when a redeem request is completed and the vault has provided a valid proof that it transferred the required amount of BTC to the correct user, the redeem module calls the :ref:`burn` function to destroy the previously locked interbtc.
+* **Transfer**: A user sends an amount of interBTC to another user by calling the :ref:`transfer` function.
+* **Issue**: The issue module calls into the treasury when an issue request is completed (via :ref:`executeIssue`) and the user has provided a valid proof that the required amount of BTC was sent to the correct vault. The issue module calls the :ref:`mint` function to create interBTC.
+* **Redeem**: The redeem protocol requires two calls to the treasury module. First, a user requests a redeem via the :ref:`requestRedeem` function. This invokes a call to the :ref:`lock` function that locks the requested amount of tokens for this user. Second, when a redeem request is completed (via :ref:`executeRedeem`) and the vault has provided a valid proof that it transferred the required amount of BTC to the correct user, the redeem module calls the :ref:`burn` function to destroy the previously locked interBTC.
 
 Data Model
 ~~~~~~~~~~
 
-Constants
----------
-
-- ``NAME``: ``interbtc``
-- ``SYMBOL``: ``pBTC``
-
 Scalars
 -------
+
+.. _totalSupply:
 
 TotalSupply
 ...........
 
-The total supply of interbtc.
-
+The total supply of interBTC.
 
 Maps
 ----
 
-Balances
+Accounts
 ........
 
-Mapping from accounts to their balance.
+Mapping from accounts to the ``Account`` struct.
 
+Structs
+-------
 
-Locked Balances
-...............
+Account
+.......
 
-Mapping from accounts to their balance of locked tokens. Locked tokens serve two purposes:
+Stores the balances of a single account.
 
-1. Locked tokens cannot be transferred. Once a user locks the token, the token needs to be unlocked to become spendable.
-2. Locked tokens are the only tokens that can be burned in the redeem procedure.
+.. tabularcolumns:: |l|l|L|
 
+======================  ==========  =======================================================	
+Parameter               Type        Description                                            
+======================  ==========  =======================================================
+``free``                Balance     Free and may be transferred without restriction.
+``reserved``            Balance     Reserved and may not be used by holder until unlocked.
+======================  ==========  =======================================================
 
 Functions
 ~~~~~~~~~
@@ -61,7 +63,7 @@ Functions
 transfer
 --------
 
-Transfers a specified amount of interbtc from a Sender to a Receiver on the BTC Parachain.
+Transfers a specified amount of interBTC from a sender to a receiver.
 
 Specification
 .............
@@ -72,43 +74,32 @@ Specification
 
 *Parameters*
 
-* ``sender``: An account with enough funds to send the ``amount`` of interbtc to the ``receiver``.
-* ``receiver``: Account receiving an amount of interbtc.
-* ``amount``: The number of interbtc being sent in the transaction.
-
+* ``sender``: Account sending an amount of interBTC.
+* ``receiver``: Account receiving an amount of interBTC.
+* ``amount``: The number of interBTC being sent.
 
 *Events*
 
-* ``Transfer(sender, receiver, amount)``: Issues an event when a transfer of funds was successful.
+* :ref:`transferEvent`
 
-*Errors*
+*Preconditions*
 
-* ``ERR_INSUFFICIENT_FUNDS``: The sender does not have a high enough balance to send an ``amount`` of interbtc.
+* The function call MUST be signed by the ``sender``.
+* The account MUST have sufficient free balance.
 
-.. *Substrate*
+*Postconditions*
 
-``fn transfer(origin, receiver: AccountId, amount: Balance) -> Result {...}``
-
-Function Sequence
-.................
-
-The ``transfer`` function takes as input the sender, the receiver, and an amount. The function executes the following steps:
-
-1. Check that the ``sender`` is authorised to send the transaction by verifying the signature attached to the transaction.
-2. Check that the ``sender``'s balance is above the ``amount``. If ``Balances[sender] < amount`` (in Substrate ``free_balance``), raise ``ERR_INSUFFICIENT_FUNDS``.
-        
-3. Subtract the sender's balance by ``amount``, i.e. ``Balances[sender] -= amount`` and add ``amount`` to the receiver's balance, i.e. ``Balances[receiver] += amount``.
-
-4. Emit the ``Transfer(sender, receiver, amount)`` event.
+* The sender's free balance MUST decrease by ``amount``.
+* The receiver's free balance MUST increase by ``amount``.
 
 .. _mint:
 
 mint
 ----
 
-In the BTC Parachain new interbtc can be created by leveraging the :ref:`issue-protocol`.
-However, to separate concerns and access to data, the Issue module has to call the ``mint`` function to complete the issue process in the interbtc component.
-The function increases the ``totalSupply`` of interbtc.
+In the BTC Parachain new interBTC can be created by leveraging the :ref:`issue-protocol`.
+However, to separate concerns and access to data, the Issue module has to call the ``mint`` function to complete the issue process in the interBTC component.
+The function increases the ``totalSupply`` of interBTC.
 
 .. warning:: This function can *only* be called from the Issue module.
 
@@ -117,126 +108,98 @@ Specification
 
 *Function Signature*
 
-``mint(requester, amount)``
+``mint(account, amount)``
 
 *Parameters*
 
-* ``requester``: The account of the requester of interbtc.
-* ``amount``: The amount of interbtc to be added to an account.
-
+* ``account``: The account requesting interBTC.
+* ``amount``: The amount of interBTC to be minted.
 
 *Events*
 
-* ``Mint(requester, amount)``: Issue an event when new interbtc are minted.
+* :ref:`mintEvent`
 
-.. *Substrate*
+*Preconditions*
 
-``fn mint(requester: AccountId, amount: Balance) -> Result {...}``
+*Postconditions*
 
-
-Preconditions
-.............
-
-This is an internal function and can only be called by the :ref:`Issue module <issue-protocol>`.
-
-Function Sequence
-.................
-
-1. Increase the ``requester`` Balance by ``amount``, i.e. ``Balances[requester] += amount``.
-2. Emit the ``Mint(requester, amount)`` event.
+* The account's free balance MUST increase by ``amount``.
+* The :ref:`totalSupply` MUST increase by ``amount``.
 
 .. _lock:
 
 lock
 ----
 
-During the redeem process, a user needs to be able to lock interbtc. Locking transfers coins from the ``Balances`` mapping to the ``LockedBalances`` mapping to prevent users from transferring the coins.
+During the :ref:`redeem-protocol`, a user needs to be able to lock interBTC. Locking transfers coins from the ``free`` balance to the ``reserved`` balance to prevent users from transferring the coins.
 
 Specification
 .............
 
 *Function Signature*
 
-``lock(redeemer, amount)``
+``lock(account, amount)``
 
 *Parameters*
 
-* ``redeemer``: The Redeemer wishing to lock a certain amount of interbtc.
-* ``amount``: The amount of interbtc that should be locked.
-
+* ``account``: The account locking a certain amount of interBTC.
+* ``amount``: The amount of interBTC that should be locked.
 
 *Events*
 
-* ``Lock(redeemer, amount)``: Emits newly locked amount of interbtc by a user.
+* :ref:`lockEvent`
 
-*Errors*
+*Preconditions*
 
-* ``ERR_INSUFFICIENT_FUNDS``: User has not enough interbtc to lock coins.
+* The account MUST have sufficient free balance.
 
+*Postconditions*
 
-Precondition
-............
-
-* Can only be called by the redeem module.
-
-Function Sequence
-.................
-
-1. Checks if the user has a balance higher than or equal to the requested amount, i.e. ``Balances[redeemer] >= amount``. Return ``ERR_INSUFFICIENT_FUNDS`` if the user's balance is too low.
-2. Decreases the user's token balance by the amount and increases the locked tokens balance by amount, i.e. ``Balances[redeemer] -= amount`` and ``LockedBalances[redeemer] += amount``.
-3. Emit the ``Lock`` event.
+* The account's free balance MUST decrease by ``amount``.
+* The account's reserved balance MUST increase by ``amount``.
 
 .. _burn:
 
 burn
 ----
 
-During the :ref:`redeem-protocol`, users first lock and then "burn" (i.e. destroy) their interbtc to receive BTC. Users can only burn tokens once they are locked to prevent transaction ordering dependencies. This means a user first needs to move his tokens from the ``Balances`` to the ``LockedBalances`` mapping via the :ref:`lock` function.
+During the :ref:`redeem-protocol`, users first lock and then "burn" (i.e. destroy) their interBTC to receive BTC. Users can only burn tokens once they are locked to prevent transaction ordering dependencies. This means a user first needs to move his tokens from the ``Balances`` to the ``LockedBalances`` mapping via the :ref:`lock` function.
 
-.. warning:: This function is only internally callable by the Redeem module.
+.. warning:: This function can *only* be called from the Redeem module.
 
 Specification
 .............
 
 *Function Signature*
 
-``burn(redeemer, amount)``
+``burn(account, amount)``
 
 *Parameters*
 
-* ``redeemer``: The Redeemer wishing to burn a certain amount of interbtc.
-* ``amount``: The amount of interbtc that should be destroyed.
-
+* ``account``: The account burning locked interBTC.
+* ``amount``: The amount of interBTC that should be burned.
 
 *Events*
 
-* ``Burn(redeemer, amount)``: Issue an event when the amount of interbtc is successfully destroyed.
+* :ref:`burnEvent`
 
-*Errors*
+*Preconditions*
 
-* ``ERR_INSUFFICIENT_LOCKED_FUNDS``: If the user has insufficient funds locked, i.e. her locked balance is lower than the amount.
+* The account MUST have sufficient reserved balance.
 
-.. *Substrate*
+*Postconditions*
 
-``fn burn(redeemer: AccountId, amount: Balance) -> Result {...}``
-
-Preconditions
-.............
-
-This is an internal function and can only be called by the :ref:`Redeem module <redeem-protocol>`.
-
-Function Sequence
-.................
-
-1. Check that the ``redeemer``'s locked balance is above the ``amount``. If ``LockedBalance[redeemer] < amount`` (in Substrate ``free_balance``), raise ``ERR_INSUFFICIENT_LOCKED_FUNDS``.
-2. Subtract the Redeemer's locked balance by ``amount``, i.e. ``LockedBalances[redeemer] -= amount``. 
-3. Emit the ``Burn(redeemer, amount)`` event.
+* The account's reserved balance MUST decrease by ``amount``.
+* The :ref:`totalSupply` MUST decrease by ``amount``.
 
 Events
 ~~~~~~
 
+.. _transferEvent:
+
 Transfer
 --------
+
 Issues an event when a transfer of funds was successful.
 
 *Event Signature*
@@ -245,38 +208,40 @@ Issues an event when a transfer of funds was successful.
 
 *Parameters*
 
-* ``sender``: An account with enough funds to send the ``amount`` of interbtc to the ``receiver``.
-* ``receiver``: Account receiving an amount of interbtc.
-* ``amount``: The number of interbtc being sent in the transaction.
+* ``sender``: Account sending an amount of interBTC.
+* ``receiver``: Account receiving an amount of interBTC.
+* ``amount``: The number of interBTC being sent.
 
 *Function*
 
 * :ref:`transfer`
 
+.. _mintEvent:
 
 Mint
 ----
   
-Issue an event when new interbtc are minted.
+Issue an event when new interBTC are minted.
 
 *Event Signature*
 
-``Mint(requester, amount)``
+``Mint(account, amount)``
 
 *Parameters*
 
-* ``requester``: The account of the requester of interbtc.
-* ``amount``: The amount of interbtc to be added to an account.
+* ``account``: The account requesting interBTC.
+* ``amount``: The amount of interBTC to be added to an account.
 
 *Function*
 
 * :ref:`mint`
 
+.. _lockEvent:
 
 Lock
 ----
 
-Emits newly locked amount of interbtc by a user.
+Emits the newly locked amount of interBTC by a user.
 
 *Event Signature*
 
@@ -284,45 +249,45 @@ Emits newly locked amount of interbtc by a user.
 
 *Parameters*
 
-* ``redeemer``: The Redeemer wishing to lock a certain amount of interbtc.
-* ``amount``: The amount of interbtc that should be locked.
+* ``account``: The account locking interBTC.
+* ``amount``: The amount of interBTC that should be locked.
 
 *Function*
 
 * :ref:`lock`
 
+.. _burnEvent:
 
 Burn
 ----
 
-Issue an event when the amount of interbtc is successfully destroyed.
+Issue an event when the amount of interBTC is successfully destroyed.
 
 *Event Signature*
 
-``Burn(redeemer, amount)``
+``Burn(account, amount)``
 
 *Parameters*
 
-* ``redeemer``: The Redeemer wishing to burn a certain amount of interbtc.
-* ``amount``: The amount of interbtc that should be burned.
+* ``account``: The account burning interBTC.
+* ``amount``: The amount of interBTC that should be burned.
 
 *Function*
 
 * :ref:`burn`
 
-
 Errors
 ~~~~~~
 
-``ERR_INSUFFICIENT_FUNDS`` 
+``ERR_INSUFFICIENT_FREE_BALANCE`` 
 
-* **Message**: "The balance of this account is insufficient to complete the transaction." 
+* **Message**: "The free balance of this account is insufficient to complete the transaction." 
 * **Functions**: :ref:`transfer` | :ref:`lock` 
-* **Cause**: The balance of the user of available tokens (i.e. ``Balances``) is below a certain amount to either transfer or lock tokens.
+* **Cause**: The free balance of the account is too low to complete this action.
 
-``ERR_INSUFFICIENT_LOCKED_FUNDS`` 
+``ERR_INSUFFICIENT_RESERVED_BALANCE`` 
 
-* **Message**: "The locked token balance of this account is insufficient to burn the tokens."
+* **Message**: "The reserved balance of this account is insufficient to burn the tokens."
 * **Function**: :ref:`burn`
-* **Cause**: The user has locked too little tokens in the ``LockedBalances`` to execute the burn function.
+* **Cause**: The reserved balance of the account is too low to complete this action.
 
