@@ -70,11 +70,13 @@ Specification
 * The ``merkleProof`` MUST contain a valid proof of of ``rawTX``.
 * The bitcoin payment MUST have been submitted to the relay chain, and MUST have sufficient confirmations.
 * The ``vault.status`` MUST be ``active``.
-* The ``vault.isBanned()`` MUST return ``false``.
+* ``vault.isBanned()`` MUST return ``false``.
 * The refunding vault MUST have enough collateral to mint an amount equal to the refund fee.
 
 *Postconditions*
 
 * The ``vault.issuedTokens`` MUST increase by ``fee``.
 * The ``TotalSupply`` in the :ref:`treasury-module` MUST increase by ``fee``.
+* The vault's free balance in the :ref:`treasury-module` MUST increase by ``fee``.
 * The vault's ``SLA`` MUST increase by the :ref:`sla` score of ``Refund``.
+* ``refundRequest.completed`` MUST be ``true``.
