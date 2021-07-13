@@ -105,7 +105,7 @@ Parameter               Type         Description
 ``newVault``            AccountId    Account of the *newVault*, which accepts the replace request.
 ``amount``              interBTC     Amount of BTC / interBTC to be replaced.
 ``griefingCollateral``  DOT          Griefing protection collateral locked by *oldVault*.
-``collateral``          DOT          DOT collateral locked by the new Vault.
+``collateral``          DOT          Collateral locked by the new Vault.
 ``acceptTime``          BlockNumber  The :ref:`activeBlockCount` when the replace request was accepted by a new Vault. Serves as start for the countdown until when the old Vault must transfer the BTC.
 ``period``              BlockNumber  Value of :ref:`ReplacePeriod` when the redeem request was made, in case that value changes while this replace is pending. 
 ``btcAddress``          BtcAddress   Vault's Bitcoin payment address.
