@@ -10,7 +10,6 @@ The Collateral module is the central storage for collateral provided by users an
 It allows to (i) lock, (ii) release, and (iii) slash collateral of either users or vaults.
 It can only be accessed by other modules and not directly through external transactions.
 
-
 Step-by-Step
 ------------
 
@@ -23,34 +22,30 @@ The protocol has three different "sub-protocols".
 Data Model
 ~~~~~~~~~~
 
-Scalars
--------
-
-TotalCollateral
-...............
-
-The total collateral provided.
-
-
-.. Enums
-.. -----
-.. 
-.. CollateralType
-.. ..............
-.. 
-.. Types of accepted collateral. 
-.. 
-.. .. note:: For now, only DOT is accepted as collateral.
-
-
 Maps
 ----
 
-CollateralBalances
-..................
+Accounts
+........
 
-Mapping from accounts to their collateral balances.
+Mapping from accounts to the ``Account`` struct.
 
+Structs
+-------
+
+Account
+.......
+
+Stores the balances of a single account.
+
+.. tabularcolumns:: |l|l|L|
+
+======================  ==========  =======================================================	
+Parameter               Type        Description                                            
+======================  ==========  =======================================================
+``free``                Balance     Free and may be transferred without restriction.
+``reserved``            Balance     Reserved and may not be used by holder until unlocked.
+======================  ==========  =======================================================
 
 Functions
 ~~~~~~~~~
@@ -67,82 +62,64 @@ Specification
 
 *Function Signature*
 
-``lockCollateral(sender, amount)``
+``lockCollateral(account, amount)``
 
 *Parameters*
 
-* ``sender``: The sender wishing to lock collateral.
+* ``account``: The account locking collateral.
 * ``amount``: The amount of collateral.
-
 
 *Events*
 
-* ``LockCollateral(sender, amount)``: Issues an event when collateral is locked.
+* :ref:`lockCollateralEvent`
 
-Precondition
-............
+*Preconditions*
 
-* The function must be called by any of the four modules: :ref:`issue-protocol`, :ref:`redeem-protocol`, :ref:`replace-protocol`, or :ref:`Vault-registry`.
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
+* The account MUST have sufficient free balance.
 
-Function Sequence
-.................
+*Postconditions*
 
-1. Add the ``amount`` of provided collateral to the ``CollateralBalances`` of the ``sender``.
-2. Increase ``TotalCollateral`` by ``amount``.
+* The account's free balance MUST decrease by ``amount``.
+* The account's reserved balance MUST increase by ``amount``.
 
 .. _releaseCollateral:
 
 releaseCollateral
 -----------------
 
-When any of the issue, redeem, or replace protocols are completed successfully the party that has initially provided collateral receives their collateral back.
+When a protocol has completed successfully, we unlock the account's collateral.
 
 Specification
 .............
 
 *Function Signature*
 
-``releaseCollateral(sender, amount)``
+``releaseCollateral(account, amount)``
 
 *Parameters*
 
-* ``sender``: The sender getting returned its collateral.
+* ``account``: The account unlocking collateral.
 * ``amount``: The amount of collateral.
-
 
 *Events*
 
-* ``ReleaseCollateral(sender, amount)``: Issues an event when collateral is released.
+* :ref:`releaseCollateralEvent`
 
-*Errors*
+*Preconditions*
 
-* ``ERR_INSUFFICIENT_COLLATERAL_AVAILABLE``: The ``sender`` has less collateral stored than the requested ``amount``.
+* The account MUST have sufficient reserved balance.
 
-Precondition
-............
+*Postconditions*
 
-* The function must be called by any of the four modules: :ref:`issue-protocol`, :ref:`redeem-protocol`, :ref:`replace-protocol`, or :ref:`Vault-registry`.
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
-
-Function Sequence
-.................
-
-1. Check if the ``amount`` is less or equal to the ``CollateralBalances`` of the ``sender``. If not, throw ``ERR_INSUFFICIENT_COLLATERAL_AVAILABLE``.
-
-2. Deduct the ``amount`` from the ``sender``'s ``CollateralBalances``.
-
-3. Deduct the ``amount`` from the ``TotalCollateral``.
-
-4. Transfer the ``amount`` to the ``sender``.
-
+* The account's reserved balance MUST decrease by ``amount``.
+* The account's free balance MUST increase by ``amount``.
 
 .. _slashCollateral:
 
 slashCollateral
 -----------------
 
-When any of the issue, redeem, or replace protocols are not completed in time, the party that has initially provided collateral (``sender``) is slashed and the collateral is transferred to another party (``receiver``).
+When a protocol has not completed successfully, the origin account (``sender``) is slashed and the collateral is transferred to another party (``receiver``).
 
 Specification
 .............
@@ -153,39 +130,27 @@ Specification
 
 *Parameters*
 
-* ``sender``: The sender that initially provided the collateral.
+* ``sender``: The sender that to slash.
 * ``receiver``: The receiver of the collateral.
 * ``amount``: The amount of collateral.
 
-
 *Events*
 
-* ``SlashCollateral(sender, receiver, amount)``: Issues an event when collateral is slashed.
+* :ref:`slashCollateralEvent`
 
-*Errors*
+*Preconditions*
 
-* ``ERR_INSUFFICIENT_COLLATERAL_AVAILABLE``: The ``sender`` has less collateral stored than the requested ``amount``.
+* The sender MUST have sufficient reserved balance.
 
+*Postconditions*
 
-Precondition
-............
-
-* The function must be called by any of the four modules: :ref:`issue-protocol`, :ref:`redeem-protocol`, :ref:`replace-protocol`, or :ref:`Vault-registry`.
-* The BTC Parachain status in the :ref:`security` component must be set to ``RUNNING:0``.
-
-Function Sequence
-.................
-
-1. Check if the ``amount`` is less or equal to the ``CollateralBalances`` of the ``sender``. If not, throw ``ERR_INSUFFICIENT_COLLATERAL_AVAILABLE``.
-
-2. Deduct the ``amount`` from the ``sender``'s ``CollateralBalances``.
-
-3. Deduct the ``amount`` from the ``TotalCollateral``.
-
-4. Transfer the ``amount`` to the ``receiver``.
+* The sender's reserved balance MUST decrease by ``amount``.
+* The receiver's free balance MUST increase by ``amount``.
 
 Events
 ~~~~~~
+
+.. _lockCollateralEvent:
 
 LockCollateral
 --------------
@@ -205,6 +170,7 @@ Emit a ``LockCollateral`` event when a sender locks collateral.
 
 * :ref:`lockCollateral`
 
+.. _releaseCollateralEvent:
 
 ReleaseCollateral
 -----------------
@@ -224,6 +190,7 @@ Emit a ``ReleaseCollateral`` event when a sender releases collateral.
 
 * :ref:`releaseCollateral`
 
+.. _slashCollateralEvent:
 
 SlashCollateral
 ----------------
@@ -247,8 +214,8 @@ Emit a ``SlashCollateral`` event when a sender's collateral is slashed and trans
 Errors
 ~~~~~~
 
-``ERR_INSUFFICIENT_COLLATERAL_AVAILABLE```
+``ERR_INSUFFICIENT_BALANCE```
 
-* **Message**: "The sender's collateral balance is below the requested amount."
-* **Function**: :ref:`releaseCollateral` | :ref:`slashCollateral`
+* **Message**: "The sender's balance is below the requested amount."
+* **Function**: :ref:`lockCollateral` | :ref:`releaseCollateral` | :ref:`slashCollateral`
 * **Cause**: the ``sender`` has less collateral stored than the requested ``amount``.
