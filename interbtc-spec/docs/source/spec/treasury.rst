@@ -121,6 +121,8 @@ Specification
 
 *Preconditions*
 
+* The function MUST ONLY be called as part of the :ref:`issue-protocol`.
+
 *Postconditions*
 
 * The account's free balance MUST increase by ``amount``.
@@ -186,6 +188,7 @@ Specification
 *Preconditions*
 
 * The account MUST have sufficient reserved balance.
+* The function MUST ONLY be called from the :ref:`redeem-protocol`.
 
 *Postconditions*
 
