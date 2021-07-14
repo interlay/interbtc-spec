@@ -11,12 +11,12 @@ Safety Failures
 
 A safety failure occurs in two cases:
 
-#. **Theft**: a Vault is considered to have committed theft if it moves/spends BTC unauthorized by the interbtc bridge. Theft is detected and reported by Relayers via an SPV proof.
+#. **Theft**: a Vault is considered to have committed theft if it moves/spends BTC unauthorized by the interBTC bridge. Theft is detected and reported by Relayers via an SPV proof.
 #. **Severe Undercollteralization**: a Vaults drops below the ``110%`` liquidation collateral threshold.
 
 In both cases, the Vault’s entire BTC holdings are liquidated and its DOT collateral is slashed - up to 150% (secure collateral threshold) of the liquidated BTC value.
 
-Consequently, the bridge offers users to burn ("Burn Event") their tokens to restore the 1:1 balance between the issued (e.g., interbtc) and locked asset (e.g., BTC).
+Consequently, the bridge offers users to burn ("Burn Event") their tokens to restore the 1:1 balance between the issued (e.g., interBTC) and locked asset (e.g., BTC).
 
 Crash Failures
 ~~~~~~~~~~~~~~
@@ -45,7 +45,7 @@ The Vault loses access to at least part of its backing collateral:
 * Of the confiscated collateral, an amount of ``confiscatedCollateral * (toBeRedeemed / (issued + toBeIssued))`` stays locked in the Vault, and the rest is moved to the Liquidation Vault. This is in anticipation of vaults being able to complete ongoing redeem and replace requests. When these requests succeed, the liquidated Vault's collateral is returned. When the requests fail (i.e., the ``cancel`` calls are being made), the remaining collateral is slashed to the Liquidation Vault.
 
 
-When the Liquidation Vault contains tokens, users can do a liquidation_redeem ("burn event"). Users can call this function to burn interbtc and receive DOT in return. 
+When the Liquidation Vault contains tokens, users can do a liquidation_redeem ("burn event"). Users can call this function to burn interBTC and receive DOT in return. 
 
 * The user receives ``liquidationVault.collateral * (burnedTokens / (issued + toBeIssued)`` in its free balance. 
 * At most ``liquidationVault.issued - liquidationVault.toBeRedeemed`` tokens can be burned.

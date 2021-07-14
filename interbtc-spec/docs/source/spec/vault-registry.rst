@@ -44,9 +44,9 @@ SecureCollateralThreshold
 Determines the over-collateralization rate for collateral locked by Vaults, necessary for issuing tokens. 
 
 The Vault can take on issue requests depending on the collateral it provides and under consideration of the ``SecureCollateralThreshold``.
-The maximum amount of interbtc a vault is able to support during the issue process is based on the following equation:
+The maximum amount of interBTC a vault is able to support during the issue process is based on the following equation:
 
-:math:`\text{max(interbtc)} = \text{collateral} * \text{ExchangeRate} / \text{SecureCollateralThreshold}`.
+:math:`\text{max(interBTC)} = \text{collateral} * \text{ExchangeRate} / \text{SecureCollateralThreshold}`.
 
 * The Secure Collateral Threshold MUST be greater than the Liquidation Threshold.
 * The Secure Collateral Threshold MUST be greater than the Premium Redeem Threshold.
@@ -75,7 +75,7 @@ Determines the lower bound for the collateral rate in issued tokens. If a Vaultâ
 LiquidationVault
 .................
 
-Account identifier of an artificial vault maintained by the VaultRegistry to handle interbtc balances and DOT collateral of liquidated Vaults. That is, when a vault is liquidated, its balances are transferred to ``LiquidationVault`` and claims are later handled via the ``LiquidationVault``.
+Account identifier of an artificial vault maintained by the VaultRegistry to handle interBTC balances and DOT collateral of liquidated Vaults. That is, when a vault is liquidated, its balances are transferred to ``LiquidationVault`` and claims are later handled via the ``LiquidationVault``.
 
 
 .. note:: A Vault's token balances and DOT collateral are transferred to the ``LiquidationVault`` as a result of automated liquidations and :ref:`reportVaultTheft`.
@@ -104,11 +104,11 @@ Stores the information of a Vault.
 =========================  ==================  ========================================================
 Parameter                  Type                Description
 =========================  ==================  ========================================================
-``toBeIssuedTokens``       interbtc            Number of interbtc tokens currently requested as part of an uncompleted issue request.
-``issuedTokens``           interbtc            Number of interbtc tokens actively issued by this Vault.
-``toBeRedeemedTokens``     interbtc            Number of interbtc tokens reserved by pending redeem and replace requests. 
+``toBeIssuedTokens``       interBTC            Number of interBTC tokens currently requested as part of an uncompleted issue request.
+``issuedTokens``           interBTC            Number of interBTC tokens actively issued by this Vault.
+``toBeRedeemedTokens``     interBTC            Number of interBTC tokens reserved by pending redeem and replace requests. 
 ``collateral``             DOT                 Total amount of collateral provided by this vault (note: "free" collateral is calculated on the fly and updated each time new exchange rate data is received).
-``toBeReplacedTokens``     interbtc            Number of interbtc tokens requested for replacement.
+``toBeReplacedTokens``     interBTC            Number of interBTC tokens requested for replacement.
 ``replaceCollateral``      DOT                 Griefing collateral to be used for accepted replace requests.
 ``backingCollateral``      DOT                 The total amount of collateral the vault uses as insurance for the issued tokens.
 ``wallet``                 Wallet<BtcAddress>  A set of Bitcoin address(es) of this vault, used for theft detection. Additionally, it contains the btcPublicKey used for generating deposit addresses in the issue process. 
@@ -272,7 +272,7 @@ Precondition
 withdrawCollateral
 ------------------
 
-A vault can withdraw its *free* collateral at any time, as long as the collateralization ratio remains above the ``SecureCollateralThreshold``. Collateral that is currently being used to back issued interbtc remains locked until the vault is used for a redeem request (full release can take multiple redeem requests).
+A vault can withdraw its *free* collateral at any time, as long as the collateralization ratio remains above the ``SecureCollateralThreshold``. Collateral that is currently being used to back issued interBTC remains locked until the vault is used for a redeem request (full release can take multiple redeem requests).
 
 
 Specification
@@ -320,7 +320,7 @@ Functions called from other pallets
 tryIncreaseToBeIssuedTokens
 ---------------------------
 
-During an issue request function (:ref:`requestIssue`), a user must be able to assign a vault to the issue request. As a vault can be assigned to multiple issue requests, race conditions may occur. To prevent race conditions, a Vault's collateral is *reserved* when an ``IssueRequest`` is created - ``toBeIssuedTokens`` specifies how much interbtc is to be issued (and the reserved collateral is then calculated based on :ref:`getExchangeRate`).
+During an issue request function (:ref:`requestIssue`), a user must be able to assign a vault to the issue request. As a vault can be assigned to multiple issue requests, race conditions may occur. To prevent race conditions, a Vault's collateral is *reserved* when an ``IssueRequest`` is created - ``toBeIssuedTokens`` specifies how much interBTC is to be issued (and the reserved collateral is then calculated based on :ref:`getExchangeRate`).
 
 Specification
 .............
@@ -332,7 +332,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of interbtc to be locked.
+* ``tokens``: The amount of interBTC to be locked.
 
 *Events*
 
@@ -368,7 +368,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of interbtc to be unreserved.
+* ``tokens``: The amount of interBTC to be unreserved.
 
 *Events*
 
@@ -403,7 +403,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of interbtc that were just issued.
+* ``tokens``: The amount of interBTC that were just issued.
 
 
 *Events*
@@ -442,7 +442,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of interbtc to be redeemed.
+* ``tokens``: The amount of interBTC to be redeemed.
 
 *Events*
 
@@ -476,7 +476,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of interbtc not to be redeemed.
+* ``tokens``: The amount of interBTC not to be redeemed.
 
 
 *Events*
@@ -514,7 +514,7 @@ Specification
 
 * ``vaultId``: The BTC Parachain address of the Vault.
 * ``userId``: The BTC Parachain address of the user that made the redeem request.
-* ``tokens``: The amount of interbtc that were not redeemed.
+* ``tokens``: The amount of interBTC that were not redeemed.
 
 
 *Events*
@@ -599,8 +599,8 @@ Specification
 
 *Parameters*
 
-* ``redeemerId`` : The account of the user redeeming interbtc.
-* ``tokens``: The amount of interbtc to be burned, in exchange for collateral.
+* ``redeemerId`` : The account of the user redeeming interBTC.
+* ``tokens``: The amount of interBTC to be burned, in exchange for collateral.
 
 *Events*
 
@@ -633,7 +633,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: Account identifier of the vault to be replaced.
-* ``tokens``: The amount of interbtc replaced.
+* ``tokens``: The amount of interBTC replaced.
 * ``collateral``: The extra collateral provided by the new vault as griefing collateral for potential accepted replaces. 
 
 *Returns*
@@ -675,7 +675,7 @@ Specification
 *Parameters*
 
 * ``vaultId``: Account identifier of the vault to be replaced.
-* ``tokens``: The amount of interbtc replaced.
+* ``tokens``: The amount of interBTC replaced.
 
 *Returns*
 
@@ -702,7 +702,7 @@ Specification
 replaceTokens
 -------------
 
-When a replace request successfully completes, the ``toBeRedeemedTokens`` and the ``issuedToken`` balance must be reduced to reflect that removal of interbtc from the ``oldVault``.Consequently, the ``issuedTokens`` of the ``newVault`` need to be increased by the same amount.
+When a replace request successfully completes, the ``toBeRedeemedTokens`` and the ``issuedToken`` balance must be reduced to reflect that removal of interBTC from the ``oldVault``.Consequently, the ``issuedTokens`` of the ``newVault`` need to be increased by the same amount.
 
 Specification
 .............
@@ -715,7 +715,7 @@ Specification
 
 * ``oldVault``: Account identifier of the vault to be replaced.
 * ``newVault``: Account identifier of the vault accepting the replace request.
-* ``tokens``: The amount of interbtc replaced.
+* ``tokens``: The amount of interBTC replaced.
 * ``collateral``: The collateral provided by the new vault. 
 
 
@@ -762,7 +762,7 @@ Specification
 
 * ``oldVault``: Account identifier of the vault to be replaced.
 * ``newVault``: Account identifier of the vault accepting the replace request.
-* ``tokens``: The amount of interbtc replaced.
+* ``tokens``: The amount of interBTC replaced.
 
 *Events*
 
@@ -856,7 +856,7 @@ Emit an event stating how much new (``newCollateral``), total collateral (``tota
 * ``Vault``: The account of the vault locking collateral.
 * ``newCollateral``: to-be-locked collateral in DOT.
 * ``totalCollateral``: total collateral in DOT.
-* ``freeCollateral``: collateral not "occupied" with interbtc in DOT.
+* ``freeCollateral``: collateral not "occupied" with interBTC in DOT.
 
 *Functions*
 
@@ -931,7 +931,7 @@ Emit
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of interbtc to be locked.
+* ``tokens``: The amount of interBTC to be locked.
 
 
 *Functions*
@@ -951,7 +951,7 @@ Emit
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of interbtc to be unreserved.
+* ``tokens``: The amount of interBTC to be unreserved.
 
 
 *Functions*
@@ -971,7 +971,7 @@ Emit an event when an issue request is executed.
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of interbtc that were just issued.
+* ``tokens``: The amount of interBTC that were just issued.
 
 *Functions*
 
@@ -990,7 +990,7 @@ Emit an event when a redeem request is requested.
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of interbtc to be redeemed.
+* ``tokens``: The amount of interBTC to be redeemed.
 
 *Functions*
 
@@ -1009,7 +1009,7 @@ Emit an event when a replace request cannot be completed because the vault has t
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of interbtc not to be replaced.
+* ``tokens``: The amount of interBTC not to be replaced.
 
 *Functions*
 
@@ -1029,7 +1029,7 @@ Emit an event if a redeem request cannot be fulfilled.
 
 * ``vault``: The BTC Parachain address of the Vault.
 * ``user``: The BTC Parachain address of the user that made the redeem request.
-* ``tokens``: The amount of interbtc that were not redeemed.
+* ``tokens``: The amount of interBTC that were not redeemed.
 * ``collateral``: The amount of collateral assigned to this request.
 
 *Functions*
@@ -1049,7 +1049,7 @@ Emit an event when a redeem request successfully completes.
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of interbtc redeemed.
+* ``tokens``: The amount of interBTC redeemed.
 
 *Functions*
 
@@ -1068,7 +1068,7 @@ Emit an event when a user is executing a redeem request that includes a premium.
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of interbtc redeemed.
+* ``tokens``: The amount of interBTC redeemed.
 * ``premiumDOT``: The amount of DOT to be paid to the user as a premium using the Vault's released collateral.
 * ``redeemer``: The user that redeems at a premium.
 
@@ -1088,8 +1088,8 @@ Emit an event when a redeem is executed under the ``LIQUIDATION`` status.
 
 *Parameters*
 
-* ``redeemer`` : The account of the user redeeming interbtc.
-* ``redeemDOTinBTC``: The amount of interbtc to be redeemed in DOT with the ``LiquidationVault``, denominated in BTC.
+* ``redeemer`` : The account of the user redeeming interBTC.
+* ``redeemDOTinBTC``: The amount of interBTC to be redeemed in DOT with the ``LiquidationVault``, denominated in BTC.
 
 *Functions*
 
@@ -1108,8 +1108,8 @@ Emit an event when a redeem is executed on a liquidated vault.
 
 *Parameters*
 
-* ``redeemer`` : The account of the user redeeming interbtc.
-* ``tokens``: The amount of interbtc that have been refeemed.
+* ``redeemer`` : The account of the user redeeming interBTC.
+* ``tokens``: The amount of interBTC that have been refeemed.
 * ``unlockedCollateral``: The amount of collateral that has been unlocked for the vault for this redeem.
 
 
@@ -1132,7 +1132,7 @@ Emit an event when a replace requests is successfully executed.
 
 * ``oldVault``: Account identifier of the vault to be replaced.
 * ``newVault``: Account identifier of the vault accepting the replace request.
-* ``tokens``: The amount of interbtc replaced.
+* ``tokens``: The amount of interBTC replaced.
 * ``collateral``: The collateral provided by the new vault. 
 
 *Functions*
@@ -1179,7 +1179,7 @@ Error Codes
 ``ERR_EXCEEDING_VAULT_LIMIT``
 
 * **Message**: "Issue request exceeds vault collateral limit."
-* **Cause**: The collateral provided by the vault combined with the exchange rate forms an upper limit on how much interbtc can be issued. The requested amount exceeds this limit.
+* **Cause**: The collateral provided by the vault combined with the exchange rate forms an upper limit on how much interBTC can be issued. The requested amount exceeds this limit.
 
 ``ERR_INSUFFICIENT_TOKENS_COMMITTED``
 
