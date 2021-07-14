@@ -107,7 +107,7 @@ Parameter           Type        Description
 ``amountBTC``       BTC         Amount of BTC to be sent to the user.
 ``transferFeeBTC``  BTC         Budget for the vault to spend in bitcoin inclusion fees.
 ``fee``             interbtc    Parachain fee: amount to be transferred from the user to the fee pool upon completion of the redeem.
-``premiumDOT``      DOT         Amount of DOT to be paid as a premium to this user (if the Vault's collateral rate was below ``PremiumRedeemThreshold`` at the time of redeeming).
+``premium``         DOT         Amount of DOT to be paid as a premium to this user (if the Vault's collateral rate was below ``PremiumRedeemThreshold`` at the time of redeeming).
 ``redeemer``        Account     The BTC Parachain address of the user requesting the redeem.
 ``btcAddress``      bytes[20]   Base58 encoded Bitcoin public key of the User.  
 ``btcHeight``       u32         Height of newest bitcoin block in the relay at the time the request is accepted. This is used by the clients upon startup, to determine how many blocks of the bitcoin chain they need to inspect to know if a payment has been made already.
@@ -134,12 +134,12 @@ Specification
 
 *Function Signature*
 
-``requestRedeem(redeemer, amountinterbtc, btcAddress, vault)``
+``requestRedeem(redeemer, amountWrapped, btcAddress, vault)``
 
 *Parameters*
 
 * ``redeemer``: address of the user triggering the redeem.
-* ``amountinterbtc``: the amount of interbtc to destroy and BTC to receive.
+* ``amountWrapped``: the amount of interbtc to destroy and BTC to receive.
 * ``btcAddress``: the address to receive BTC.
 * ``vault``: the vault selected for the redeem request.
 
@@ -153,37 +153,37 @@ Specification
 
 *Preconditions*
 
-Let ``burnedTokens`` be ``amountinterbtc`` minus the result of the multiplication of :ref:`redeemFee` and ``amountinterbtc``. Then:
+Let ``burnedTokens`` be ``amountWrapped`` minus the result of the multiplication of :ref:`redeemFee` and ``amountWrapped``. Then:
 
 * The function call MUST be signed by *redeemer*.
 * The BTC Parachain status in the :ref:`security` component MUST be set to ``RUNNING:0``.
 * The selected vault MUST NOT be banned.
 * The selected vault MUST NOT be liquidated.
-* The redeemer MUST have at least ``amountinterbtc`` free tokens.
+* The redeemer MUST have at least ``amountWrapped`` free tokens.
 * ``burnedTokens`` minus the inclusion fee MUST be above the :ref:`RedeemBtcDustValue`, where the inclusion fee is the multiplication of :ref:`RedeemTransactionSize` and the fee rate estimate reported by the oracle.
 * The vault's ``issuedTokens`` MUST be at least ``vault.toBeRedeemedTokens + burnedTokens``.
 
 *Postconditions*
 
-Let ``burnedTokens`` be ``amountinterbtc`` minus the result of the multiplication of :ref:`redeemFee` and ``amountinterbtc``. Then:
+Let ``burnedTokens`` be ``amountWrapped`` minus the result of the multiplication of :ref:`redeemFee` and ``amountWrapped``. Then:
 
 * The vault's ``toBeRedeemedTokens`` MUST increase by ``burnedTokens``.
-* ``amountinterbtc`` of the redeemer's tokens MUST be locked by this transaction.
+* ``amountWrapped`` of the redeemer's tokens MUST be locked by this transaction.
 * :ref:`decreaseToBeReplacedTokens` MUST be called, supplying ``vault`` and ``burnedTokens``. The returned ``replaceCollateral`` MUST be released by this function.
 * A new ``RedeemRequest`` MUST be added to the ``RedeemRequests`` map, with the following value:
    * 
-   * ``redeem.vault`` is the requested ``vault``
-   * ``redeem.opentime`` is the current :ref:`activeBlockCount`
-   * ``redeem.fee`` is :ref:`redeemFee` multiplied by ``amountinterbtc``,
-   * ``redeem.transferFeeBtc`` is the inclusion_fee, which is the multiplication of :ref:`RedeemTransactionSize` and the fee rate estimate reported by the oracle,
-   * ``redeem.amount_btc`` is ``amountinterbtc - redeem.fee - redeem.transferFeeBtc``,
-   * ``redeem.period`` is the current value of the :ref:`RedeemPeriod`,
-   * ``redeem.redeemer`` is the ``redeemer`` argument,
-   * ``redeem.btc_address`` is the ``btcAddress`` argument,
-   * ``redeem.btc_height`` is the current height of the btc relay,
-   * ``redeem.status`` is ``Pending``,
-   * If the vault's collateralization rate is above the :ref:`PremiumCollateralThreshold`, then ``redeem.premium`` is ``0``,
-   * If the vault's collateralization rate is below the :ref:`PremiumCollateralThreshold`, then ``redeem.premium`` is :ref:`premiumRedeemFee` multiplied by the worth of ``redeem.amount_btc``,
+   * ``redeem.vault`` MUST be the requested ``vault``
+   * ``redeem.opentime`` MUST be the current :ref:`activeBlockCount`
+   * ``redeem.fee`` MUST be :ref:`redeemFee` multiplied by ``amountWrapped``,
+   * ``redeem.transferFeeBtc`` MUST be the inclusion_fee, which is the multiplication of :ref:`RedeemTransactionSize` and the fee rate estimate reported by the oracle,
+   * ``redeem.amount_btc`` MUST be ``amountWrapped - redeem.fee - redeem.transferFeeBtc``,
+   * ``redeem.period`` MUST be the current value of the :ref:`RedeemPeriod`,
+   * ``redeem.redeemer`` MUST be the ``redeemer`` argument,
+   * ``redeem.btc_address`` MUST be the ``btcAddress`` argument,
+   * ``redeem.btc_height`` MUST be the current height of the btc relay,
+   * ``redeem.status`` MUST be ``Pending``,
+   * If the vault's collateralization rate is above the :ref:`PremiumCollateralThreshold`, then ``redeem.premium`` MUST be ``0``,
+   * If the vault's collateralization rate is below the :ref:`PremiumCollateralThreshold`, then ``redeem.premium`` MUST be :ref:`premiumRedeemFee` multiplied by the worth of ``redeem.amount_btc``,
 
 .. _liquidationRedeem:
 
@@ -197,12 +197,12 @@ Specification
 
 *Function Signature*
 
-``liquidationRedeem(redeemer, amountinterbtc)``
+``liquidationRedeem(redeemer, amountWrapped)``
 
 *Parameters*
 
 * ``redeemer``: address of the user triggering the redeem.
-* ``amountinterbtc``: the amount of interbtc to destroy.
+* ``amountWrapped``: the amount of interbtc to destroy.
 
 
 *Events*
@@ -214,12 +214,12 @@ Specification
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN:2``.
 * The function call MUST be signed.
-* The redeemer MUST have at least ``amountinterbtc`` free tokens.
+* The redeemer MUST have at least ``amountWrapped`` free tokens.
 
 *Postconditions*
 
-* ``amountinterbtc`` tokens MUST be burned from the user.
-* :ref:`redeemTokensLiquidation` MUST be called with ``redeemer`` and ``amountinterbtc`` as arguments.
+* ``amountWrapped`` tokens MUST be burned from the user.
+* :ref:`redeemTokensLiquidation` MUST be called with ``redeemer`` and ``amountWrapped`` as arguments.
 
 .. _executeRedeem:
 
@@ -253,14 +253,13 @@ Specification
 * The function call MUST be signed be *someone*, i.e. not necessarily the *redeemer*.
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN:2``.
 * A *pending* ``RedeemRequest`` MUST exist with an id equal to ``redeemId``.
-* The request MUST NOT have expired.
-* The ``rawTx`` MUST decode to a valid transaction that transfers the amount specified in the ``RedeemRequest`` struct. It MUST be a transaction to the correct address, and provide the expected OP_RETURN, based on the ``RedeemRequest``.
+* The ``rawTx`` MUST decode to a valid transaction that transfers exactly the amount specified in the ``RedeemRequest`` struct. It MUST be a transaction to the correct address, and provide the expected OP_RETURN, based on the ``RedeemRequest``.
 * The ``merkleProof`` MUST contain a valid proof of of ``rawTX``.
 * The bitcoin payment MUST have been submitted to the relay chain, and MUST have sufficient confirmations.
 
 *Postconditions*
 
-* ``redeemRequest.amount_btc - redeemRequest.transferFeeBtc`` of the tokens in the redeemer's account MUST be burned.
+* ``redeemRequest.amountBtc - redeemRequest.transferFeeBtc`` of the tokens in the redeemer's account MUST be burned.
 * ``redeemRequest.fee`` MUST be unlocked and transferred from the redeemer's account to the fee pool.
 * :ref:`redeemTokens` MUST be called, supplying ``redeemRequest.vault``, ``redeemRequest.amountBtc - redeemRequest.transferFeeBtc``, ``redeemRequest.premium`` and ``redeemRequest.redeemer`` as arguments.
 * ``redeemRequest.status`` MUST be set to ``Completed``.
@@ -312,8 +311,7 @@ Let ``amountIncludingParachainFee`` be equal to the worth in collateral of ``red
 * If the vault is liquidated, the redeemer MUST be transferred part of the vault's collateral: an amount of  ``vault.backingCollateral * ((amountIncludingParachainFee) / vault.to_be_redeemed_tokens)``.
 * If the vault is *not* liquidated, the fellowing collateral changes are made:
    * If ``reimburse`` is true, the user SHOULD be reimbursed the worth of ``amountIncludingParachainFee`` in collateral. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
-   * A punishment fee SHOULD be tranferred from the vault's backing collateral to the reedeemer: an amount of :ref:`punishmentFee` times the worth of ``amountIncludingParachainFee``. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
-   * An additional punishment fee SHOULD be transferred to the fee pool: an amount ranging from :ref:`LiquidationThreshold` to :ref:`PremiumCollateralThreshold` times the worth of ``amountIncludingParachainFee``, depending on the vault's SLA. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
+   * A punishment fee MUST be tranferred from the vault's backing collateral to the reedeemer: an amount ranging from :ref:`LiquidationThreshold` to :ref:`PremiumCollateralThreshold` times the worth of ``amountIncludingParachainFee``, depending on the vault's SLA. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
 * If ``reimburse`` is true: 
    * ``redeem.fee`` MUST be transferred from the vault to the fee pool.
    * If after the loss of collateral the vault is below the :ref:`SecureCollateralThreshold`:
