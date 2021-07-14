@@ -1,4 +1,4 @@
-# interbtc Spec
+# interBTC Spec
 
 ## Autobuild
 

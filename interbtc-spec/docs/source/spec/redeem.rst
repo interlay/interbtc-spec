@@ -6,17 +6,17 @@ Redeem
 Overview
 ~~~~~~~~
 
-The redeem module allows a user to receive BTC on the Bitcoin chain in return for destroying an equivalent amount of interbtc on the BTC Parachain. The process is initiated by a user requesting a redeem with a vault. The vault then needs to send BTC to the user within a given time limit. Next, the vault has to finalize the process by providing a proof to the BTC Parachain that he has send the right amount of BTC to the user. If the vault fails to deliver a valid proof within the time limit, the user can claim an equivalent amount of DOT from the vault's locked collateral to reimburse him for his loss in BTC.
+The redeem module allows a user to receive BTC on the Bitcoin chain in return for destroying an equivalent amount of interBTC on the BTC Parachain. The process is initiated by a user requesting a redeem with a vault. The vault then needs to send BTC to the user within a given time limit. Next, the vault has to finalize the process by providing a proof to the BTC Parachain that he has send the right amount of BTC to the user. If the vault fails to deliver a valid proof within the time limit, the user can claim an equivalent amount of DOT from the vault's locked collateral to reimburse him for his loss in BTC.
 
-Moreover, as part of the liquidation procedure, users are able to directly exchange interbtc for DOT. To this end, a user is able to execute a special liquidation redeem if one or multiple vaults have been liquidated.
+Moreover, as part of the liquidation procedure, users are able to directly exchange interBTC for DOT. To this end, a user is able to execute a special liquidation redeem if one or multiple vaults have been liquidated.
 
 Step-by-step
 ------------
 
-1. Precondition: A user owns interbtc.
-2. A user locks an amount of interbtc by calling the :ref:`requestRedeem` function. In this function call, the user selects a vault to execute the redeem request from the list of vaults. The function creates a redeem request with a unique hash.
+1. Precondition: A user owns interBTC.
+2. A user locks an amount of interBTC by calling the :ref:`requestRedeem` function. In this function call, the user selects a vault to execute the redeem request from the list of vaults. The function creates a redeem request with a unique hash.
 3. The selected vault listens for the ``RequestRedeem`` event emitted by the user. The vault then proceeds to transfer BTC to the address specified by the user in the :ref:`requestRedeem` function including a unique hash in the ``OP_RETURN`` of one output.
-4. The vault executes the :ref:`executeRedeem` function by providing the Bitcoin transaction from step 3 together with the redeem request identifier within the time limit. If the function completes successfully, the locked interbtc are destroyed and the user received its BTC.
+4. The vault executes the :ref:`executeRedeem` function by providing the Bitcoin transaction from step 3 together with the redeem request identifier within the time limit. If the function completes successfully, the locked interBTC are destroyed and the user received its BTC.
 5. Optional: If the user could not receive BTC within the given time (as required in step 4), the user calls :ref:`cancelRedeem` after the redeem time limit. The user can choose either to reimburse, or to retry. In case of reimbursement, the user transfer ownership of the tokens to the vault, but receives collateral in exchange. In case of retry, the user gets back its tokens. In either case, the user is given some part of the vault's collateral as compensation for the inconvenience. In addition, some amount (depending on the vault's SLA) of collateral is transferred from the vault to the fee pool.
 
    a. Optional: If during a :ref:`cancelRedeem` the user selects reimbursement, and as a result the vault becomes undercollateralized, then vault does not receive the user's tokens - they are burned, and the vault's ``issuedTokens`` decreases. When, at some later point, it gets sufficient colalteral, it can call :ref:`mintTokensForReimbursedRedeem` to get the tokens. 
@@ -85,7 +85,7 @@ Maps
 RedeemRequests
 ...............
 
-Users create redeem requests to receive BTC in return for interbtc. This mapping provides access from a unique hash ``redeemId`` to a ``Redeem`` struct. ``<redeemId, Redeem>``.
+Users create redeem requests to receive BTC in return for interBTC. This mapping provides access from a unique hash ``redeemId`` to a ``Redeem`` struct. ``<redeemId, Redeem>``.
 
 
 Structs
@@ -106,7 +106,7 @@ Parameter           Type        Description
 ``period``          u32         Value of :ref:`RedeemPeriod` when the redeem request was made, in case that value changes while this redeem is pending. 
 ``amountBTC``       BTC         Amount of BTC to be sent to the user.
 ``transferFeeBTC``  BTC         Budget for the vault to spend in bitcoin inclusion fees.
-``fee``             interbtc    Parachain fee: amount to be transferred from the user to the fee pool upon completion of the redeem.
+``fee``             interBTC    Parachain fee: amount to be transferred from the user to the fee pool upon completion of the redeem.
 ``premium``         DOT         Amount of DOT to be paid as a premium to this user (if the Vault's collateral rate was below ``PremiumRedeemThreshold`` at the time of redeeming).
 ``redeemer``        Account     The BTC Parachain address of the user requesting the redeem.
 ``btcAddress``      bytes[20]   Base58 encoded Bitcoin public key of the User.  
@@ -139,7 +139,7 @@ Specification
 *Parameters*
 
 * ``redeemer``: address of the user triggering the redeem.
-* ``amountWrapped``: the amount of interbtc to destroy and BTC to receive.
+* ``amountWrapped``: the amount of interBTC to destroy and BTC to receive.
 * ``btcAddress``: the address to receive BTC.
 * ``vault``: the vault selected for the redeem request.
 
@@ -190,7 +190,7 @@ Let ``burnedTokens`` be ``amountWrapped`` minus the result of the multiplication
 liquidationRedeem
 -----------------
 
-A user executes a liquidation redeem that exchanges interbtc for DOT from the `LiquidationVault`. The 1:1 backing is being recovered, hence this function burns interbtc without releasing any BTC. 
+A user executes a liquidation redeem that exchanges interBTC for DOT from the `LiquidationVault`. The 1:1 backing is being recovered, hence this function burns interBTC without releasing any BTC. 
 
 Specification
 .............
@@ -202,7 +202,7 @@ Specification
 *Parameters*
 
 * ``redeemer``: address of the user triggering the redeem.
-* ``amountWrapped``: the amount of interbtc to destroy.
+* ``amountWrapped``: the amount of interBTC to destroy.
 
 
 *Events*
@@ -290,7 +290,7 @@ Specification
 *Parameters*
 
 * ``redeemId``: the unique hash of the redeem request.
-* ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the vault, or wishes to keep the interbtc (and retry to redeem with another Vault).
+* ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the vault, or wishes to keep the interBTC (and retry to redeem with another Vault).
 
 
 *Events*
@@ -346,7 +346,7 @@ Specification
 *Parameters*
 
 * ``redeemId``: the unique hash of the redeem request.
-* ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the vault, or wishes to keep the interbtc (and retry to redeem with another Vault).
+* ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the vault, or wishes to keep the interBTC (and retry to redeem with another Vault).
 
 *Events*
 
@@ -407,7 +407,7 @@ Emit an event when a user does a liquidation redeem.
 *Parameters*
 
 * ``redeemer``: address of the user triggering the redeem.
-* ``amountinterbtc``: the amount of interbtc to burned.
+* ``amountinterbtc``: the amount of interBTC to burned.
 
 *Functions*
 
@@ -426,7 +426,7 @@ Emit an event when a redeem request is successfully executed by a vault.
 
 * ``redeemer``: address of the user triggering the redeem.
 * ``redeemId``: the unique hash created during the ``requestRedeem`` function.
-* ``amountinterbtc``: the amount of interbtc to destroy and BTC to receive.
+* ``amountinterbtc``: the amount of interBTC to destroy and BTC to receive.
 * ``vault``: the vault responsible for executing this redeem request.
 
 
@@ -490,7 +490,7 @@ Error Codes
 
 * **Message**: "The requested amount exceeds the user's balance."
 * **Function**: :ref:`requestRedeem`, :ref:`liquidationRedeem`
-* **Cause**: If the user is trying to redeem more BTC than his interbtc balance.
+* **Cause**: If the user is trying to redeem more BTC than his interBTC balance.
 
 ``ERR_VAULT_BANNED``
 
