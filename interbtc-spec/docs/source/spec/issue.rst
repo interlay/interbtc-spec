@@ -196,7 +196,8 @@ Specification
     * The Vault's ``toBeIssuedTokens`` MUST decrease by the deficit (``issue.amount - amountTransferred``).
     * The ``issue.fee`` MUST be updated to the amount transferred multiplied by the :ref:`issueFee`.
     * The ``issue.amount`` MUST be set to the amount transferred minus the updated ``issue.fee``.
-    * The Vault's free balance MUST increase by the ``griefingCollateral``.
+    * The requester's free balance MUST increase by ``(griefingCollateral * amountTransferred) / (issue.amount + issue.fee)``.
+    * The Vault's free balance MUST increase by the leftover ``griefingCollateral``.
     * The ``issue.status`` MUST be set to ``Completed``.
 
 * If the amount transferred IS NOT less than the expected amount:
