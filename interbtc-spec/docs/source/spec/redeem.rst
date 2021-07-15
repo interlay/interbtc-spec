@@ -149,7 +149,7 @@ Specification
 
 *Events*
 
-* ``RequestRedeem(redeemId, redeemer, amount, vault, btcAddress)``
+* :ref:`requestRedeemEvent`
 
 *Preconditions*
 
@@ -207,8 +207,7 @@ Specification
 
 *Events*
 
-* ``RequestRedeem(redeemID, redeemer, redeemAmountWrapped, feeWrapped, premium, vaultID, userBtcAddress, transferFeeBtc)``
-
+* :ref:`liquidationRedeemEvent`
 
 *Preconditions*
 
@@ -245,8 +244,7 @@ Specification
 
 *Events*
 
-* ``ExecuteRedeem(redeemer, redeemId, amount, vault)``:
-
+* :ref:`executeRedeemEvent`
 
 *Preconditions*
 
@@ -295,7 +293,7 @@ Specification
 
 *Events*
 
-``CancelRedeem(redeemId, redeemer, amountBtc, fee, vault)``: Emits an event with the ``redeemId`` that is cancelled.
+* :ref:`cancelRedeemEvent`
 
 *Preconditions*
 
@@ -350,7 +348,7 @@ Specification
 
 *Events*
 
-``MintTokensForReimbursedRedeem(vaultId, redeemId, amountMinted)``
+* :ref:`mintTokensForReimbursedRedeemEvent`
 
 *Preconditions*
 
@@ -370,6 +368,8 @@ Specification
 
 Events
 ~~~~~~~
+
+.. _requestRedeemEvent:
 
 RequestRedeem
 -------------
@@ -395,6 +395,8 @@ Emit an event when a redeem request is created. This event needs to be monitored
 
 * ref:`requestRedeem`
 
+.. _liquidationRedeemEvent:
+
 LiquidationRedeem
 -----------------
 
@@ -412,6 +414,8 @@ Emit an event when a user does a liquidation redeem.
 *Functions*
 
 * ref:`liquidationRedeem`
+
+.. _executeRedeemEvent:
 
 ExecuteRedeem
 -------------
@@ -434,6 +438,7 @@ Emit an event when a redeem request is successfully executed by a vault.
 
 * ref:`executeRedeem`
 
+.. _cancelRedeemEvent:
 
 CancelRedeem
 ------------
@@ -456,6 +461,7 @@ Emit an event when a user cancels a redeem request that has not been fulfilled a
 
 * ref:`cancelRedeem`
 
+.. _mintTokensForReimbursedRedeemEvent:
 
 MintTokensForReimbursedRedeem
 -----------------------------

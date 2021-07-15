@@ -69,7 +69,7 @@ The ``txId`` is obtained as the ``sha256d()`` of the ``rawTx``.
 
 *Events*
 
-* ``ReportVaultTheft(vaultId)`` - emits an event indicating that a vault has been caught displacing BTC without permission.
+* :ref:`reportVaultTheftEvent`
 
 *Preconditions*
 
@@ -111,7 +111,7 @@ Specification
 
 *Events*
 
-* ``ReportVaultTheft(vaultId)`` - emits an event indicating that a vault has been caught displacing BTC without permission.
+* :ref:`reportVaultTheftEvent`
 
 *Preconditions*
 
@@ -131,6 +131,8 @@ Specification
 
 Events
 ~~~~~~~
+
+.. _reportVaultTheftEvent:
 
 ReportVaultTheft
 ----------------

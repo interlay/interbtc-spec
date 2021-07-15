@@ -98,7 +98,7 @@ Specification
 
 *Events*
 
-* ``SetExchangeRate(oracleId, rate)``: Emits the new exchange rate when it is updated by the oracle.
+* :ref:`setExchangeRateEvent`
 
 *Preconditions*
 
@@ -133,7 +133,7 @@ Specification
 
 *Events*
 
-* ``SetSatoshiPerByte(oracleId, btcTxFeesPerByte)``: Emits the new btc fee rates when updated by the oracle.
+* :ref:`setBtcTxFeesPerByteEvent`
 
 *Preconditions*
 
@@ -189,7 +189,9 @@ Specification
 Events
 ~~~~~~
 
-setExchangeRate
+.. _setExchangeRateEvent:
+
+SetExchangeRate
 ---------------
 
 Emits the new exchange rate when it is updated by the oracle.
@@ -207,7 +209,9 @@ Emits the new exchange rate when it is updated by the oracle.
 
 * :ref:`setExchangeRate`
 
-setBtcTxFeesPerByte
+.. _setBtcTxFeesPerByteEvent:
+
+SetBtcTxFeesPerByte
 -------------------
 
 Emits the new tx fee rates when they are updated by the oracle.

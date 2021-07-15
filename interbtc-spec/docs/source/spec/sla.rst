@@ -134,10 +134,12 @@ Specification
 
 *Events*
 
-* ``UpdateSLA``
+* :ref:`updateSlaEvent`
 
 Events
 ~~~~~~
+
+.. _updateSlaEvent:
 
 UpdateSLA
 ---------
