@@ -57,6 +57,13 @@ The time difference between when an issue request is created and required comple
 Concretely, this period is the amount by which :ref:`activeBlockCount` is allowed to increase before the issue is considered to be expired.
 The period has an upper limit to prevent griefing of Vault collateral.
 
+.. _issueBtcDustValue:
+
+IssueBtcDustValue
+.................
+
+The minimum amount of BTC that is required for issue requests; lower values would risk the rejection of payment on Bitcoin.
+
 Maps
 ----
 
@@ -128,6 +135,7 @@ Specification
 * The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
 * The :ref:`btc-relay` MUST be initialized.
 * The Vault MUST be registered and active.
+* The ``amount`` MUST be greater than or equal to :ref:`issueBtcDustValue`.
 * The ``griefingCollateral`` MUST exceed the value of request ``amount`` at the current exchange-rate, multiplied by :ref:`issueGriefingCollateral`.
 * The :ref:`tryIncreaseToBeIssuedTokens` function MUST return a new BTC deposit address for the Vault ensuring that the Vault's free collateral is above the :ref:`SecureCollateralThreshold` for the requested ``amount`` and that a unique BTC address is used for depositing BTC.
 * A new unique ``issuedId`` MUST be generated via the :ref:`generateSecureId` function.
