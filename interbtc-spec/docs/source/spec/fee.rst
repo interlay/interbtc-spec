@@ -146,7 +146,7 @@ Specification
 
 *Events*
 
-* ``WithdrawRewards(account, amount)``
+* :ref:`withdrawRewardsEvent`
 
 *Preconditions*
 
@@ -159,6 +159,8 @@ Specification
 
 Events
 ~~~~~~
+
+.. _withdrawRewardsEvent:
 
 WithdrawRewards
 ---------------

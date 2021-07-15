@@ -254,7 +254,7 @@ Specification
 
 *Events*
 
-* ``NominationOptIn(vaultId)``
+* :ref:`nominationOptInEvent`
 
 *Preconditions*
 
@@ -287,7 +287,7 @@ Specification
 
 *Events*
 
-* ``NominationOptOut(vaultId)``
+* :ref:`nominationOptOutEvent`
 
 *Preconditions*
 
@@ -321,7 +321,7 @@ Specification
 
 *Events*
 
-* ``DepositCollateral(vaultId, nominatorId, amount)``
+* :ref:`depositNominationCollateralEvent`
 
 *Preconditions*
 
@@ -358,7 +358,7 @@ Specification
 
 *Events*
 
-* ``WithdrawCollateral(vaultId, nominatorId, amount)``
+* :ref:`withdrawNominationCollateralEvent`
 
 *Preconditions*
 
@@ -378,6 +378,8 @@ Specification
 Events
 ~~~~~~
 
+.. _nominationOptInEvent:
+
 NominationOptIn
 ---------------
 
@@ -393,6 +395,7 @@ NominationOptIn
 
 * :ref:`optInToNomination`
 
+.. _nominationOptOutEvent:
 
 NominationOptOut
 ----------------
@@ -409,6 +412,7 @@ NominationOptOut
 
 * :ref:`optOutOfNomination`
 
+.. _depositNominationCollateralEvent:
 
 DepositCollateral
 -----------------
@@ -427,6 +431,7 @@ DepositCollateral
 
 * :ref:`depositNominationCollateral`
 
+.. _withdrawNominationCollateralEvent:
 
 WithdrawCollateral
 ------------------

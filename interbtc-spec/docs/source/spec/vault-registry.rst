@@ -145,7 +145,7 @@ Specification
 
 *Events*
 
-* ``RegisterVault(Vault, collateral)``: emit an event stating that a new vault (``vault``) was registered and provide information on the Vault's collateral (``collateral``). 
+* :ref:`registerVaultEvent`
 
 *Preconditions*
 
@@ -183,7 +183,7 @@ Specification
 
 *Events*
 
-* ``RegisterAddress(vaultId, address)``
+* :ref:`registerAddressEvent`
 
 
 
@@ -219,7 +219,7 @@ Specification
 
 *Events*
 
-* ``UpdatePublicKey(vaultId, publicKey)``
+* :ref:`updatePublicKeyEvent`
 
 
 *Preconditions*
@@ -253,7 +253,7 @@ Specification
 
 *Events*
 
-* ``DepositCollateral(vaultId, newCollateral, totalCollateral, freeCollateral)``: emit an event stating how much new (``newCollateral``), total collateral (``totalCollateral``) and freely available collateral (``freeCollateral``) the vault calling this function has locked.
+* :ref:`depositCollateralEvent`
 
 Precondition
 ............
@@ -289,7 +289,7 @@ Specification
 
 *Events*
 
-* ``WithdrawCollateral(vaultId, withdrawAmount, totalCollateral)``: emit emit an event stating how much collateral was withdrawn by the vault and total collateral a vault has left.
+* :ref:`withdrawCollateralEvent`
 
 *Preconditions*
 
@@ -336,7 +336,7 @@ Specification
 
 *Events*
 
-* ``IncreaseToBeIssuedTokens(vaultId, tokens)``
+* :ref:`increaseToBeIssuedTokensEvent`
 
 
 *Preconditions*
@@ -372,7 +372,7 @@ Specification
 
 *Events*
 
-* ``DecreaseToBeIssuedTokens(vaultId, tokens)``
+* :ref:`decreaseToBeIssuedTokensEvent`
 
 *Preconditions*
 
@@ -408,7 +408,7 @@ Specification
 
 *Events*
 
-* ``IssueTokens(vaultId, tokens)``: Emit an event when an issue request is executed.
+* :ref:`issueTokensEvent`
 
 
 *Preconditions*
@@ -446,7 +446,7 @@ Specification
 
 *Events*
 
-* ``IncreaseToBeRedeemedTokens(vaultId, tokens)``: Emit an event when a redeem request is requested.
+* :ref:`increaseToBeRedeemedTokensEvent`
 
 *Preconditions*
 
@@ -481,7 +481,7 @@ Specification
 
 *Events*
 
-* ``DecreaseToBeRedeemedTokens(vaultId, tokens)``: Emit an event when a redeem request is cancelled.
+* :ref:`decreaseToBeRedeemedTokensEvent`
 
 *Preconditions*
 
@@ -519,7 +519,7 @@ Specification
 
 *Events*
 
-* ``DecreaseTokens(vaultId, userId, tokens)``: Emit an event if a redeem request cannot be fulfilled.
+* :ref:`decreaseTokensEvent`
 
 *Preconditions*
 
@@ -561,9 +561,9 @@ Specification
 
 One of:
 
-* ``RedeemTokens(vault, tokens)``: Emit an event when a redeem request successfully completes.
-* ``RedeemTokensPremium(vaultId, tokens, premium, redeemerId)``: Emit an event when a redeem event with a non-zero premium completes.
-* ``RedeemTokensLiquidatedVault(vaultId, tokens, amount)``: Emit an event when a redeem is executed on a liquidated vault.
+* :ref:`redeemTokensEvent`
+* :ref:`redeemTokensPremiumEvent`
+* :ref:`redeemTokensLiquidatedVaultEvent`
 
 *Preconditions*
 
@@ -604,7 +604,7 @@ Specification
 
 *Events*
 
-* ``RedeemTokensLiquidation(redeemerId, tokens, reward)``: Emit an event when a liquidation redeem is executed.
+* :ref:`redeemTokensLiquidationEvent`
 
 *Preconditions*
 
@@ -638,11 +638,7 @@ Specification
 
 *Returns*
 
-* A tupple of the new total ``toBeReplacedTokens`` and ``replaceCollateral``.
-  
-*Events*
-
-* ``IncreaseToBeReplacedTokens(vaultId, tokens)``: Emit an event when a replacement is requested for additional tokens.
+* A tuple of the new total ``toBeReplacedTokens`` and ``replaceCollateral``.
 
 *Preconditions*
 
@@ -679,7 +675,7 @@ Specification
 
 *Returns*
 
-* A tupple of the new total ``toBeReplacedTokens`` and ``replaceCollateral``.
+* A tuple of the new total ``toBeReplacedTokens`` and ``replaceCollateral``.
   
 
 *Preconditions*
@@ -721,7 +717,7 @@ Specification
 
 *Events*
 
-* ``ReplaceTokens(oldVault, newVault, tokens, collateral)``: Emit an event when a replace requests is successfully executed.
+* :ref:`replaceTokensEvent`
 
 *Preconditions*
 
@@ -764,10 +760,6 @@ Specification
 * ``newVault``: Account identifier of the vault accepting the replace request.
 * ``tokens``: The amount of interBTC replaced.
 
-*Events*
-
-* ``CancelReplaceTokens(oldVault, newVault, tokens, collateral)``: Emit an event when a replace requests is cancelled.
-
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
@@ -807,7 +799,7 @@ Specification
 
 *Events*
 
-* ``LiquidateVault(vault)``: Emit an event indicating that the vault with ``vault`` account identifier has been liquidated.
+* :ref:`liquidateVaultEvent`
 
 *Preconditions*
 
@@ -821,6 +813,8 @@ Specification
 
 Events
 ~~~~~~
+
+.. _registerVaultEvent:
 
 RegisterVault
 -------------
@@ -840,7 +834,7 @@ Emit an event stating that a new vault (``vault``) was registered and provide in
 
 * :ref:`registerVault`
 
-.. _event_DepositCollateral:
+.. _depositCollateralEvent:
 
 DepositCollateral
 ------------------------
@@ -862,6 +856,7 @@ Emit an event stating how much new (``newCollateral``), total collateral (``tota
 
 * :ref:`depositCollateral`
 
+.. _withdrawCollateralEvent:
 
 WithdrawCollateral
 ------------------
@@ -882,6 +877,8 @@ Emit emit an event stating how much collateral was withdrawn by the vault and to
 
 * :ref:`withdrawCollateral`
 
+.. _registerAddressEvent:
+
 RegisterAddress
 ---------------
 
@@ -900,6 +897,7 @@ Emit an event stating that a vault (``vault``) registered a new address (``addre
 
 * :ref:`registerAddress`
 
+.. _updatePublicKeyEvent:
 
 UpdatePublicKey
 ---------------
@@ -919,8 +917,10 @@ Emit an event stating that a vault (``vault``) registered a new address (``addre
 
 * :ref:`updatePublicKey`
 
+.. _increaseToBeIssuedTokensEvent:
+
 IncreaseToBeIssuedTokens
----------------------------
+------------------------
 
 Emit 
 
@@ -938,6 +938,7 @@ Emit
 
 * :ref:`tryIncreaseToBeIssuedTokens`
 
+.. _decreaseToBeIssuedTokensEvent:
 
 DecreaseToBeIssuedTokens
 ------------------------
@@ -958,6 +959,7 @@ Emit
 
 * :ref:`decreaseToBeIssuedTokens`
 
+.. _issueTokensEvent:
 
 IssueTokens
 -----------
@@ -977,6 +979,7 @@ Emit an event when an issue request is executed.
 
 * :ref:`issueTokens`
 
+.. _increaseToBeRedeemedTokensEvent:
 
 IncreaseToBeRedeemedTokens
 --------------------------
@@ -996,6 +999,7 @@ Emit an event when a redeem request is requested.
 
 * :ref:`tryIncreaseToBeRedeemedTokens`
 
+.. _decreaseToBeRedeemedTokensEvent:
 
 DecreaseToBeRedeemedTokens
 --------------------------
@@ -1015,6 +1019,7 @@ Emit an event when a replace request cannot be completed because the vault has t
 
 * :ref:`decreaseToBeRedeemedTokens`
 
+.. _decreaseTokensEvent:
 
 DecreaseTokens
 --------------
@@ -1036,6 +1041,7 @@ Emit an event if a redeem request cannot be fulfilled.
 
 * :ref:`decreaseTokens`
 
+.. _redeemTokensEvent:
 
 RedeemTokens
 ------------
@@ -1055,6 +1061,7 @@ Emit an event when a redeem request successfully completes.
 
 * :ref:`redeemTokens`
 
+.. _redeemTokensPremiumEvent:
 
 RedeemTokensPremium
 -------------------
@@ -1076,6 +1083,7 @@ Emit an event when a user is executing a redeem request that includes a premium.
 
 * :ref:`redeemTokens`
 
+.. _redeemTokensLiquidationEvent:
 
 RedeemTokensLiquidation
 -----------------------
@@ -1095,7 +1103,7 @@ Emit an event when a redeem is executed under the ``LIQUIDATION`` status.
 
 * :ref:`redeemTokensLiquidation`
 
-
+.. _redeemTokensLiquidatedVaultEvent:
 
 RedeemTokensLiquidatedVault
 ---------------------------
@@ -1117,7 +1125,7 @@ Emit an event when a redeem is executed on a liquidated vault.
 
 * :ref:`redeemTokens`
 
-
+.. _replaceTokensEvent:
 
 ReplaceTokens
 -------------
@@ -1139,6 +1147,7 @@ Emit an event when a replace requests is successfully executed.
 
 * :ref:`replaceTokens`
 
+.. _liquidateVaultEvent:
 
 LiquidateVault
 --------------
