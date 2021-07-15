@@ -9,17 +9,17 @@ Actors
 There are four main participant roles in the system. A high-level overview of all modules and actors, as well as interactions between them, is provided in :numref:`high-level` below.
 
 - **Vaults**: Vaults are collateralized intermediaries that are active on both the backing blockchain (Bitcoin) and the issuing blockchain to provide collateral in DOT. They receive and hold BTC from users who wish to create interBTC tokens. When a user destroys interBTC tokens, a vault releases the corresponding amount of BTC to the user's BTC address. Vaults interact with the following modules directly: :ref:`vault-registry`, :ref:`redeem-protocol`, and :ref:`replace-protocol`.
+
+  - **Reporting**: Monitors that other Vaults do not move locked BTC on Bitcoin without prior authorization by the BTC Parachain (i.e., through one of the :ref:`redeem-protocol`, :ref:`replace-protocol` or :ref:`refund-protocol` protocols).
+  - **Relaying**: Submits block headers published on Bitcoin to the :ref:`btc-relay`.
+
 - **Users**: Users interact with the BTC Parachain to create, use (trade/transfer/...), and redeem Bitcoin-backed interBTC tokens. Since the different protocol phases can be executed by different users, we introduce the following *sub-roles*:
 
   - **Requester**: A user that locks BTC with a vault on Bitcoin and issues interBTC on the BTC Parachain. Interacts with the :ref:`issue-protocol` module.
   - **Sender** and **Receiver**: A user (Sender) that sends interBTC to another user (Receiver) on the BTC Parachain. Interacts with the :ref:`treasury-module` module. 
   - **Redeemer**: A user that destroys interBTC on the BTC Parachain to receive the corresponding amount of BTC on the Bitcoin blockchain from a Vault. Interacts with the :ref:`redeem-protocol` module. 
 
-- **Staked Relayers**:  Collateralized intermediaries which run Bitcoin full nodes and (i) monitor validity and availability of transactional data for Bitcoin blocks submitted to BTC-Relay, (ii) monitor that Vaults do not move locked BTC on Bitcoin without prior authorization by the BTC Parachain (i.e., through one of the Issue, Redeem or Replace protocols). In case either of the above errors was detected, Staked Relayers report this to the BTC Parachain. Interact with the :ref:`btc-relay`, :ref:`security`, and :ref:`Vault-registry` modules. 
-
-.. todo:: The exact composition of Staked Relayers (static vs dynamic committee) and the internal agreement mechanism needs to be defined. Do Staked Relayers run a BFT protocol to create a threshold signature when reporting an error / updating the state of BTC-Relay? Who can join this committee?
-
-- **Governance Mechanism**: The Parachain Governance Mechanism monitors the correct operation of the BTC Parachain, as well as the correct behaviour of Staked Relayers (and other participants if necessary). Interacts with the :ref:`security` module when Staked Relayers misbehave and can manually interfere with the operation and parameterization of all components of the BTC Parachain.
+- **Governance Mechanism**: The Parachain Governance Mechanism monitors the correct operation of the BTC Parachain. Interacts with the :ref:`security` module and can manually update the parameterization of all components in the BTC Parachain.
 
 .. note:: The exact composition of the Governance Mechanism is to be defined by Polkadot.  
 
@@ -93,7 +93,8 @@ It tracks replace requests by existing Vaults, exposes functionality for to-be-r
 Security
 --------
 
-The Security module handles the Staked Relayers. Staked Relayers can register and vote, where applicable, on the status of the BTC Parachain. They can also report theft of BTC by vaults.
+The Security module is the kernel of the BTC Parachain. It is imported by most modules to ensure that the chain is running.
+
 
 Governance Mechanism
 --------------------

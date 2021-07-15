@@ -18,9 +18,9 @@ Additionally, Vaults with high SLAs avoid having their entire collateral slashed
 Step-by-step
 ------------
 
-1. Vault and Staked Relayers interact with the BTC-Parachain.
-2. Certain actions have an impact on their SLA. If this is the case, the function updates the SLA score of the Vault or Staked Relayer accordingly.
-3. The SLA is stored for each Vault and Staked Relayer to impact collateral slashing for Vaults and for fee allocation.
+1. Vaults interact with the BTC-Parachain.
+2. Certain actions have an impact on their SLA. If this is the case, the function updates the SLA score of the Vault.
+3. The SLA is stored for each Vault to impact collateral slashing and for fee allocation.
 
 
 Data Model
@@ -56,17 +56,6 @@ SubmitIssueProof (Increase)
 
 - Initial value: 1
 
-
-Scalars (Staked Relayers)
--------------------------
-
-Staked Relayer SLA Target
-.........................
-
-Target value for Staked Relayer SLAs
-
-- Initial value: 100
-
 Block Submission (Increase)
 ...........................
 
@@ -85,11 +74,6 @@ VaultSLA
 ........
 
 Mapping from Vault accounts to their SLA score.
-
-StakedRelayerSLA
-................
-
-Mapping from Staked Relayer accounts to their SLA score.
 
 Functions
 ~~~~~~~~~

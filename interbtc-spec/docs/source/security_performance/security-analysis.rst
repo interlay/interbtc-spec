@@ -83,7 +83,7 @@ A vault which receives lock transaction from a user during :ref:`issue-protocol`
 This would result in interBTC being issued for the same amount of lock transaction breaking **consistency**, i.e., :math:`|locked_BTC| < |interBTC|`. 
 To this end, the interBTC component forbids vaults to move locked funds lock transaction received during :ref:`issue-protocol` and considers such cases as theft.
 This theft is observable by any user.
-However, we used the specific roles of Staked Relayers to report theft of BTC.
+However, we expect Vaults to report theft of BTC.
 To restore **Consistency**, the interBTC component slashes the vault's entire collateral and executes automatic liquidation, yielding negative utility for the vault.  
 To allow economically rational vaults to move funds on the BTC Parachain we use the :ref:`replace-protocol`, a non-interactive atomic cross-chain swap (ACCS) protocol based on cross-chain state verification.
 
