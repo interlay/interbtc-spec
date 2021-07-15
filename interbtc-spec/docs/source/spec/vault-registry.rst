@@ -616,10 +616,10 @@ Specification
 * The liquidation vault's ``issuedTokens`` is reduced by ``tokens``.
 * The redeemer has received an amount of collateral equal to ``(tokens / liquidationVault.issuedTokens) * liquidationVault.backingCollateral``.
 
-.. _tryIncreaseToBeReplacedTokens:
+.. _increaseToBeReplacedTokens:
 
-tryIncreaseToBeReplacedTokens
------------------------------
+increaseToBeReplacedTokens
+--------------------------
 
 Increases the toBeReplaced tokens of a vault, which indicates how many tokens other vaults can replace in total.
 
@@ -628,7 +628,7 @@ Specification
 
 *Function Signature*
 
-``tryIncreaseToBeReplacedTokens(oldVault, tokens, collateral)``
+``increaseToBeReplacedTokens(oldVault, tokens, collateral)``
 
 *Parameters*
 
@@ -639,6 +639,10 @@ Specification
 *Returns*
 
 * A tuple of the new total ``toBeReplacedTokens`` and ``replaceCollateral``.
+
+*Events*
+
+* :ref:`increaseToBeReplacedTokensEvent`
 
 *Preconditions*
 
@@ -1013,11 +1017,32 @@ Emit an event when a replace request cannot be completed because the vault has t
 *Parameters*
 
 * ``vault``: The BTC Parachain address of the Vault.
-* ``tokens``: The amount of interBTC not to be replaced.
+* ``tokens``: The amount of interBTC not to be redeemed.
 
 *Functions*
 
 * :ref:`decreaseToBeRedeemedTokens`
+
+.. _increaseToBeReplacedTokensEvent:
+
+IncreaseToBeReplacedTokens
+--------------------------
+
+Emit an event when a replace request cannot be completed because the vault has too little tokens committed.
+
+*Event Signature*
+
+``IncreaseToBeReplacedTokens(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of interBTC to be replaced.
+
+*Functions*
+
+* :ref:`increaseToBeReplacedTokens`
+
 
 .. _decreaseTokensEvent:
 
