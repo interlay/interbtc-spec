@@ -680,7 +680,10 @@ Specification
 *Returns*
 
 * A tuple of the new total ``toBeReplacedTokens`` and ``replaceCollateral``.
-  
+
+*Events*
+
+* :ref:`decreaseToBeReplacedTokensEvent`
 
 *Preconditions*
 
@@ -1028,7 +1031,7 @@ Emit an event when a replace request cannot be completed because the vault has t
 IncreaseToBeReplacedTokens
 --------------------------
 
-Emit an event when a replace request cannot be completed because the vault has too little tokens committed.
+Emit an event when the ``toBeReplacedTokens`` is increased.
 
 *Event Signature*
 
@@ -1043,6 +1046,25 @@ Emit an event when a replace request cannot be completed because the vault has t
 
 * :ref:`increaseToBeReplacedTokens`
 
+.. _decreaseToBeReplacedTokensEvent:
+
+DecreaseToBeReplacedTokens
+--------------------------
+
+Emit an event when the ``toBeReplacedTokens`` is decreased.
+
+*Event Signature*
+
+``DecreaseToBeReplacedTokens(vault, tokens)``
+
+*Parameters*
+
+* ``vault``: The BTC Parachain address of the Vault.
+* ``tokens``: The amount of interBTC not to be replaced.
+
+*Functions*
+
+* :ref:`decreaseToBeReplacedTokens`
 
 .. _decreaseTokensEvent:
 
