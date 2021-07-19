@@ -54,7 +54,7 @@ The first step is to issue interBTC and give users access to other protocols.
 2. A user requests to issue a certain amount of interBTC. A user can directly select a Vault to issue with. If the user does not select a Vault, a Vault is automatically selected with preference given to Vaults with higher SLA rating. In the first iteration of the protocol this selection is deterministic. 
 3. The user transfers the equivalent amount of BTC that he wants to issue to the Vault. Additionally, the user provides a fee in BTC that is locked with the Vault as well. 
 4. The user proves the transfer of BTC to the BTC Parachain and receives the requested amount of newly issued interBTC. 
-5. The fees paid by the users are issued as interBTC as well. They are forwarded to a general fee pool and distributed according to a configurable distribution to all Vaults, Maintainers, and Collators. This ensures that all participants earn on new issue requests, independent if their current collateral is already reserved or not.
+5. The fees paid by the users are issued as interBTC as well. They are forwarded to a general fee pool and distributed according to a configurable distribution to all Vaults and Collators. This ensures that all participants earn on new issue requests, independent if their current collateral is already reserved or not.
 6. The user can then freely use the issued interBTC to participate in any other protocol deployed on the BTC Parachain and connected Parachains.
 
 
@@ -76,14 +76,14 @@ interBTC interest process
 -------------------------
 
 Fees paid in interBTC (on Issue, Redeem, and Replace) are forwarded to a fee pool.
-The fee pool then distributes the interBTC fees to all Vaults, Maintainers, and Collators according to a configurable distribution, and, if implemented, depending on the SLA score.
+The fee pool then distributes the interBTC fees to all Vaults and Collators according to a configurable distribution, and, if implemented, depending on the SLA score.
 All participants are able to withdraw their accumulated fees at any time.
 
 DOT interest process
 --------------------
 
 Fees paid in DOT are forwarded to a fee pool.
-The fee pool then distributes the interBTC fees to all Vaults, Maintainers, and Collators according to a configurable distribution, and, if implemented, depending on the SLA score.
+The fee pool then distributes the interBTC fees to all Vaults and Collators according to a configurable distribution, and, if implemented, depending on the SLA score.
 All participants are able to withdraw their accumulated fees at any time.
 
 Arbitrage

@@ -18,23 +18,6 @@ Step-by-step
 Data Model
 ~~~~~~~~~~
 
-Scalars (Rewards)
------------------
-
-VaultRewards
-............
-
-Tracks the fee share (in %) allocated to Vaults.
-
-- Initial value: 80%
-
-MaintainerRewards
-.................
-
-Tracks fee share (in %) allocated to Parachain maintainers. 
-
-- Initial value: 20%
-
 Scalars (Fees)
 --------------
 
@@ -117,14 +100,12 @@ Specification
 
 *Preconditions*
 
-* There MUST be at least one registered Vault.
+* There MUST be at least one registered Vault OR a treasury account.
 
 *Postconditions*
 
- .. todo:: link to reward pool
- 
-* The Vault reward pool MUST increase by ``amount * VaultRewards``.
-* The Maintainer fund MUST increase by ``amount * MaintainerRewards``.
+* If there are no registered funds, rewards MUST be sent to the treasury account.
+* Otherwise, rewards MUST be distributed according to :ref:`reward_distributeReward`. 
 
 .. _withdrawRewards:
 
