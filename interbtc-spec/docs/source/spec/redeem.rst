@@ -378,16 +378,16 @@ Emit an event when a redeem request is created. This event needs to be monitored
 
 *Event Signature*
 
-* ``RequestRedeem(redeemID, redeemer, redeemAmountWrapped, feeWrapped, premium, vaultID, userBtcAddress, transferFeeBtc)``
+* ``RequestRedeem(redeemID, redeemer, amountWrapped, feeWrapped, premium, vaultId, userBtcAddress, transferFeeBtc)``
 
 *Parameters*
 
 * ``redeemID``: the unique identifier of this redeem request.
 * ``redeemer``: address of the user triggering the redeem.
-* ``redeemAmountWrapped``: the amount to be received by the user.
-* ``feeWrapped``: the fee to be given to the foo pool.
+* ``amountWrapped``: the amount to be received by the user.
+* ``feeWrapped``: the fee to be paid to the reward pool.
 * ``premium``: the premium to be given to the user, if any.
-* ``vaultID``: the vault selected for the redeem request.
+* ``vaultId``: the vault selected for the redeem request.
 * ``userBtcAddress``: the address the vault is to transfer the funds to.
 * ``transferFeeBtc``: the budget the vault has to spend on bitcoin inclusion fees, paid for by the user.
 
@@ -404,12 +404,12 @@ Emit an event when a user does a liquidation redeem.
 
 *Event Signature*
 
-``LiquidationRedeem(redeemer, amountinterbtc)``
+``LiquidationRedeem(redeemer, amountWrapped)``
 
 *Parameters*
 
 * ``redeemer``: address of the user triggering the redeem.
-* ``amountinterbtc``: the amount of interBTC to burned.
+* ``amountWrapped``: the amount of interBTC to burned.
 
 *Functions*
 
@@ -424,15 +424,16 @@ Emit an event when a redeem request is successfully executed by a vault.
 
 *Event Signature*
 
-``ExecuteRedeem(redeemer, redeemId, amountinterbtc, vault)``
+``ExecuteRedeem(redeemId, redeemer, amountWrapped, feeWrapped, vault, transferFeeBtc)``
 
 *Parameters*
 
-* ``redeemer``: address of the user triggering the redeem.
 * ``redeemId``: the unique hash created during the ``requestRedeem`` function.
-* ``amountinterbtc``: the amount of interBTC to destroy and BTC to receive.
+* ``redeemer``: address of the user triggering the redeem.
+* ``amountWrapped``: the amount of interBTC to destroy and BTC to receive.
+* ``feeWrapped``: the amount of interBTC taken for fees.
 * ``vault``: the vault responsible for executing this redeem request.
-
+* ``transferFeeBtc``: the budget for the bitcoin inclusion fees, paid for by the user.
 
 *Functions*
 
@@ -447,15 +448,15 @@ Emit an event when a user cancels a redeem request that has not been fulfilled a
 
 *Event Signature*
 
-``CancelRedeem(redeemId, redeemer, amountBtc, fee, vault)``
+``CancelRedeem(redeemId, redeemer, vault, amountSlashed, status)``
 
 *Parameters*
 
 * ``redeemId``: the unique hash of the redeem request.
 * ``redeemer``: The redeemer starting the redeem process.
-* ``amountBtc``: the amount that was to be received by the user.
-* ``fee``: the parachain fee that was to be added to the fee pool upon a successful redeem. 
 * ``vault``: the vault who failed to execute the redeem.
+* ``amountSlashed``: the amount that was slashed from the vault.
+* ``status``: the status of the redeem request.
 
 *Functions*
 
