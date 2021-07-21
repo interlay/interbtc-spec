@@ -44,8 +44,7 @@ Users
 
 - **Internal Cost**
 
-  - Issue and redeem fees
-  - BTC-Relay fees
+  - Issue fees
   - Parachain transaction fees
 
 - **External Costs**
@@ -61,7 +60,7 @@ Vaults
 
 - **Income**
 
-  - Issue and redeem fees
+  - Issue fees
   - SLA-based subsidy
 
 - **Internal Cost**
@@ -139,7 +138,7 @@ To ensure security of interBTC, i.e., that users never face financial damage, XC
 
 - **Non-deterministic Collateral Lockup**. When a Vault locks collateral to secure interBTC, it does not know for how long this collateral will remain locked up. As such, it nearly impossible to determine a fair price for the premium charged to the user, without putting either the user or the Vault at a disadvantage. 
 
-- **Limited Chargeable Events**. The Vault only has two events during which it can charge fees: (1) fulfillment of and issue request and (2) fulfillment of a redeem request. Thereby, the fees charged for the redeem request must be **upper-bounded** for security reasons (to prevent extortion by the Vault via sky-rocketing redeem fees). 
+- **Limited Chargeable Events**. The Vault only has one event during which it can charge fees, fulfillment of an issue request. Thereby, the fees charged must be **upper-bounded** for security reasons (to prevent extortion by the Vault via sky-rocketing fees). 
 
 
 As such, an open research question is: 
@@ -149,7 +148,7 @@ As such, an open research question is:
 Subsidizing Vault Collateral Costs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- **Higher user fees for issue/redeem** to ensure sufficiently good economic performance of Vaults to incentivize participation. Ideally, this would be combined with a supply/demand-based market for interBTC, driven by Parachains/applications on Polkadot (see below). The risk for (both) this model is that high fees may impede adoption if users revert to cheaper, yet centralized solutions. 
+- **Higher user fees for issue** to ensure sufficiently good economic performance of Vaults to incentivize participation. Ideally, this would be combined with a supply/demand-based market for interBTC, driven by Parachains/applications on Polkadot (see below). The risk for (both) this model is that high fees may impede adoption if users revert to cheaper, yet centralized solutions. 
 - **XCMP fees from other Parachains**. Charge Parachains additional fees for getting access to interBTC, creating an supply/demand-based market for interBTC access. The more demand for interBTC, the higher the market price, the more BTC will be locked to mint interBTC. However, this (i) impedes adoption by other Parachains and (ii) results in clear price deviations between interBTC and BTC in times of interBTC shortage. The latter may not be a bad thing per se, yet may have an unexpected effect for applications using interBTC. 
 - **Polkadot treasury subsidy** to Vaults on a continuous basis, subject to correct operation / collateral usage, to account for the opportunity costs of the Vault accrued through locking up collateral. 
 - **Governance token model**, where tokens are allocated to Vaults on a continuous basis, subject to correct operation / collateral usage. The token model, however, needs careful consideration and a clear use case (in addition to voting). 

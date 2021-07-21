@@ -58,16 +58,6 @@ Issue griefing collateral as a percentage of the locked collateral of a Vault a 
 - Paid in collateral
 - Initial value: 0.005%
 
-.. _redeemFee:
-
-RedeemFee
-.........
-
-Redeem fee share (configurable parameter, as percentage) that users need to pay upon request redeeming ``interBTC``. 
-
-- Paid in ``interBTC``
-- Initial value: 0.5%
-
 .. _premiumRedeemFee:
 
 PremiumRedeemFee
