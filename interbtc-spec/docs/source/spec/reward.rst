@@ -307,7 +307,7 @@ DistributeReward
 
 *Functions*
 
-* :ref:`DistributeReward`
+* :ref:`reward_distributeReward`
 
 
 .. _withdrawRewardEvent:

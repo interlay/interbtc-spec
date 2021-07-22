@@ -484,7 +484,7 @@ DistributeReward
 
 *Functions*
 
-* :ref:`distributeReward`
+* :ref:`staking_distributeReward`
 
 
 
