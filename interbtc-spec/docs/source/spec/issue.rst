@@ -194,18 +194,17 @@ Specification
 * The issue request for ``issueId`` MUST NOT have expired.
 * The ``rawTx`` MUST be valid and contain a payment to the Vault.
 * The ``rawMerkleProof`` MUST be valid and prove inclusion to the main chain.
-* The payment amount MUST include the fee calculated in :ref:`requestIssue`.
+* If the amount transferred is less than ``issue.amount + issue.fee``, then the ``executor`` MUST be the account that made the issue request.
 
 *Postconditions*
 
 * If the amount transferred IS less than the ``issue.amount + issue.fee``:
 
-    * The ``executor`` MUST be the account that made the issue request.
     * The Vault's ``toBeIssuedTokens`` MUST decrease by the deficit (``issue.amount - amountTransferred``).
+    * The Vault's free balance MUST increase by the ``griefingCollateral * (1 - amountTransferred / (issue.amount + issue.fee))``.
+    * The requester's free balance MUST increase by the ``griefingCollateral * amountTransferred / (issue.amount + issue.fee)``.
     * The ``issue.fee`` MUST be updated to the amount transferred multiplied by the :ref:`issueFee`.
     * The ``issue.amount`` MUST be set to the amount transferred minus the updated ``issue.fee``.
-    * The Vault's free balance MUST increase by the ``griefingCollateral``.
-    * The ``issue.status`` MUST be set to ``Completed``.
 
 * If the amount transferred IS NOT less than the expected amount:
 
@@ -215,14 +214,18 @@ Specification
         * If the Vault IS NOT liquidated and has sufficient collateral:
 
             * The Vault's ``toBeIssuedTokens`` MUST increase by the surplus (``amountTransferred - issue.amount``).
+            * The ``issue.fee`` MUST be updated to the amount transferred multiplied by the :ref:`issueFee`.
+            * The ``issue.amount`` MUST be set to the amount transferred minus the updated ``issue.fee``.
 
         * If the Vault IS NOT liquidated and does not have sufficient collateral:
 
             * There MUST exist a :ref:`refund-protocol` request which references ``issueId``.
 
-* The Vault's ``toBeIssuedTokens`` MUST decrease by the total amount.
-* The Vault's ``issuedTokens`` MUST increase by the total amount.
-* The user MUST receive interBTC in it's free balance.
+* The ``issue.status`` MUST be set to ``Completed``.
+* The Vault's ``toBeIssuedTokens`` MUST decrease by ``issue.amount + issue.fee``.
+* The Vault's ``issuedTokens`` MUST increase by ``issue.amount + issue.fee``.
+* The user MUST receive ``issue.amount`` interBTC in its free balance.
+* The fee pool MUST increase by ``issue.fee`` interBTC.
 
 .. _cancelIssue:
 
