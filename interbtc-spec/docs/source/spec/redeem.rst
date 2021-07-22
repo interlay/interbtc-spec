@@ -309,7 +309,7 @@ Let ``amountIncludingParachainFee`` be equal to the worth in collateral of ``red
 * If the vault is liquidated, the redeemer MUST be transferred part of the vault's collateral: an amount of  ``vault.backingCollateral * ((amountIncludingParachainFee) / vault.toBeRedeemedTokens)``.
 * If the vault is *not* liquidated, the fellowing collateral changes are made:
    * If ``reimburse`` is true, the user SHOULD be reimbursed the worth of ``amountIncludingParachainFee`` in collateral. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
-   * A punishment fee MUST be tranferred from the vault's backing collateral to the reedeemer: an amount ranging from :ref:`LiquidationThreshold` to :ref:`PremiumCollateralThreshold` times the worth of ``amountIncludingParachainFee``. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
+   * A punishment fee MUST be tranferred from the vault's backing collateral to the redeemer: :ref:`punishmentFee`. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
 * If ``reimburse`` is true: 
    * ``redeem.fee`` MUST be transferred from the vault to the fee pool.
    * If after the loss of collateral the vault is below the :ref:`SecureCollateralThreshold`:
