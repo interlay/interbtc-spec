@@ -77,7 +77,6 @@ Specification
 * The ``vault.issuedTokens`` MUST increase by ``fee``.
 * The :ref:`totalSupply` in the :ref:`treasury-module` MUST increase by ``fee``.
 * The vault's free balance in the :ref:`treasury-module` MUST increase by ``fee``.
-* The vault's ``SLA`` MUST increase by the :ref:`sla` score of ``Refund``.
 * ``refundRequest.completed`` MUST be ``true``.
 
 

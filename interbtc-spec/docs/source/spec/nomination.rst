@@ -77,7 +77,7 @@ The Vault Nomination protocol changes the economic incentive for Vaults to misbe
 Economic Security without Vault Nomination
 ..........................................
 
-Informally and not considering any SLA scores or rewards, a rational Vault should not steal BTC if the economic value of the collateral is above the value of the BTC held in custody.
+Informally and not considering reputation or rewards, a rational Vault should not steal BTC if the economic value of the collateral is above the value of the BTC held in custody.
 The *effective collateralization* rate at which Vaults should steal BTC is below 100%.
 More formally, we can express this as:
 
