@@ -194,17 +194,17 @@ Specification
 * The issue request for ``issueId`` MUST NOT have expired.
 * The ``rawTx`` MUST be valid and contain a payment to the Vault.
 * The ``rawMerkleProof`` MUST be valid and prove inclusion to the main chain.
-* Either the amount transferred MUST be greater or equal to ``issue.amount + issue.fee``, or the ``executor`` MUST be the account that made the issue request.
+* If the amount transferred is less than ``issue.amount + issue.fee``, then the ``executor`` MUST be the account that made the issue request.
 
 *Postconditions*
 
 * If the amount transferred IS less than the ``issue.amount + issue.fee``:
 
     * The Vault's ``toBeIssuedTokens`` MUST decrease by the deficit (``issue.amount - amountTransferred``).
-    * The ``issue.fee`` MUST be updated to the amount transferred multiplied by the :ref:`issueFee`.
-    * The ``issue.amount`` MUST be set to the amount transferred minus the updated ``issue.fee``.
     * The Vault's free balance MUST increase by the ``griefingCollateral * (1 - amountTransferred / (issue.amount + issue.fee))``.
     * The requester's free balance MUST increase by the ``griefingCollateral * amountTransferred / (issue.amount + issue.fee)``.
+    * The ``issue.fee`` MUST be updated to the amount transferred multiplied by the :ref:`issueFee`.
+    * The ``issue.amount`` MUST be set to the amount transferred minus the updated ``issue.fee``.
 
 * If the amount transferred IS NOT less than the expected amount:
 
@@ -225,7 +225,7 @@ Specification
 * The Vault's ``toBeIssuedTokens`` MUST decrease by ``issue.amount + issue.fee``.
 * The Vault's ``issuedTokens`` MUST increase by ``issue.amount + issue.fee``.
 * The user MUST receive ``issue.amount`` interBTC in its free balance.
-* The Vault MUST receive ``issue.fee`` interBTC in its free balance.
+* The fee pool MUST increase by ``issue.fee`` interBTC.
 
 .. _cancelIssue:
 
