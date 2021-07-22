@@ -115,10 +115,10 @@ Specification
 
 
 
-.. _distribute:
+.. _reward_distributeReward:
 
-distribute
-----------
+distributeReward
+----------------
 
 Distributes rewards to the stakeholders.
 
@@ -127,7 +127,7 @@ Specification
 
 *Function Signature*
 
-``distribute(currencyId, reward)``
+``distributeReward(currencyId, reward)``
 
 *Parameters*
 

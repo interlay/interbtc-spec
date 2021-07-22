@@ -265,7 +265,7 @@ Let ``slashTally`` be ``slashTally[nonce, currencyId, vaultId, nominatorId]``, t
 
 
 
-.. _distributeReward:
+.. _staking_distributeReward:
 
 distributeReward
 ----------------

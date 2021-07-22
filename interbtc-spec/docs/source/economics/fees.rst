@@ -98,27 +98,6 @@ Collators
 
   - Staking-collateral lockup
 
-Maintainers
------------
-
-- **Income**
-
-  - Parachain subsidy (revenue share)
-  - Upgrade/extension/maintenance fee
-
-- **Internal Cost**
-
-  - *None*
-
-- **External Costs**
-
-  - Server maintenance (UI, etc.)
-  - Operational/developer costs
-
-- **Opportunity Cost**
-
-  - Other bridges 
-
 Payment flows
 ~~~~~~~~~~~~~
 
