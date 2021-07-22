@@ -62,7 +62,6 @@ Vaults
 - **Income**
 
   - Issue and redeem fees
-  - SLA-based subsidy
 
 - **Internal Cost**
 
@@ -84,7 +83,7 @@ Collators
 - **Income**
 
   - Transaction fees
-  - Parachain subsidy (SLA-based?)
+  - Parachain subsidy
 
 - **Internal Cost**
 

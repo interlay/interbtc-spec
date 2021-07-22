@@ -10,7 +10,7 @@ Overview
 
 **Relayers** are participants whose main role it is to run Bitcoin full nodes and:
     
-    1. Submit valid Bitcoin block headers to increase their :ref:`sla` score.
+    1. Submit valid Bitcoin block headers to earn rewards.
     2. Check vaults do not move BTC, unless expressly requested during :ref:`redeem-protocol`, :ref:`replace-protocol` or :ref:`refund-protocol`.
 
 In the second case, the module should check the accusation (using a Merkle proof), and liquidate the vault if valid. 

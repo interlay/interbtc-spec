@@ -22,7 +22,6 @@ Welcome to the interBTC Technical Specification!
    spec/btc-relay
    spec/collateral
    spec/fee
-   spec/sla
    spec/oracle
    spec/issue
    spec/refund
@@ -50,7 +49,6 @@ Welcome to the interBTC Technical Specification!
 
    economics/incentives
    economics/fees
-   economics/SLA
 
 .. toctree::
    :maxdepth: 2
