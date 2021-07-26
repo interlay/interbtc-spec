@@ -47,7 +47,8 @@ The main accounting changes of a successful redeem is summarized below. See the 
   - ``redeem.amountBTC`` bitcoin is transferred to the user.
   - ``redeem.amountBTC + redeem.fee + redeem.transferFeeBTC`` is burned from the user.
   - The vault's ``issuedTokens`` decreases by ``redeem.amountBTC + redeem.transferFeeBTC``.
-  - The fee pool content increases by ``redeem.fee``.
+  - The fee pool content increases by ``redeem.fee`` (if non-zero).
+  - If the vault self-redeems (the redeemer is the vault ID) no fee is paid.
 
 
 
@@ -174,7 +175,7 @@ Let ``burnedTokens`` be ``amountWrapped`` minus the result of the multiplication
    * 
    * ``redeem.vault`` MUST be the requested ``vault``
    * ``redeem.opentime`` MUST be the current :ref:`activeBlockCount`
-   * ``redeem.fee`` MUST be :ref:`redeemFee` multiplied by ``amountWrapped``,
+   * ``redeem.fee`` MUST be :ref:`redeemFee` multiplied by ``amountWrapped`` if ``redeemer != vault``, otherwise this should be zero.
    * ``redeem.transferFeeBtc`` MUST be the inclusion fee, which is the multiplication of :ref:`RedeemTransactionSize` and the fee rate estimate reported by the oracle,
    * ``redeem.amountBtc`` MUST be ``amountWrapped - redeem.fee - redeem.transferFeeBtc``,
    * ``redeem.period`` MUST be the current value of the :ref:`RedeemPeriod`,
@@ -311,7 +312,7 @@ Let ``amountIncludingParachainFee`` be equal to the worth in collateral of ``red
    * If ``reimburse`` is true, the user SHOULD be reimbursed the worth of ``amountIncludingParachainFee`` in collateral. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
    * A punishment fee MUST be tranferred from the vault's backing collateral to the redeemer: :ref:`punishmentFee`. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
 * If ``reimburse`` is true: 
-   * ``redeem.fee`` MUST be transferred from the vault to the fee pool.
+   * ``redeem.fee`` MUST be transferred from the vault to the fee pool if non-zero.
    * If after the loss of collateral the vault is below the :ref:`SecureCollateralThreshold`:
       *  ``amountIncludingParachainFee`` of the user's tokens are *burned*. 
       * :ref:`decreaseTokens` MUST be called, supplying the vault, the user, and ``amountIncludingParachainFee`` as arguments. 
