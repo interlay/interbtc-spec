@@ -3,102 +3,122 @@
 Exchange Rate Oracle
 ====================
 
-.. note:: This exchange oracle module is a bare minimum model that relies on a single trusted oracle source. Decentralized oracles are a difficult and open research problem that is outside of the scope of this specification. However, the general interface to get the exchange rate can remain the same even with different constructions.
+.. note:: This exchange oracle module model that relies on trusted oracle sources. Decentralized oracles are a difficult and open research problem that is outside of the scope of this specification. However, the general interface to get the exchange rate can remain the same even with different constructions.
 
+The Exchange Rate Oracle receives a continuous data feed on the from oracles, with information in exchange rates or bitcoin inclusion estimates.  Multiple oracles can be authorized, in which case the 'median' of all unexpired values is used as the actual value. It is not technically the median - when an even number of oracles have submitted values, it does not average the middle two values. Instead, it arbitrarily picks one of them. This is done because this can be done in O(n) rather than in O(n log n). 
 
-The Exchange Rate Oracle receives a continuous data feed on the exchange rate between two currencies such as BTC and DOT.
+In the implementation, the :ref:`feedValues` function does not directly update the aggregate - this is done in the :ref:`oracle_onInitialize` hook, in order to keep the ``feedValues`` function weight independent of the number of oracles. Furthermore, for oracle offline detection and for updating the aggregate when a value becomes outdated, the ``onInitialize`` hook was necessary anyway. 
 
-The implementation of the oracle **is not part of this specification**. InterBTC assumes the oracle operates correctly and that the received data is reliable. 
+The implementation of the oracle client **is not part of this specification**. InterBTC assumes the oracle operates correctly and that the received data is reliable. 
 
 
 Data Model
 ~~~~~~~~~~
 
+Enums
+-----
+
+OracleKey
+.........
+
+Key to indicate a specific value.
+
+.. tabularcolumns:: |l|L|
+
+=======================================  ========================================================================
+Discriminant                             Description
+=======================================  ========================================================================
+``ExchangeRate(CurrencyId)``             Exchange rate against Bitcoin, in e.g. planck per satoshi.
+``FeeEstimation(BitcoinInclusionTime)``  Estimate of the bitcoin inclusion fee.
+=======================================  ========================================================================
+
+BitcoinInclusionTime
+....................
+
+Indicates the time period for bitcoin inclusion fee estimates.
+
+.. tabularcolumns:: |l|L|
+
+======================  ========================================================================
+Discriminant            Description
+======================  ========================================================================
+``fast``                Inclusion estimate for 1 block (~10 min) inclusion.
+``half``                Inclusion estimate for 3 block (~30 min) inclusion.
+``hour``                Inclusion estimate for 6 block (~60 min) inclusion.
+======================  ========================================================================
+
+
 Scalars
 -------
 
-ExchangeRate
-............
-
-The base exchange rate MUST be stored in the smallest denomination of the currency pair (e.g., Planck per Satoshi). This exchange rate is used to determine how much collateral is required to issue a specific amount of interBTC.
-
-.. note:: If the exchange rate between BTC and DOT is 2308 (i.e. 1 BTC = 2308 DOT) then we can convert to the base rate as follows:
-    ``planck_per_satoshi = dot_per_btc * (10**dot_decimals / 10**btc_decimals)``
-    ``230800 = 2308 * (10**10 / 10**8)``
-
-The exchange rate MUST be stored in a 128-bit unsigned fixed-point representation.
-
-SatoshiPerBytes
-...............
-
-The estimated Satoshis per bytes required to get a Bitcoin transaction included - see the :ref:`btcTxFeesPerByte`.
+.. _MaxDelay:
 
 MaxDelay
 ........
 
-The maximum delay in seconds between incoming calls providing exchange rate data. If the Exchange Rate Oracle receives no data for more than this period, the BTC Parachain enters an ``Error`` state with a ``ORACLE_OFFLINE`` error cause.
-
-LastExchangeRateTime
-....................
-
-UNIX timestamp indicating when the last exchange rate data was received. 
-
-
-Structs
--------
-
-.. _btcTxFeesPerByte:
-
-BtcTxFeesPerByte
-................
-
-The estimated inclusion time for a Bitcoin transaction MUST be stored in Satoshis per byte.
-
-.. tabularcolumns:: |l|l|L|
-
-=========================  ==================  ========================================================
-Parameter                  Type                Description
-=========================  ==================  ========================================================
-``fast``                   u32                 The fee to include a BTC transaction within the next block.
-``half``                   u32                 The fee to include a BTC transaction within the next three blocks (~30 min).
-``hour``                   u32                 The fee to include a BTC transaction within the six blocks  (~60 min).
-=========================  ==================  ========================================================
+The time after which a reported value will no longer be considered valid.
 
 
 Maps
 ----
+
+Aggregate
+.........
+
+Maps ``oracleKey`` to the median of all unexpired values reported by oracles for that key.
 
 AuthorizedOracles
 .................
 
 The account(s) of the oracle. Returns true if registered as an oracle.
 
+ValidUntil
+..........
+
+Maps OracleKeys to a timestamp that indicates when one of the values expires, at which time a new aggregate needs to be calculated.
+
+RawValues
+.........
+
+Maps OracleKeys and account ids to raw timestamped values. 
+
+RawValuesUpdated
+................
+
+Maps OracleKey to a boolean value that indicates that a new value has been received that has not yet been included in the aggregate.
+
+AuthorizedOracles
+.................
+
+Maps oracle ``accountId`` to the oracle's name. The presence of an account id in this map indicates that the account is authorized to feed values.
+
 
 Functions
 ~~~~~~~~~
 
-.. _setExchangeRate:
+.. _feedValues:
 
-setExchangeRate
----------------
+feedValues
+----------
 
-This function sets the latest base exchange rate.
+The dispatchable function that oracles call to feed new price data into the system.
 
 Specification
 .............
 
 *Function Signature*
 
-``setExchangeRate(oracleId, rate)``
+``feedValues(oracleId, Vec<oracleKey, value>)``
 
 *Parameters*
 
 * ``oracleId``: the oracle account calling this function.
-* ``rate``: the fixed point exchange rate.
+* ``oracleKey``: indicated which value is being set
+* ``value``: the value being set
 
 *Events*
 
-* :ref:`setExchangeRateEvent`
+* :ref:`feedValuesEvent`
 
 *Preconditions*
 
@@ -108,127 +128,92 @@ Specification
 
 *Postconditions*
 
-* The ``ExchangeRate`` MUST be set to the provided ``rate``.
-* The ``LastExchangeRateTime`` MUST be updated to the current time.
-* If the status in :ref:`security` is ``ERROR:1``, the system MUST be set to ``RUNNING:0``.
+For each ``(oracleKey, value)`` pair,
 
-.. _setBtcTxFeesPerByte:
+* ``RawValuesUpdated[oracleKey]`` MUST be set to true
+* ``RawValues[oracleKey]`` MUST be set to a ``TimeStamped`` values, where,
 
-setBtcTxFeesPerByte
--------------------
+  * ``TimeStamped.timestamp`` MUST be the current time,
+  * ``TimeStamped.value`` MUST be ``value``.
 
-Set the Satoshi per bytes fee rates.
+.. _getPrice:
+
+getPrice
+---------------
+
+Returns the latest medianized value for the given key, as calculated from the received external data sources.
 
 Specification
 .............
 
 *Function Signature*
 
-``setBtcTxFeesPerByte(oracleId, btcTxFeesPerByte)``
+``getPrice(oracleKey)``
 
 *Parameters*
 
-* ``oracleId``: the oracle account calling this function.
-* ``btcTxFeesPerByte``: the estimated inclusion fees.
-
-*Events*
-
-* :ref:`setBtcTxFeesPerByteEvent`
+* ``oracleKey``: the key for which the value should be returned
 
 *Preconditions*
 
-* The function call MUST be signed by ``oracleId``.
-* The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
-* The oracle MUST be authorized.
+* ``EchangeRate[oracleKey]`` MUST NOT be ``None``. That is, sufficient oracles must have submitted unexpired values.
 
 *Postconditions*
 
-* The ``SatoshiPerBytes`` MUST be set to the provided ``btcTxFeesPerByte``.
+* MUST return the fixed point value for the given key.
 
-.. _getExchangeRate:
 
-getExchangeRate
+.. _oracle_onInitialize:
+
+onInitialize
 ---------------
 
-Returns the latest exchange rate, as received from the external data sources.
+This function is called at the start of every block. When new values have been submitted, or when old values expire, this function update the aggregate value.
 
 Specification
 .............
 
 *Function Signature*
 
-``getExchangeRate()``
-
-*Preconditions*
-
-* The ``LastExchangeRateTime`` MUST NOT be before the current time minus the ``MaxDelay``.
+``onInitialize()``
 
 *Postconditions*
 
-* MUST return the fixed point base exchange rate.
+* If ``RawValuesUpdated`` is empty, i.e., ``feedValues`` was not yet called since the initialization of the parachain, then the ``OracleOffline`` MUST be set in the :ref:`security` pallet.
+* For each ``(oracleKey, updated)`` in ``RawValuesUpdated``, if ``updated`` is true, or the current time is greater than ``ValidUntil[oracle]``,
 
-.. _getLastExchangeRateTime:
+  * ``RawValuesUpdated[oracleKey]`` MUST be set to false
+  * ``ExchangeRate[oracleKey]`` MUST be set to the middle value of the sorted list of unexpired values from ``RawValues[oracleKey]``. If there are an even number, one MAY be arbitrarily picked.
+  * ``ValidUntil[oracleKey]`` MUST be set to ``MaxDelay`` plus the minimum timestamp from the unexpired values in ``RawValues[oracleKey]``.
 
-getLastExchangeRateTime
-------------------------
-
-Returns the UNIX timestamp of when the last exchange rate was received from the external data sources.
-
-Specification
-.............
-
-*Function Signature*
-
-``getLastExchangeRateTime()``
-
-*Postconditions*
-
-* MUST return the 32-bit UNIX timestamp.
-
+.. TODO: recover_from_oracle_offline
 
 Events
 ~~~~~~
 
-.. _setExchangeRateEvent:
+.. _feedValuesEvent:
 
-SetExchangeRate
+feedValues
+----------
+
+setExchangeRate
 ---------------
 
 Emits the new exchange rate when it is updated by the oracle.
 
 *Event Signature*
 
-``SetExchangeRate(oracleId, rate)`` 
+``FeedValues(oracleId, Vec<(oracleKey, value)>),`` 
 
 *Parameters*
 
 * ``oracleId``: the oracle account calling this function.
-* ``rate``: the fixed point exchange rate.
+* ``oracleKey``: the key indicating which value is being set
+* ``value``: the new value
 
 *Function*
 
-* :ref:`setExchangeRate`
-
-.. _setBtcTxFeesPerByteEvent:
-
-SetBtcTxFeesPerByte
--------------------
-
-Emits the new tx fee rates when they are updated by the oracle.
-
-*Event Signature*
-
-``SetSatoshiPerByte(oracleId, btcTxFeesPerByte)`` 
-
-*Parameters*
-
-* ``oracleId``: the oracle account calling this function.
-* ``btcTxFeesPerByte``: the estimated inclusion fees.
-
-*Function*
-
-* :ref:`setBtcTxFeesPerByte`
-
+* :ref:`feedValues`
 
 Error Codes
 ~~~~~~~~~~~
@@ -236,11 +221,11 @@ Error Codes
 ``ERR_MISSING_EXCHANGE_RATE``
 
 * **Message**: "Exchange rate not set."
-* **Function**: :ref:`getExchangeRate` 
+* **Function**: :ref:`getPrice` 
 * **Cause**: The last exchange rate information exceeded the maximum delay acceptable by the oracle. 
 
 ``ERR_INVALID_ORACLE_SOURCE``
 
 * **Message**: "Invalid oracle account."
-* **Function**: :ref:`setExchangeRate` 
+* **Function**: :ref:`feedValues` 
 * **Cause**: The caller of the function was not authorized. 
