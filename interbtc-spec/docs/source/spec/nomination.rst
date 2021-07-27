@@ -65,7 +65,7 @@ Max Nomination Ratio
 This ratio prevents the Vault from withdrawing its entire collateral and only exposing Nominators to economic risk, or stealing without liquidation consequences.
 This means that a Vault can only withdraw collateral as long as the fraction of nominated collateral does not exceed the threshold cap.
 Capping Nominator collateral also prevents Vaults being “outnumbered” by Nominators and their relative fee earnings being marginalized.
-The calculation is defined in :ref:`getMaxNominationRatio`.
+The calculation is defined in :ref:`vault-registry`, in the ``getMaxNominationRatio`` function.
 
 .. _securityConsiderations:
 
@@ -189,23 +189,6 @@ Parameter                    Type                Description
 
 Functions
 ~~~~~~~~~
-
-.. _getMaxNominationRatio:
-
-getMaxNominationRatio
-----------------------
-
-Returns the nomination ratio, denoting the maximum amount of collateral that can be nominated to a particular Vault.
-
-- ``MaxNominationRatio = (SecureCollateralThreshold / PremiumRedeemThreshold) - 1)``
-
-*Example*
-
-- ``SecureCollateralThreshold = 1.5 (150%)``
-- ``PremiumRedeemThreshold = 1.2 (120%)``
-- ``MaxNominationRatio = (1.5 / 1.2) - 1 = 0.25 (25%)``
-
-In this example, a Vault with 10 DOT locked as collateral can only receive 2.5 DOT through nomination.
 
 .. _setNominationEnabled:
 
