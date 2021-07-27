@@ -297,8 +297,10 @@ Specification
 * The BTC Parachain status in the :ref:`security` component MUST be set to ``RUNNING:0``.
 * A vault with id ``vaultId`` MUST be registered.
 * The collatalization rate of the vault MUST remain above ``SecureCollateralThreshold`` after the withdrawal of ``withdrawAmount``.
+* After the withdrawal, the vault's ratio of nominated collateral to own collateral must remain above the value returned by :ref:`getMaxNominationRatio`.
 
 *Postconditions*
+
 * An amount of ``withdrawAmount`` is unlocked.
 
 
@@ -817,6 +819,23 @@ Specification
 * Collateral is moved from the vault to the liquidation vault: an amount of ``confiscatedCollateral - confiscatedCollateral * (toBeRedeemedTokens / (toBeIssuedTokens + issuedTokens))`` is moved, where ``confiscatedCollateral`` is the minimum of the ``backingCollateral`` and ``SecureCollateralThreshold`` times the equivalent worth of the amount of tokens it is backing.
 
 .. note:: If a vault successfully executes a replace after having been liquidated, it receives some of its confiscated collateral back.
+
+.. _getMaxNominationRatio:
+
+getMaxNominationRatio
+----------------------
+
+Returns the nomination ratio, denoting the maximum amount of collateral that can be nominated to a particular Vault.
+
+- ``MaxNominationRatio = (SecureCollateralThreshold / PremiumRedeemThreshold) - 1)``
+
+*Example*
+
+- ``SecureCollateralThreshold = 1.5 (150%)``
+- ``PremiumRedeemThreshold = 1.2 (120%)``
+- ``MaxNominationRatio = (1.5 / 1.2) - 1 = 0.25 (25%)``
+
+In this example, a Vault with 10 DOT locked as collateral can only receive 2.5 DOT through nomination.
 
 Events
 ~~~~~~
