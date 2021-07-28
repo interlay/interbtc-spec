@@ -36,8 +36,6 @@ The data access and state changes to the Vault registry are documented in :numre
 Fee Model
 ---------
 
-Following additions are added if the fee model is integrated.
-
 - Issue fees are paid by users in interBTC when executing the request. The fees are transferred to the Parachain Fee Pool.
 - If an issue request is executed, the user’s griefing collateral is returned.
 - If an issue request is canceled, the Vault assigned to this issue request receives the griefing collateral.
