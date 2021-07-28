@@ -72,6 +72,17 @@ The fee is paid in collateral based on the ``interBTC`` amount at the current ex
 - Paid in collateral
 - Initial value: 10%
 
+.. _theftFee:
+
+TheftFee
+........
+
+Fee (as percentage) that a reporter (Vault or Relayer) receives if another Vault commits theft.
+The fee is paid in collateral based on the ``interBTC`` amount at the current exchange rate.
+
+- Paid in collateral
+- Initial value: 5%
+
 .. _replaceGriefingCollateral:
 
 ReplaceGriefingCollateral

@@ -12,11 +12,11 @@ Safety Failures
 A safety failure occurs in two cases:
 
 #. **Theft**: a Vault is considered to have committed theft if it moves/spends BTC unauthorized by the interBTC bridge. Theft is detected and reported by Relayers via an SPV proof.
-#. **Severe Undercollteralization**: a Vaults drops below the ``110%`` liquidation collateral threshold.
+#. **Severe Undercollteralization**: a Vaults drops below the :ref:`liquidationThreshold`.
 
-In both cases, the Vault’s entire BTC holdings are liquidated and its DOT collateral is slashed - up to 150% (secure collateral threshold) of the liquidated BTC value.
+In both cases, the Vault’s entire BTC holdings are liquidated and its collateral is slashed - up to the :ref:`SecureCollateralThreshold` of the liquidated BTC value.
 
-Consequently, the bridge offers users to burn ("Burn Event") their tokens to restore the 1:1 balance between the issued (e.g., interBTC) and locked asset (e.g., BTC).
+Consequently, the bridge offers users to burn ("Burn Event", see :ref:`liquidationRedeem`) their tokens to restore the 1:1 balance between the issued (e.g., interBTC) and locked asset (e.g., BTC).
 
 Crash Failures
 ~~~~~~~~~~~~~~
@@ -101,4 +101,3 @@ Implementation Notes
 - In ``cancelReplace``, when the griefing collateral is slashed, it is forwarded to the backing collateral to the Vault. In case the Vault is liquidated, it is forwarded to the free balance of the Vault.
 - In ``premiumRedeem``, the griefing collateral is set as 0.
 - In ``executeReplace``, the ``oldVault``'s griefing collateral is released, regardless of whether or not it is liquidated.
-

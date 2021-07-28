@@ -5,115 +5,177 @@ Economic Incentives
 
 Incentives are the core of decentralized systems. Fundamentally, actors in decentralized systems participate in a game where each actor attempts to maximize its utility. Designs of such decentralized systems need to encode a mechanism that provides clear incentives for actors to adhere to protocol rules while discouraging undesired behavior. Specifically, actors make risk-based decisions: payoffs associated with the execution of certain actions are compared against the risk incurred by the action. The BTC Parachain, being an open system with multiple distinct stakeholders, must hence offer a mechanism to assure honest participation outweighs subversive strategies.
 
-The overall objective of the incentive mechanism is an optimization problem with private information in a dynamic setting. Users need to pay fees to Vaults in return for their service. On the one hand, user fees should be low enough to allow them to profit from having interBTC (e.g., if a user stands to gain from earning interest in a stablecoin system using interBTC, then the fee for issuing interBTC should not outweigh the interest gain). On the other hand, fees need to be high enough to encourage Vaults to lock their DOT in the system and operate Vault clients. This problem is amplified as the BTC Parachain does not exist in isolation and Vaults can choose to participate in other protocols (e.g., staking, stablecoin issuance) as well. In the following we outline the constraints we see, a minimal viable incentive model, and pointers to further research questions we plan to solve by getting feedback from potential Vaults as well as quantitative modeling.
+The overall objective of the incentive mechanism is an optimization problem with private information in a dynamic setting. Users need to pay fees to Vaults in return for their service. On the one hand, user fees should be low enough to allow them to profit from having interBTC (e.g., if a user stands to gain from earning interest in a stablecoin system using interBTC, then the fee for issuing interBTC should not outweigh the interest gain). 
 
+On the other hand, fees need to be high enough to encourage Vaults to lock their DOT in the system and operate Vault clients. This problem is amplified as the BTC Parachain does not exist in isolation and Vaults can choose to participate in other protocols (e.g., staking, stablecoin issuance) as well. In the following, we outline the constraints we see, a viable incentive model, and pointers to further research questions we plan to solve by getting feedback from potential Vaults as well as quantitative modeling.
 
-Roles
-~~~~~
+Currencies
+~~~~~~~~~~
 
-We can classify four groups of users, or agents, in the BTC Parachain system. This is mainly based on their prior cryptocurrency holdings - namely BTC and DOT.
+The BTC-Parachain features four asset types: 
+
+- `BTC` - the backing-asset (locked on Bitcoin)
+- `interBTC` - the issued cryptocurrency-backed asset (on Polkadot)
+- `DOT` - the currency used to pay for transaction fees
+- `COL` - the currencies used as collateral (e.g., `DOT`, `KSM`, ...)
+
+Actors: Roles, Risks, and Economics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The main question when designing the fee model for interBTC is: When are fees paid, by whom, and how much?
+
+.. figure:: ../figures/taxable-actions.png
+  :alt: Taxable actions
+  
+  High-level overview of fee accrual in the BTC-Parachain (external sources only).
+
+We can classify four groups of users, or actors, in the interBTC bridge.
+
+Below, we provide an overview of the protocol role, the risks, and the economics of each of the four actors.
+Specifically, we list the following:
+
+- **Protocol role** The intended interactions of the actor with the bridge.
+- **Risks** An informal overview of the risks of using the bridge.
+- **Economics** An informal overview of the following economic factors:
+
+  - **Income**: revenue achieved by using the bridge. We differentiate between *primary* income that is achieved when the bridge works as intended and *secondary* income that is available in failure cases (e.g., misbehavior of Vaults or Users).
+  - **Internal costs**: costs associated directly with the BTC-Parachain (i.e., inflow or internal flow of funds)
+  - **External costs**: costs associated with external factors, such as node operation, engineering costs etc. (i.e., outflow of funds)
+  - **Opportunity costs**: lost revenue, if e.g. locked up collateral was to be used in other applications (e.g. to stake on the Relay chain)
+
 
 Users
 -----
 
 - **Protocol role** Users lock BTC with Vaults to create interBTC. They hold and/or use interBTC for payments, lending, or investment in financial products. At some point, users redeem interBTC for BTC by destroying the backed assets.
+- **Risks** A user gives up custody over their BTC to a Vault. The Vault is over-collateralized in `COL`, (i.e., compared to the USD they will lose when taking away the user’s BTC). However, in a market crisis with significant price drops and liquidity shortages, Vaults might choose to steal the BTC. Users will be reimbursed with `COL` in that case - not the currency they initially started out with.
 - **Economics** A user holds BTC and has exposure to an exchange rate from BTC to other assets. A user’s incentives are based on the services (and their rewards) available when issuing interBTC.
-- **Risks** A user gives up custody over their BTC to a Vault. The Vault is over-collateralized in DOT (i.e., compared to the USD they will lose when taking away the user’s BTC), however, in a market crisis with significant price drops and liquidity shortages, Vaults might choose to keep the BTC. Users will be reimbursed with DOT in that case - not the currency they initially started out with.
+
+  - **Income**
+  
+    - Primary: Use of interBTC in external applications (outside the bridge)
+    - Secondary: Slashed collateral of Vaults on failed redeems paid in `COL`, see :ref:`cancelRedeem`
+    - Secondary: Slashed collateral of Vaults on premium redeems paid in `COL`, see :ref:`requestRedeem`
+    - Secondary: Arbitrage interBTC for `COL`, see :ref:`liquidationRedeem`
+  
+  - **Internal Cost**
+  
+    - Issue and redeem fees paid in `interBTC`, see :ref:`requestIssue` and :ref:`requestRedeem`
+    - Parachain transaction fees on every transaction with the system paid in `DOT`
+    - Optional: Additional BTC fees on refund paid in `BTC`, see :ref:`executeRefund`
+  
+  - **External Costs**
+  
+    - *None*
+  
+  - **Opportunity Cost**
+  
+    - Locking BTC with a Vault that could be used in another protocol
 
 Vaults
 ------
 
-- **Protocol role** Vaults lock up DOT collateral in the BTC Parachain and hold users’ BTC (i.e., receive custody). When users wish to redeem interBTC for BTC, Vaults release BTC to users according to the events received from the BTC Parachain.
-- **Economics** Vaults hold DOT and thus have exposure to the DOT price against other assets. Vaults inherently make a bet that DOT will increase in value against other assets – otherwise they would simply exchange DOT against their preferred asset(s). This is a simplified view of the underlying problem. In reality, we need to additionally consider nominated vaults as well as vault pooling. Moreover, the inflation of DOT will play a major role in selection of the asset that fees should be paid in.
-- **Risks** A Vault backs a set of interBTC with DOT collateral. If the exchange rate of the DOT/BTC pair drops the Vault stands at risk to not be able to keep the required level of over-collateralization. This risk can be elevated by a shortage of liquidity.
+- **Protocol role** Vaults lock up collateral in the BTC Parachain and hold users’ BTC (i.e., receive custody). When users wish to redeem interBTC for BTC, Vaults release BTC to users according to the events received from the BTC Parachain.
+- **Risks** A Vault backs a set of interBTC with collateral. If the exchange rate of the `COL/BTC` pair drops the Vault stands at risk to not be able to keep the required level of over-collateralization. This risk can be elevated by a shortage of liquidity.
+- **Economics** Vaults hold `COL` and thus have exposure to the `COL` price against `BTC`. Vaults inherently make a bet that `COL` will either stay constant or increase in value against BTC – otherwise they would simply exchange `COL` against their preferred asset(s). This is a simplified view of the underlying problem. We assume Vaults to be economically driven, i.e., following a strategy to maximize profits over time. While there may be altruistic actors, who follow protocol rules independent of the economic impact, we do not consider these here.
 
+  - **Income**
+  
+    - Primary: Issue and redeem fees paid in `interBTC`, see :ref:`requestIssue` and :ref:`requestRedeem`
+    - Secondary: Slashed collateral of Users on failed issues paid in `DOT`, see :ref:`cancelIssue`
+    - Secondary: Slashed collateral of Vaults on failed replace paid in `COL`, see :ref:`cancelReplace`
+    - Secondary: Additional BTC of Users on refund paid in `BTC`, see :ref:`executeRefund`
+  
+  - **Internal Cost**
+  
+    - Parachain transaction fees on every transaction with the system paid in `DOT`
+    - Optional: Slashed collateral on failed redeems paid in `COL`, see :ref:`cancelRedeem`
+    - Optional: Slashed collateral on theft paid in `COL`, see :ref:`reportVaultTheft`
+    - Optional: Slashed collateral on liquidation paid in `COL`, see :ref:`liquidateVault`
+  
+  - **External Costs**
+  
+    - Vault client operation/maintenance costs
+    - Bitcoin full node operation/maintenance costs
+  
+  - **Opportunity Cost**
+  
+    - Locking `COL` that could be used in another protocol
 
 Relayers
----------------
+--------
 
 - **Protocol role** Relayers run Bitcoin full nodes and submit block headers to BTC-Relay, ensuring it remains up to date with Bitcoin’s state. They also report misbehaving Vaults who have allegedly stolen BTC (move BTC outside of BTC Parachain constraints).
-- **Risks** Relayers need to keep an up-to-date Bitcoin full node running to receive the latest blocks and be able to verify transaction availability and validity.
+- **Risks** Relayers have no financial stake in the system. Their highest risk is that they do not get sufficient rewards for submitting transactions (i.e., reporting Vault theft or submitting BTC block headers).
+- **Economics** Relayers are exposed to similar mechanics as Vaults, since they also hold DOT. However, they have no direct exposure to the BTC/DOT exchange rate, since they (typically, at least as part of the BTC Parachain) do not hold BTC. As such, Staked Relayers can purely be motivated to earn interest on DOT, but can also have the option to earn interest in interBTC and optimize their holdings depending on the best possible return at any given time.
+
+  - **Income**
+  
+    - Primary: *None*
+    - Secondary: Slashed collateral on theft paid in `COL`, see :ref:`reportVaultTheft`
+  
+  - **Internal Cost**
+  
+    - Parachain transaction fees on every transaction with the system paid in `DOT`
+  
+  - **External Costs**
+  
+    - Bitcoin full node operation/maintenance costs
+    - Parachain node operation/maintenance costs
+  
+  - **Opportunity Cost**
+  
+    - *None*
+
+.. note:: Operating a Vault requires access to a Bitcoin wallet. Currently, the best solution to access a Bitcoin wallet programmatically is by using the inbuilt wallet of the Bitcoin core full node. Hence, the Vault client is already running a Bitcoin full node. Therefore, the Relayer and the Vault roles are bundled together in the implementation of the Vault/Relayer clients.
 
 Collators
 ---------
 
-- **Protocol role** Collators are full nodes on both a parachain and the Relay Chain. They collect parachain transactions and produce state transition proofs for the validators on the Relay Chain. They can also send and receive messages from other parachains using XCMP.
-- More on collators can be found in the Polkadot wiki: https://wiki.polkadot.network/docs/en/learn-collator#docsNav
+- **Protocol role** Collators are full nodes on both a parachain and the Relay Chain. They collect parachain transactions and produce state transition proofs for the validators on the Relay Chain. They can also send and receive messages from other parachains using XCMP. More on collators can be found in the Polkadot wiki: https://wiki.polkadot.network/docs/en/learn-collator#docsNav
+- **Risks** Collators have no financial stake in the system. Hence running a collator has no inherent risk.
+- **Economics** Collators have to run a full node for the parachain incurring external costs. In return, they can receive fees. 
 
-Processes
-~~~~~~~~~
+  - **Income**
+  
+    - Primary: Parachain transaction fees on every transaction with the system paid in `DOT`
+  
+  - **Internal Cost**
+  
+    - *None*
+  
+  - **External Costs**
+  
+    - Parachain full node operation/maintenance costs
+  
+  - **Opportunity Cost**
 
-We will now explain how each of the four agent types above profits from participating in the BTC Parachain. Specifically, we sketch a typical interaction ﬂow with the BTC Parachain and explain how each agent type behaves.
- 
-Issue process
--------------
+    - *None*
 
-The first step is to issue interBTC and give users access to other protocols.
- 
-1. A Vault locks an amount of DOT in the BTC Parachain. 
-2. A user requests to issue a certain amount of interBTC. A user can directly select a Vault to issue with. If the user does not select a Vault it is pseudorandomly assigned. In the first iteration of the protocol this selection is deterministic. 
-3. The user transfers the equivalent amount of BTC that he wants to issue to the Vault. Additionally, the user provides a fee in BTC that is locked with the Vault as well. 
-4. The user proves the transfer of BTC to the BTC Parachain and receives the requested amount of newly issued interBTC. 
-5. The fees paid by the users are issued as interBTC as well. They are forwarded to a general fee pool and distributed according to a configurable distribution to all Vaults and Collators. This ensures that all participants earn on new issue requests, independent if their current collateral is already reserved or not.
-6. The user can then freely use the issued interBTC to participate in any other protocol deployed on the BTC Parachain and connected Parachains.
+Challenges Around Economic Efficiency 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+To ensure security of interBTC, i.e., that users never face financial damage, XCLAIM relies on collateral. However, in the current design, this leads to the following economic challenges:  
 
-Redeem process
---------------
+- **Over-collateralization**. Vaults must lock up significantly (e.g., 150%) more collateral than minted interBTC to ensure security against exchange rate fluctuations (see :ref:`secureCollateralThreshold`). Dynamically modifying the secure collateral threshold could only marginally reduce this requirement, at a high computational overhead. As such, to issue 1 interBTC, one must lock up 1 BTC, as well as the 1.5 BTC worth of collateral (e.g. in DOT), resulting in a 250% collateralization.
 
-The BTC Parachain is intended to primarily incentivize users to issue interBTC and minimize friction to redeem BTC. Hence, the redeem process is structured in a simple way with providing the same incentives to all participating Vaults. Moreover, Vaults are punished for not fulfilling a redeem request in time. 
+- **Non-deterministic Collateral Lockup**. When a Vault locks collateral to secure interBTC, it does not know for how long this collateral will remain locked. As such, it is nearly impossible to determine a fair price for the premium charged to the user, without putting either the user or the Vault at a disadvantage. 
 
-A user can retry to redeem with other Vaults in case a redeem request is not fulfilled. In this case, the non-fulfilling Vault will be punished not by the entire BTC amount but rather by a smaller amount. 
+- **Limited Chargeable Events**. The Vault only has two events during which it can charge fees: (1) fulfillment of and issue request and (2) fulfillment of a redeem request. Thereby, the fees charged for the redeem request must be **upper-bounded** for security reasons (to prevent extortion by the Vault via sky-rocketing redeem fees).
 
-1. A user requests to redeem interBTC for BTC with a Vault and locks the equivalent amount of interBTC. 
-2. The Vault sends the BTC minus the globally defined fee to the user.
-3. The fee is kept in interBTC and, equally to the issue process, paid into the fee pool to be distributed among all participants.
-4. The Vault proves correct redeem with the BTC Parachain and unlocks the DOT collateral in return. 
-5. The Vault can decide to keep the DOT collateral in the BTC Parachain to participate in issue requests or withdraw the collateral.
- 
+.. _externalEconomicRisks:
 
-interBTC interest process
--------------------------
+External Economic Risks
+~~~~~~~~~~~~~~~~~~~~~~~
 
-Fees paid in interBTC (on Issue, Redeem, and Replace) are forwarded to a fee pool.
-The fee pool then distributes the interBTC fees to all Vaults and Collators according to a configurable distribution.
-All participants are able to withdraw their accumulated fees at any time.
+A range of external factors also have to be considered in the incentives for the actors.
 
-DOT interest process
---------------------
+- **Exchange rate fluctuations**. Vaults have a risk of having their `COL` liquidated if the `COL/BTC` exchange rate drops below the :ref:`liquidationThreshold`. In this case, the collateral is liquidated as described in :ref:`liquidations`. Liquidations describe that users can restore the `interBTC` to `BTC` peg by burning `interBTC` for `COL`. However, in a continuous drop of the exchange rate the value of `COL` will fall below the value of the burned `interBTC`. As such, the system relies on actors that execute fast arbitrage trades of `interBTC` for `COL`.
 
-Fees paid in DOT are forwarded to a fee pool.
-The fee pool then distributes the interBTC fees to all Vaults and Collators according to a configurable distribution.
-All participants are able to withdraw their accumulated fees at any time.
+- **Counterparty risk for BTC in custody**. When a user locks BTC with the Vault, he implicitly sells a BTC call option to the Vault. The Vault can, at any point in time, decide to exercise this option by "stealing" the user's BTC. The price for this option is determined by *spot_price + punishment_fee* (*punishment_fee* is essentially the option premium). The main issue here is that we do not know how to price this option, because it has no expiry date - so this deal between the User and the Vault essentially becomes a BTC perpetual that can be physically exercised at any point in time (American-style).
 
-Arbitrage
----------
+- **interBTC Liquidity Shortage**. Related to the exchange rate fluctuations, arbitrageurs rely on their own `interBTC` or a place to buy `interBTC` for `COL` to execute an arbitrage trade. In a `interBTC` liquidity shortage, simply not enough `interBTC` might be available. In combination with a severe exchange rate drop (more than :ref:`liquidationThreshold` - 100%), there will be no financial incentive to restore the `interBTC` to `BTC` peg.
 
-After the issue process is completed a user can access any protocol deployed on Polkadot using interBTC. Not everyone that wants to obtain interBTC has to take this route. We imagine that liquidity providers issue interBTC and exchange these for other assets in the Polkadot ecosystem. The price of interBTC and BTC will hence be decoupled.
- 
-Price decoupling of BTC and interBTC, in turn, can be used by arbitrage traders. If interBTC trades relatively higher than BTC, arbitrage traders will seek to issue new interBTC with their existing BTC to sell interBTC at a higher market price. In case BTC trades above interBTC, arbitrageurs seek to redeem interBTC for BTC and trade these at a higher market price.
- 
- 
-Constraints
-~~~~~~~~~~~
+- **BTC and COL Liquidity Shortage**. `interBTC` is a "stablecoin" in relation to `BTC`. Since owning `interBTC` gives a claim to redeem `BTC`, the price of `interBTC` to `BTC` should remain roughly the same. However, in case `interBTC` demand is much larger than either the `COL` and/or `BTC` supply, the price for `interBTC` might increase much faster than `BTC`. In practice, this should not be an issue since the collateral thresholds are computed based on the `BTC` to `COL` exchange rate rather than the `interBTC` rates.
 
-We sketched above how each agent can be motivated to participate based on their incentive. However, determining the fee model, including how much a user should pay in BTC fees or the interest earned in DOT or interBTC by Vaults requires careful consideration. These numbers depend on certain constraints than can be roughly categorized in two parts:
- 
-1. **Inherent risks**: Each agent takes on different risks that include, for example, giving up custody of their BTC, exchange rate risk on the DOT/BTC pair, costs to maintain the infrastructure to operate Vault clients, as well as trusting the BTC Parachain to operate correctly and as designed. 
-2. **Opportunity costs**: Each agent might decide to take an alternative path to receive the desired incentives. For example, users might pick a different platform or bridge to utilize their BTC. Also Vaults and Keepers might pick other protocols to earn interest on their DOT holdings.
- 
-We provide an overview of the risks and alternatives for the agents in Table 1. When an agent is exposed to a high risk and has several alternatives, the agent needs to receive an accordingly high reward in return: if the risks and alternatives outweigh the incentives for an agent, the agent will not join the BTC Parachain. As seen in already deployed protocols including wBTC and pTokens, experiencing – to this date – insignificant volume, the balance of risks, alternatives, and incentives need to motivate agents to join.
-
-*Table 1*: A subjective rating of the risks and alternatives for each agent. Risk ratings are from low to high. Alternatives ratings are also from low to high, where “high" indicates the existence of numerous viable alternatives, while “low“ indicates that the BTC Parachain is the dominant option on the market.
-
-.. tabularcolumns:: |l|l|p{0.3\linewidth}|l|p{0.3\linewidth}|
-
-+----------------+-------------+-----------------------------------------------------------------------------------------------------------------------------------------+------------------+-----------------------------------------------------------------------+
-| Agent          | Risk rating | Risks                                                                                                                                   | Opportunity cost | Alternatives                                                          |
-+----------------+-------------+-----------------------------------------------------------------------------------------------------------------------------------------+------------------+-----------------------------------------------------------------------+
-| User           | high        | Counterparty (Vault), Technical risk (BTC Parachain), Market risks (DOT/BTC volatility and liquidity through Vault)                     | medium           | wBTC, tBTC, RenVM, ChainX                                             |
-+----------------+-------------+-----------------------------------------------------------------------------------------------------------------------------------------+------------------+-----------------------------------------------------------------------+
-| Vault          | high        | Counterparty (Vault), Technical risk (BTC Parachain, Vault client), Market risks (DOT/BTC volatility and liquidity)                     | high             | Staking (relay chain, Parachains), Lending (Acala), Trading (Laminar) |
-+----------------+-------------+-----------------------------------------------------------------------------------------------------------------------------------------+------------------+-----------------------------------------------------------------------+
-| Keeper         | high        | Counterparty (Vault), Technical risk (BTC Parachain, Vault and Keeper client), Market risks (DOT/BTC volatility and liquidity)          | high             | Staking (relay chain, Parachains), Lending (Acala), Trading (Laminar) |
-+----------------+-------------+-----------------------------------------------------------------------------------------------------------------------------------------+------------------+-----------------------------------------------------------------------+
+- **Opportunity costs**: Each actor might decide to take an alternative path to receive the desired incentives. For example, users might pick a different platform or bridge to utilize their BTC. Also Vaults and Keepers might pick other protocols to earn interest on their DOT holdings.

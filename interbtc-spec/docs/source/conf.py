@@ -19,7 +19,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u'BTC Parachain Specification'
+project = u'interBTC Specification'
 copyright = u'2021, Interlay'
 author = u'Interlay'
 
