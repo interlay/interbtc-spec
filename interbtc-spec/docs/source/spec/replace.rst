@@ -55,8 +55,6 @@ The data access and state changes to the :ref:`vault-registry` are documented in
 Fee Model
 ---------
 
-The following additions are added if the fee model is integrated.
-
 - If a replace request is cancelled, the griefing collateral is transferred to the *newVault*.
 - If a replace request is executed, the griefing collateral is transferred to the *oldVault*.
 
