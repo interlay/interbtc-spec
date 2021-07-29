@@ -8,7 +8,7 @@ Overview
 
 The vault registry is the central place to manage vaults. Vaults can register themselves here, update their collateral, or can be liquidated.
 Similarly, the issue, redeem, refund, and replace protocols call this module to assign vaults during issue, redeem, refund, and replace procedures.
-Morever, vaults use the registry to register public key for the :ref:`okd` and register addresses for the :ref:`op-return` scheme.
+Moreover, vaults use the registry to register public key for the :ref:`okd` and register addresses for the :ref:`op-return` scheme.
 
 Data Model
 ~~~~~~~~~~
@@ -84,6 +84,7 @@ Account identifier of an artificial vault maintained by the VaultRegistry to han
 Maps
 ----
 
+.. _vaults:
 
 Vaults
 ......
@@ -104,22 +105,21 @@ Stores the information of a Vault.
 =========================  ==================  ========================================================
 Parameter                  Type                Description
 =========================  ==================  ========================================================
+``wallet``                 Wallet<BtcAddress>  A set of Bitcoin address(es) of this vault, used for theft detection. Additionally, it contains the btcPublicKey used for generating deposit addresses in the issue process. 
+``status``                 VaultStatus         Current status of the vault (Active, Liquidated, CommittedTheft)
+``bannedUntil``            BlockNumber         Block height until which this vault is banned from being used for Issue, Redeem (except during automatic liquidation) and Replace . 
 ``toBeIssuedTokens``       interBTC            Number of interBTC tokens currently requested as part of an uncompleted issue request.
 ``issuedTokens``           interBTC            Number of interBTC tokens actively issued by this Vault.
 ``toBeRedeemedTokens``     interBTC            Number of interBTC tokens reserved by pending redeem and replace requests. 
-``collateral``             DOT                 Total amount of collateral provided by this vault (note: "free" collateral is calculated on the fly and updated each time new exchange rate data is received).
 ``toBeReplacedTokens``     interBTC            Number of interBTC tokens requested for replacement.
 ``replaceCollateral``      DOT                 Griefing collateral to be used for accepted replace requests.
-``backingCollateral``      DOT                 The total amount of collateral the vault uses as insurance for the issued tokens.
-``wallet``                 Wallet<BtcAddress>  A set of Bitcoin address(es) of this vault, used for theft detection. Additionally, it contains the btcPublicKey used for generating deposit addresses in the issue process. 
-``bannedUntil``            u256                Block height until which this vault is banned from being used for Issue, Redeem (except during automatic liquidation) and Replace . 
-``status``                 VaultStatus         Current status of the vault (Active, Liquidated, CommittedTheft)
+``liquidatedCollateral``   DOT                 Any collateral that is locked for remaining to_be_redeemed on liquidation.
 =========================  ==================  ========================================================
 
 .. note:: This specification currently assumes for simplicity that a vault will reuse the same BTC address, even after multiple redeem requests. **[Future Extension]**: For better security, Vaults may desire to generate new BTC addresses each time they execute a redeem request. This can be handled by pre-generating multiple BTC addresses and storing these in a list for each Vault. Caution is necessary for users which execute issue requests with "old" vault addresses - these BTC must be moved to the latest address by Vaults. 
 
-Dispatchable Functions
-~~~~~~~~~~~~~~~~~~~~~~
+External Functions
+~~~~~~~~~~~~~~~~~~
 
 
 .. _registerVault:
@@ -157,10 +157,21 @@ Specification
 
 *Postconditions*
 
-* The provided ``collateral`` is locked.
-* A new vault is added to ``Vaults``, with ``backing_collateral`` set to ``collateral``, and with ``btcPublicKey`` as the public key in the wallet. 
-* The status is set to ``Active(true)``, meaning the new vault accepts new issues. 
-* The rest of the variables (``issuedTokens``, ``toBeIssuedTokens``, etc) are zero-initialized. 
+* The vault's free balance MUST decrease by ``collateral``.
+* The vault's reserved balance MUST increase by ``collateral``.
+* The new vault MUST be created as follows:
+
+    * ``vault.wallet``: MUST be empty.
+    * ``vault.status``: MUST be set to ``active=true``.
+    * ``vault.bannedUntil``: MUST be empty.
+    * ``vault.toBeIssuedTokens``: MUST be zero.
+    * ``vault.issuedTokens``: MUST be zero.
+    * ``vault.toBeRedeemedTokens``: MUST be zero.
+    * ``vault.toBeReplacedTokens``: MUST be zero.
+    * ``vault.replaceCollateral``: MUST be zero.
+    * ``vault.liquidatedCollateral``: MUST be zero.
+
+* The new vault MUST be inserted into :ref:`vaults` using their account identifier as key.
 
 .. _registerAddress:
 
@@ -195,7 +206,7 @@ Precondition
 
 *Postconditions*
 
-* ``address`` is added to the vault's wallet.
+* ``address`` MUST be added to the vault's wallet.
 
  
 .. _updatePublicKey:
@@ -230,7 +241,7 @@ Specification
 
 *Postconditions*
 
-* The vault's public key is set to ``publicKey``.
+* The vault's public key MUST be set to ``publicKey``.
 
 .. _depositCollateral:
 
@@ -265,7 +276,7 @@ Precondition
 
 *Postconditions*
 
-* The vault's ``backingCollateral`` is increased by the amount ``collateral``.
+* Function :ref:`staking_depositStake` MUST complete successfully - parameterized by ``vaultId`` and ``collateral``.
 
 .. _withdrawCollateral:
 
@@ -301,7 +312,8 @@ Specification
 
 *Postconditions*
 
-* An amount of ``withdrawAmount`` is unlocked.
+* Function :ref:`staking_withdrawStake` MUST complete successfully - parameterized by ``vaultId`` and ``withdrawAmount``.
+* The vault's free balance MUST increase by ``withdrawAmount``.
 
 
 
@@ -309,13 +321,8 @@ Specification
 
 
 
-
-
-
-
-
-Functions called from other pallets
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Internal Functions
+~~~~~~~~~~~~~~~~~~
 
 .. _tryIncreaseToBeIssuedTokens:
 
@@ -351,7 +358,7 @@ Specification
 
 *Postconditions*
 
-* The vault's ``toBeIssuedTokens`` is increased by an amount of  ``tokens``.
+* The vault's ``toBeIssuedTokens`` MUST be increased by an amount of ``tokens``.
 
 .. _decreaseToBeIssuedTokens:
 
@@ -385,8 +392,8 @@ Specification
 
 *Postconditions*
 
-* If the vault is *not* liquidated, its ``toBeIssuedTokens`` is decreased by an amount of ``tokens``. 
-* If the vault *is* liquidated, the liquidation vault's ``toBeIssuedTokens`` is decreased by an amount of ``tokens``. 
+* If the vault is *not* liquidated, its ``toBeIssuedTokens`` MUST be decreased by an amount of ``tokens``. 
+* If the vault *is* liquidated, the liquidation vault's ``toBeIssuedTokens`` MUST be decreased by an amount of ``tokens``. 
 
 .. _issueTokens:
 
@@ -422,8 +429,9 @@ Specification
 
 *Postconditions*
 
-* If the vault is *not* liquidated, its ``toBeIssuedTokens`` is decreased by ``tokens``, while its ``issuedTokens`` is increased by ``tokens``.
-* If the vault *is* liquidated, the ``toBeIssuedTokens`` of the liquidation vault is decreased by ``tokens``, while its ``issuedTokens`` is increased by ``tokens``.
+* If the vault is *not* liquidated, its ``toBeIssuedTokens`` MUST be decreased by ``tokens``, while its ``issuedTokens`` MUST be increased by ``tokens``.
+* If the vault is *not* liquidated, function :ref:`reward_depositStake` MUST complete successfully - parameterized by ``vaultId`` and ``tokens``.
+* If the vault *is* liquidated, the ``toBeIssuedTokens`` of the liquidation vault MUST be decreased by ``tokens``, while its ``issuedTokens`` MUST be increased by ``tokens``.
 
 
 .. _tryIncreaseToBeRedeemedTokens:
@@ -459,7 +467,7 @@ Specification
 
 *Postconditions*
 
-* The vault's ``toBeRedeemedTokens`` is increased by ``tokens``.
+* The vault's ``toBeRedeemedTokens`` MUST be increased by ``tokens``.
 
 .. _decreaseToBeRedeemedTokens:
 
@@ -494,8 +502,8 @@ Specification
 
 *Postconditions*
 
-* If the vault is *not* liquidated, its ``toBeRedeemedTokens`` is decreased by ``tokens``.
-* If the vault *is* liquidated, the ``toBeRedeemedTokens`` of the liquidation vault is decreased by ``tokens``.
+* If the vault is *not* liquidated, its ``toBeRedeemedTokens`` MUST be decreased by ``tokens``.
+* If the vault *is* liquidated, the ``toBeRedeemedTokens`` of the liquidation vault MUST be decreased by ``tokens``.
 
 
 .. _decreaseTokens:
@@ -532,8 +540,8 @@ Specification
 
 *Postconditions*
 
-* If the vault is *not* liquidated, its ``toBeRedeemedTokens`` and ``issuedTokens`` are decreased by ``tokens``.
-* If the vault *is* liquidated, the ``toBeRedeemedTokens`` and ``issuedTokens`` of the liquidation vault are decreased by ``tokens``.
+* If the vault is *not* liquidated, its ``toBeRedeemedTokens`` and ``issuedTokens`` MUST be decreased by ``tokens``.
+* If the vault *is* liquidated, the ``toBeRedeemedTokens`` and ``issuedTokens`` of the liquidation vault MUST be decreased by ``tokens``.
 
 
 .. _redeemTokens:
@@ -573,16 +581,17 @@ One of:
 * A vault with id ``vaultId`` MUST be registered.
 * If the vault is *not* liquidated:
    * The vault's ``toBeRedeemedTokens`` must be greater than or equal to ``tokens``.
-   * If ``premium > 0``, then the vault's ``backingCollateral`` must be greater than or equal to ``premium``.
+   * If ``premium > 0``, then the vault's ``backingCollateral`` (as calculated via :ref:`computeStakeAtIndex`) must be greater than or equal to ``premium``.
 * If the vault *is* liquidated, then the liquidation vault's ``toBeRedeemedTokens`` must be greater than or equal to ``tokens``
   
 *Postconditions*
 
 * If the vault is *not* liquidated:
-   * The vault's ``toBeRedeemedTokens`` is decreased by ``tokens``, and its ``issuedTokens`` is increased by the same amount.
+   * The vault's ``toBeRedeemedTokens`` MUST be decreased by ``tokens``, and its ``issuedTokens`` MUST increase by the same amount.
    * If ``premium = 0``, then the ``RedeemTokens`` event is emitted
    * If ``premium > 0``, then ``premium`` is transferred from the vault's collateral to the redeemer. The ``RedeemTokensPremium`` event is emitted.
-* If the vault *is* liquidated, then the liquidation vault's ``toBeRedeemedTokens`` is decreased by ``tokens``, and its ``issuedTokens`` is increased by the same amount. The ``RedeemTokensLiquidatedVault`` event is emitted.
+   * Function :ref:`reward_withdrawStake` MUST complete successfully - parameterized by ``vaultId`` and ``tokens``.
+* If the vault *is* liquidated, then the liquidation vault's ``toBeRedeemedTokens`` MUST be decreased by ``tokens``, and its ``issuedTokens`` MUST increase by the same amount. The ``RedeemTokensLiquidatedVault`` event is emitted.
 
 .. _redeemTokensLiquidation:
 
@@ -615,8 +624,8 @@ Specification
 
 *Postconditions*
 
-* The liquidation vault's ``issuedTokens`` is reduced by ``tokens``.
-* The redeemer has received an amount of collateral equal to ``(tokens / liquidationVault.issuedTokens) * liquidationVault.backingCollateral``.
+* The liquidation vault's ``issuedTokens`` MUST decrease by ``tokens``.
+* The redeemer MUST have received an amount of collateral equal to ``(tokens / liquidationVault.issuedTokens) * liquidationVault.backingCollateral``.
 
 .. _increaseToBeReplacedTokens:
 
@@ -655,8 +664,8 @@ Specification
 
 *Postconditions*
 
-* The vault's ``toBeReplaceTokens`` is increased by ``tokens``.
-* The vault's ``replaceCollateral`` is increased by ``collateral``.
+* The vault's ``toBeReplaceTokens`` MUST be increased by ``tokens``.
+* The vault's ``replaceCollateral`` MUST be increased by ``collateral``.
 
 
 
@@ -694,8 +703,8 @@ Specification
 
 *Postconditions*
 
-* The vault's ``replaceCollateral`` is decreased by ``(min(tokens, toBeReplacedTokens) / toBeReplacedTokens) * replaceCollateral``.
-* The vault's ``toBeReplaceTokens`` is decreased by ``min(tokens, toBeReplacedTokens)``.
+* The vault's ``replaceCollateral`` MUST be decreased by ``(min(tokens, toBeReplacedTokens) / toBeReplacedTokens) * replaceCollateral``.
+* The vault's ``toBeReplaceTokens`` MUST be decreased by ``min(tokens, toBeReplacedTokens)``.
   
 .. note:: the ``replaceCollateral`` is not actually unlocked - this is the responsibility of the caller. It is implemented this way, because in :ref:`requestRedeem` it needs to be unlocked, whereas in :ref:`requestReplace` it must remain locked.  
 
@@ -741,8 +750,8 @@ Specification
 *Postconditions*
 
 * If ``oldVault`` is *not* liquidated:
-   * The ``oldVault``'s ``toBeRedeemedTokens`` and ``issuedTokens`` are decreased by the amount ``tokens``.
-   * Some of the ``oldVault's`` collateral is unlocked: an amount of ``tokens / toBeRedeemed``.
+   * The ``oldVault``'s ``toBeRedeemedTokens`` and ``issuedTokens`` MUST be decreased by the amount ``tokens``.
+   * The ``oldVault``'s collateral free balance MUST be increased by ``tokens / toBeRedeemed``.
 * If ``oldVault`` *is* liquidated, the liquidation vault's ``toBeRedeemedTokens`` and ``issuedTokens`` are decrease by the amount ``tokens``.
 * If ``newVault`` is *not* liquidated, its ``toBeIssuedTokens`` is decreased by ``tokens``, while its ``issuedTokens`` is increased by the same amount.
 * If ``newVault`` *is* liquidated, the liquidation vault's  ``toBeIssuedTokens`` is decreased by ``tokens``, while its ``issuedTokens`` is increased by the same amount.
@@ -781,10 +790,10 @@ Specification
 
 *Postconditions*
 
-* If ``oldVault`` is *not* liquidated, its ``toBeRedeemedTokens`` is decreased by ``tokens``.
-* If ``oldVault`` *is* liquidated, the liquidation vault's ``toBeRedeemedTokens`` is decreased by ``tokens``.
-* If ``newVault`` is *not* liquidated, its ``toBeIssuedTokens`` is decreased by ``tokens``.
-* If ``newVault`` *is* liquidated, the liquidation vault's  ``toBeIssuedTokens`` is decreased by ``tokens``.
+* If ``oldVault`` is *not* liquidated, its ``toBeRedeemedTokens`` MUST be decreased by ``tokens``.
+* If ``oldVault`` *is* liquidated, the liquidation vault's ``toBeRedeemedTokens`` MUST be decreased by ``tokens``.
+* If ``newVault`` is *not* liquidated, its ``toBeIssuedTokens`` MUST be decreased by ``tokens``.
+* If ``newVault`` *is* liquidated, the liquidation vault's  ``toBeIssuedTokens`` MUST be decreased by ``tokens``.
 
 
 .. _liquidateVault:
@@ -814,9 +823,10 @@ Specification
 
 *Postconditions*
 
-* The liquidation vault's ``issuedTokens``, ``toBeIssuedTokens`` and ``toBeRedeemedTokens`` are increased by the respective amounts in the vault.
-* The vault's ``issuedTokens`` and ``toBeIssuedTokens`` are set to 0.
-* Collateral is moved from the vault to the liquidation vault: an amount of ``confiscatedCollateral - confiscatedCollateral * (toBeRedeemedTokens / (toBeIssuedTokens + issuedTokens))`` is moved, where ``confiscatedCollateral`` is the minimum of the ``backingCollateral`` and ``SecureCollateralThreshold`` times the equivalent worth of the amount of tokens it is backing.
+* Function :ref:`reward_withdrawStake` MUST complete successfully - parameterized by ``vault`` and ``vault.issuedTokens``.
+* The liquidation vault's ``issuedTokens``, ``toBeIssuedTokens`` and ``toBeRedeemedTokens`` MUST be increased by the respective amounts in the vault.
+* The vault's ``issuedTokens`` and ``toBeIssuedTokens`` MUST be set to 0.
+* Collateral MUST be moved from the vault to the liquidation vault: an amount of ``confiscatedCollateral - confiscatedCollateral * (toBeRedeemedTokens / (toBeIssuedTokens + issuedTokens))`` is moved, where ``confiscatedCollateral`` is the minimum of the vault's ``backingCollateral`` (as calculated via :ref:`computeStakeAtIndex`) and ``SecureCollateralThreshold`` times the equivalent worth of the amount of tokens it is backing.
 
 .. note:: If a vault successfully executes a replace after having been liquidated, it receives some of its confiscated collateral back.
 
@@ -869,11 +879,11 @@ Emit an event stating how much new (``newCollateral``), total collateral (``tota
 
 *Event Signature*
 
-``DepositCollateral(Vault, newCollateral, totalCollateral, freeCollateral)``
+``DepositCollateral(vault, newCollateral, totalCollateral, freeCollateral)``
 
 *Parameters*
 
-* ``Vault``: The account of the vault locking collateral.
+* ``vault``: The account of the vault locking collateral.
 * ``newCollateral``: to-be-locked collateral in DOT.
 * ``totalCollateral``: total collateral in DOT.
 * ``freeCollateral``: collateral not "occupied" with interBTC in DOT.
@@ -891,11 +901,11 @@ Emit emit an event stating how much collateral was withdrawn by the vault and to
 
 *Event Signature*
 
-``WithdrawCollateral(Vault, withdrawAmount, totalCollateral)``
+``WithdrawCollateral(vault, withdrawAmount, totalCollateral)``
 
 *Parameters*
 
-* ``Vault``: The account of the vault locking collateral.
+* ``vault``: The account of the vault locking collateral.
 * ``withdrawAmount``: To-be-withdrawn collateral in DOT.
 * ``totalCollateral``: total collateral in DOT.
 
@@ -932,11 +942,11 @@ Emit an event stating that a vault (``vault``) registered a new address (``addre
 
 *Event Signature*
 
-``UpdatePublicKey(vaultId, publicKey)``
+``UpdatePublicKey(vault, publicKey)``
 
 *Parameters*
 
-* ``vaultId``: the account of the vault.
+* ``vault``: the account of the vault.
 * ``publicKey``: the new BTC public key of the vault.
 
 *Functions*
