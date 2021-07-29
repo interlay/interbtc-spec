@@ -16,12 +16,14 @@ cache:
     - .cache/pip
     - venv/
 
-before_script:
-    - python3 -V  # Print out python version for debugging
-    - pip3 install -r requirements.txt
+.before_script_template:
+    before_script:
+      - python3 -V  # Print out python version for debugging
+      - pip3 install -r requirements.txt
 
 btcrelay:
     stage: test
+    extends: .before_script_template
     script:
     - cd btcrelay-spec/docs; make html
     - sphinx-build -b latex source build/latex
@@ -33,6 +35,7 @@ btcrelay:
 
 interbtc:
     stage: test
+    extends: .before_script_template
     script:
     - cd interbtc-spec/docs; make html
     - sphinx-build -b latex source build/latex
@@ -44,6 +47,7 @@ interbtc:
 
 pages:
     stage: deploy
+    extends: .before_script_template
     script:
     - cd btcrelay-spec/docs
     - make html
