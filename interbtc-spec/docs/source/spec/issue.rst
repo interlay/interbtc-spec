@@ -227,7 +227,7 @@ Specification
 * The Vault's ``toBeIssuedTokens`` MUST decrease by ``issue.amount + issue.fee``.
 * The Vault's ``issuedTokens`` MUST increase by ``issue.amount + issue.fee``.
 * The user MUST receive ``issue.amount`` interBTC in its free balance.
-* The fee pool MUST increase by ``issue.fee`` interBTC.
+* Function :ref:`reward_distributeReward` MUST complete successfully  - parameterized by ``issue.fee``.
 
 .. _cancelIssue:
 

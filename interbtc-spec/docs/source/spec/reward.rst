@@ -81,7 +81,7 @@ Specification
 
 
 
-.. _depositStake:
+.. _reward_depositStake:
 
 depositStake
 ------------
@@ -175,7 +175,7 @@ Specification
 
 
 
-.. _withdrawStake:
+.. _reward_withdrawStake:
 
 withdrawStake
 -------------
@@ -267,7 +267,7 @@ DepositStake
 
 *Functions*
 
-* :ref:`depositStake`
+* :ref:`reward_depositStake`
 
 
 
@@ -288,7 +288,7 @@ WithdrawStake
 
 *Functions*
 
-* :ref:`withdrawStake`
+* :ref:`reward_withdrawStake`
 
 
 .. _distributeRewardEvent:
