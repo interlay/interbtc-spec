@@ -31,8 +31,55 @@ Security
 
 - Unique identification of Bitcoin payments: :ref:`op-return`
 
-Functions
-~~~~~~~~~
+Data Model
+~~~~~~~~~~
+
+Scalars
+-------
+
+.. _refundBtcDustValue:
+
+RefundBtcDustValue
+..................
+
+The minimum amount of BTC that is required for refund requests; lower values would risk the rejection of payment on Bitcoin.
+
+Maps
+----
+
+.. _refundRequests:
+
+RefundRequests
+..............
+
+Overpaid issue payments create refund requests to return BTC. This mapping provides access from a unique hash ``RefundId`` to a ``Refund`` struct. ``<RefundId, Refund>``.
+
+Structs
+-------
+
+Refund
+......
+
+Stores the status and information about a single refund request.
+
+.. tabularcolumns:: |l|l|L|
+
+======================  ============  =======================================================	
+Parameter               Type          Description                                            
+======================  ============  =======================================================
+``vault``               AccountId     The account of the Vault responsible for this request.
+``amountWrapped``       interBTC      Amount of interBTC to be refunded.
+``fee``                 interBTC      Fee charged to the user for refunding.
+``amountBtc``           interBTC      Total amount that was overpaid.
+``issuer``              AccountId     Account that overpaid on issue.
+``btcAddress``          BtcAddress    User's Bitcoin address.
+``issueId``             H256          The id of the issue request.
+``completed``           bool          True if the refund was processed successfully.
+======================  ============  =======================================================
+
+
+External Functions
+~~~~~~~~~~~~~~~~~~
 
 .. _executeRefund:
 
@@ -80,8 +127,78 @@ Specification
 * ``refundRequest.completed`` MUST be ``true``.
 
 
+Internal Functions
+~~~~~~~~~~~~~~~~~~
+
+.. _requestRefund:
+
+requestRefund
+-------------
+
+Used to request a refund if too much BTC was sent to a Vault by mistake. 
+
+Specification
+.............
+
+*Function Signature*
+
+``requestRefund(amount, vault, issuer, btcAddress, issueId)``
+
+*Parameters*
+
+* ``amount``: the amount that the user has overpaid.
+* ``vault``: id of the vault the issue was made to.
+* ``issuer``: id of the user that made the issue request.
+* ``btcAddress``: the btc address that should receive the refund.
+* ``issueId``: corresponding issue request which was overpaid.
+
+*Events*
+
+* :ref:`requestRefundEvent`
+
+*Preconditions*
+
+* The function call MUST only be called by :ref:`executeIssue`.
+* The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN:2``.
+* The ``amount - fee`` MUST be greater than or equal to :ref:`refundBtcDustValue`.
+* A new unique ``refundId`` MUST be generated via the :ref:`generateSecureId` function.
+
+*Postconditions*
+
+* The new refund request MUST be created as follows:
+
+    * ``refund.vault``: MUST be the ``vault``.
+    * ``refund.amountWrapped``: MUST be the ``amount - fee``
+    * ``refund.fee``: MUST equal ``amount`` multiplied by :ref:`refundFee`.
+    * ``refund.amountBtc``: MUST be the ``amount``.
+    * ``refund.issuer``: MUST be the ``issuer``.
+    * ``refund.btcAddress``: MUST be the ``btcAddress``. 
+    * ``refund.issueId``: MUST be the ``issueId``.
+    * ``refund.completed``: MUST be false.
+
+* The new refund request MUST be inserted into :ref:`refundRequests` using the generated ``refundId`` as the key.
+
+
 Events
 ~~~~~~
+
+.. _requestRefundEvent:
+
+RequestRefund
+-------------
+
+*Event Signature*
+
+``RequestRefund(refundId, issuer, amount, vault, btcAddress, issueId, fee)``
+
+*Parameters*
+
+* ``refundId``: A unique hash created via :ref:`generateSecureId`.
+* ``issuer``: The user's account identifier.
+* ``amount``: The amount of interBTC overpaid.
+* ``vault``: The address of the Vault involved in this refund request.
+* ``issueId``: The unique hash created during :ref:`requestIssue`.
+* ``fee``: The amount of interBTC to mint as fees.
 
 .. _executeRefundEvent:
 
@@ -94,7 +211,7 @@ ExecuteRefund
 
 *Parameters*
 
-* ``refundId``: the unique hash created during the internal ``requestRefund`` function.
+* ``refundId``: The unique hash created during via :ref:``requestRefund``.
 * ``issuer``: The user's account identifier.
 * ``vault``: The address of the Vault involved in this refund request.
 * ``amount``: The amount of interBTC refunded.

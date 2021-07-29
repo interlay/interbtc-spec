@@ -41,6 +41,16 @@ Issue griefing collateral as a percentage of the locked collateral of a Vault a 
 - Paid in collateral
 - Initial value: 0.005%
 
+.. _refundFee:
+
+RefundFee
+.........
+
+Refund fee (configurable parameter, as percentage) that users need to pay to refund overpaid ``interBTC``. 
+
+- Paid in ``interBTC``
+- Initial value: 0.5%
+
 .. _redeemFee:
 
 RedeemFee
