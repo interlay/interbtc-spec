@@ -281,6 +281,11 @@ Specification
 *Postconditions*
 
 * The Vault MUST be removed from the ``Vaults`` mapping.
+* The Vault MUST remain above the secure collateralization threshold.
+* ``get_total_nominated_collateral(vault_id)`` must return zero.
+* For all nominators, ``get_nominator_collateral(vault_id, user_id)`` must return zero.
+* Staking pallet ``nonce`` must be incremented by one.
+* ``compute_reward_at_index(nonce - 1, INTERBTC, vault_id, user_id)`` in the Staking pallet must be equal to the user's nomination just before the vault opted out.
 
 .. _depositNominationCollateral:
 
@@ -316,7 +321,7 @@ Specification
 
 *Postconditions*
 
-* The Vault's collateral MUST increase by the amount nominated.
+* The Vault's backing collateral MUST increase by the amount nominated.
 * The Nominator's balance MUST decrease by the amount nominated.
 
 .. _withdrawNominationCollateral:
@@ -350,7 +355,7 @@ Specification
 * A Vault with id ``vaultId`` MUST be registered.
 * A Vault with id ``vaultId`` MUST exist in the ``Vaults`` mapping.
 * The Vault MUST remain above the secure collateralization threshold.
-* Nominator MUST have nominated at least `amount`.
+* Nominator MUST have a nomination (including slashes) of at least ``amount``.
 
 *Postconditions*
 
