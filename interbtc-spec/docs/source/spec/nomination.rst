@@ -285,7 +285,7 @@ Specification
 * ``getTotalNominatedCollateral(vaultId)`` must return zero.
 * For all nominators, ``getNominatorCollateral(vaultId, userId)`` must return zero.
 * Staking pallet ``nonce`` must be incremented by one.
-* ``computeRewardAtIndex(nonce - 1, INTERBTC, vaultId, userId)`` in the Staking pallet must be equal to the user's nomination just before the vault opted out.
+* The return value of calling :ref:`staking_computeRewardAtIndex` parameterized with ``(nonce - 1, INTERBTC, vaultId, userId)`` must be equal to the user's nomination just before the vault opted out.
 
 .. _depositNominationCollateral:
 

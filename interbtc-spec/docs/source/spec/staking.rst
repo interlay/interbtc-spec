@@ -307,7 +307,7 @@ Let ``initialTotalCurrentStake`` be ``TotalCurrentStake[currencyId, nonce, vault
 
 
 
-.. _computeRewardAtIndex:
+.. _staking_computeRewardAtIndex:
 
 computeRewardAtIndex
 --------------------
