@@ -580,18 +580,28 @@ One of:
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
 * A vault with id ``vaultId`` MUST be registered.
 * If the vault is *not* liquidated:
+
    * The vault's ``toBeRedeemedTokens`` must be greater than or equal to ``tokens``.
    * If ``premium > 0``, then the vault's ``backingCollateral`` (as calculated via :ref:`computeStakeAtIndex`) must be greater than or equal to ``premium``.
+
 * If the vault *is* liquidated, then the liquidation vault's ``toBeRedeemedTokens`` must be greater than or equal to ``tokens``
   
 *Postconditions*
 
 * If the vault is *not* liquidated:
-   * The vault's ``toBeRedeemedTokens`` MUST be decreased by ``tokens``, and its ``issuedTokens`` MUST increase by the same amount.
-   * If ``premium = 0``, then the ``RedeemTokens`` event is emitted
-   * If ``premium > 0``, then ``premium`` is transferred from the vault's collateral to the redeemer. The ``RedeemTokensPremium`` event is emitted.
+
+   * If ``premium > 0``, then ``premium`` is transferred from the vault's collateral to the redeemer.
    * Function :ref:`reward_withdrawStake` MUST complete successfully - parameterized by ``vaultId`` and ``tokens``.
-* If the vault *is* liquidated, then the liquidation vault's ``toBeRedeemedTokens`` MUST be decreased by ``tokens``, and its ``issuedTokens`` MUST increase by the same amount. The ``RedeemTokensLiquidatedVault`` event is emitted.
+   * The redeemer's free collateral balance MUST increase by ``premium``.
+
+* If the vault *is* liquidated:
+
+   * The amount ``toBeReleased`` is calculated as ``(liquidatedCollateral * tokens) / toBeRedeemedTokens``.
+   * The vault's ``liquidatedCollateral`` MUST decrease by ``toBeReleased``.
+   * Function :ref:`reward_depositStake` MUST complete successfully - parameterized by ``vaultId`` and ``toBeReleased``.
+
+* The vault's ``toBeRedeemedTokens`` MUST decrease by ``tokens``.
+* The vault's ``issuedTokens`` MUST decrease by ``tokens``.
 
 .. _redeemTokensLiquidation:
 
@@ -749,12 +759,16 @@ Specification
 
 *Postconditions*
 
-* If ``oldVault`` is *not* liquidated:
-   * The ``oldVault``'s ``toBeRedeemedTokens`` and ``issuedTokens`` MUST be decreased by the amount ``tokens``.
-   * The ``oldVault``'s collateral free balance MUST be increased by ``tokens / toBeRedeemed``.
-* If ``oldVault`` *is* liquidated, the liquidation vault's ``toBeRedeemedTokens`` and ``issuedTokens`` are decrease by the amount ``tokens``.
-* If ``newVault`` is *not* liquidated, its ``toBeIssuedTokens`` is decreased by ``tokens``, while its ``issuedTokens`` is increased by the same amount.
-* If ``newVault`` *is* liquidated, the liquidation vault's  ``toBeIssuedTokens`` is decreased by ``tokens``, while its ``issuedTokens`` is increased by the same amount.
+* If the ``oldVault`` *is* liquidated:
+
+   * The amount ``toBeReleased`` is calculated as ``(oldVault.liquidatedCollateral * tokens) / toBeRedeemedTokens``.
+   * The ``oldVault``'s ``liquidatedCollateral`` MUST decrease by ``toBeReleased``.
+   * Function :ref:`reward_depositStake` MUST complete successfully - parameterized by ``oldVault`` and ``toBeReleased``.
+
+* The ``oldVault``'s ``toBeRedeemed`` MUST decrease by ``tokens``.
+* The ``oldVault``'s ``issuedTokens`` MUST decrease by ``tokens``.
+* The ``newVault``'s ``toBeIssuedTokens`` MUST decrease by ``tokens``.
+* The ``newVault``'s ``issuedTokens`` MUST increase by ``tokens``.
 
 
 
@@ -823,10 +837,29 @@ Specification
 
 *Postconditions*
 
-* Function :ref:`reward_withdrawStake` MUST complete successfully - parameterized by ``vault`` and ``vault.issuedTokens``.
-* The liquidation vault's ``issuedTokens``, ``toBeIssuedTokens`` and ``toBeRedeemedTokens`` MUST be increased by the respective amounts in the vault.
-* The vault's ``issuedTokens`` and ``toBeIssuedTokens`` MUST be set to 0.
-* Collateral MUST be moved from the vault to the liquidation vault: an amount of ``confiscatedCollateral - confiscatedCollateral * (toBeRedeemedTokens / (toBeIssuedTokens + issuedTokens))`` is moved, where ``confiscatedCollateral`` is the minimum of the vault's ``backingCollateral`` (as calculated via :ref:`computeStakeAtIndex`) and ``SecureCollateralThreshold`` times the equivalent worth of the amount of tokens it is backing.
+* ``usedCollateral`` MUST be calculated as ``exchangeRate * (issuedTokens + toBeIssuedTokens)) * secureCollateralThreshold``.
+* ``usedCollateral`` MUST be set to ``backingCollateral`` if ``backingCollateral < usedCollateral``.
+* ``usedTokens`` MUST be calculated as ``issuedTokens - toBeIssuedTokens``.
+* ``toBeLiquidated`` MUST be calculated as ``(usedCollateral * (usedTokens - toBeRedeemedTokens)) / usedTokens``.
+* ``remainingCollateral`` MUST be calculated as ``usedCollateral - toBeLiquidated``.
+* Function :ref:`reward_withdrawStake` MUST complete successfully - parameterized by ``vault`` and ``issuedTokens``.
+* Function :ref:`staking_withdrawStake` MUST complete successfully - parameterized by ``vault`` and ``remainingCollateral``.
+* ``liquidatedCollateral`` MUST be increased by ``remainingCollateral``.
+* ``toWithdraw`` MUST be calculated as ``toBeLiquidated - backingCollateral`` OR ``toBeLiquidated`` if ``backingCollateral > toBeLiquidated``.
+* ``toSlash`` MUST be calculated as the remainder of the previous calculation.
+* Function :ref:`staking_withdrawStake` MUST complete successfully - parameterized by ``vault`` and ``toWithdraw``.
+* Function :ref:`slashStake` MUST complete successfully - parameterized by ``vault`` and ``toSlash``.
+
+* The liquidation vault MUST be updated as follows:
+
+   * ``liquidationVault.issuedTokens`` MUST increase by ``vault.issuedTokens``
+   * ``liquidationVault.toBeIssuedTokens`` MUST increase by ``vault.toBeIssuedTokens``
+   * ``liquidationVault.toBeRedeemedTokens`` MUST increase by ``vault.toBeRedeemedTokens``
+   
+* The vault MUST be updated as follows:
+
+   * ``vault.issuedTokens`` MUST be set to zero
+   * ``vault.toBeIssuedTokens`` MUST be set to zero
 
 .. note:: If a vault successfully executes a replace after having been liquidated, it receives some of its confiscated collateral back.
 
