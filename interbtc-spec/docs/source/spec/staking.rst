@@ -204,36 +204,6 @@ Let ``nonce`` be ``Nonce[currencyId, vaultId]``, and ``initialTotalStake`` be ``
 
 
 
-.. _unslashStake:
-
-unslashStake
-------------
-
-Unslashes a vault's stake in the given currency in the reward pool. It does exactly the opposite of :ref:`slashStake`, i.e., it distributes the given amount of stake across all of the vault's stakeholders proportionally to their current stake. 
-
-Specification
-.............
-
-*Function Signature*
-
-``unslashStake(currencyId, vaultId, amount)``
-
-*Parameters*
-
-* ``currencyId``: The currency for which to add the stake
-* ``vaultId``: Account of the vault
-* ``amount``: The amount by which the stake is to decrease
-
-*Postconditions*
-
-Let ``nonce`` be ``Nonce[currencyId, vaultId]``, and ``initialTotalStake`` be ``TotalCurrentStake[currencyId, nonce, vaultId]``. Then:
-
-* ``SlashPerToken[currencyId, nonce, vaultId]`` MUST decrease by ``amount / TotalStake[currencyId, nonce, vaultId]``
-* ``TotalCurrentStake[currencyId, nonce, vaultId]`` MUST increase by ``amount``
-* if ``initialTotalStake - amount`` is NOT zero, ``RewardPerToken[currencyId, nonce, vaultId]`` MUST decrease by ``RewardPerToken[currencyId, nonce, vaultId] * amount / (initialTotalStake - amount)``
-
-
-
 .. _computeStakeAtIndex:
 
 computeStakeAtIndex
