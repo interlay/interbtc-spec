@@ -259,8 +259,11 @@ Specification
 *Postconditions*
 
 * ``redeemRequest.amountBtc - redeemRequest.transferFeeBtc`` of the tokens in the redeemer's account MUST be burned.
+* The user's `lockedTokens` MUST decrease by `redeemRequest.amountBtc + redeemRequest.transferFeeBtc`.
+* The vault’s `toBeRedeemedTokens` MUST decrease by `redeemRequest.amountBtc + redeemRequest.transferFeeBtc`.
+* The vault’s `issuedTokens` MUST decrease by `redeemRequest.amountBtc + redeemRequest.transferFeeBtc`.
 * ``redeemRequest.fee`` MUST be unlocked and transferred from the redeemer's account to the fee pool.
-* :ref:`redeemTokens` MUST be called, supplying ``redeemRequest.vault``, ``redeemRequest.amountBtc - redeemRequest.transferFeeBtc``, ``redeemRequest.premium`` and ``redeemRequest.redeemer`` as arguments.
+* :ref:`redeemTokens` MUST be called, supplying ``redeemRequest.vault``, ``redeemRequest.amountBtc + redeemRequest.transferFeeBtc``, ``redeemRequest.premium`` and ``redeemRequest.redeemer`` as arguments.
 * ``redeemRequest.status`` MUST be set to ``Completed``.
 
 
@@ -305,10 +308,14 @@ Specification
 
 *Postconditions*
 
-Let ``amountIncludingParachainFee`` be equal to the worth in collateral of ``redeem.amountBtc + redeem.transferFeeBtc``. Then:
+Let ``amountIncludingParachainFee`` be equal to the worth in collateral of ``redeem.amountBtc + redeem.transferFeeBtc``. 
+Let ``confiscatedCollateral`` be equal to ``vault.backingCollateral * (amountIncludingParachainFee / vault.toBeRedeemedTokens)``.
+Then:
 
-* If the vault is liquidated, the redeemer MUST be transferred part of the vault's collateral: an amount of  ``vault.backingCollateral * ((amountIncludingParachainFee) / vault.toBeRedeemedTokens)``.
-* If the vault is *not* liquidated, the fellowing collateral changes are made:
+* If the vault is liquidated:
+   * If ``reimburse`` is true, an amount of ``confiscatedCollateral`` MUST be transferred from the vault to the redeemer.
+   * If ``reimburse`` is false, an amount of ``confiscatedCollateral`` MUST be transferred from the vault to the liquidation vault.
+* If the vault is *not* liquidated, the following collateral changes are made:
    * If ``reimburse`` is true, the user SHOULD be reimbursed the worth of ``amountIncludingParachainFee`` in collateral. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
    * A punishment fee MUST be tranferred from the vault's backing collateral to the redeemer: :ref:`punishmentFee`. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
 * If ``reimburse`` is true: 
@@ -358,11 +365,10 @@ Specification
 * ``redeem.status`` MUST be ``Reimbursed(false)``.
 * The vault MUST have sufficient collateral to remain above the :ref:`SecureCollateralThreshold` after issuing ``redeem.amountBtc + redeem.transferFeeBtc`` tokens.
 * The vault MUST NOT be banned.
-
+* The function call MUST be signed by ``redeem.vault``, i.e. this function can only be called by the vault.
 
 *Postconditions*
 
-* The function call MUST be signed by ``redeem.vault``, i.e. this function can only be called by the the vault.
 * :ref:`tryIncreaseToBeIssuedTokens` and :ref:`issueTokens` MUST be called, both with the vault and ``redeem.amountBtc + redeem.transferFeeBtc`` as arguments.
 * ``redeem.amountBtc + redeem.transferFeeBtc`` tokens MUST be minted to the vault.
 
