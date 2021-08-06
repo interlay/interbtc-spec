@@ -282,10 +282,10 @@ Specification
 
 * The Vault MUST be removed from the ``Vaults`` mapping.
 * The Vault MUST remain above the secure collateralization threshold.
-* ``get_total_nominated_collateral(vault_id)`` must return zero.
-* For all nominators, ``get_nominator_collateral(vault_id, user_id)`` must return zero.
+* ``getTotalNominatedCollateral(vaultId)`` must return zero.
+* For all nominators, ``getNominatorCollateral(vaultId, userId)`` must return zero.
 * Staking pallet ``nonce`` must be incremented by one.
-* ``compute_reward_at_index(nonce - 1, INTERBTC, vault_id, user_id)`` in the Staking pallet must be equal to the user's nomination just before the vault opted out.
+* ``computeRewardAtIndex(nonce - 1, INTERBTC, vaultId, userId)`` in the Staking pallet must be equal to the user's nomination just before the vault opted out.
 
 .. _depositNominationCollateral:
 
