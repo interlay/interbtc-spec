@@ -365,7 +365,7 @@ Specification
 * ``redeem.status`` MUST be ``Reimbursed(false)``.
 * The vault MUST have sufficient collateral to remain above the :ref:`SecureCollateralThreshold` after issuing ``redeem.amountBtc + redeem.transferFeeBtc`` tokens.
 * The vault MUST NOT be banned.
-* The function call MUST be signed by ``redeem.vault``, i.e. this function can only be called by the the vault.
+* The function call MUST be signed by ``redeem.vault``, i.e. this function can only be called by the vault.
 
 *Postconditions*
 
