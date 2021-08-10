@@ -38,14 +38,11 @@ The specification clearly separates these modules to ensure that each module can
     High level overview of the BTC Parachain. interBTC consists of seven modules. The Oracle module stores the exchange rates based on the input of centralized and decentralized exchanges. The Treasury module maintains the ownership of interBTC, the VaultRegistry module stores information about the current Vaults in the system, and the Issue, Redeem and Replace modules expose functions and maintain data related to the respective sub protocols. The StabilizedCollateral modules handles vault collateralization, stabilization against exchange rate fluctuations and automatic liquidation. BTC-Relay tracks the Bitcoin main chain and verifies transaction inclusion. The Parachain Governance maintains correct operation of the BTC Parachain and intervenes / halts operation if necessary. 
 
 
-Exchange Rate Oracle
---------------------
+Oracle
+------
 
-The Oracle module maintains the ``ExchangeRate`` value between the asset that is used to collateralize Vaults (DOT) and the to-be-issued asset (BTC).
-In the proof-of-concept, the Oracle is operated by a trusted third party to feed the current exchange rates into the system.
-
-.. note:: The exchange rate oracle implementation is not part of this specification. interBTC simply expects a continuous input of exchange rate data and assumes the oracle operates correctly.
-.. .. todo:: Check with Web3 on how they plan to implement this. Probably, Governance Mechanism will provide this service, or intervene in case of failures.
+The Oracle module maintains the exchange rate value between the asset that is used to collateralize Vaults (e.g. DOT) and the wrapped asset (interBTC).
+Governance authorizes trusted third parties to feed the current exchange rates into the system for a nominal fee.
 
 
 Treasury
