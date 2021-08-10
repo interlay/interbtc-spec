@@ -590,15 +590,14 @@ One of:
 
 * If the vault is *not* liquidated:
 
-   * If ``premium > 0``, then ``premium`` is transferred from the vault's collateral to the redeemer.
+   * If ``premium > 0``, then ``premium`` MUST be transferred from the vault's collateral to the redeemer's free balance.
    * Function :ref:`reward_withdrawStake` MUST complete successfully - parameterized by ``vaultId`` and ``tokens``.
-   * The redeemer's free collateral balance MUST increase by ``premium``.
 
 * If the vault *is* liquidated:
 
-   * The amount ``toBeReleased`` is calculated as ``(liquidatedCollateral * tokens) / toBeRedeemedTokens``.
+   * The amount ``toBeReleased`` is calculated as ``(vault.liquidatedCollateral * tokens) / vault.toBeRedeemedTokens``.
    * The vault's ``liquidatedCollateral`` MUST decrease by ``toBeReleased``.
-   * Function :ref:`reward_depositStake` MUST complete successfully - parameterized by ``vaultId`` and ``toBeReleased``.
+   * Function :ref:`staking_depositStake` MUST complete successfully - parameterized by ``vaultId``, ``vaultId``, and ``toBeReleased``.
 
 * The vault's ``toBeRedeemedTokens`` MUST decrease by ``tokens``.
 * The vault's ``issuedTokens`` MUST decrease by ``tokens``.
@@ -761,9 +760,9 @@ Specification
 
 * If the ``oldVault`` *is* liquidated:
 
-   * The amount ``toBeReleased`` is calculated as ``(oldVault.liquidatedCollateral * tokens) / toBeRedeemedTokens``.
+   * The amount ``toBeReleased`` is calculated as ``(oldVault.liquidatedCollateral * tokens) / oldVault.toBeRedeemedTokens``.
    * The ``oldVault``'s ``liquidatedCollateral`` MUST decrease by ``toBeReleased``.
-   * Function :ref:`reward_depositStake` MUST complete successfully - parameterized by ``oldVault`` and ``toBeReleased``.
+   * Function :ref:`staking_depositStake` MUST complete successfully - parameterized by ``oldVault``, ``oldVault`` and ``toBeReleased``.
 
 * The ``oldVault``'s ``toBeRedeemed`` MUST decrease by ``tokens``.
 * The ``oldVault``'s ``issuedTokens`` MUST decrease by ``tokens``.
@@ -839,9 +838,9 @@ Specification
 
 * ``usedCollateral`` MUST be calculated as ``exchangeRate * (issuedTokens + toBeIssuedTokens)) * secureCollateralThreshold``.
 * ``usedCollateral`` MUST be set to ``backingCollateral`` if ``backingCollateral < usedCollateral``.
-* ``usedTokens`` MUST be calculated as ``issuedTokens - toBeIssuedTokens``.
+* ``usedTokens`` MUST be calculated as ``issuedTokens + toBeIssuedTokens``.
 * ``toBeLiquidated`` MUST be calculated as ``(usedCollateral * (usedTokens - toBeRedeemedTokens)) / usedTokens``.
-* ``remainingCollateral`` MUST be calculated as ``usedCollateral - toBeLiquidated``.
+* ``remainingCollateral`` MUST be calculated as ``max(0, usedCollateral - toBeLiquidated)``.
 * Function :ref:`reward_withdrawStake` MUST complete successfully - parameterized by ``vault`` and ``issuedTokens``.
 * Function :ref:`staking_withdrawStake` MUST complete successfully - parameterized by ``vault`` and ``remainingCollateral``.
 * ``liquidatedCollateral`` MUST be increased by ``remainingCollateral``.
