@@ -93,7 +93,7 @@ Structs
 -------
 
 RedeemRequest
-......
+.............
 
 Stores the status and information about a single redeem request.
 
@@ -553,4 +553,3 @@ Error Codes
 * **Message**: "The redeem is already completed."
 * **Function**: :ref:`cancelRedeem` | :ref:`executeRedeem`
 * **Cause**:  The status of the redeem is not as expected for this call.
-
