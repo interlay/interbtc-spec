@@ -70,12 +70,12 @@ Maps
 IssueRequests
 .............
 
-Users create issue requests to issue interBTC. This mapping provides access from a unique hash ``IssueId`` to a ``Issue`` struct. ``<IssueId, Issue>``.
+Users create issue requests to issue interBTC. This mapping provides access from a unique hash ``IssueId`` to a ``Issue`` struct. ``<IssueId, IssueRequest>``.
 
 Structs
 -------
 
-Issue
+IssueRequest
 .....
 
 Stores the status and information about a single issue request.

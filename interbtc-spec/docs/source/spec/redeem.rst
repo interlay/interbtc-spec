@@ -86,13 +86,13 @@ Maps
 RedeemRequests
 ...............
 
-Users create redeem requests to receive BTC in return for interBTC. This mapping provides access from a unique hash ``redeemId`` to a ``Redeem`` struct. ``<redeemId, Redeem>``.
+Users create redeem requests to receive BTC in return for interBTC. This mapping provides access from a unique hash ``redeemId`` to a ``Redeem`` struct. ``<redeemId, RedeemRequest>``.
 
 
 Structs
 -------
 
-Redeem
+RedeemRequest
 ......
 
 Stores the status and information about a single redeem request.
