@@ -24,7 +24,7 @@ copyright = u'2021, Interlay'
 author = u'Interlay'
 
 # The short X.Y version
-version = u'v5.5.0'
+version = u'v5.6.0'
 
 # -- General configuration ---------------------------------------------------
 
