@@ -119,7 +119,7 @@ Functions
 requestReplace
 --------------
 
-The *oldVault* (to-be-replaced) submits a request to be (partially) replaced. If it requests more than it can fulfil (i.e. the sum of ``toBeReplacedTokens`` and ``toBeRedeemedTokens`` exceeds its ``issuedTokens``, then the request amount is reduced such that the sum of ``toBeReplacedTokens`` and ``toBeRedeemedTokens`` is exactly equal to ``issuedTokens``.
+The *oldVault* (to-be-replaced) submits a request to be (partially) replaced. If it requests more than it can fulfill (i.e. the sum of ``toBeReplacedTokens`` and ``toBeRedeemedTokens`` exceeds its ``issuedTokens``), then the request amount is reduced such that the sum of ``toBeReplacedTokens`` and ``toBeRedeemedTokens`` is exactly equal to ``issuedTokens``.
 
 Specification
 .............
