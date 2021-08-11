@@ -86,14 +86,14 @@ Maps
 RedeemRequests
 ...............
 
-Users create redeem requests to receive BTC in return for interBTC. This mapping provides access from a unique hash ``redeemId`` to a ``Redeem`` struct. ``<redeemId, Redeem>``.
+Users create redeem requests to receive BTC in return for interBTC. This mapping provides access from a unique hash ``redeemId`` to a ``Redeem`` struct. ``<redeemId, RedeemRequest>``.
 
 
 Structs
 -------
 
-Redeem
-......
+RedeemRequest
+.............
 
 Stores the status and information about a single redeem request.
 
@@ -553,4 +553,3 @@ Error Codes
 * **Message**: "The redeem is already completed."
 * **Function**: :ref:`cancelRedeem` | :ref:`executeRedeem`
 * **Cause**:  The status of the redeem is not as expected for this call.
-
