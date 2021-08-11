@@ -76,7 +76,7 @@ Structs
 -------
 
 IssueRequest
-.....
+............
 
 Stores the status and information about a single issue request.
 
@@ -415,4 +415,3 @@ Error Codes
 * **Message**: "Issue completed and cannot be cancelled."
 * **Function**: :ref:`cancelIssue`
 * **Cause**: Raises an error if the issue is already completed.
-
