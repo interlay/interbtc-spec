@@ -242,7 +242,7 @@ The actual amount of replaced tokens is calculated to be ``consumedTokens = min(
 
   * ``oldVault``: MUST be the ``oldVault``.
   * ``newVault``: MUST be the ``newVault``.
-  * ``amount``: MUST be``consumedTokens``. 
+  * ``amount``: MUST be ``consumedTokens``.
   * ``griefingCollateral``: MUST be ``consumedGriefingCollateral``
   * ``collateral``: MUST be ``collateral``.
   * ``accept_time``: MUST be the current active block number.
