@@ -145,7 +145,7 @@ Specification
 * The *oldVault* MUST be registered.
 * The *oldVault* MUST NOT be banned.
 * The *oldVault* MUST NOT be nominated (if :ref:`vault_nomination` is enabled).
-* If the ``btcAmount`` is greater than the Vault's ``replacableTokens = issuedTokens - toBeRedeemTokens - toBeReplaceTokens``, set the ``btcAmount to the ``replaceableTokens`` amount.
+* If the ``btcAmount`` is greater than the Vault's ``replacableTokens = issuedTokens - toBeRedeemTokens - toBeReplaceTokens``, set the ``btcAmount`` to the ``replaceableTokens`` amount.
 * The *oldVault* MUST provide sufficient ``griefingCollateral`` such that the ratio of all of its ``toBeReplacedTokens`` and ``replaceCollateral`` is above :ref:`replaceGriefingCollateral`.
 * The *oldVault* MUST request sufficient ``btcAmount`` to be replaced such that its total is above ``ReplaceBtcDustValue``.
 
