@@ -150,11 +150,12 @@ Specification
 
 *Function Signature*
 
-``withdrawRewards(account)``
+``withdrawRewards(accountId, vaultId)``
 
 *Parameters*
 
-* ``account``: the account withdrawing ``interBTC`` rewards.
+* ``accountId``: the account withdrawing ``interBTC`` rewards.
+* ``vaultId``: the vault that generated ``interBTC`` rewards.
 
 *Events*
 
@@ -162,7 +163,9 @@ Specification
 
 *Preconditions*
 
-* The ``account`` MUST have available rewards for ``interBTC``.
+* The function call MUST be signed by ``accountId``.
+* The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
+* The ``accountId`` MUST have available rewards for ``interBTC``.
 
 *Postconditions*
 
