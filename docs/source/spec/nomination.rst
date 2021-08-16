@@ -152,6 +152,8 @@ Data Model
 Scalars
 -------
 
+.. _nominationEnabled:
+
 NominationEnabled
 .................
 
@@ -171,21 +173,6 @@ Set of Vault accounts that have enabled nomination.
 
 Structs
 -------
-
-Nominator
-.........
-
-Stores the information of a Nominator.
-
-.. tabularcolumns:: |l|l|L|
-
-===========================  ==================  ========================================================
-Parameter                    Type                Description
-===========================  ==================  ========================================================
-``id``                       AccountId           The ID of the Nominator represented by this struct.
-``collateral``               Balance             Amount of nominated collateral.
-===========================  ==================  ========================================================
-
 
 Functions
 ~~~~~~~~~
@@ -210,7 +197,7 @@ Specification
 
 *Preconditions*
 
-* The calling account MUST be root or the function MUST be called from a passed governance referendum.
+* The calling account MUST be root (system level origin).
 
 *Postconditions*
 
@@ -242,6 +229,7 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST be ``RUNNING:0``.
+* :ref:`nominationEnabled` MUST be true.
 * A Vault with id ``vaultId`` MUST be registered.
 * The Vault MUST NOT be opted in.
 
@@ -314,7 +302,7 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST be ``RUNNING:0``.
-* The global nomination flag MUST be enabled.
+* :ref:`nominationEnabled` MUST be true.
 * A Vault with id ``vaultId`` MUST be registered.
 * A Vault with id ``vaultId`` MUST exist in the ``Vaults`` mapping.
 * The Vault MUST remain below the max nomination ratio.
@@ -351,7 +339,7 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST be ``RUNNING:0``.
-* The global nomination flag MUST be enabled.
+* :ref:`nominationEnabled` MUST be true.
 * A Vault with id ``vaultId`` MUST be registered.
 * A Vault with id ``vaultId`` MUST exist in the ``Vaults`` mapping.
 * The Vault MUST remain above the secure collateralization threshold.
