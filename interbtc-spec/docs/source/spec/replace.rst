@@ -194,7 +194,7 @@ Specification
 .. _acceptReplace:
 
 acceptReplace
---------------
+-------------
 
 A *newVault* accepts an existing replace request. It can optionally lock additional DOT collateral specifically for this replace. If the replace is cancelled, this amount will be unlocked again.
 
@@ -223,6 +223,7 @@ Specification
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
 * The *oldVault* and *newVault* MUST be registered.
 * The *oldVault* MUST NOT be equal to *newVault*.
+* The *newVault* MUST NOT be banned.
 * The *newVault*'s free balance MUST be enough to lock ``collateral``.
 * The *newVault* MUST have lock sufficient collateral to remain above the :ref:`SecureCollateralThreshold` after accepting ``btcAmount``.
 * The *newVault*'s ``btcAddress`` MUST NOT be registered.
@@ -230,19 +231,20 @@ Specification
 
 *Postconditions*
 
-The actual amount of replaced tokens is calculated to be ``consumedTokens = min(oldVault.toBeReplacedTokens, btcAmount)``. The amount of griefingCollateral used is ``consumedGriefingCollateral = oldVault.replaceCollateral * (consumedTokens / oldVault.toBeReplacedTokens)``.
+The actual amount of replaced tokens is calculated to be ``redeemableTokens = min(oldVault.toBeReplacedTokens, btcAmount)``.
+The amount of griefingCollateral used is ``consumedGriefingCollateral = oldVault.replaceCollateral * (redeemableTokens / oldVault.toBeReplacedTokens)``.
 
 * The *oldVault*'s ``replaceCollateral`` MUST be decreased by ``consumedGriefingCollateral``. 
-* The *oldVault*'s ``toBeReplacedTokens`` MUST be decreased by ``consumedTokens``. 
-* The *oldVault*'s ``toBeRedeemedTokens`` MUST be increased by ``consumedTokens``. 
-* The *newVault*'s ``toBeIssuedTokens`` MUST be increased by ``consumedTokens``. 
-* The *newVault* locks additional collateral; its ``backingCollateral`` MUST be increased by ``collateral * (consumedTokens / oldVault.toBeReplacedTokens)``. 
+* The *oldVault*'s ``toBeReplacedTokens`` MUST be decreased by ``redeemableTokens``. 
+* The *oldVault*'s ``toBeRedeemedTokens`` MUST be increased by ``redeemableTokens``. 
+* The *newVault*'s ``toBeIssuedTokens`` MUST be increased by ``redeemableTokens``. 
+* The *newVault* locks additional collateral; its ``backingCollateral`` MUST be increased by ``collateral * (redeemableTokens / oldVault.toBeReplacedTokens)``. 
 * A unique `replaceId` must be generated from :ref:`generateSecureId`.
 * A new ``ReplaceRequest`` MUST be added to the replace request mapping at the `replaceId` key. 
 
   * ``oldVault``: MUST be the ``oldVault``.
   * ``newVault``: MUST be the ``newVault``.
-  * ``amount``: MUST be ``consumedTokens``.
+  * ``amount``: MUST be ``redeemableTokens``.
   * ``griefingCollateral``: MUST be ``consumedGriefingCollateral``
   * ``collateral``: MUST be ``collateral``.
   * ``accept_time``: MUST be the current active block number.
