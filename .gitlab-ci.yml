@@ -21,25 +21,13 @@ cache:
       - python3 -V  # Print out python version for debugging
       - pip3 install -r requirements.txt
 
-btcrelay:
-    stage: test
-    extends: .before_script_template
-    script:
-    - cd btcrelay-spec/docs; make html
-    - sphinx-build -b latex source build/latex
-    - make -C build/latex  
-    only:
-    - branches
-    except:
-    - master
-
 interbtc:
     stage: test
     extends: .before_script_template
     script:
-    - cd interbtc-spec/docs; make html
+    - cd docs; make html
     - sphinx-build -b latex source build/latex
-    - make -C build/latex    
+    - make -C build/latex 
     only:
     - branches
     except:
@@ -49,19 +37,10 @@ pages:
     stage: deploy
     extends: .before_script_template
     script:
-    - cd btcrelay-spec/docs
-    - make html
+    - cd docs
     - sphinx-build -b latex source build/latex
     - make -C build/latex
-    - mv build/html/ ../../public/btcrelay-spec/
-    - mv build/latex/BTCRelay.pdf ../../public/btcrelay-spec.pdf
-    - cd ../..
-    - cd interbtc-spec/docs
-    - make html
-    - sphinx-build -b latex source build/latex
-    - make -C build/latex
-    - mv build/html/* ../../public/
-    - mv build/latex/interbtc.pdf ../../public/interbtc-spec.pdf
+    - mv build/latex/interbtc.pdf ../public/interbtc-spec.pdf
     artifacts:
         paths:
         - public
@@ -76,5 +55,4 @@ release-github:
         - git-chglog --output CHANGELOG.md $CI_COMMIT_TAG
         - gh release -R https://github.com/interlay/interbtc-spec create $CI_COMMIT_TAG --title $CI_COMMIT_TAG -F CHANGELOG.md -d
     only:
-        - tags
-
+    - tags

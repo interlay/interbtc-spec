@@ -1,0 +1,674 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Data Model &mdash; interBTC Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Functions: Storage and Verification" href="functions.html" />
+    <link rel="prev" title="Staking" href="../staking.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> interBTC Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v5.5.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/xclaim-architecture.html">XCLAIM Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/btcrelay-architecture.html">BTC-Relay Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/accepted-format.html">Accepted Bitcoin Transaction Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">How to Read This Specification</a></li>
+</ul>
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../collateral.html">Collateral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../issue.html">Issue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../refund.html">Refund</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redeem.html">Redeem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../relay.html">Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../treasury.html">Treasury</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vault-registry.html">Vault Registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reward.html">Reward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../staking.html">Staking</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data Model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#types">Types</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#rawblockheader">RawBlockHeader</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#constants">Constants</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#difficulty-adjustment-interval">DIFFICULTY_ADJUSTMENT_INTERVAL</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#target-timespan">TARGET_TIMESPAN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#target-timespan-divisor">TARGET_TIMESPAN_DIVISOR</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unrounded-max-target">UNROUNDED_MAX_TARGET</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#main-chain-id">MAIN_CHAIN_ID</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stable-bitcoin-confirmations">STABLE_BITCOIN_CONFIRMATIONS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#stable-parachain-confirmations">STABLE_PARACHAIN_CONFIRMATIONS</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#structs">Structs</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#blockheader">BlockHeader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#richblockheader">RichBlockHeader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#blockchain">BlockChain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transaction">Transaction</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transactioninput">TransactionInput</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transactionoutput">TransactionOutput</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#script">Script</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#enums">Enums</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#locktime">LockTime</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data-structures">Data Structures</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#blockheaders">BlockHeaders</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#chains">Chains</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#chainsindex">ChainsIndex</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bestblock">BestBlock</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bestblockheight">BestBlockHeight</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#chaincounter">ChainCounter</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../security_performance/liquidations.html">Vault Liquidations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../security_performance/xclaim-security.html">XCLAIM Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../security_performance/btcrelay-security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../security_performance/performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../economics/incentives.html">Economic Incentives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../economics/fees.html">Fee Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">interBTC Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Data Model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/spec/btc-relay/data-model.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="data-model">
+<span id="id1"></span><h1>Data Model<a class="headerlink" href="#data-model" title="Permalink to this headline">¶</a></h1>
+<p>The BTC-Relay, as opposed to Bitcoin SPV clients, only stores a subset of information contained in block headers and does not store transactions.
+Specifically, only data that is absolutely necessary to perform correct verification of block headers and transaction inclusion is stored.</p>
+<p>Note that the structs used to represent bitcoin transactions and blocks is slightly different from the <a class="reference internal" href="../../intro/bitcoin.html#bitcoin-data-model"><span class="std std-ref">Bitcoin Data Model</span></a>. For example, no <code class="docutils literal notranslate"><span class="pre">tx_in</span> <span class="pre">count</span></code> is required, since this information is implicitly stored in the vector of inputs.</p>
+<div class="section" id="types">
+<h2>Types<a class="headerlink" href="#types" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="rawblockheader">
+<span id="id2"></span><h3>RawBlockHeader<a class="headerlink" href="#rawblockheader" title="Permalink to this headline">¶</a></h3>
+<p>An 80 bytes long Bitcoin blockchain header, according to the format as specified by the <a class="reference external" href="https://developer.bitcoin.org/reference/block_chain.html">Bitcoin reference</a>.</p>
+</div>
+</div>
+<div class="section" id="constants">
+<h2>Constants<a class="headerlink" href="#constants" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="difficulty-adjustment-interval">
+<h3>DIFFICULTY_ADJUSTMENT_INTERVAL<a class="headerlink" href="#difficulty-adjustment-interval" title="Permalink to this headline">¶</a></h3>
+<p>The interval in number of blocks at which Bitcoin adjusts its difficulty (approx. every 2 weeks = 2016 blocks).</p>
+</div>
+<div class="section" id="target-timespan">
+<h3>TARGET_TIMESPAN<a class="headerlink" href="#target-timespan" title="Permalink to this headline">¶</a></h3>
+<p>Expected duration of the different adjustment interval in seconds, <code class="docutils literal notranslate"><span class="pre">1209600</span></code> seconds (two weeks) in the case of Bitcoin.</p>
+</div>
+<div class="section" id="target-timespan-divisor">
+<h3>TARGET_TIMESPAN_DIVISOR<a class="headerlink" href="#target-timespan-divisor" title="Permalink to this headline">¶</a></h3>
+<p>Auxiliary constant used in Bitcoin’s difficulty re-target mechanism.</p>
+</div>
+<div class="section" id="unrounded-max-target">
+<h3>UNROUNDED_MAX_TARGET<a class="headerlink" href="#unrounded-max-target" title="Permalink to this headline">¶</a></h3>
+<p>The maximum difficulty target, <span class="math notranslate nohighlight">\(2^{224}-1\)</span> in the case of Bitcoin. For more information, see the <a class="reference external" href="https://en.bitcoin.it/wiki/Target">Bitcoin Wiki</a>.</p>
+</div>
+<div class="section" id="main-chain-id">
+<h3>MAIN_CHAIN_ID<a class="headerlink" href="#main-chain-id" title="Permalink to this headline">¶</a></h3>
+<p>Identifier of the Bitcoin main chain tracked in the <code class="docutils literal notranslate"><span class="pre">ChainsIndex</span></code> mapping. At any point in time, the <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> with this identifier is considered to be the main chain and will be used to transaction inclusion verification.</p>
+</div>
+<div class="section" id="stable-bitcoin-confirmations">
+<h3>STABLE_BITCOIN_CONFIRMATIONS<a class="headerlink" href="#stable-bitcoin-confirmations" title="Permalink to this headline">¶</a></h3>
+<p>Global security parameter (typically referred to as <code class="docutils literal notranslate"><span class="pre">k</span></code> in scientific literature), determining the umber of confirmations (in blocks) necessary for a transaction to be considered “stable” in Bitcoin. Stable thereby means that the probability of the transaction being excluded from the blockchain due to a fork is negligible.</p>
+</div>
+<div class="section" id="stable-parachain-confirmations">
+<h3>STABLE_PARACHAIN_CONFIRMATIONS<a class="headerlink" href="#stable-parachain-confirmations" title="Permalink to this headline">¶</a></h3>
+<p>Global security parameter (typically referred to as <code class="docutils literal notranslate"><span class="pre">k</span></code> in scientific literature), determining the umber of confirmations (in blocks) necessary for a transaction to be considered “stable” in the BTC Parachain. Stable thereby means that the probability of the transaction being excluded from the blockchain due to a fork is negligible.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We use this to enforce a minimum delay on Bitcoin block header acceptance in the BTC-Parachain in cases where a (large) number of block headers are submitted as a batch.</p>
+</div>
+</div>
+</div>
+<div class="section" id="structs">
+<h2>Structs<a class="headerlink" href="#structs" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="blockheader">
+<span id="id3"></span><h3>BlockHeader<a class="headerlink" href="#blockheader" title="Permalink to this headline">¶</a></h3>
+<p>Representation of a Bitcoin block header, constructed by the parachain from the <a class="reference internal" href="#rawblockheader"><span class="std std-ref">RawBlockHeader</span></a>. The main differences compared to the <a class="reference internal" href="../../intro/bitcoin.html#bitcoinblockheader"><span class="std std-ref">Block Headers</span></a> in <a class="reference internal" href="../../intro/bitcoin.html#bitcoin-data-model"><span class="std std-ref">Bitcoin Data Model</span></a> is that this contains the unpacked <code class="docutils literal notranslate"><span class="pre">target</span></code> constructed from <code class="docutils literal notranslate"><span class="pre">nBits</span></code>, and an additional <code class="docutils literal notranslate"><span class="pre">hash</span></code> of the <code class="docutils literal notranslate"><span class="pre">BlockHeader</span></code> for convenience.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Fields marked as [Optional] are not critical for the secure operation of BTC-Relay, but can be stored anyway, at the developers discretion. We omit these fields in the rest of this specification.</p>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 5%" />
+<col style="width: 83%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">merkleRoot</span></code></p></td>
+<td><p>H256Le</p></td>
+<td><p>Root of the Merkle tree referencing transactions included in the block.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">target</span></code></p></td>
+<td><p>u256</p></td>
+<td><p>Difficulty target of this block (converted from <code class="docutils literal notranslate"><span class="pre">nBits</span></code>, see <a class="reference external" href="https://bitcoin.org/en/developer-reference#target-nbits">Bitcoin documentation</a>.).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">timestamp</span></code></p></td>
+<td><p>timestamp</p></td>
+<td><p>UNIX timestamp indicating when this block was mined in Bitcoin.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">hashPrevBlock</span></code></p></td>
+<td><p>H256Le</p></td>
+<td><p>Block hash of the predecessor of this block.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">hash</span></code></p></td>
+<td><p>H256Le</p></td>
+<td><p>Block hash of of this block.</p></td>
+</tr>
+<tr class="row-odd"><td><p>.</p></td>
+<td><p>.</p></td>
+<td><p>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
+<td><p>i32</p></td>
+<td><p>[Optional] Version of the submitted block.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">nonce</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>[Optional] Nonce used to solve the PoW of this block.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="richblockheader">
+<span id="id4"></span><h3>RichBlockHeader<a class="headerlink" href="#richblockheader" title="Permalink to this headline">¶</a></h3>
+<p>Representation of a Bitcoin block header containing additional metadata. This struct is used to store Bitcoin block headers.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 7%" />
+<col style="width: 79%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">blockHeight</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>Height of this block in the Bitcoin main chain.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">chainRef</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>Pointer to the <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> struct in which this block header is contained.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">blockHeader</span></code></p></td>
+<td><p>BlockHeader</p></td>
+<td><p>Associated parsed <code class="docutils literal notranslate"><span class="pre">BlockHeader</span></code> struct.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">paraHeight</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">activeBlockCount</span></code> at the time the block header was submitted to the relay. See the security pallet for more information.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="blockchain">
+<h3>BlockChain<a class="headerlink" href="#blockchain" title="Permalink to this headline">¶</a></h3>
+<p>Representation of a Bitcoin blockchain / fork.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 10%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">chainId</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>Unique identifier for faster lookup in <code class="docutils literal notranslate"><span class="pre">ChainsIndex</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">startHeight</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>Lowest block number in this chain. Used to determine the forking point during chain reorganizations.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">maxHeight</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>Max. block height in this chain.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="transaction">
+<h3>Transaction<a class="headerlink" href="#transaction" title="Permalink to this headline">¶</a></h3>
+<p>Representation of a Bitcoin Transaction. It differs from the one specified in <a class="reference internal" href="../../intro/bitcoin.html#bitcoin-data-model"><span class="std std-ref">Bitcoin Data Model</span></a> in that it does not contain in lengths of the input and output vectors, because this data is implicit in the vector. Furthermore, we use different types for the inputs and outputs. The segregated witnesses and <code class="docutils literal notranslate"><span class="pre">flags</span></code>, if any, are placed inside the inputs.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 24%" />
+<col style="width: 59%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
+<td><p>i32</p></td>
+<td><p>Transaction version number.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">inputs</span></code></p></td>
+<td><p>Vec&lt;<a class="reference internal" href="#transactioninput"><span class="std std-ref">TransactionInput</span></a>&gt;</p></td>
+<td><p>Vector of transaction inputs.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">output</span></code></p></td>
+<td><p>Vec&lt;<a class="reference internal" href="#transactionoutput"><span class="std std-ref">TransactionOutput</span></a>&gt;</p></td>
+<td><p>Vector of transaction inputs.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lockTime</span></code></p></td>
+<td><p><a class="reference internal" href="#locktime"><span class="std std-ref">LockTime</span></a></p></td>
+<td><p>A Unix timestamp OR block number.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="transactioninput">
+<span id="id5"></span><h3>TransactionInput<a class="headerlink" href="#transactioninput" title="Permalink to this headline">¶</a></h3>
+<p>Representation of a Bitcoin transaction input. It differs from the one specified in <a class="reference internal" href="../../intro/bitcoin.html#bitcoin-data-model"><span class="std std-ref">Bitcoin Data Model</span></a> in that it contains <code class="docutils literal notranslate"><span class="pre">flags</span></code> and the segregated witnesses. Furthermore, it contains dedicated fields for coinbase transactions.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 8%" />
+<col style="width: 79%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">previousHash</span></code></p></td>
+<td><p>H256Le,</p></td>
+<td><p>The hash of the transaction to spend from.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">previousIndex</span></code></p></td>
+<td><p>u32,</p></td>
+<td><p>The index of the output within the transaction pointed to by <code class="docutils literal notranslate"><span class="pre">previousHash</span></code> to spend from.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">coinbase</span></code></p></td>
+<td><p>bool,</p></td>
+<td><p>True if the transaction input is the newly mined funds.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">height</span></code></p></td>
+<td><p>Option&lt;u32&gt;,</p></td>
+<td><p>An optional blockheight used in the coinbase transaction. See <a class="reference external" href="https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki">https://github.com/bitcoin/bips/blob/master/bip-0034.mediawiki</a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">script</span></code></p></td>
+<td><p>Vec&lt;u8&gt;,</p></td>
+<td><p>The script satisfying the output’s script.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">sequence</span></code></p></td>
+<td><p>u32,</p></td>
+<td><p>Sequence number (default <code class="docutils literal notranslate"><span class="pre">0xffffffff</span></code>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">flags</span></code></p></td>
+<td><p>u8,</p></td>
+<td><p>The flags set in <code class="docutils literal notranslate"><span class="pre">Transaction</span></code> that indicates a Segrated Witness transaction. If none were set in the transaction, this value is 0.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">witness</span></code></p></td>
+<td><p>Vec&lt;Vec&lt;u8&gt;&gt;,</p></td>
+<td><p>The witness scripts of the transaction. See  See <a class="reference external" href="https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki">https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="transactionoutput">
+<span id="id6"></span><h3>TransactionOutput<a class="headerlink" href="#transactionoutput" title="Permalink to this headline">¶</a></h3>
+<p>Representation if a Bitcoin transaction output</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 67%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">value</span></code></p></td>
+<td><p>i64,</p></td>
+<td><p>The number of satoshis to transfer to this output.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">script</span></code></p></td>
+<td><p><a class="reference internal" href="#script"><span class="std std-ref">Script</span></a></p></td>
+<td><p>The spending condition of the output.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="script">
+<span id="id7"></span><h3>Script<a class="headerlink" href="#script" title="Permalink to this headline">¶</a></h3>
+<p>Representation if a Bitcoin transaction output</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 13%" />
+<col style="width: 67%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">bytes</span></code></p></td>
+<td><p>Vec&lt;u8&gt;,</p></td>
+<td><p>The spending condition of the output.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="enums">
+<h2>Enums<a class="headerlink" href="#enums" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="locktime">
+<span id="id8"></span><h3>LockTime<a class="headerlink" href="#locktime" title="Permalink to this headline">¶</a></h3>
+<p>Represents either a unix timestamp OR a blocknumber. See the <a class="reference external" href="https://github.com/bitcoin/bitcoin/blob/7fcf53f7b4524572d1d0c9a5fdc388e87eb02416/src/script/script.h#L39">Bitcoin source</a>.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 77%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Discriminant</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Time(u32)</span></code></p></td>
+<td><p>Lock time interpreted as a unix timestamp.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">BlockHeight(u32)</span></code></p></td>
+<td><p>Lock time interpreted as a block number.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section" id="data-structures">
+<h2>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="blockheaders">
+<h3>BlockHeaders<a class="headerlink" href="#blockheaders" title="Permalink to this headline">¶</a></h3>
+<p>Mapping of <code class="docutils literal notranslate"><span class="pre">&lt;blockHash,</span> <span class="pre">RichBlockHeader&gt;</span></code>, storing all verified Bitcoin block headers (fork and main chain) submitted to BTC-Relay.</p>
+</div>
+<div class="section" id="chains">
+<span id="id9"></span><h3>Chains<a class="headerlink" href="#chains" title="Permalink to this headline">¶</a></h3>
+<p>Level of indirection over <a class="reference internal" href="#chainsindex"><span class="std std-ref">ChainsIndex</span></a>, i.e. the values stored in this map are keys of <code class="docutils literal notranslate"><span class="pre">ChainsIndex</span></code>. <code class="docutils literal notranslate"><span class="pre">Chains[0]</span></code> MUST always be <code class="docutils literal notranslate"><span class="pre">0</span></code>, such that <code class="docutils literal notranslate"><span class="pre">ChainsIndex[Chains[0]]</span></code> is the bitcoin <em>main chain</em>. The remaining items MUST sort the chains by height, i.e. it MUST hold that for each <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;</span> <span class="pre">i</span> <span class="pre">&lt;</span> <span class="pre">j</span></code>, <code class="docutils literal notranslate"><span class="pre">ChainsIndex[Chains[i]].maxHeight</span> <span class="pre">&gt;=</span> <span class="pre">ChainsIndex[Chains[j]].maxHeight</span></code>. Furthermore, keys MUST be consecutive, i.e. for each <code class="docutils literal notranslate"><span class="pre">i</span></code>, if <code class="docutils literal notranslate"><span class="pre">Chains[i]</span></code> does not exist, <code class="docutils literal notranslate"><span class="pre">Chains[i+1]</span></code> MUST NOT exist either.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The assumption for <code class="docutils literal notranslate"><span class="pre">Chains</span></code> is that, in the majority of cases, block headers will be appended to the <em>main chain</em> (longest chain), i.e., the <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> entry at the most significant position in the queue/heap. Similarly, transaction inclusion proofs (<a class="reference internal" href="functions.html#verifytransactioninclusion"><span class="std std-ref">verifyTransactionInclusion</span></a>) are only checked against the <em>main chain</em>. This means, in the average case lookup complexity will be O(1). Furthermore, block headers can only be appended if they (i) have a valid PoW and (ii) do not yet exist in <code class="docutils literal notranslate"><span class="pre">BlockHeaders</span></code> - hence, spamming is very costly and unlikely. Finally, blockchain forks and re-organizations occur infrequently, especially in Bitcoin. In principle, optimizing lookup costs should be prioritized, ideally O(1), while inserting of new items and re-balancing can even be O(n).</p>
+</div>
+</div>
+<div class="section" id="chainsindex">
+<span id="id10"></span><h3>ChainsIndex<a class="headerlink" href="#chainsindex" title="Permalink to this headline">¶</a></h3>
+<p>The main storage map of <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> structs, indexed by a <em>values</em> from the <a class="reference internal" href="#chains"><span class="std std-ref">Chains</span></a>. <code class="docutils literal notranslate"><span class="pre">ChainsIndex[0]</span></code> MUST always contain the main chain.</p>
+</div>
+<div class="section" id="bestblock">
+<h3>BestBlock<a class="headerlink" href="#bestblock" title="Permalink to this headline">¶</a></h3>
+<p>32 byte Bitcoin block hash (double SHA256) identifying the current blockchain tip, i.e., the <code class="docutils literal notranslate"><span class="pre">RichBlockHeader</span></code> with the highest <code class="docutils literal notranslate"><span class="pre">blockHeight</span></code> in the <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> entry, which has the most significant <code class="docutils literal notranslate"><span class="pre">height</span></code> in the <code class="docutils literal notranslate"><span class="pre">Chains</span></code> priority queue (topmost position).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Bitcoin uses SHA256 (32 bytes) for its block hashes, transaction identifiers and Merkle trees. In Substrate, we hence use <code class="docutils literal notranslate"><span class="pre">H256</span></code> to represent these hashes.</p>
+</div>
+</div>
+<div class="section" id="bestblockheight">
+<h3>BestBlockHeight<a class="headerlink" href="#bestblockheight" title="Permalink to this headline">¶</a></h3>
+<p>Integer representing the maximum block height (<code class="docutils literal notranslate"><span class="pre">height</span></code>) in the <code class="docutils literal notranslate"><span class="pre">Chains</span></code> priority queue. This is also the <code class="docutils literal notranslate"><span class="pre">blockHeight</span></code> of the <code class="docutils literal notranslate"><span class="pre">RichBlockHeader</span></code> entry pointed to by <code class="docutils literal notranslate"><span class="pre">BestBlock</span></code>.</p>
+</div>
+<div class="section" id="chaincounter">
+<h3>ChainCounter<a class="headerlink" href="#chaincounter" title="Permalink to this headline">¶</a></h3>
+<p>Integer increment-only counter used to track existing BlockChain entries.
+Initialized with 1 (0 is reserved for <code class="docutils literal notranslate"><span class="pre">MAIN_CHAIN_ID</span></code>).</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="functions.html" class="btn btn-neutral float-right" title="Functions: Storage and Verification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../staking.html" class="btn btn-neutral float-left" title="Staking" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Interlay
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,751 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Issue &mdash; interBTC Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Refund" href="refund.html" />
+    <link rel="prev" title="Exchange Rate Oracle" href="oracle.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> interBTC Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v5.5.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/xclaim-architecture.html">XCLAIM Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/btcrelay-architecture.html">BTC-Relay Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/accepted-format.html">Accepted Bitcoin Transaction Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">How to Read This Specification</a></li>
+</ul>
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="collateral.html">Collateral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Issue</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-by-step">Step-by-step</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#security">Security</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#vault-registry">Vault Registry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fee-model">Fee Model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data-model">Data Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalars">Scalars</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#issueperiod">IssuePeriod</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#issuebtcdustvalue">IssueBtcDustValue</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#maps">Maps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#issuerequests">IssueRequests</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#structs">Structs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id4">Issue</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#requestissue">requestIssue</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specification">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#executeissue">executeIssue</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cancelissue">cancelIssue</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id9">Specification</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#events">Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#requestissueevent">RequestIssue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#issueamountchange">IssueAmountChange</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#executeissueevent">ExecuteIssue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cancelissueevent">CancelIssue</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-codes">Error Codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="refund.html">Refund</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redeem.html">Redeem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relay.html">Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="treasury.html">Treasury</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vault-registry.html">Vault Registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reward.html">Reward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="staking.html">Staking</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/liquidations.html">Vault Liquidations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/xclaim-security.html">XCLAIM Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/btcrelay-security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../economics/incentives.html">Economic Incentives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../economics/fees.html">Fee Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">interBTC Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Issue</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/spec/issue.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="issue">
+<span id="issue-protocol"></span><h1>Issue<a class="headerlink" href="#issue" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The Issue module allows as user to create new interBTC tokens. The user needs to request interBTC through the <a class="reference internal" href="#requestissue"><span class="std std-ref">requestIssue</span></a> function, then send BTC to a Vault, and finally complete the issuing of interBTC by calling the <a class="reference internal" href="#executeissue"><span class="std std-ref">executeIssue</span></a> function. If the user does not complete the process in time, the Vault can cancel the issue request and receive a griefing collateral from the user by invoking the <a class="reference internal" href="#cancelissue"><span class="std std-ref">cancelIssue</span></a> function. Below is a high-level step-by-step description of the protocol.</p>
+<div class="section" id="step-by-step">
+<h3>Step-by-step<a class="headerlink" href="#step-by-step" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Precondition: a Vault has locked collateral as described in the <a class="reference internal" href="vault-registry.html#vault-registry"><span class="std std-ref">Vault Registry</span></a>.</p></li>
+<li><p>A user executes the <a class="reference internal" href="#requestissue"><span class="std std-ref">requestIssue</span></a> function to open an issue request. The issue request includes the amount of interBTC the user wants to issue, the selected Vault, and a small collateral reserve to prevent <a class="reference internal" href="../security_performance/xclaim-security.html#griefing"><span class="std std-ref">Griefing</span></a>.</p></li>
+<li><p>A user sends the equivalent amount of BTC to issue as interBTC to the Vault on the Bitcoin blockchain.</p></li>
+<li><p>The user or Vault acting on behalf of the user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain. The user or a Vault acting on behalf of the user executes the <a class="reference internal" href="#executeissue"><span class="std std-ref">executeIssue</span></a> function on the BTC Parachain. The issue function requires a reference to the issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of interBTC into his account.</p></li>
+<li><p>Optional: If the user is not able to complete the issue request within the predetermined time frame (<code class="docutils literal notranslate"><span class="pre">IssuePeriod</span></code>), the Vault is able to call the <a class="reference internal" href="#cancelissue"><span class="std std-ref">cancelIssue</span></a> function to cancel the issue request adn will receive the griefing collateral locked by the user.</p></li>
+</ol>
+</div>
+<div class="section" id="security">
+<h3>Security<a class="headerlink" href="#security" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Unique identification of Bitcoin payments: <a class="reference internal" href="../security_performance/xclaim-security.html#okd"><span class="std std-ref">On-Chain Key Derivation Scheme</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="vault-registry">
+<h3>Vault Registry<a class="headerlink" href="#vault-registry" title="Permalink to this headline">¶</a></h3>
+<p>The data access and state changes to the Vault registry are documented in <a class="reference internal" href="#fig-vault-registry-issue"><span class="std std-numref">Fig. 9</span></a> below.</p>
+<div class="figure align-default" id="id13">
+<span id="fig-vault-registry-issue"></span><img alt="Vault-Registry Issue" src="../_images/VaultRegistry-Issue.png" />
+<p class="caption"><span class="caption-number">Fig. 9 </span><span class="caption-text">The issue protocol interacts with three functions in the <a class="reference internal" href="vault-registry.html#vault-registry"><span class="std std-ref">Vault Registry</span></a> that handle updating the different token balances.</span><a class="headerlink" href="#id13" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="fee-model">
+<h3>Fee Model<a class="headerlink" href="#fee-model" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Issue fees are paid by users in interBTC when executing the request. The fees are transferred to the Parachain Fee Pool.</p></li>
+<li><p>If an issue request is executed, the user’s griefing collateral is returned.</p></li>
+<li><p>If an issue request is canceled, the Vault assigned to this issue request receives the griefing collateral.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="data-model">
+<h2>Data Model<a class="headerlink" href="#data-model" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="scalars">
+<h3>Scalars<a class="headerlink" href="#scalars" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="issueperiod">
+<span id="id1"></span><h4>IssuePeriod<a class="headerlink" href="#issueperiod" title="Permalink to this headline">¶</a></h4>
+<p>The time difference between when an issue request is created and required completion time by a user.
+Concretely, this period is the amount by which <a class="reference internal" href="security.html#activeblockcount"><span class="std std-ref">ActiveBlockCount</span></a> is allowed to increase before the issue is considered to be expired.
+The period has an upper limit to prevent griefing of Vault collateral.</p>
+</div>
+<div class="section" id="issuebtcdustvalue">
+<span id="id2"></span><h4>IssueBtcDustValue<a class="headerlink" href="#issuebtcdustvalue" title="Permalink to this headline">¶</a></h4>
+<p>The minimum amount of BTC that is required for issue requests; lower values would risk the rejection of payment on Bitcoin.</p>
+</div>
+</div>
+<div class="section" id="maps">
+<h3>Maps<a class="headerlink" href="#maps" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="issuerequests">
+<span id="id3"></span><h4>IssueRequests<a class="headerlink" href="#issuerequests" title="Permalink to this headline">¶</a></h4>
+<p>Users create issue requests to issue interBTC. This mapping provides access from a unique hash <code class="docutils literal notranslate"><span class="pre">IssueId</span></code> to a <code class="docutils literal notranslate"><span class="pre">Issue</span></code> struct. <code class="docutils literal notranslate"><span class="pre">&lt;IssueId,</span> <span class="pre">Issue&gt;</span></code>.</p>
+</div>
+</div>
+<div class="section" id="structs">
+<h3>Structs<a class="headerlink" href="#structs" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id4">
+<h4>Issue<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<p>Stores the status and information about a single issue request.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 12%" />
+<col style="width: 65%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">vault</span></code></p></td>
+<td><p>AccountId</p></td>
+<td><p>The address of the Vault responsible for this issue request.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">opentime</span></code></p></td>
+<td><p>BlockNumber</p></td>
+<td><p>The <a class="reference internal" href="security.html#activeblockcount"><span class="std std-ref">ActiveBlockCount</span></a> when the issue request was created.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">period</span></code></p></td>
+<td><p>BlockNumber</p></td>
+<td><p>Value of the <a class="reference internal" href="#issueperiod"><span class="std std-ref">IssuePeriod</span></a> when the request was made.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code></p></td>
+<td><p>DOT</p></td>
+<td><p>Security deposit provided by a user.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">amount</span></code></p></td>
+<td><p>interBTC</p></td>
+<td><p>Amount of interBTC to be issued.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fee</span></code></p></td>
+<td><p>interBTC</p></td>
+<td><p>Fee charged to the user for issuing.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">requester</span></code></p></td>
+<td><p>AccountId</p></td>
+<td><p>User account receiving interBTC upon successful issuing.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">btcAddress</span></code></p></td>
+<td><p>BtcAddress</p></td>
+<td><p>Vault’s P2WPKH Bitcoin deposit address.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">btcPublicKey</span></code></p></td>
+<td><p>BtcPublicKey</p></td>
+<td><p>Vault’s Bitcoin public key used to generate the deposit address.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">btcHeight</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>The highest recorded height of the relay at time of opening.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">status</span></code></p></td>
+<td><p>Enum</p></td>
+<td><p>Status of the request: Pending, Completed or Cancelled.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="requestissue">
+<span id="id5"></span><h3>requestIssue<a class="headerlink" href="#requestissue" title="Permalink to this headline">¶</a></h3>
+<p>A user opens an issue request to create a specific amount of interBTC.
+When calling this function, a user provides their parachain account identifier, the to be issued amount of interBTC, and the Vault she wants to use in this process (parachain account identifier). Further, she provides some (small) amount of DOT collateral (<code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code>) to prevent griefing.</p>
+<div class="section" id="specification">
+<h4>Specification<a class="headerlink" href="#specification" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">requestIssue(requester,</span> <span class="pre">amount,</span> <span class="pre">vault,</span> <span class="pre">griefingCollateral)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">requester</span></code>: The user’s account identifier.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: The amount of interBTC to be issued.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The address of the Vault involved in this issue request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code>: The collateral amount provided by the user as griefing protection.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#requestissueevent"><span class="std std-ref">RequestIssue</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p>The function call MUST be signed by <code class="docutils literal notranslate"><span class="pre">requester</span></code>.</p></li>
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component MUST NOT be <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:2</span></code>.</p></li>
+<li><p>The <span class="xref std std-ref">btc-relay</span> MUST be initialized.</p></li>
+<li><p>The Vault MUST be registered and active.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">amount</span></code> MUST be greater than or equal to <a class="reference internal" href="#issuebtcdustvalue"><span class="std std-ref">IssueBtcDustValue</span></a>.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code> MUST exceed or equal the value of request <code class="docutils literal notranslate"><span class="pre">amount</span></code> at the current exchange-rate, multiplied by <a class="reference internal" href="fee.html#issuegriefingcollateral"><span class="std std-ref">IssueGriefingCollateral</span></a>.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code> MUST be equal or less than the requester’s free balance.</p></li>
+<li><p>The <a class="reference internal" href="vault-registry.html#tryincreasetobeissuedtokens"><span class="std std-ref">tryIncreaseToBeIssuedTokens</span></a> function MUST return a new BTC deposit address for the Vault ensuring that the Vault’s free collateral is above the <a class="reference internal" href="vault-registry.html#securecollateralthreshold"><span class="std std-ref">SecureCollateralThreshold</span></a> for the requested <code class="docutils literal notranslate"><span class="pre">amount</span></code> and that a unique BTC address is used for depositing BTC.</p></li>
+<li><p>A new unique <code class="docutils literal notranslate"><span class="pre">issuedId</span></code> MUST be generated via the <a class="reference internal" href="security.html#generatesecureid"><span class="std std-ref">generateSecureId</span></a> function.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul>
+<li><p>The Vault’s <code class="docutils literal notranslate"><span class="pre">toBeIssuedTokens</span></code> MUST increase by <code class="docutils literal notranslate"><span class="pre">amount</span></code>.</p></li>
+<li><p>The requester’s free balance MUST decrease by <code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code>.</p></li>
+<li><p>The requester’s locked balance MUST increase by <code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code>.</p></li>
+<li><p>A new BTC deposit address for the Vault MUST be generated by the <a class="reference internal" href="vault-registry.html#tryincreasetobeissuedtokens"><span class="std std-ref">tryIncreaseToBeIssuedTokens</span></a>.</p></li>
+<li><p>The new issue request MUST be created as follows:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">issue.vault</span></code>: MUST be the <code class="docutils literal notranslate"><span class="pre">vault</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">issue.opentime</span></code>: MUST be the <a class="reference internal" href="security.html#activeblockcount"><span class="std std-ref">ActiveBlockCount</span></a> of the current block of this transaction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">issue.period</span></code>: MUST be the current <a class="reference internal" href="#issueperiod"><span class="std std-ref">IssuePeriod</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">issue.griefingCollateral</span></code>: MUST be the <code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code> amount passed to the function.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">issue.amount</span></code>: MUST be <code class="docutils literal notranslate"><span class="pre">amount</span></code> minus <code class="docutils literal notranslate"><span class="pre">issue.fee</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">issue.fee</span></code>: MUST equal <code class="docutils literal notranslate"><span class="pre">amount</span></code> multiplied by <a class="reference internal" href="fee.html#issuefee"><span class="std std-ref">IssueFee</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">issue.requester</span></code>: MUST be the <code class="docutils literal notranslate"><span class="pre">requester</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">issue.btcAddress</span></code>: MUST be the BTC address returned from the <a class="reference internal" href="vault-registry.html#tryincreasetobeissuedtokens"><span class="std std-ref">tryIncreaseToBeIssuedTokens</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">issue.btcPublicKey</span></code>: MUST be the BTC public key returned from the <a class="reference internal" href="vault-registry.html#tryincreasetobeissuedtokens"><span class="std std-ref">tryIncreaseToBeIssuedTokens</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">issue.btcHeight</span></code>: MUST be the current Bitcoin height as stored in the BTC-Relay.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">issue.status</span></code>: MUST be <code class="docutils literal notranslate"><span class="pre">Pending</span></code>.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>The new issue request MUST be inserted into <a class="reference internal" href="#issuerequests"><span class="std std-ref">IssueRequests</span></a> using the generated <code class="docutils literal notranslate"><span class="pre">issueId</span></code> as the key.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="executeissue">
+<span id="id6"></span><h3>executeIssue<a class="headerlink" href="#executeissue" title="Permalink to this headline">¶</a></h3>
+<p>An executor completes the issue request by sending a proof of transferring the defined amount of BTC to the vault’s address.</p>
+<div class="section" id="id7">
+<h4>Specification<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">executeIssue(executorId,</span> <span class="pre">issueId,</span> <span class="pre">rawMerkleProof,</span> <span class="pre">rawTx)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">executor</span></code>: the account of the user.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">issueId</span></code>: the unique hash created during the <code class="docutils literal notranslate"><span class="pre">requestIssue</span></code> function.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rawMerkleProof</span></code>: Raw Merkle tree path (concatenated LE SHA256 hashes).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rawTx</span></code>: Raw Bitcoin transaction including the transaction inputs and outputs.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#executeissueevent"><span class="std std-ref">ExecuteIssue</span></a></p></li>
+<li><p><a class="reference internal" href="#issueamountchangeevent"><span class="std std-ref">IssueAmountChange</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p>The function call MUST be signed by <code class="docutils literal notranslate"><span class="pre">executor</span></code>.</p></li>
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component MUST NOT be <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:2</span></code>.</p></li>
+<li><p>The issue request for <code class="docutils literal notranslate"><span class="pre">issueId</span></code> MUST exist in <a class="reference internal" href="#issuerequests"><span class="std std-ref">IssueRequests</span></a>.</p></li>
+<li><p>The issue request for <code class="docutils literal notranslate"><span class="pre">issueId</span></code> MUST NOT have expired.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">rawTx</span></code> MUST be valid and contain a payment to the Vault.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">rawMerkleProof</span></code> MUST be valid and prove inclusion to the main chain.</p></li>
+<li><p>If the amount transferred is less than <code class="docutils literal notranslate"><span class="pre">issue.amount</span> <span class="pre">+</span> <span class="pre">issue.fee</span></code>, then the <code class="docutils literal notranslate"><span class="pre">executor</span></code> MUST be the account that made the issue request.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul>
+<li><p>If the amount transferred IS less than the <code class="docutils literal notranslate"><span class="pre">issue.amount</span> <span class="pre">+</span> <span class="pre">issue.fee</span></code>:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The Vault’s <code class="docutils literal notranslate"><span class="pre">toBeIssuedTokens</span></code> MUST decrease by the deficit (<code class="docutils literal notranslate"><span class="pre">issue.amount</span> <span class="pre">-</span> <span class="pre">amountTransferred</span></code>).</p></li>
+<li><p>The Vault’s free balance MUST increase by the <code class="docutils literal notranslate"><span class="pre">griefingCollateral</span> <span class="pre">*</span> <span class="pre">(1</span> <span class="pre">-</span> <span class="pre">amountTransferred</span> <span class="pre">/</span> <span class="pre">(issue.amount</span> <span class="pre">+</span> <span class="pre">issue.fee))</span></code>.</p></li>
+<li><p>The requester’s free balance MUST increase by the <code class="docutils literal notranslate"><span class="pre">griefingCollateral</span> <span class="pre">*</span> <span class="pre">amountTransferred</span> <span class="pre">/</span> <span class="pre">(issue.amount</span> <span class="pre">+</span> <span class="pre">issue.fee)</span></code>.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">issue.fee</span></code> MUST be updated to the amount transferred multiplied by the <a class="reference internal" href="fee.html#issuefee"><span class="std std-ref">IssueFee</span></a>.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">issue.amount</span></code> MUST be set to the amount transferred minus the updated <code class="docutils literal notranslate"><span class="pre">issue.fee</span></code>.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>If the amount transferred IS NOT less than the expected amount:</p>
+<blockquote>
+<div><ul>
+<li><p>The requester’s free balance MUST increase by the <code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code>.</p></li>
+<li><p>If the amount transferred IS greater than the expected amount:</p>
+<blockquote>
+<div><ul>
+<li><p>If the Vault IS NOT liquidated and has sufficient collateral:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The Vault’s <code class="docutils literal notranslate"><span class="pre">toBeIssuedTokens</span></code> MUST increase by the surplus (<code class="docutils literal notranslate"><span class="pre">amountTransferred</span> <span class="pre">-</span> <span class="pre">issue.amount</span></code>).</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">issue.fee</span></code> MUST be updated to the amount transferred multiplied by the <a class="reference internal" href="fee.html#issuefee"><span class="std std-ref">IssueFee</span></a>.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">issue.amount</span></code> MUST be set to the amount transferred minus the updated <code class="docutils literal notranslate"><span class="pre">issue.fee</span></code>.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>If the Vault IS NOT liquidated and does not have sufficient collateral:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>There MUST exist a <a class="reference internal" href="refund.html#refund-protocol"><span class="std std-ref">Refund</span></a> request which references <code class="docutils literal notranslate"><span class="pre">issueId</span></code>.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>The requester’s locked balance MUST decrease by <code class="docutils literal notranslate"><span class="pre">issue.griefingCollateral</span></code>.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">issue.status</span></code> MUST be set to <code class="docutils literal notranslate"><span class="pre">Completed</span></code>.</p></li>
+<li><p>The Vault’s <code class="docutils literal notranslate"><span class="pre">toBeIssuedTokens</span></code> MUST decrease by <code class="docutils literal notranslate"><span class="pre">issue.amount</span> <span class="pre">+</span> <span class="pre">issue.fee</span></code>.</p></li>
+<li><p>The Vault’s <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> MUST increase by <code class="docutils literal notranslate"><span class="pre">issue.amount</span> <span class="pre">+</span> <span class="pre">issue.fee</span></code>.</p></li>
+<li><p>The user MUST receive <code class="docutils literal notranslate"><span class="pre">issue.amount</span></code> interBTC in its free balance.</p></li>
+<li><p>Function <a class="reference internal" href="reward.html#reward-distributereward"><span class="std std-ref">distributeReward</span></a> MUST complete successfully  - parameterized by <code class="docutils literal notranslate"><span class="pre">issue.fee</span></code>.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="cancelissue">
+<span id="id8"></span><h3>cancelIssue<a class="headerlink" href="#cancelissue" title="Permalink to this headline">¶</a></h3>
+<p>If an issue request is not completed on time, the issue request can be cancelled.</p>
+<div class="section" id="id9">
+<h4>Specification<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">cancelIssue(requester,</span> <span class="pre">issueId)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">requester</span></code>: The sender of the cancel transaction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">issueId</span></code>: the unique hash of the issue request.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#cancelissueevent"><span class="std std-ref">CancelIssue</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p>The function call MUST be signed by <code class="docutils literal notranslate"><span class="pre">requester</span></code>.</p></li>
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component MUST NOT be <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:2</span></code>.</p></li>
+<li><p>The issue request for <code class="docutils literal notranslate"><span class="pre">issueId</span></code> MUST exist in <a class="reference internal" href="#issuerequests"><span class="std std-ref">IssueRequests</span></a>.</p></li>
+<li><p>The issue request MUST have expired.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul>
+<li><p>If the vault IS liquidated:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The requester’s free balance MUST increase by the <code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code>.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>If the Vault IS NOT liquidated:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>The vault’s free balance MUST increase by the <code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code>.</p></li>
+</ul>
+</div></blockquote>
+</li>
+<li><p>The requester’s locked balance MUST decrease by the <code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code>.</p></li>
+<li><p>The vault’s <code class="docutils literal notranslate"><span class="pre">toBeIssuedTokens</span></code> MUST decrease by <code class="docutils literal notranslate"><span class="pre">issue.amount</span> <span class="pre">+</span> <span class="pre">issue.fee</span></code>.</p></li>
+<li><p>The issue status MUST be set to <code class="docutils literal notranslate"><span class="pre">Cancelled</span></code>.</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="events">
+<h2>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="requestissueevent">
+<span id="id10"></span><h3>RequestIssue<a class="headerlink" href="#requestissueevent" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event if a user successfully open a issue request.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">RequestIssue(issueId,</span> <span class="pre">requester,</span> <span class="pre">amount,</span> <span class="pre">fee,</span> <span class="pre">griefingCollateral,</span> <span class="pre">vault,</span> <span class="pre">btcAddress,</span> <span class="pre">btcPublicKey)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">issueId</span></code>: A unique hash identifying the issue request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">requester</span></code>: The user’s account identifier.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: The amount of interBTC requested.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fee</span></code>: The amount of interBTC to mint as fees.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code>: The security deposit provided by the user.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The address of the Vault involved in this issue request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">btcAddress</span></code>: The Bitcoin address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">btcPublicKey</span></code>: The Bitcoin public key of the Vault.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#requestissue"><span class="std std-ref">requestIssue</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="issueamountchange">
+<span id="issueamountchangeevent"></span><h3>IssueAmountChange<a class="headerlink" href="#issueamountchange" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event if the issue amount changed for any reason.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">IssueAmountChange(issueId,</span> <span class="pre">amount,</span> <span class="pre">fee,</span> <span class="pre">griefingCollateral)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">issueId</span></code>: A unique hash identifying the issue request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: The amount of interBTC requested.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fee</span></code>: The amount of interBTC to mint as fees.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code>: Confiscated griefing collateral.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#executeissue"><span class="std std-ref">executeIssue</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="executeissueevent">
+<span id="id11"></span><h3>ExecuteIssue<a class="headerlink" href="#executeissueevent" title="Permalink to this headline">¶</a></h3>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">ExecuteIssue(issueId,</span> <span class="pre">requester,</span> <span class="pre">amount,</span> <span class="pre">vault,</span> <span class="pre">fee)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">issueId</span></code>: A unique hash identifying the issue request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">requester</span></code>: The user’s account identifier.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: The amount of interBTC issued to the user.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The address of the Vault involved in this issue request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">fee</span></code>: The amount of interBTC minted as fees.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#executeissue"><span class="std std-ref">executeIssue</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="cancelissueevent">
+<span id="id12"></span><h3>CancelIssue<a class="headerlink" href="#cancelissueevent" title="Permalink to this headline">¶</a></h3>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">CancelIssue(issueId,</span> <span class="pre">requester,</span> <span class="pre">griefingCollateral)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">issueId</span></code>: the unique hash of the issue request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">requester</span></code>: The sender of the cancel transaction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">griefingCollateral</span></code>: The released griefing collateral.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#cancelissue"><span class="std std-ref">cancelIssue</span></a></p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="error-codes">
+<h2>Error Codes<a class="headerlink" href="#error-codes" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_VAULT_NOT_FOUND</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “There exists no Vault with the given account id.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#requestissue"><span class="std std-ref">requestIssue</span></a></p></li>
+<li><p><strong>Cause</strong>: The specified Vault does not exist.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_VAULT_BANNED</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “The selected Vault has been temporarily banned.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#requestissue"><span class="std std-ref">requestIssue</span></a></p></li>
+<li><p><strong>Cause</strong>:  Issue requests are not possible with temporarily banned Vaults</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_COLLATERAL</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “User provided collateral below limit.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#requestissue"><span class="std std-ref">requestIssue</span></a></p></li>
+<li><p><strong>Cause</strong>: User provided griefingCollateral below <a class="reference internal" href="fee.html#issuegriefingcollateral"><span class="std std-ref">IssueGriefingCollateral</span></a>.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_UNAUTHORIZED_USER</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “Unauthorized: Caller must be associated user”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#executeissue"><span class="std std-ref">executeIssue</span></a></p></li>
+<li><p><strong>Cause</strong>: The caller of this function is not the associated user, and hence not authorized to take this action.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_ISSUE_ID_NOT_FOUND</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “Requested issue id not found.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#executeissue"><span class="std std-ref">executeIssue</span></a></p></li>
+<li><p><strong>Cause</strong>: Issue id not found in the <code class="docutils literal notranslate"><span class="pre">IssueRequests</span></code> mapping.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_COMMIT_PERIOD_EXPIRED</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “Time to issue interBTC expired.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#executeissue"><span class="std std-ref">executeIssue</span></a></p></li>
+<li><p><strong>Cause</strong>: The user did not complete the issue request within the block time limit defined by the <code class="docutils literal notranslate"><span class="pre">IssuePeriod</span></code>.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_TIME_NOT_EXPIRED</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “Time to issue interBTC not yet expired.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#cancelissue"><span class="std std-ref">cancelIssue</span></a></p></li>
+<li><p><strong>Cause</strong>: Raises an error if the time limit to call <code class="docutils literal notranslate"><span class="pre">executeIssue</span></code> has not yet passed.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_ISSUE_COMPLETED</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “Issue completed and cannot be cancelled.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#cancelissue"><span class="std std-ref">cancelIssue</span></a></p></li>
+<li><p><strong>Cause</strong>: Raises an error if the issue is already completed.</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="refund.html" class="btn btn-neutral float-right" title="Refund" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="oracle.html" class="btn btn-neutral float-left" title="Exchange Rate Oracle" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Interlay
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,478 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Economic Incentives &mdash; interBTC Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Fee Model" href="fees.html" />
+    <link rel="prev" title="Performance Analysis" href="../security_performance/performance.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> interBTC Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v5.5.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/xclaim-architecture.html">XCLAIM Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/btcrelay-architecture.html">BTC-Relay Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/accepted-format.html">Accepted Bitcoin Transaction Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/introduction.html">How to Read This Specification</a></li>
+</ul>
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/collateral.html">Collateral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/issue.html">Issue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/refund.html">Refund</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/redeem.html">Redeem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/relay.html">Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/treasury.html">Treasury</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/vault-registry.html">Vault Registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/reward.html">Reward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/staking.html">Staking</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/liquidations.html">Vault Liquidations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/xclaim-security.html">XCLAIM Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/btcrelay-security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Economic Incentives</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#currencies">Currencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#actors-roles-risks-and-economics">Actors: Roles, Risks, and Economics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#users">Users</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#vaults">Vaults</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#relayers">Relayers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#collators">Collators</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#challenges-around-economic-efficiency">Challenges Around Economic Efficiency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#external-economic-risks">External Economic Risks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fees.html">Fee Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">interBTC Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Economic Incentives</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/economics/incentives.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="economic-incentives">
+<span id="incentives"></span><h1>Economic Incentives<a class="headerlink" href="#economic-incentives" title="Permalink to this headline">¶</a></h1>
+<p>Incentives are the core of decentralized systems. Fundamentally, actors in decentralized systems participate in a game where each actor attempts to maximize its utility. Designs of such decentralized systems need to encode a mechanism that provides clear incentives for actors to adhere to protocol rules while discouraging undesired behavior. Specifically, actors make risk-based decisions: payoffs associated with the execution of certain actions are compared against the risk incurred by the action. The BTC Parachain, being an open system with multiple distinct stakeholders, must hence offer a mechanism to assure honest participation outweighs subversive strategies.</p>
+<p>The overall objective of the incentive mechanism is an optimization problem with private information in a dynamic setting. Users need to pay fees to Vaults in return for their service. On the one hand, user fees should be low enough to allow them to profit from having interBTC (e.g., if a user stands to gain from earning interest in a stablecoin system using interBTC, then the fee for issuing interBTC should not outweigh the interest gain).</p>
+<p>On the other hand, fees need to be high enough to encourage Vaults to lock their DOT in the system and operate Vault clients. This problem is amplified as the BTC Parachain does not exist in isolation and Vaults can choose to participate in other protocols (e.g., staking, stablecoin issuance) as well. In the following, we outline the constraints we see, a viable incentive model, and pointers to further research questions we plan to solve by getting feedback from potential Vaults as well as quantitative modeling.</p>
+<div class="section" id="currencies">
+<h2>Currencies<a class="headerlink" href="#currencies" title="Permalink to this headline">¶</a></h2>
+<p>The BTC-Parachain features four asset types:</p>
+<ul class="simple">
+<li><p><cite>BTC</cite> - the backing-asset (locked on Bitcoin)</p></li>
+<li><p><cite>interBTC</cite> - the issued cryptocurrency-backed asset (on Polkadot)</p></li>
+<li><p><cite>DOT</cite> - the currency used to pay for transaction fees</p></li>
+<li><p><cite>COL</cite> - the currencies used as collateral (e.g., <cite>DOT</cite>, <cite>KSM</cite>, …)</p></li>
+</ul>
+</div>
+<div class="section" id="actors-roles-risks-and-economics">
+<h2>Actors: Roles, Risks, and Economics<a class="headerlink" href="#actors-roles-risks-and-economics" title="Permalink to this headline">¶</a></h2>
+<p>The main question when designing the fee model for interBTC is: When are fees paid, by whom, and how much?</p>
+<div class="figure align-default" id="id1">
+<img alt="Taxable actions" src="../_images/taxable-actions.png" />
+<p class="caption"><span class="caption-number">Fig. 19 </span><span class="caption-text">High-level overview of fee accrual in the BTC-Parachain (external sources only).</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>We can classify four groups of users, or actors, in the interBTC bridge.</p>
+<p>Below, we provide an overview of the protocol role, the risks, and the economics of each of the four actors.
+Specifically, we list the following:</p>
+<ul class="simple">
+<li><p><strong>Protocol role</strong> The intended interactions of the actor with the bridge.</p></li>
+<li><p><strong>Risks</strong> An informal overview of the risks of using the bridge.</p></li>
+<li><p><strong>Economics</strong> An informal overview of the following economic factors:</p>
+<ul>
+<li><p><strong>Income</strong>: revenue achieved by using the bridge. We differentiate between <em>primary</em> income that is achieved when the bridge works as intended and <em>secondary</em> income that is available in failure cases (e.g., misbehavior of Vaults or Users).</p></li>
+<li><p><strong>Internal costs</strong>: costs associated directly with the BTC-Parachain (i.e., inflow or internal flow of funds)</p></li>
+<li><p><strong>External costs</strong>: costs associated with external factors, such as node operation, engineering costs etc. (i.e., outflow of funds)</p></li>
+<li><p><strong>Opportunity costs</strong>: lost revenue, if e.g. locked up collateral was to be used in other applications (e.g. to stake on the Relay chain)</p></li>
+</ul>
+</li>
+</ul>
+<div class="section" id="users">
+<h3>Users<a class="headerlink" href="#users" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Protocol role</strong> Users lock BTC with Vaults to create interBTC. They hold and/or use interBTC for payments, lending, or investment in financial products. At some point, users redeem interBTC for BTC by destroying the backed assets.</p></li>
+<li><p><strong>Risks</strong> A user gives up custody over their BTC to a Vault. The Vault is over-collateralized in <cite>COL</cite>, (i.e., compared to the USD they will lose when taking away the user’s BTC). However, in a market crisis with significant price drops and liquidity shortages, Vaults might choose to steal the BTC. Users will be reimbursed with <cite>COL</cite> in that case - not the currency they initially started out with.</p></li>
+<li><p><strong>Economics</strong> A user holds BTC and has exposure to an exchange rate from BTC to other assets. A user’s incentives are based on the services (and their rewards) available when issuing interBTC.</p>
+<ul>
+<li><p><strong>Income</strong></p>
+<ul>
+<li><p>Primary: Use of interBTC in external applications (outside the bridge)</p></li>
+<li><p>Secondary: Slashed collateral of Vaults on failed redeems paid in <cite>COL</cite>, see <a class="reference internal" href="../spec/redeem.html#cancelredeem"><span class="std std-ref">cancelRedeem</span></a></p></li>
+<li><p>Secondary: Slashed collateral of Vaults on premium redeems paid in <cite>COL</cite>, see <a class="reference internal" href="../spec/redeem.html#requestredeem"><span class="std std-ref">requestRedeem</span></a></p></li>
+<li><p>Secondary: Arbitrage interBTC for <cite>COL</cite>, see <a class="reference internal" href="../spec/redeem.html#liquidationredeem"><span class="std std-ref">liquidationRedeem</span></a></p></li>
+</ul>
+</li>
+<li><p><strong>Internal Cost</strong></p>
+<ul>
+<li><p>Issue and redeem fees paid in <cite>interBTC</cite>, see <a class="reference internal" href="../spec/issue.html#requestissue"><span class="std std-ref">requestIssue</span></a> and <a class="reference internal" href="../spec/redeem.html#requestredeem"><span class="std std-ref">requestRedeem</span></a></p></li>
+<li><p>Parachain transaction fees on every transaction with the system paid in <cite>DOT</cite></p></li>
+<li><p>Optional: Additional BTC fees on refund paid in <cite>BTC</cite>, see <a class="reference internal" href="../spec/refund.html#executerefund"><span class="std std-ref">executeRefund</span></a></p></li>
+</ul>
+</li>
+<li><p><strong>External Costs</strong></p>
+<ul>
+<li><p><em>None</em></p></li>
+</ul>
+</li>
+<li><p><strong>Opportunity Cost</strong></p>
+<ul>
+<li><p>Locking BTC with a Vault that could be used in another protocol</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="vaults">
+<h3>Vaults<a class="headerlink" href="#vaults" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Protocol role</strong> Vaults lock up collateral in the BTC Parachain and hold users’ BTC (i.e., receive custody). When users wish to redeem interBTC for BTC, Vaults release BTC to users according to the events received from the BTC Parachain.</p></li>
+<li><p><strong>Risks</strong> A Vault backs a set of interBTC with collateral. If the exchange rate of the <cite>COL/BTC</cite> pair drops the Vault stands at risk to not be able to keep the required level of over-collateralization. This risk can be elevated by a shortage of liquidity.</p></li>
+<li><p><strong>Economics</strong> Vaults hold <cite>COL</cite> and thus have exposure to the <cite>COL</cite> price against <cite>BTC</cite>. Vaults inherently make a bet that <cite>COL</cite> will either stay constant or increase in value against BTC – otherwise they would simply exchange <cite>COL</cite> against their preferred asset(s). This is a simplified view of the underlying problem. We assume Vaults to be economically driven, i.e., following a strategy to maximize profits over time. While there may be altruistic actors, who follow protocol rules independent of the economic impact, we do not consider these here.</p>
+<ul>
+<li><p><strong>Income</strong></p>
+<ul>
+<li><p>Primary: Issue and redeem fees paid in <cite>interBTC</cite>, see <a class="reference internal" href="../spec/issue.html#requestissue"><span class="std std-ref">requestIssue</span></a> and <a class="reference internal" href="../spec/redeem.html#requestredeem"><span class="std std-ref">requestRedeem</span></a></p></li>
+<li><p>Secondary: Slashed collateral of Users on failed issues paid in <cite>DOT</cite>, see <a class="reference internal" href="../spec/issue.html#cancelissue"><span class="std std-ref">cancelIssue</span></a></p></li>
+<li><p>Secondary: Slashed collateral of Vaults on failed replace paid in <cite>COL</cite>, see <a class="reference internal" href="../spec/replace.html#cancelreplace"><span class="std std-ref">cancelReplace</span></a></p></li>
+<li><p>Secondary: Additional BTC of Users on refund paid in <cite>BTC</cite>, see <a class="reference internal" href="../spec/refund.html#executerefund"><span class="std std-ref">executeRefund</span></a></p></li>
+</ul>
+</li>
+<li><p><strong>Internal Cost</strong></p>
+<ul>
+<li><p>Parachain transaction fees on every transaction with the system paid in <cite>DOT</cite></p></li>
+<li><p>Optional: Slashed collateral on failed redeems paid in <cite>COL</cite>, see <a class="reference internal" href="../spec/redeem.html#cancelredeem"><span class="std std-ref">cancelRedeem</span></a></p></li>
+<li><p>Optional: Slashed collateral on theft paid in <cite>COL</cite>, see <a class="reference internal" href="../spec/relay.html#reportvaulttheft"><span class="std std-ref">reportVaultTheft</span></a></p></li>
+<li><p>Optional: Slashed collateral on liquidation paid in <cite>COL</cite>, see <a class="reference internal" href="../spec/vault-registry.html#liquidatevault"><span class="std std-ref">liquidateVault</span></a></p></li>
+</ul>
+</li>
+<li><p><strong>External Costs</strong></p>
+<ul>
+<li><p>Vault client operation/maintenance costs</p></li>
+<li><p>Bitcoin full node operation/maintenance costs</p></li>
+</ul>
+</li>
+<li><p><strong>Opportunity Cost</strong></p>
+<ul>
+<li><p>Locking <cite>COL</cite> that could be used in another protocol</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="relayers">
+<h3>Relayers<a class="headerlink" href="#relayers" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Protocol role</strong> Relayers run Bitcoin full nodes and submit block headers to BTC-Relay, ensuring it remains up to date with Bitcoin’s state. They also report misbehaving Vaults who have allegedly stolen BTC (move BTC outside of BTC Parachain constraints).</p></li>
+<li><p><strong>Risks</strong> Relayers have no financial stake in the system. Their highest risk is that they do not get sufficient rewards for submitting transactions (i.e., reporting Vault theft or submitting BTC block headers).</p></li>
+<li><p><strong>Economics</strong> Relayers are exposed to similar mechanics as Vaults, since they also hold DOT. However, they have no direct exposure to the BTC/DOT exchange rate, since they (typically, at least as part of the BTC Parachain) do not hold BTC. As such, Staked Relayers can purely be motivated to earn interest on DOT, but can also have the option to earn interest in interBTC and optimize their holdings depending on the best possible return at any given time.</p>
+<ul>
+<li><p><strong>Income</strong></p>
+<ul>
+<li><p>Primary: <em>None</em></p></li>
+<li><p>Secondary: Slashed collateral on theft paid in <cite>COL</cite>, see <a class="reference internal" href="../spec/relay.html#reportvaulttheft"><span class="std std-ref">reportVaultTheft</span></a></p></li>
+</ul>
+</li>
+<li><p><strong>Internal Cost</strong></p>
+<ul>
+<li><p>Parachain transaction fees on every transaction with the system paid in <cite>DOT</cite></p></li>
+</ul>
+</li>
+<li><p><strong>External Costs</strong></p>
+<ul>
+<li><p>Bitcoin full node operation/maintenance costs</p></li>
+<li><p>Parachain node operation/maintenance costs</p></li>
+</ul>
+</li>
+<li><p><strong>Opportunity Cost</strong></p>
+<ul>
+<li><p><em>None</em></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Operating a Vault requires access to a Bitcoin wallet. Currently, the best solution to access a Bitcoin wallet programmatically is by using the inbuilt wallet of the Bitcoin core full node. Hence, the Vault client is already running a Bitcoin full node. Therefore, the Relayer and the Vault roles are bundled together in the implementation of the Vault/Relayer clients.</p>
+</div>
+</div>
+<div class="section" id="collators">
+<h3>Collators<a class="headerlink" href="#collators" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Protocol role</strong> Collators are full nodes on both a parachain and the Relay Chain. They collect parachain transactions and produce state transition proofs for the validators on the Relay Chain. They can also send and receive messages from other parachains using XCMP. More on collators can be found in the Polkadot wiki: <a class="reference external" href="https://wiki.polkadot.network/docs/en/learn-collator#docsNav">https://wiki.polkadot.network/docs/en/learn-collator#docsNav</a></p></li>
+<li><p><strong>Risks</strong> Collators have no financial stake in the system. Hence running a collator has no inherent risk.</p></li>
+<li><p><strong>Economics</strong> Collators have to run a full node for the parachain incurring external costs. In return, they can receive fees.</p>
+<ul>
+<li><p><strong>Income</strong></p>
+<ul>
+<li><p>Primary: Parachain transaction fees on every transaction with the system paid in <cite>DOT</cite></p></li>
+</ul>
+</li>
+<li><p><strong>Internal Cost</strong></p>
+<ul>
+<li><p><em>None</em></p></li>
+</ul>
+</li>
+<li><p><strong>External Costs</strong></p>
+<ul>
+<li><p>Parachain full node operation/maintenance costs</p></li>
+</ul>
+</li>
+<li><p><strong>Opportunity Cost</strong></p>
+<ul>
+<li><p><em>None</em></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="challenges-around-economic-efficiency">
+<h2>Challenges Around Economic Efficiency<a class="headerlink" href="#challenges-around-economic-efficiency" title="Permalink to this headline">¶</a></h2>
+<p>To ensure security of interBTC, i.e., that users never face financial damage, XCLAIM relies on collateral. However, in the current design, this leads to the following economic challenges:</p>
+<ul class="simple">
+<li><p><strong>Over-collateralization</strong>. Vaults must lock up significantly (e.g., 150%) more collateral than minted interBTC to ensure security against exchange rate fluctuations (see <a class="reference internal" href="../spec/vault-registry.html#securecollateralthreshold"><span class="std std-ref">SecureCollateralThreshold</span></a>). Dynamically modifying the secure collateral threshold could only marginally reduce this requirement, at a high computational overhead. As such, to issue 1 interBTC, one must lock up 1 BTC, as well as the 1.5 BTC worth of collateral (e.g. in DOT), resulting in a 250% collateralization.</p></li>
+<li><p><strong>Non-deterministic Collateral Lockup</strong>. When a Vault locks collateral to secure interBTC, it does not know for how long this collateral will remain locked. As such, it is nearly impossible to determine a fair price for the premium charged to the user, without putting either the user or the Vault at a disadvantage.</p></li>
+<li><p><strong>Limited Chargeable Events</strong>. The Vault only has two events during which it can charge fees: (1) fulfillment of and issue request and (2) fulfillment of a redeem request. Thereby, the fees charged for the redeem request must be <strong>upper-bounded</strong> for security reasons (to prevent extortion by the Vault via sky-rocketing redeem fees).</p></li>
+</ul>
+</div>
+<div class="section" id="external-economic-risks">
+<span id="externaleconomicrisks"></span><h2>External Economic Risks<a class="headerlink" href="#external-economic-risks" title="Permalink to this headline">¶</a></h2>
+<p>A range of external factors also have to be considered in the incentives for the actors.</p>
+<ul class="simple">
+<li><p><strong>Exchange rate fluctuations</strong>. Vaults have a risk of having their <cite>COL</cite> liquidated if the <cite>COL/BTC</cite> exchange rate drops below the <a class="reference internal" href="../spec/vault-registry.html#liquidationthreshold"><span class="std std-ref">LiquidationThreshold</span></a>. In this case, the collateral is liquidated as described in <a class="reference internal" href="../security_performance/liquidations.html#liquidations"><span class="std std-ref">Vault Liquidations</span></a>. Liquidations describe that users can restore the <cite>interBTC</cite> to <cite>BTC</cite> peg by burning <cite>interBTC</cite> for <cite>COL</cite>. However, in a continuous drop of the exchange rate the value of <cite>COL</cite> will fall below the value of the burned <cite>interBTC</cite>. As such, the system relies on actors that execute fast arbitrage trades of <cite>interBTC</cite> for <cite>COL</cite>.</p></li>
+<li><p><strong>Counterparty risk for BTC in custody</strong>. When a user locks BTC with the Vault, he implicitly sells a BTC call option to the Vault. The Vault can, at any point in time, decide to exercise this option by “stealing” the user’s BTC. The price for this option is determined by <em>spot_price + punishment_fee</em> (<em>punishment_fee</em> is essentially the option premium). The main issue here is that we do not know how to price this option, because it has no expiry date - so this deal between the User and the Vault essentially becomes a BTC perpetual that can be physically exercised at any point in time (American-style).</p></li>
+<li><p><strong>interBTC Liquidity Shortage</strong>. Related to the exchange rate fluctuations, arbitrageurs rely on their own <cite>interBTC</cite> or a place to buy <cite>interBTC</cite> for <cite>COL</cite> to execute an arbitrage trade. In a <cite>interBTC</cite> liquidity shortage, simply not enough <cite>interBTC</cite> might be available. In combination with a severe exchange rate drop (more than <a class="reference internal" href="../spec/vault-registry.html#liquidationthreshold"><span class="std std-ref">LiquidationThreshold</span></a> - 100%), there will be no financial incentive to restore the <cite>interBTC</cite> to <cite>BTC</cite> peg.</p></li>
+<li><p><strong>BTC and COL Liquidity Shortage</strong>. <cite>interBTC</cite> is a “stablecoin” in relation to <cite>BTC</cite>. Since owning <cite>interBTC</cite> gives a claim to redeem <cite>BTC</cite>, the price of <cite>interBTC</cite> to <cite>BTC</cite> should remain roughly the same. However, in case <cite>interBTC</cite> demand is much larger than either the <cite>COL</cite> and/or <cite>BTC</cite> supply, the price for <cite>interBTC</cite> might increase much faster than <cite>BTC</cite>. In practice, this should not be an issue since the collateral thresholds are computed based on the <cite>BTC</cite> to <cite>COL</cite> exchange rate rather than the <cite>interBTC</cite> rates.</p></li>
+<li><p><strong>Opportunity costs</strong>: Each actor might decide to take an alternative path to receive the desired incentives. For example, users might pick a different platform or bridge to utilize their BTC. Also Vaults and Keepers might pick other protocols to earn interest on their DOT holdings.</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="fees.html" class="btn btn-neutral float-right" title="Fee Model" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../security_performance/performance.html" class="btn btn-neutral float-left" title="Performance Analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Interlay
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

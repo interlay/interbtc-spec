@@ -1,0 +1,348 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Accepted Bitcoin Transaction Format &mdash; interBTC Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="How to Read This Specification" href="../spec/introduction.html" />
+    <link rel="prev" title="Bitcoin Data Model" href="bitcoin.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> interBTC Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v5.5.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xclaim-architecture.html">XCLAIM Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btcrelay-architecture.html">BTC-Relay Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Accepted Bitcoin Transaction Format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#case-1-op-return-transactions">Case 1: OP_RETURN Transactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#case-2-regular-p2pkh-p2wpkh-p2sh-p2wsh-transactions">Case 2: Regular P2PKH / P2WPKH / P2SH / P2WSH Transactions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/introduction.html">How to Read This Specification</a></li>
+</ul>
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/collateral.html">Collateral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/issue.html">Issue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/refund.html">Refund</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/redeem.html">Redeem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/relay.html">Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/treasury.html">Treasury</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/vault-registry.html">Vault Registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/reward.html">Reward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/staking.html">Staking</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/liquidations.html">Vault Liquidations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/xclaim-security.html">XCLAIM Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/btcrelay-security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../economics/incentives.html">Economic Incentives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../economics/fees.html">Fee Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">interBTC Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Accepted Bitcoin Transaction Format</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/intro/accepted-format.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="accepted-bitcoin-transaction-format">
+<span id="accepted-tx-format"></span><h1>Accepted Bitcoin Transaction Format<a class="headerlink" href="#accepted-bitcoin-transaction-format" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="../spec/btc-relay/parser.html#parser"><span class="std std-ref">Functions: Parser</span></a> module of BTC-Relay can in theory be used to parse arbitrary Bitcoin transactions.
+However, the interBTC component of the BTC Parachain restricts the format of Bitcoin transactions to ensure consistency and prevent protocol failure due to parsing errors.</p>
+<p>As such, Bitcoin transactions for which transaction inclusion proofs are submitted to BTC-Relay as part of the in the interBTC <em>Issue</em>, <em>Redeem</em>, and <em>Replace</em> protocols must be <a class="reference external" href="https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash">P2PKH</a> or <a class="reference external" href="https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions">P2WPKH</a> transactions and follow the format below.</p>
+<div class="section" id="case-1-op-return-transactions">
+<h2>Case 1: OP_RETURN Transactions<a class="headerlink" href="#case-1-op-return-transactions" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference external" href="https://en.bitcoin.it/wiki/OP_RETURN">OP_RETURN</a> field can be used to store <a class="reference external" href="https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like">40 bytes in a given Bitcoin transaction</a>. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in interBTC.</p>
+<p>Many Bitcoin wallets automatically order UTXOs. We require that the <em>Payment UTXO</em> and the <em>Data UTXO</em> are made within the first three indexes (index 0 - 2).
+We <em>do not</em> require any specific ordering of those outputs.
+The reason behind checking for the first three outputs is that wallets like Electrum might insert the UTXOs returning part of the spent input at index 1.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please refer to the interBTC specification for more details on the <em>Refund</em>, <em>Redeem</em> and <em>Replace</em> protocols.</p>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Inputs</p></th>
+<th class="head"><p>Outputs</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><em>Arbitrary number of inputs</em></p></td>
+<td><p><strong>Index 0 to 2</strong>:</p>
+<p><em>Payment UTXO</em>: P2PKH / P2WPKH output to <code class="docutils literal notranslate"><span class="pre">btcAddress</span></code> Bitcoin address.</p>
+<p><em>Data UTXO</em>: OP_RETURN containing <code class="docutils literal notranslate"><span class="pre">identifier</span></code></p>
+<p><strong>Index 3-31</strong>:</p>
+<p>Any other UTXOs that will not be considered.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The value and recipient address (<code class="docutils literal notranslate"><span class="pre">btcAddress</span></code>) of the <em>Payment UTXO</em> and the <code class="docutils literal notranslate"><span class="pre">identifier</span></code> in the <em>Data UTXO</em> (OP_RETURN) depend on the executed interBTC protocol:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>In <em>Refund</em> <code class="docutils literal notranslate"><span class="pre">btcAddress</span></code> is the Bitcoin address of the user for the refunding process and <code class="docutils literal notranslate"><span class="pre">identifier</span></code> is the <code class="docutils literal notranslate"><span class="pre">refundId</span></code> of the <code class="docutils literal notranslate"><span class="pre">RefundRequest</span></code> in <code class="docutils literal notranslate"><span class="pre">RefundRequests</span></code>.</p></li>
+<li><p>In <em>Redeem</em> <code class="docutils literal notranslate"><span class="pre">btcAddress</span></code> is the Bitcoin address of the user who triggered the redeem process and <code class="docutils literal notranslate"><span class="pre">identifier</span></code> is the <code class="docutils literal notranslate"><span class="pre">redeemId</span></code> of the <code class="docutils literal notranslate"><span class="pre">RedeemRequest</span></code> in <code class="docutils literal notranslate"><span class="pre">RedeemRequests</span></code>.</p></li>
+<li><p>In <em>Replace</em> <code class="docutils literal notranslate"><span class="pre">btcAddress</span></code> is the Bitcoin address of the new vault, which has agreed to replace the vault which triggered the replace protocol and <code class="docutils literal notranslate"><span class="pre">identifier</span></code> is the <code class="docutils literal notranslate"><span class="pre">replaceId</span></code> of the <code class="docutils literal notranslate"><span class="pre">ReplaceRequest</span></code> in <code class="docutils literal notranslate"><span class="pre">ReplaceRequests</span></code>.</p></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="case-2-regular-p2pkh-p2wpkh-p2sh-p2wsh-transactions">
+<h2>Case 2: Regular P2PKH / P2WPKH / P2SH / P2WSH Transactions<a class="headerlink" href="#case-2-regular-p2pkh-p2wpkh-p2sh-p2wsh-transactions" title="Permalink to this headline">¶</a></h2>
+<p>We accept regular <a class="reference external" href="https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash">P2PKH</a>, <a class="reference external" href="https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions">P2WPKH</a>, <a class="reference external" href="https://github.com/libbitcoin/libbitcoin-system/wiki/P2SH(P2WSH)-Transactions">P2SH</a>, and <a class="reference external" href="https://github.com/libbitcoin/libbitcoin-system/wiki/P2WSH-Transactions">P2WSH</a> transactions.
+We ensure that the recipient address is unique via the On-Chain Key Derivation Scheme.</p>
+<p>Many Bitcoin wallets automatically order UTXOs. We require that the <em>Payment UTXO</em> is included within the first three indexes (index 0 - 2).
+We <em>do not</em> require any specific ordering of those outputs.
+The reason behind checking for the first three outputs is that wallets like Electrum might insert the UTXOs returning part of the spent input at index 1.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please refer to the interBTC specification for more details on the <em>Issue</em> protocol.</p>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Inputs</p></th>
+<th class="head"><p>Outputs</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><em>Arbitrary number of inputs</em></p></td>
+<td><p><strong>Index 0 to 2</strong>:</p>
+<p><em>Payment UTXO</em>: Output to <code class="docutils literal notranslate"><span class="pre">btcAddress</span></code> Bitcoin address.</p>
+<p><strong>Index 3-31</strong>:</p>
+<p>Any other UTXOs that will not be considered.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>The recipient address (<code class="docutils literal notranslate"><span class="pre">btcAddress</span></code>) of the <em>Payment UTXO</em> is a address derived from the public key the vault submitted to the BTC-Parachain.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../spec/introduction.html" class="btn btn-neutral float-right" title="How to Read This Specification" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="bitcoin.html" class="btn btn-neutral float-left" title="Bitcoin Data Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Interlay
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

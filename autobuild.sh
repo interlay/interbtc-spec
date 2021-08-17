@@ -1,2 +1,2 @@
 #!/bin/bash
-cd interbtc-spec && ./autobuild.sh & cd btcrelay-spec && ./autobuild.sh
+sphinx-autobuild -W --port 9000 docs/source docs/build/html

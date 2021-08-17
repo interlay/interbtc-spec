@@ -1,0 +1,546 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Welcome to the interBTC Technical Specification! &mdash; interBTC Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="BTC Parachain at a Glance" href="intro/at-a-glance.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="#" class="icon icon-home" alt="Documentation Home"> interBTC Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v5.5.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro/at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro/CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro/polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro/xclaim-architecture.html">XCLAIM Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro/btcrelay-architecture.html">BTC-Relay Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intro/accepted-format.html">Accepted Bitcoin Transaction Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/introduction.html">How to Read This Specification</a></li>
+</ul>
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="spec/collateral.html">Collateral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/issue.html">Issue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/refund.html">Refund</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/redeem.html">Redeem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/relay.html">Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/treasury.html">Treasury</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/vault-registry.html">Vault Registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/reward.html">Reward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/staking.html">Staking</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="spec/btc-relay/data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/btc-relay/functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/btc-relay/parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/btc-relay/helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/btc-relay/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="spec/btc-relay/errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="security_performance/liquidations.html">Vault Liquidations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security_performance/xclaim-security.html">XCLAIM Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security_performance/btcrelay-security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security_performance/performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="economics/incentives.html">Economic Incentives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="economics/fees.html">Fee Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">interBTC Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Welcome to the interBTC Technical Specification!</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="welcome-to-the-interbtc-technical-specification">
+<h1>Welcome to the interBTC Technical Specification!<a class="headerlink" href="#welcome-to-the-interbtc-technical-specification" title="Permalink to this headline">¶</a></h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please note that this specification is a living document. The actual implementation might deviate from the specification. In case of deviations in the code, the code has priority over the specification.</p>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="intro/at-a-glance.html">BTC Parachain at a Glance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro/at-a-glance.html#functionality">Functionality</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/at-a-glance.html#components">Components</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intro/CbA.html">Cryptocurrency-backed Assets</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro/CbA.html#cryptocurrency-back-assets-cba">Cryptocurrency-back Assets (CbA)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/CbA.html#design-principles">Design Principles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/CbA.html#recommended-background-reading">Recommended Background Reading</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intro/polkadot.html">Polkadot</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro/polkadot.html#substrate">Substrate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/polkadot.html#substrate-specifics">Substrate Specifics</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intro/xclaim-architecture.html">XCLAIM Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro/xclaim-architecture.html#actors">Actors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/xclaim-architecture.html#modules">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/xclaim-architecture.html#interactions">Interactions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intro/btcrelay-architecture.html">BTC-Relay Architecture</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro/btcrelay-architecture.html#actors">Actors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/btcrelay-architecture.html#components">Components</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intro/bitcoin.html">Bitcoin Data Model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro/bitcoin.html#block-headers">Block Headers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/bitcoin.html#transactions">Transactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/bitcoin.html#inputs">Inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/bitcoin.html#outputs">Outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/bitcoin.html#witness">Witness</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/bitcoin.html#witness-stack-item">Witness Stack Item</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intro/accepted-format.html">Accepted Bitcoin Transaction Format</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="intro/accepted-format.html#case-1-op-return-transactions">Case 1: OP_RETURN Transactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="intro/accepted-format.html#case-2-regular-p2pkh-p2wpkh-p2sh-p2wsh-transactions">Case 2: Regular P2PKH / P2WPKH / P2SH / P2WSH Transactions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/introduction.html">How to Read This Specification</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/introduction.html#external-functions">External Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/introduction.html#internal-functions">Internal Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/introduction.html#preconditions-postconditions-and-invariants">Preconditions, Postconditions and Invariants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/introduction.html#errors-and-events">Errors and Events</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="spec/collateral.html">Collateral</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/collateral.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/collateral.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/collateral.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/collateral.html#events">Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/collateral.html#errors">Errors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/fee.html">Fee</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/fee.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/fee.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/fee.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/fee.html#events">Events</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/oracle.html">Exchange Rate Oracle</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/oracle.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/oracle.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/oracle.html#events">Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/oracle.html#error-codes">Error Codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/issue.html">Issue</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/issue.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/issue.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/issue.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/issue.html#events">Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/issue.html#error-codes">Error Codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/refund.html">Refund</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/refund.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/refund.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/refund.html#external-functions">External Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/refund.html#internal-functions">Internal Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/refund.html#events">Events</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/redeem.html">Redeem</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/redeem.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/redeem.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/redeem.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/redeem.html#events">Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/redeem.html#error-codes">Error Codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/replace.html">Replace</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/replace.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/replace.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/replace.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/replace.html#events">Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/replace.html#error-codes">Error Codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/security.html">Security</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/security.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/security.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/security.html#data-storage">Data Storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/security.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/security.html#events">Events</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/relay.html">Relay</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/relay.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/relay.html#data-storage">Data Storage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/relay.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/relay.html#events">Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/relay.html#errors">Errors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/treasury.html">Treasury</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/treasury.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/treasury.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/treasury.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/treasury.html#events">Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/treasury.html#errors">Errors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/vault-registry.html">Vault Registry</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/vault-registry.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/vault-registry.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/vault-registry.html#external-functions">External Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/vault-registry.html#internal-functions">Internal Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/vault-registry.html#events">Events</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/vault-registry.html#error-codes">Error Codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/nomination.html">Vault Nomination</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/nomination.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/nomination.html#protocol">Protocol</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/nomination.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/nomination.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/nomination.html#events">Events</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/reward.html">Reward</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/reward.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/reward.html#invariants">Invariants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/reward.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/reward.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/reward.html#events">Events</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/staking.html">Staking</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/staking.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/staking.html#data-model">Data Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/staking.html#functions">Functions</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="spec/btc-relay/data-model.html">Data Model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/data-model.html#types">Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/data-model.html#constants">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/data-model.html#structs">Structs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/data-model.html#enums">Enums</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/data-model.html#data-structures">Data Structures</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/btc-relay/functions.html">Functions: Storage and Verification</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/functions.html#initialize">initialize</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/functions.html#storeblockheader">storeBlockHeader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/functions.html#swapmainblockchain">swapMainBlockchain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/functions.html#verifyblockheader">verifyBlockHeader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/functions.html#verifytransactioninclusion">verifyTransactionInclusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/functions.html#validatetransaction">validateTransaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/functions.html#verifyandvalidatetransaction">verifyAndValidateTransaction</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/functions.html#flagblockerror">flagBlockError</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/functions.html#clearblockerror">clearBlockError</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/btc-relay/parser.html">Functions: Parser</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/parser.html#id1">Block Header</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/parser.html#transactions">Transactions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/btc-relay/helpers.html">Functions: Utils</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/helpers.html#sha256d">sha256d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/helpers.html#concatsha256d">concatSha256d</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/helpers.html#nbitstotarget">nBitsToTarget</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/helpers.html#checkcorrecttarget">checkCorrectTarget</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/helpers.html#computenewtarget">computeNewTarget</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/helpers.html#computemerkle">computeMerkle</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/helpers.html#calculatedifficulty">calculateDifficulty</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/helpers.html#getforkidbyblockhash">getForkIdByBlockHash</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/helpers.html#incrementchaincounter">incrementChainCounter</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/btc-relay/events.html">Events</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/events.html#initialized">Initialized</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/events.html#storemainchainheader">StoreMainChainHeader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/events.html#storeforkheader">StoreForkHeader</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/events.html#chainreorg">ChainReorg</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/events.html#verifytransactioninclusion">VerifyTransactionInclusion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spec/btc-relay/events.html#validatetransaction">ValidateTransaction</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="spec/btc-relay/errors.html">Error Codes</a></li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="security_performance/liquidations.html">Vault Liquidations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/liquidations.html#safety-failures">Safety Failures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/liquidations.html#crash-failures">Crash Failures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/liquidations.html#liquidations-safety-failures">Liquidations (Safety Failures)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="security_performance/xclaim-security.html">XCLAIM Security Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/xclaim-security.html#replay-attacks">Replay Attacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/xclaim-security.html#counterfeiting">Counterfeiting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/xclaim-security.html#permanent-blockchain-splits">Permanent Blockchain Splits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/xclaim-security.html#denial-of-service-attacks">Denial-of-Service Attacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/xclaim-security.html#fee-model-security-sybil-attacks-and-extortion">Fee Model Security: Sybil Attacks and Extortion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/xclaim-security.html#griefing">Griefing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/xclaim-security.html#concurrency">Concurrency</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="security_performance/btcrelay-security.html">Security Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/btcrelay-security.html#security-parameter-k">Security Parameter <em>k</em></a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/btcrelay-security.html#liveness-failures">Liveness Failures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/btcrelay-security.html#safety-failures">Safety Failures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/btcrelay-security.html#hard-and-soft-forks">Hard and Soft forks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="security_performance/performance.html">Performance Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/performance.html#estimation-of-storage-costs">Estimation of Storage Costs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="security_performance/performance.html#btc-relay-optimizations">BTC-Relay Optimizations</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="economics/incentives.html">Economic Incentives</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="economics/incentives.html#currencies">Currencies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="economics/incentives.html#actors-roles-risks-and-economics">Actors: Roles, Risks, and Economics</a></li>
+<li class="toctree-l2"><a class="reference internal" href="economics/incentives.html#challenges-around-economic-efficiency">Challenges Around Economic Efficiency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="economics/incentives.html#external-economic-risks">External Economic Risks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="economics/fees.html">Fee Model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="economics/fees.html#payment-flows">Payment Flows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="economics/fees.html#interbtc-fee-model">interBTC Fee Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="economics/fees.html#transaction-fee-model">Transaction Fee Model</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="other/interlay.html">Interlay</a></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="intro/at-a-glance.html" class="btn btn-neutral float-right" title="BTC Parachain at a Glance" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Interlay
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,423 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>XCLAIM Security Analysis &mdash; interBTC Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Security Analysis" href="btcrelay-security.html" />
+    <link rel="prev" title="Vault Liquidations" href="liquidations.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> interBTC Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v5.5.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/xclaim-architecture.html">XCLAIM Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/btcrelay-architecture.html">BTC-Relay Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/accepted-format.html">Accepted Bitcoin Transaction Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/introduction.html">How to Read This Specification</a></li>
+</ul>
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/collateral.html">Collateral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/issue.html">Issue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/refund.html">Refund</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/redeem.html">Redeem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/relay.html">Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/treasury.html">Treasury</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/vault-registry.html">Vault Registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/reward.html">Reward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/staking.html">Staking</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="liquidations.html">Vault Liquidations</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">XCLAIM Security Analysis</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#replay-attacks">Replay Attacks</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#op-return">OP_RETURN</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#unique-addresses-via-on-chain-key-derivation">Unique Addresses via On-Chain Key Derivation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#on-chain-key-derivation-scheme">On-Chain Key Derivation Scheme</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#counterfeiting">Counterfeiting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#permanent-blockchain-splits">Permanent Blockchain Splits</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#backing-chain">Backing Chain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#issuing-chain">Issuing Chain</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#denial-of-service-attacks">Denial-of-Service Attacks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fee-model-security-sybil-attacks-and-extortion">Fee Model Security: Sybil Attacks and Extortion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#sybil-attacks">Sybil Attacks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#extortion">Extortion</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#griefing">Griefing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#concurrency">Concurrency</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#concurrent-redeem">Concurrent redeem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#concurrent-issue-and-redeem">Concurrent issue and redeem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#solution">Solution</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="btcrelay-security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../economics/incentives.html">Economic Incentives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../economics/fees.html">Fee Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">interBTC Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>XCLAIM Security Analysis</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/security_performance/xclaim-security.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="xclaim-security-analysis">
+<span id="xclaim-security"></span><h1>XCLAIM Security Analysis<a class="headerlink" href="#xclaim-security-analysis" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="replay-attacks">
+<h2>Replay Attacks<a class="headerlink" href="#replay-attacks" title="Permalink to this headline">¶</a></h2>
+<p>Without adequate protection, inclusion proofs for transactions on Bitcoin can be <strong>replayed</strong> by: (i) the user to trick interBTC component into issuing duplicate interBTC tokens and (ii) the vault to reuse a single transaction on Bitcoin to falsely prove multiple redeem, replace, and refund requests.
+We employ two different mechanisms to achieve this:</p>
+<ol class="arabic simple">
+<li><p><em>Identification via OP_RETURN</em>: When sending a Bitcoin transaction, the BTC-Parachain requires that a unique identifier is included as one of the outputs in the transaction.</p></li>
+<li><p><em>Unique Addresses via On-Chain Key Derivation</em>: The BTC-Parachain generates a new and unique address that Bitcoin can be transferred to.</p></li>
+</ol>
+<p>The details of the transaction format can be found at the <a class="reference external" href="https://interlay.gitlab.io/interBTC-spec/btcrelay-spec/intro/accepted-format.html">accepted Bitcoin transaction format</a>.</p>
+<div class="section" id="op-return">
+<span id="id1"></span><h3>OP_RETURN<a class="headerlink" href="#op-return" title="Permalink to this headline">¶</a></h3>
+<p>Applied in the following protocols:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../spec/redeem.html#redeem-protocol"><span class="std std-ref">Redeem</span></a></p></li>
+<li><p><a class="reference internal" href="../spec/replace.html#replace-protocol"><span class="std std-ref">Replace</span></a></p></li>
+<li><p><a class="reference internal" href="../spec/refund.html#refund-protocol"><span class="std std-ref">Refund</span></a></p></li>
+</ul>
+<p>A simple and practical mitigation is to introduce unique identifiers for each protocol execution and require transactions on Bitcoin submitted to the BTC-Relay of these protocols to contain the corresponding identifier.</p>
+<p>In this specification, we achieve this by requiring that vaults prepare a transaction with at least two outputs. One output is an OP_RETURN with a unique hash created in the <a class="reference internal" href="../spec/security.html#security"><span class="std std-ref">Security</span></a> module.
+Vaults are using Bitcoin full-nodes to send transactions and can easily and programmatically create transactions with an OP_RETURN output.</p>
+<p><strong>UX Issues with OP_RETURN</strong></p>
+<p>However, OP_RETURN has severe UX problems. Most Bitcoin wallets do not support OP_RETURN. That is, a user cannot use the UI to easily create an OP_RETURN transaction.
+As of this writing, the only wallet that supports this out of the box is Electrum. Other wallets, such as Samurai, exist but only support mainnet transactions (hence, have not yet been tested).</p>
+<p>In addition, while Bitcoin’s URI format (<a class="reference external" href="https://en.bitcoin.it/wiki/BIP_0021">BIP21</a>) generally supports OP_RETURN, none of the existing wallets have implemented an interpreter for this “upgraded” URI structure - this would have to be implemented manually by wallet providers.
+An alternative solution is to pre-generate the Bitcoin transaction for the user. The problem with this is that - again - most Bitcoin wallets do not support parsing of raw Bitcoin transactions. That is, a user cannot easily verify that the raw Bitcoin transaction string provided by interBTC indeed does what it should do (and does not steal the user’s funds). This approach works with hardware wallets, such as Ledger - but again, not all users will use interBTC from hardware wallets.</p>
+</div>
+<div class="section" id="unique-addresses-via-on-chain-key-derivation">
+<h3>Unique Addresses via On-Chain Key Derivation<a class="headerlink" href="#unique-addresses-via-on-chain-key-derivation" title="Permalink to this headline">¶</a></h3>
+<p>Applied in the following protocol:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../spec/issue.html#issue-protocol"><span class="std std-ref">Issue</span></a></p></li>
+</ul>
+<p>To avoid the use of OP_RETURN during the issue process, and the significant usability drawbacks incurred by this approach, we employ the use of an On-chain Key Derivation scheme (OKD) for Bitcoin’s ECDSA (secp256k1 curve). The BTC-Parachain maintains a BTC ‘master’ public key for each registered vault and generates a unique, ephemeral ‘deposit’ public key (and RIPEMD-160 address) for each issue request, utilizing the unique issue identifier for replay protection.</p>
+<p>This way, each issue request can be linked to a distinct Bitcoin transaction via the receiving (‘deposit’) address, making it impossible for vaults/users to execute replay attacks. The use of OKD thereby allows to keep the issue process non-interactive, ensuring vaults cannot censor issue requests.</p>
+<div class="section" id="on-chain-key-derivation-scheme">
+<span id="okd"></span><h4>On-Chain Key Derivation Scheme<a class="headerlink" href="#on-chain-key-derivation-scheme" title="Permalink to this headline">¶</a></h4>
+<p>We define the full OKD scheme as follows (additive notation):</p>
+<p><strong>Preliminaries</strong></p>
+<p>A Vault has a private/public keypair <span class="math notranslate nohighlight">\((v, V)\)</span>, where <span class="math notranslate nohighlight">\(V = v·G\)</span> and <span class="math notranslate nohighlight">\(G\)</span> is the base point of the secp256k1 curve.
+Upon registration, the Vault submits public key <span class="math notranslate nohighlight">\(V\)</span> to the BTC-Parachain storage.</p>
+<p><strong>Issue protocol via new OKD scheme</strong></p>
+<ol class="arabic simple">
+<li><dl class="simple">
+<dt>When a user creates an issue request, the BTC-Parachain</dt><dd><ol class="loweralpha simple">
+<li><p>Computes <span class="math notranslate nohighlight">\(c = H(V || id)\)</span>, where id is the unique issue identifier, generated on-chain by the BTC-Parachain using the user’s AccountId and an internal auto-incrementing nonce as input.</p></li>
+<li><p>Generates a new public key (“deposit public key”) <span class="math notranslate nohighlight">\(D = V·c\)</span> and then the corresponding BTC RIPEMD-160 hash-based address <span class="math notranslate nohighlight">\(addr(D)\)</span> (‘deposit’ address) using <span class="math notranslate nohighlight">\(D\)</span> as input.</p></li>
+<li><p>Stores <span class="math notranslate nohighlight">\(D\)</span> and <span class="math notranslate nohighlight">\(addr(D)\)</span> alongside the id of the Issue request.</p></li>
+</ol>
+</dd>
+</dl>
+</li>
+<li><p>The user deposits the amount of to-be-issued BTC to <span class="math notranslate nohighlight">\(addr(D)\)</span> and submits the Bitcoin transaction inclusion proof, alongside the raw Bitcoin transaction, to BTC-Relay.</p></li>
+<li><p>The BTC-Relay verifies that the destination address of the Bitcoin transaction is indeed <span class="math notranslate nohighlight">\(addr(D)\)</span> (and the amount, etc.) and mints new interBTC to the user’s AccountId.</p></li>
+<li><p>The Vault knows that the private key of <span class="math notranslate nohighlight">\(D\)</span> is <span class="math notranslate nohighlight">\(c·v\)</span>, where <span class="math notranslate nohighlight">\(c = H(V || id)\)</span> is publicly known (can be computed by the Vault off-chain, or stored on-chain for convenience). The Vault can now import the private key <span class="math notranslate nohighlight">\(c·v\)</span> into its Bitcoin wallet to gain access to the deposited BTC (required for redeem).</p></li>
+</ol>
+</div>
+</div>
+</div>
+<div class="section" id="counterfeiting">
+<h2>Counterfeiting<a class="headerlink" href="#counterfeiting" title="Permalink to this headline">¶</a></h2>
+<p>A vault which receives lock transaction from a user during <a class="reference internal" href="../spec/issue.html#issue-protocol"><span class="std std-ref">Issue</span></a> could use these coins to re-execute the issue itself, creating counterfeit interBTC.
+This would result in interBTC being issued for the same amount of lock transaction breaking <strong>consistency</strong>, i.e., <span class="math notranslate nohighlight">\(|locked_BTC| &lt; |interBTC|\)</span>.
+To this end, the interBTC component forbids vaults to move locked funds lock transaction received during <a class="reference internal" href="../spec/issue.html#issue-protocol"><span class="std std-ref">Issue</span></a> and considers such cases as theft.
+This theft is observable by any user.
+However, we expect Vaults to report theft of BTC.
+To restore <strong>Consistency</strong>, the interBTC component slashes the vault’s entire collateral and executes automatic liquidation, yielding negative utility for the vault.
+To allow economically rational vaults to move funds on the BTC Parachain we use the <a class="reference internal" href="../spec/replace.html#replace-protocol"><span class="std std-ref">Replace</span></a>, a non-interactive atomic cross-chain swap (ACCS) protocol based on cross-chain state verification.</p>
+</div>
+<div class="section" id="permanent-blockchain-splits">
+<h2>Permanent Blockchain Splits<a class="headerlink" href="#permanent-blockchain-splits" title="Permalink to this headline">¶</a></h2>
+<p>Permanent chain splits or <em>hard forks</em> occur where consensus rules are loosened or conflicting rules are introduced, resulting in multiple instances of the same blockchain.
+Thereby, a mechanism to differentiate between the two resulting chains <em>replay protection</em> is necessary for secure operation.</p>
+<div class="section" id="backing-chain">
+<h3>Backing Chain<a class="headerlink" href="#backing-chain" title="Permalink to this headline">¶</a></h3>
+<p>If replay protection is provided after a permanent split of Bitcoin, the BTC-Relay must be updated to verify the latter for Bitcoin (or Bitcoin’ respectively).
+If no replay protection is implemented, BTC-Relay will behave according to the protocol rules of Bitcoin for selecting the “main” chain. For example, it will follow the chain with most accumulated PoW under Nakamoto consensus.</p>
+</div>
+<div class="section" id="issuing-chain">
+<h3>Issuing Chain<a class="headerlink" href="#issuing-chain" title="Permalink to this headline">¶</a></h3>
+<p>A permanent fork on the issuing blockchain results in two chains I and I’ with two instances of the interBTC component identified by the same public keys. To prevent an adversary exploiting this to execute replay attacks, both users and vaults must be required to include a unique identifier (or a digest thereof) in the transactions published on Bitcoin as part of <a class="reference internal" href="../spec/issue.html#issue-protocol"><span class="std std-ref">Issue</span></a> and <a class="reference internal" href="../spec/redeem.html#redeem-protocol"><span class="std std-ref">Redeem</span></a> (in addition to the identifiers introduces in Replay Attacks).</p>
+<p>Next, we identify two possibilities to synchronize Bitcoin balances on I and I’: (i) deploy a chain relay for I on I’ and vice-versa to continuously synchronize the interBTC components or (ii) redeploy the interBTC component on both chains and require users and vaults to re-issue Bitcoin, explicitly selecting I or I’.</p>
+</div>
+</div>
+<div class="section" id="denial-of-service-attacks">
+<h2>Denial-of-Service Attacks<a class="headerlink" href="#denial-of-service-attacks" title="Permalink to this headline">¶</a></h2>
+<p>interBTC is decentralized by design, thus making denial-of-service (DoS) attacks difficult. Given that any user with access to Bitcoin and BTC Parachain can become a vault, an adversary would have to target all vaults simultaneously. Where there are a large number of vaults, this attack would be impractical and expensive to perform. Alternatively, an attacker may try to target the interBTC component. However, performing a DoS attack against the interBTC component is equivalent to a DoS attack against the entire issuing blockchain or network, which conflicts with our assumptions of a resource bounded adversary and the security models of Bitcoin and BTC Parachain. Moreover, should an adversary perform a Sybil attack and register as a large number of vaults and ignore service requests to perform a DoS attack, the adversary would be required to lock up a large amount of collateral to be effective. This would lead to the collateral being slashed by the interBTC component, making this attack expensive and irrational.</p>
+</div>
+<div class="section" id="fee-model-security-sybil-attacks-and-extortion">
+<h2>Fee Model Security: Sybil Attacks and Extortion<a class="headerlink" href="#fee-model-security-sybil-attacks-and-extortion" title="Permalink to this headline">¶</a></h2>
+<p>While the exact design of the fee model lies beyond the scope of this paper, we outline the following two restrictions, necessary to protect against attacks by malicious vaults.</p>
+<div class="section" id="sybil-attacks">
+<h3>Sybil Attacks<a class="headerlink" href="#sybil-attacks" title="Permalink to this headline">¶</a></h3>
+<p>To prevent financial gains from Sybil attacks, where a single adversary creates multiple low collateralized vaults, the interBTC component can enforce (i) a minimum necessary collateral amount and (ii) a fee model based on issued volume, rather than “pay-per-issue”.
+In practice, users can in principle easily filter out low-collateral vaults.</p>
+</div>
+<div class="section" id="extortion">
+<h3>Extortion<a class="headerlink" href="#extortion" title="Permalink to this headline">¶</a></h3>
+<p>Without adequate restrictions, vaults could set extreme fees for executing <a class="reference internal" href="../spec/redeem.html#redeem-protocol"><span class="std std-ref">Redeem</span></a>, making redeeming of Bitcoin unfeasible.
+To this end, the interBTC component must enforce that either (i) no fees can be charged for executing <a class="reference internal" href="../spec/redeem.html#redeem-protocol"><span class="std std-ref">Redeem</span></a> or (ii) fees for redeeming must be pre-agreed upon during issue.</p>
+</div>
+</div>
+<div class="section" id="griefing">
+<span id="id2"></span><h2>Griefing<a class="headerlink" href="#griefing" title="Permalink to this headline">¶</a></h2>
+<p>Griefing describes the act of blocking a vaults collateral by creating “bogus” requests. There are two cases:</p>
+<ol class="arabic simple">
+<li><p>A user can create an issue request without the intention to issue tokens. The user “blocks” the vault’s collateral for a specific amount of time. if enough users execute this, a legitimate user could possibly not find a vault with free collateral to start an issue request.</p></li>
+<li><p>A vault can request to be replaced without the intention to be replaced. When another vault accepts the replace request, that vault needs to lock additional collateral. The requesting vault, however, could never complete the replace request to e.g. ensure that it will be able to serve more issue requests.</p></li>
+</ol>
+<p>For both cases, we require the requesting parties to lock up a (small) amount of griefing collateral. This makes such attacks costly for the attacker.</p>
+</div>
+<div class="section" id="concurrency">
+<h2>Concurrency<a class="headerlink" href="#concurrency" title="Permalink to this headline">¶</a></h2>
+<p>We need to ensure that concurrent issue, redeem, and replace requests are handled.</p>
+<div class="section" id="concurrent-redeem">
+<h3>Concurrent redeem<a class="headerlink" href="#concurrent-redeem" title="Permalink to this headline">¶</a></h3>
+<p>We need to make sure that a vault cannot be used in multiple redeem requests in parallel if that would exceed his amount of locked BTC. <strong>Example</strong>: If the vault has 5 BTC locked and receives two redeem requests for 5 interBTC/BTC, he can only fulfil one and would lose his collateral with the other.</p>
+</div>
+<div class="section" id="concurrent-issue-and-redeem">
+<h3>Concurrent issue and redeem<a class="headerlink" href="#concurrent-issue-and-redeem" title="Permalink to this headline">¶</a></h3>
+<p>A vault can be used in parallel for issue and redeem requests. In the issue procedure, the vault’s <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> are already increased when the issue request is created. However, this is before (!) the BTC is sent to the vault. If we used these <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> as a basis for redeem requests, we might end up in a case where the vault does not have enough BTC. <strong>Example</strong>: The vault already has 3 BTC in custody from previous successful issue procedures. A user creates an issue request for 2 interBTC. At this point, the <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> by this vault are 5. However, his BTC balance is only 3. Now, a user could create a redeem request of 5 interBTC and the vault would have to fulfill those. The user could then cancel the issue request over 2 interBTC. The vault could only send 3 BTC to the user and would lose his deposit. Or the vault just loses his deposit without sending any BTC.</p>
+</div>
+<div class="section" id="solution">
+<h3>Solution<a class="headerlink" href="#solution" title="Permalink to this headline">¶</a></h3>
+<p>We use separate token balances to handle issue, replace, and redeem requests in the <a class="reference internal" href="../spec/vault-registry.html#vault-registry"><span class="std std-ref">Vault Registry</span></a>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="btcrelay-security.html" class="btn btn-neutral float-right" title="Security Analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="liquidations.html" class="btn btn-neutral float-left" title="Vault Liquidations" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Interlay
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
