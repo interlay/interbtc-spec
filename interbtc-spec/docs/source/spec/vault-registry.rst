@@ -821,11 +821,12 @@ Specification
 
 *Function Signature*
 
-``liquidateVault(vault)``
+``liquidateVault(vault, reporter)``
 
 *Parameters*
 
 * ``vault``: Account identifier of the vault to be liquidated.
+* ``reporter``: [Optional] Account that initiated the liquidation (e.g. theft report).
 
 
 *Events*
@@ -859,6 +860,8 @@ Specification
 
    * ``vault.issuedTokens`` MUST be set to zero
    * ``vault.toBeIssuedTokens`` MUST be set to zero
+
+* If `reporter` IS specified, `min(TheftFee(liquidatedAmountinBTC), TheftFeeMax)` MUST be transferred from the liquidated vault to the ``reporter``.
 
 .. note:: If a vault successfully executes a replace after having been liquidated, it receives some of its confiscated collateral back.
 
