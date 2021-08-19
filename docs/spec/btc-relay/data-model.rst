@@ -1,7 +1,7 @@
 .. _data-model:
 
 Data Model
-==========
+----------
 
 The BTC-Relay, as opposed to Bitcoin SPV clients, only stores a subset of information contained in block headers and does not store transactions. 
 Specifically, only data that is absolutely necessary to perform correct verification of block headers and transaction inclusion is stored. 
@@ -71,8 +71,6 @@ BlockHeader
 ...........
 
 Representation of a Bitcoin block header, constructed by the parachain from the :ref:`RawBlockHeader`. The main differences compared to the :ref:`bitcoinBlockHeader` in :ref:`bitcoin-data-model` is that this contains the unpacked ``target`` constructed from ``nBits``, and an additional ``hash`` of the ``BlockHeader`` for convenience.
-
-
 
 .. note:: Fields marked as [Optional] are not critical for the secure operation of BTC-Relay, but can be stored anyway, at the developers discretion. We omit these fields in the rest of this specification. 
 
