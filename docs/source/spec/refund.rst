@@ -116,10 +116,6 @@ Specification
 * The ``rawTx`` MUST decode to a valid transaction that transfers the amount specified in the ``RefundRequest`` struct. It MUST be a transaction to the correct address, and provide the expected OP_RETURN, based on the ``RefundRequest``.
 * The ``rawMerkleProof`` MUST be valid and prove inclusion to the main chain.
 * The ``vault.status`` MUST be ``active``.
-<<<<<<< HEAD
-=======
-* ``vault.isBanned()`` MUST return ``false``.
->>>>>>> ac0c959 (chore: merge btcrelay specification into interbtc specification)
 * The refunding vault MUST have enough collateral to mint an amount equal to the refund fee.
 
 *Postconditions*

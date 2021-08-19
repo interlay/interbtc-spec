@@ -580,26 +580,20 @@ One of:
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
 * A vault with id ``vaultId`` MUST be registered.
 * If the vault is *not* liquidated:
-<<<<<<< HEAD
 
    * The vault's ``toBeRedeemedTokens`` must be greater than or equal to ``tokens``.
    * If ``premium > 0``, then the vault's ``backingCollateral`` (as calculated via :ref:`computeStakeAtIndex`) must be greater than or equal to ``premium``.
 
-=======
-   * The vault's ``toBeRedeemedTokens`` must be greater than or equal to ``tokens``.
-   * If ``premium > 0``, then the vault's ``backingCollateral`` (as calculated via :ref:`computeStakeAtIndex`) must be greater than or equal to ``premium``.
->>>>>>> ac0c959 (chore: merge btcrelay specification into interbtc specification)
 * If the vault *is* liquidated, then the liquidation vault's ``toBeRedeemedTokens`` must be greater than or equal to ``tokens``
   
 *Postconditions*
 
-* If the vault is *not* liquidated:
-<<<<<<< HEAD
+* If the vault *IS NOT* liquidated:
 
    * If ``premium > 0``, then ``premium`` MUST be transferred from the vault's collateral to the redeemer's free balance.
    * Function :ref:`reward_withdrawStake` MUST complete successfully - parameterized by ``vaultId`` and ``tokens``.
 
-* If the vault *is* liquidated:
+* If the vault *IS* liquidated:
 
    * The amount ``toBeReleased`` is calculated as ``(vault.liquidatedCollateral * tokens) / vault.toBeRedeemedTokens``.
    * The vault's ``liquidatedCollateral`` MUST decrease by ``toBeReleased``.
@@ -607,13 +601,6 @@ One of:
 
 * The vault's ``toBeRedeemedTokens`` MUST decrease by ``tokens``.
 * The vault's ``issuedTokens`` MUST decrease by ``tokens``.
-=======
-   * The vault's ``toBeRedeemedTokens`` MUST be decreased by ``tokens``, and its ``issuedTokens`` MUST increase by the same amount.
-   * If ``premium = 0``, then the ``RedeemTokens`` event is emitted
-   * If ``premium > 0``, then ``premium`` is transferred from the vault's collateral to the redeemer. The ``RedeemTokensPremium`` event is emitted.
-   * Function :ref:`reward_withdrawStake` MUST complete successfully - parameterized by ``vaultId`` and ``tokens``.
-* If the vault *is* liquidated, then the liquidation vault's ``toBeRedeemedTokens`` MUST be decreased by ``tokens``, and its ``issuedTokens`` MUST increase by the same amount. The ``RedeemTokensLiquidatedVault`` event is emitted.
->>>>>>> ac0c959 (chore: merge btcrelay specification into interbtc specification)
 
 .. _redeemTokensLiquidation:
 
@@ -771,10 +758,9 @@ Specification
 
 *Postconditions*
 
-<<<<<<< HEAD
-* If the ``oldVault`` *is* liquidated:
+* If the ``oldVault`` *IS* liquidated:
 
-   * The amount ``toBeReleased`` is calculated as ``(oldVault.liquidatedCollateral * tokens) / oldVault.toBeRedeemedTokens``.
+   * The amount ``toBeReleased`` MUST be calculated as ``(oldVault.liquidatedCollateral * tokens) / oldVault.toBeRedeemedTokens``.
    * The ``oldVault``'s ``liquidatedCollateral`` MUST decrease by ``toBeReleased``.
    * Function :ref:`staking_depositStake` MUST complete successfully - parameterized by ``oldVault``, ``oldVault`` and ``toBeReleased``.
 
@@ -782,16 +768,6 @@ Specification
 * The ``oldVault``'s ``issuedTokens`` MUST decrease by ``tokens``.
 * The ``newVault``'s ``toBeIssuedTokens`` MUST decrease by ``tokens``.
 * The ``newVault``'s ``issuedTokens`` MUST increase by ``tokens``.
-=======
-* If ``oldVault`` is *not* liquidated:
-   * The ``oldVault``'s ``toBeRedeemedTokens`` and ``issuedTokens`` MUST be decreased by the amount ``tokens``.
-   * The ``oldVault``'s collateral free balance MUST be increased by ``tokens / toBeRedeemed``.
-* If ``oldVault`` *is* liquidated, the liquidation vault's ``toBeRedeemedTokens`` and ``issuedTokens`` are decrease by the amount ``tokens``.
-* If ``newVault`` is *not* liquidated, its ``toBeIssuedTokens`` is decreased by ``tokens``, while its ``issuedTokens`` is increased by the same amount.
-* If ``newVault`` *is* liquidated, the liquidation vault's  ``toBeIssuedTokens`` is decreased by ``tokens``, while its ``issuedTokens`` is increased by the same amount.
->>>>>>> ac0c959 (chore: merge btcrelay specification into interbtc specification)
-
-
 
 .. _cancelReplaceTokens:
 
@@ -843,19 +819,12 @@ Specification
 
 *Function Signature*
 
-<<<<<<< HEAD
 ``liquidateVault(vault, reporter)``
-=======
-``liquidateVault(vault)``
->>>>>>> ac0c959 (chore: merge btcrelay specification into interbtc specification)
 
 *Parameters*
 
 * ``vault``: Account identifier of the vault to be liquidated.
-<<<<<<< HEAD
 * ``reporter``: [Optional] Account that initiated the liquidation (e.g. theft report).
-=======
->>>>>>> ac0c959 (chore: merge btcrelay specification into interbtc specification)
 
 
 *Events*
@@ -866,7 +835,6 @@ Specification
 
 *Postconditions*
 
-<<<<<<< HEAD
 * ``usedCollateral`` MUST be calculated as ``exchangeRate * (issuedTokens + toBeIssuedTokens)) * secureCollateralThreshold``.
 * ``usedCollateral`` MUST be set to ``backingCollateral`` if ``backingCollateral < usedCollateral``.
 * ``usedTokens`` MUST be calculated as ``issuedTokens + toBeIssuedTokens``.
@@ -892,12 +860,6 @@ Specification
    * ``vault.toBeIssuedTokens`` MUST be set to zero
 
 * If `reporter` IS specified, `min(TheftFee(liquidatedAmountinBTC), TheftFeeMax)` MUST be transferred from the liquidated vault to the ``reporter``.
-=======
-* Function :ref:`reward_withdrawStake` MUST complete successfully - parameterized by ``vault`` and ``vault.issuedTokens``.
-* The liquidation vault's ``issuedTokens``, ``toBeIssuedTokens`` and ``toBeRedeemedTokens`` MUST be increased by the respective amounts in the vault.
-* The vault's ``issuedTokens`` and ``toBeIssuedTokens`` MUST be set to 0.
-* Collateral MUST be moved from the vault to the liquidation vault: an amount of ``confiscatedCollateral - confiscatedCollateral * (toBeRedeemedTokens / (toBeIssuedTokens + issuedTokens))`` is moved, where ``confiscatedCollateral`` is the minimum of the vault's ``backingCollateral`` (as calculated via :ref:`computeStakeAtIndex`) and ``SecureCollateralThreshold`` times the equivalent worth of the amount of tokens it is backing.
->>>>>>> ac0c959 (chore: merge btcrelay specification into interbtc specification)
 
 .. note:: If a vault successfully executes a replace after having been liquidated, it receives some of its confiscated collateral back.
 
@@ -944,7 +906,7 @@ Emit an event stating that a new vault (``vault``) was registered and provide in
 .. _depositCollateralEvent:
 
 DepositCollateral
-------------------------
+-----------------
 
 Emit an event stating how much new (``newCollateral``), total collateral (``totalCollateral``) and freely available collateral (``freeCollateral``) the vault calling this function has locked.
 

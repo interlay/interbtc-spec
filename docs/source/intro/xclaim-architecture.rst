@@ -1,15 +1,5 @@
-<<<<<<< HEAD
-<<<<<<< HEAD:docs/source/intro/xclaim-architecture.rst
 XCLAIM Architecture
 ===================
-=======
-XCLAIM(BTC, DOT) Architecture
-=============================
->>>>>>> ac0c959 (chore: merge btcrelay specification into interbtc specification):docs/build/html/_sources/intro/architecture.rst.txt
-=======
-XCLAIM Architecture
-===================
->>>>>>> ac0c959 (chore: merge btcrelay specification into interbtc specification)
 
 interBTC consists of four different actors and eight modules. The component further uses two additional modules, the BTC-Relay component and the Parachain Governance mechanism.
 
@@ -31,8 +21,6 @@ There are four main participant roles in the system. A high-level overview of al
 
 - **Governance Mechanism**: The Parachain Governance Mechanism monitors the correct operation of the BTC Parachain. Interacts with the :ref:`security` module and can manually update the parameterization of all components in the BTC Parachain.
 
-.. note:: The exact composition of the Governance Mechanism is to be defined by Polkadot.  
-
 Modules
 ~~~~~~~
 
@@ -48,23 +36,11 @@ The specification clearly separates these modules to ensure that each module can
     High level overview of the BTC Parachain. interBTC consists of seven modules. The Oracle module stores the exchange rates based on the input of centralized and decentralized exchanges. The Treasury module maintains the ownership of interBTC, the VaultRegistry module stores information about the current Vaults in the system, and the Issue, Redeem and Replace modules expose functions and maintain data related to the respective sub protocols. The StabilizedCollateral modules handles vault collateralization, stabilization against exchange rate fluctuations and automatic liquidation. BTC-Relay tracks the Bitcoin main chain and verifies transaction inclusion. The Parachain Governance maintains correct operation of the BTC Parachain and intervenes / halts operation if necessary. 
 
 
-<<<<<<< HEAD
 Oracle
 ------
 
 The Oracle module maintains the exchange rate value between the asset that is used to collateralize Vaults (e.g. DOT) and the wrapped asset (interBTC).
 Governance authorizes trusted third parties to feed the current exchange rates into the system for a nominal fee.
-=======
-Exchange Rate Oracle
---------------------
-
-The Oracle module maintains the ``ExchangeRate`` value between the asset that is used to collateralize Vaults (DOT) and the to-be-issued asset (BTC).
-In the proof-of-concept, the Oracle is operated by a trusted third party to feed the current exchange rates into the system.
-
-.. note:: The exchange rate oracle implementation is not part of this specification. interBTC simply expects a continuous input of exchange rate data and assumes the oracle operates correctly.
-.. .. todo:: Check with Web3 on how they plan to implement this. Probably, Governance Mechanism will provide this service, or intervene in case of failures.
->>>>>>> ac0c959 (chore: merge btcrelay specification into interbtc specification)
-
 
 Treasury
 --------
@@ -80,9 +56,8 @@ The VaultRegistry module manages the Vaults in the system.It allows Managing the
 This module also handles the collateralization rates of Vaults and reacts to exchange rate fluctuations.
 Specifically, it:
 
-* stores how much collateral each vault provided and how much of that collateral is allocated to interBTC.
-* tracks the collateralization rate of each vault and triggers measures in case the rate declines, e.g. due to exchange rate fluctuations.
-* triggers, as a last resort, automatic liquidation if a vault falls below the minimum collateralization rate.
+* Stores how much collateral each vault provided and how much of that collateral is allocated to interBTC.
+* Triggers, as a last resort, automatic liquidation if a vault falls below the minimum collateralization rate.
 
 Collateral
 ----------
@@ -118,8 +93,6 @@ Governance Mechanism
 --------------------
 
 The Governance Mechanism handles correct operation of the BTC Parachain.
-
-.. note:: The Governance Mechanism is not part of this specification. The BTC Parachain simply expects continuous operation of the BTC Parachain.
 
 Interactions
 ~~~~~~~~~~~~

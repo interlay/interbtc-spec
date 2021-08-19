@@ -1,25 +1,15 @@
 .. _oracle:
 
-<<<<<<< HEAD
 Oracle
 ======
 
 .. note:: This oracle model relies on trusted oracle sources. Decentralized oracles are a difficult and open research problem that is outside of the scope of this specification. However, the general interface to get the exchange rate can remain the same even with different constructions.
 
 The Oracle receives a continuous data feed from off-chain oracles, with information in exchange rates or bitcoin inclusion estimates. Multiple oracles can be authorized, in which case the 'median' of all unexpired values is used as the actual value. It is not technically the median - when an even number of oracles have submitted values, it does not average the middle two values. Instead, it arbitrarily picks one of them. This is done because this can be done in O(n) rather than in O(n log n). 
-=======
-Exchange Rate Oracle
-====================
 
-.. note:: This exchange rate oracle model relies on trusted oracle sources. Decentralized oracles are a difficult and open research problem that is outside of the scope of this specification. However, the general interface to get the exchange rate can remain the same even with different constructions.
-
-The Exchange Rate Oracle receives a continuous data feed from off-chain oracles, with information in exchange rates or bitcoin inclusion estimates. Multiple oracles can be authorized, in which case the 'median' of all unexpired values is used as the actual value. It is not technically the median - when an even number of oracles have submitted values, it does not average the middle two values. Instead, it arbitrarily picks one of them. This is done because this can be done in O(n) rather than in O(n log n). 
->>>>>>> ac0c959 (chore: merge btcrelay specification into interbtc specification)
-
-In the implementation, the :ref:`feedValues` function does not directly update the aggregate - this is done in the :ref:`oracle_onInitialize` hook, in order to keep the ``feedValues`` function weight independent of the number of oracles. Furthermore, for oracle offline detection and for updating the aggregate when a value becomes outdated, the ``onInitialize`` hook was necessary anyway. 
+In the implementation, the :ref:`feedValues` function does not directly update the aggregate - this is done in the :ref:`oracle_onInitialize` hook, in order to keep the ``feedValues`` function weight independent of the number of oracles. Furthermore, for oracle offline detection and for updating the aggregate when a value becomes outdated, the ``onInitialize`` hook was necessary anyway.
 
 The implementation of the oracle client **is not part of this specification**. InterBTC assumes the oracle operates correctly and that the received data is reliable. 
-
 
 Data Model
 ~~~~~~~~~~
