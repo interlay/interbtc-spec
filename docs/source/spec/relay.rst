@@ -3,7 +3,7 @@
 Relay
 =====
 
-The :ref:`relay` module is responsible for handling theft reporting and block submission to the :ref:`btc-relay`. 
+The :ref:`relay` module is responsible for handling theft reporting and block submission to the :ref:`btc_relay`. 
 
 Overview
 ~~~~~~~~
@@ -76,7 +76,7 @@ The ``txId`` is obtained as the ``sha256d()`` of the ``rawTx``.
 * The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
 * A vault with id ``vaultId`` MUST be registered.
 * The txId MUST NOT be in ``TheftReports`` mapping.
-* The ``verifyTransactionInclusion`` function in the :ref:`btc-relay` component must return true for the derived ``txId``.
+* The ``verifyTransactionInclusion`` function in the :ref:`btc_relay` component must return true for the derived ``txId``.
 
 *Postconditions*
 
@@ -119,7 +119,7 @@ Specification
 * A vault with id ``vaultId`` MUST be registered.
 * ``rawMerkleProof1`` MUST NOT equal ``rawMerkleProof2``.
 * ``rawTx1`` MUST NOT equal ``rawTx2``.
-* The ``verifyTransactionInclusion`` function in the :ref:`btc-relay` component must return true for the derived ``txId``.
+* The ``verifyTransactionInclusion`` function in the :ref:`btc_relay` component must return true for the derived ``txId``.
 * Both transactions MUST NOT be in ``TheftReports`` mapping.
 
 *Postconditions*

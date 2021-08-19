@@ -131,7 +131,7 @@ Specification
 
 * The function call MUST be signed by ``requester``.
 * The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
-* The :ref:`btc-relay` MUST be initialized.
+* The :ref:`btc_relay` MUST be initialized.
 * The Vault MUST be registered and active.
 * The Vault MUST NOT be banned.
 * The ``amount`` MUST be greater than or equal to :ref:`issueBtcDustValue`.

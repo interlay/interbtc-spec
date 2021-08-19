@@ -29,7 +29,7 @@ Step-by-Step
 
    * Note: from the *oldVault*'s perspective a redeem is very similar to an accepted replace. That is, its goal is to get rid of tokens, and it is not important if this is achieved by a user redeeming, or by a Vault accepting the replace request. As such, when a user requests a redeem with a Vault that has requested a replacement, the *oldVault*'s ``toBeReplacedTokens`` is decreased by the amount of tokens redeemed by the user.
 
-5. Within a pre-defined delay, *oldVault* must release the BTC on Bitcoin to *newVault*'s BTC address, and submit a valid transaction inclusion proof by calling the :ref:`executeReplace` function (call to ``verifyTransactionInclusion`` in :ref:`btc-relay`). If *oldVault* releases the BTC to *newVault* correctly and submits the transaction inclusion proof to Replace module on time, *oldVault*'s DOT collateral is released - *newVault* has now replaced *oldVault*.
+5. Within a pre-defined delay, *oldVault* must release the BTC on Bitcoin to *newVault*'s BTC address, and submit a valid transaction inclusion proof by calling the :ref:`executeReplace` function (call to ``verifyTransactionInclusion`` in :ref:`btc_relay`). If *oldVault* releases the BTC to *newVault* correctly and submits the transaction inclusion proof to Replace module on time, *oldVault*'s DOT collateral is released - *newVault* has now replaced *oldVault*.
 
    * Note: as with redeems, to prevent *oldVault* from trying to re-use old transactions (or other payments to *newVaults* on Bitcoin) as fake proofs, we require *oldVault* to include a ``nonce`` in an OP_RETURN output of the transfer transaction on Bitcoin.
 
@@ -258,7 +258,7 @@ The amount of griefingCollateral used is ``consumedGriefingCollateral = oldVault
 executeReplace
 --------------
 
-The to-be-replaced Vault finalizes the replace process by submitting a proof that it transferred the correct amount of BTC to the BTC address of the new Vault, as specified in the ``ReplaceRequest``. This function calls *verifyAndValidateTransaction* in :ref:`btc-relay`.
+The to-be-replaced Vault finalizes the replace process by submitting a proof that it transferred the correct amount of BTC to the BTC address of the new Vault, as specified in the ``ReplaceRequest``. This function calls *verifyAndValidateTransaction* in :ref:`btc_relay`.
 
 Specification
 .............

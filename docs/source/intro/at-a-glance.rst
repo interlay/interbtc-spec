@@ -1,14 +1,14 @@
-BTC Parachain at a Glance
-=========================
+interBTC at a Glance
+====================
 
-The *BTC Parachain* connects the Polkadot ecosystem with Bitcoin.
+The *interBTC bridge* connects the Polkadot ecosystem with Bitcoin.
 It allows the creation of *interBTC*, a fungible token that represents Bitcoin in the Polkadot ecosystem.
 interBTC is backed by Bitcoin 1:1 and allows redeeming of the equivalent amount of Bitcoins by relying on a collateralized third-party.
 
 .. figure:: ../figures/intro/overview.png
      :alt: interBTC in the Polkadot ecosystem.
 
-     The BTC Parachain allows the creation of collateralized 1:1 Bitcoin-backed tokens in Polkadot. These tokens can be transfered and traded within the Polkadot ecosystem.
+     The interBTC bridge allows the creation of collateralized 1:1 Bitcoin-backed tokens in Polkadot. These tokens can be transferred and traded within the Polkadot ecosystem.
 
 Functionality
 -------------
