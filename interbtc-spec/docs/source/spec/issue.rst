@@ -186,7 +186,7 @@ Specification
 *Events*
 
 * :ref:`executeIssueEvent`
-* :ref:`issueAmountChangeEvent` (conditional)
+* If the amount transferred IS not equal to the ``issue.amount + issue.fee``, the :ref:`issueAmountChangeEvent` MUST be emitted
 
 *Preconditions*
 
