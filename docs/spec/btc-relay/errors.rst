@@ -186,7 +186,7 @@ A summary of error codes raised in exceptions by BTC-Relay, and their meanings, 
 
 * **Function**: :ref:`validateTransaction`
 
-* **Cause**: The parsed transaction has an incorrect format (see :ref:`accepted-tx-format`).
+* **Cause**: The parsed transaction has an incorrect format (see :ref:`accepted_bitcoin_transaction_format`).
 
 
 
