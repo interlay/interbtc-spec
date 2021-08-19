@@ -6,6 +6,8 @@ BTC-Relay Security Analysis
 This section provides an overview of security considerations related to BTC-Relay.
 We refer the reader to `this paper (Section 7) <https://eprint.iacr.org/2018/643.pdf>`_ for more details.
 
+.. _security_parameter_k:
+
 Security Parameter *k*
 ----------------------
 

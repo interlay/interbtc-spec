@@ -121,6 +121,7 @@ Interactions
 We provide a detailed overview of the function calls between the different modules in :numref:`fig-interactions`.
 
 .. _fig-interactions:
+
 .. figure:: ../figures/intro/detailed-architecture.png
     :alt: detailed architecture diagram
 

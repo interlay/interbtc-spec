@@ -12,7 +12,7 @@ We employ two different mechanisms to achieve this:
 1. *Identification via OP_RETURN*: When sending a Bitcoin transaction, the BTC-Parachain requires that a unique identifier is included as one of the outputs in the transaction.
 2. *Unique Addresses via On-Chain Key Derivation*: The BTC-Parachain generates a new and unique address that Bitcoin can be transferred to.
 
-The details of the transaction format can be found at the `accepted Bitcoin transaction format <https://interlay.gitlab.io/interBTC-spec/btcrelay-spec/intro/accepted-format.html>`_.
+The details of the transaction format can be found at the :ref:`accepted_bitcoin_transaction_format`.
 
 
 .. _op-return:

@@ -42,7 +42,8 @@ From this fee pool 100% is distributed among all active Vaults.
 
 Each Vault is receiving a fair share of this fee pool by considering its stake in the system. The stake in the system is just the amount of BTC a vault is currently insuring with collateral. Calculating the rewards for a Vault is equivalent to this formula:
 
-.. math:: \text{rewards} = \text{stake} (\text{total_rewards} / \text{total_stake})
+.. math:: \text{rewards} = \text{stake} (\text{totalRewards} / \text{totalStake})
+
     
 *Eq. 1: Vault reward distribution.*
 
@@ -51,7 +52,7 @@ Each Vault is receiving a fair share of this fee pool by considering its stake i
 
 To be exact, the stake is expressed as the interBTC issued by a Vault. The issued interBTC are the interBTC currently being backed by the Vault. This shows how much a Vault’s collateral is “occupied” by users:
 
-.. math:: \text{stake} = \text{interBTC_issued}
+.. math:: \text{stake} = \text{interBTCIssued}
 
 *Eq. 2: Parameterized stake updates.*
 
@@ -149,28 +150,15 @@ A Vault’s stake is adjusted based on the change in issued interBTC - for insta
 
 Now, each Vault’s rewards are calculated according to the following formula (equivalent to Eq. 1):
 
-.. math::
+.. math:: \text{deposit}(\text{stakeDelta}): \text{rewardTally} \mathrel{+}= \text{rewardPerToken} \cdot \text{stakeDelta}
 
-    \text{deposit}(\text{stake_delta}):
-      \text{reward_tally} += \text{reward_per_token} \cdot \text{stake_delta}
+.. math:: \text{stake} \mathrel{+}= \text{stakeDelta}
 
-.. math:: 
-
-      \text{stake} += \text{stake_delta}
-
-.. math:: 
-
-      \text{total_stake} += \text{stake_delta}
+.. math:: \text{totalStake} \mathrel{+}= \text{stakeDelta}
   
-.. math:: 
+.. math:: \text{distributeReward}(\text{reward}): \text{rewardPerToken} \mathrel{+}= \text{reward} / \text{totalStake}
 
-    \text{distribute_reward}(\text{reward}):
-      \text{reward_per_token} += \text{reward} / \text{total_stake}
-
-.. math:: 
-
-    \text{compute_reward}():
-      \text{return stake} \cdot \text{reward_per_token} - \text{reward_tally}
+.. math:: \text{computeReward}(): \text{return stake} \cdot \text{rewardPerToken} - \text{rewardTally}
 
 *Eq. 3: Vault reward distribution using the SRD.*
 

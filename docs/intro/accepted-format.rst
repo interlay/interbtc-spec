@@ -1,4 +1,4 @@
-.. _accepted-tx-format:
+.. _accepted_bitcoin_transaction_format:
 
 Accepted Bitcoin Transaction Format
 ===================================

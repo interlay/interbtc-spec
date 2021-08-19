@@ -16,7 +16,7 @@ Overview
 In the second case, the module should check the accusation (using a Merkle proof), and liquidate the vault if valid. 
 It is assumed that there is at least one honest relayer.
 
-The Governance Mechanism votes on critical changes to the architecture or unexpected failures, e.g. hard forks or detected 51% attacks (if a fork exceeds the specified security parameter *k*, see `Security Parameter k <https://interlay.gitlab.io/interBTC-spec/btcrelay-spec/security_performance/security.html#security-parameter-k>`_.). 
+The Governance Mechanism votes on critical changes to the architecture or unexpected failures, e.g. hard forks or detected 51% attacks (if a fork exceeds the specified security parameter *k*, see :ref:`security_parameter_k`.
 
 Data Storage
 ~~~~~~~~~~~~

@@ -332,7 +332,7 @@ Given a raw Bitcoin transaction, this function
 
 2) Validates the extracted values against the function parameters.
 
-.. note:: See :ref:`bitcoin-data-model` for more details on the transaction structure, and :ref:`accepted-tx-format` for the transaction format of Bitcoin transactions validated in this function.
+.. note:: See :ref:`bitcoin-data-model` for more details on the transaction structure, and :ref:`accepted_bitcoin_transaction_format` for the transaction format of Bitcoin transactions validated in this function.
 
 Specification
 ~~~~~~~~~~~~~
@@ -360,7 +360,7 @@ Specification
 *Errors*
 
 * ``ERR_INSUFFICIENT_VALUE = "Value of payment below requested amount"``: return error the value of the (first) *Payment UTXO* is lower than ``paymentValue``.
-* ``ERR_TX_FORMAT = "Transaction has incorrect format"``: return error if the transaction has an incorrect format (see :ref:`accepted-tx-format`).
+* ``ERR_TX_FORMAT = "Transaction has incorrect format"``: return error if the transaction has an incorrect format (see :ref:`accepted_bitcoin_transaction_format`).
 * ``ERR_WRONG_RECIPIENT = "Incorrect recipient Bitcoin address"``: return error if the recipient specified in the (first) *Payment UTXO* does not match the given ``recipientBtcAddress``.
 * ``ERR_INVALID_OPRETURN = "Incorrect identifier in OP_RETURN field"``: return error if the OP_RETURN field of the (second) *Data UTXO* does not match the given ``opReturnId``.
 
