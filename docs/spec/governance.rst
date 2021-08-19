@@ -8,7 +8,7 @@ Overview
 
 On-chain governance is useful for controlling system parameters, authorizing trusted oracles and upgrading the core protocols. The architecture adopted by the interBTC parachain is modelled on Polkadot, which allows for a **Council** and **Technical Committee** to propose referenda which are voted on by INTR holders.
 
-.. figure:: ../figures/governance.jpeg
+.. figure:: ../figures/spec/governance.jpeg
     :alt: Governance Architecture
 
 
