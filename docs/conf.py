@@ -123,6 +123,8 @@ html_theme_options = {
 #
 # html_sidebars = {}
 
+html_favicon = 'favicon.ico'
+
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
@@ -154,7 +156,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-        (master_doc, 'interbtc.tex', u'interbtc Documentation: interbtc',
+        (master_doc, 'interbtc.tex', u'interBTC Specification',
      u'Interlay', 'manual'),
 ]
 
@@ -164,7 +166,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-        (master_doc, 'interbtc', u'interbtc Documentation: interbtc',
+        (master_doc, 'interbtc', u'interBTC Documentation',
      [author], 1)
 ]
 
