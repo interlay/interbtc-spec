@@ -1,0 +1,453 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Vault Liquidations &mdash; interBTC Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="XCLAIM Security Analysis" href="xclaim-security.html" />
+    <link rel="prev" title="Error Codes" href="../spec/btc-relay/errors.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> interBTC Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v5.5.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/xclaim-architecture.html">XCLAIM Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/btcrelay-architecture.html">BTC-Relay Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/accepted-format.html">Accepted Bitcoin Transaction Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/introduction.html">How to Read This Specification</a></li>
+</ul>
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/collateral.html">Collateral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/issue.html">Issue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/refund.html">Refund</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/redeem.html">Redeem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/relay.html">Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/treasury.html">Treasury</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/vault-registry.html">Vault Registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/reward.html">Reward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/staking.html">Staking</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Vault Liquidations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#safety-failures">Safety Failures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#crash-failures">Crash Failures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#liquidations-safety-failures">Liquidations (Safety Failures)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#issue">Issue</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#redeem">Redeem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#replace">Replace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation-notes">Implementation Notes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="xclaim-security.html">XCLAIM Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btcrelay-security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../economics/incentives.html">Economic Incentives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../economics/fees.html">Fee Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">interBTC Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Vault Liquidations</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/security_performance/liquidations.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="vault-liquidations">
+<span id="liquidations"></span><h1>Vault Liquidations<a class="headerlink" href="#vault-liquidations" title="Permalink to this headline">¶</a></h1>
+<p>Vaults are collateralized entities in the system responsible for keeping BTC in custody.
+If Vaults fail to behave according to protocol rules, they face punishment through slashing of collateral. There are two types of failures: <strong>safety failures</strong> and <strong>crash failures</strong>.</p>
+<div class="section" id="safety-failures">
+<h2>Safety Failures<a class="headerlink" href="#safety-failures" title="Permalink to this headline">¶</a></h2>
+<p>A safety failure occurs in two cases:</p>
+<ol class="arabic simple">
+<li><p><strong>Theft</strong>: a Vault is considered to have committed theft if it moves/spends BTC unauthorized by the interBTC bridge. Theft is detected and reported by Relayers via an SPV proof.</p></li>
+<li><p><strong>Severe Undercollteralization</strong>: a Vaults drops below the <a class="reference internal" href="../spec/vault-registry.html#liquidationthreshold"><span class="std std-ref">LiquidationThreshold</span></a>.</p></li>
+</ol>
+<p>In both cases, the Vault’s entire BTC holdings are liquidated and its collateral is slashed - up to the <a class="reference internal" href="../spec/vault-registry.html#securecollateralthreshold"><span class="std std-ref">SecureCollateralThreshold</span></a> of the liquidated BTC value.</p>
+<p>Consequently, the bridge offers users to burn (“Burn Event”, see <a class="reference internal" href="../spec/redeem.html#liquidationredeem"><span class="std std-ref">liquidationRedeem</span></a>) their tokens to restore the 1:1 balance between the issued (e.g., interBTC) and locked asset (e.g., BTC).</p>
+</div>
+<div class="section" id="crash-failures">
+<h2>Crash Failures<a class="headerlink" href="#crash-failures" title="Permalink to this headline">¶</a></h2>
+<p>If Vaults go offline and fail to execute redeem, they are:</p>
+<ul class="simple">
+<li><p><strong>Penalized</strong> (punishment fee slashed) and</p></li>
+<li><p><strong>Temporarily banned for 24 hours</strong> from accepting further issue, redeem, and replace requests.</p></li>
+</ul>
+<p>The punishment fee is calculated based on the amount to be redeemed:</p>
+<ul class="simple">
+<li><p><strong>Punishment Fee</strong>: 10% of the failed redeem value.</p></li>
+</ul>
+</div>
+<div class="section" id="liquidations-safety-failures">
+<h2>Liquidations (Safety Failures)<a class="headerlink" href="#liquidations-safety-failures" title="Permalink to this headline">¶</a></h2>
+<p>When a Vault is liquidated, its <code class="docutils literal notranslate"><span class="pre">issued</span></code> and <code class="docutils literal notranslate"><span class="pre">toBeIssued</span></code> tokens are <em>moved</em> to the Liquidation Vault.
+In contrast, the Vault’s <code class="docutils literal notranslate"><span class="pre">toBeRedeemed</span></code> tokens are <em>copied</em> over.
+The Vault loses access to at least part of its backing collateral:</p>
+<ul class="simple">
+<li><p>The Vault loses <code class="docutils literal notranslate"><span class="pre">confiscatedCollateral</span> <span class="pre">=</span> <span class="pre">min(SECURE_THRESHOLD</span> <span class="pre">*</span> <span class="pre">(issued</span> <span class="pre">+</span> <span class="pre">toBeIssued),</span> <span class="pre">backingCollateral)</span></code>, and any leftover amount is released to its free balance.</p></li>
+<li><p>Of the confiscated collateral, an amount of <code class="docutils literal notranslate"><span class="pre">confiscatedCollateral</span> <span class="pre">*</span> <span class="pre">(toBeRedeemed</span> <span class="pre">/</span> <span class="pre">(issued</span> <span class="pre">+</span> <span class="pre">toBeIssued))</span></code> stays locked in the Vault, and the rest is moved to the Liquidation Vault. This is in anticipation of vaults being able to complete ongoing redeem and replace requests. When these requests succeed, the liquidated Vault’s collateral is returned. When the requests fail (i.e., the <code class="docutils literal notranslate"><span class="pre">cancel</span></code> calls are being made), the remaining collateral is slashed to the Liquidation Vault.</p></li>
+</ul>
+<p>When the Liquidation Vault contains tokens, users can do a liquidation_redeem (“burn event”). Users can call this function to burn interBTC and receive DOT in return.</p>
+<ul class="simple">
+<li><p>The user receives <code class="docutils literal notranslate"><span class="pre">liquidationVault.collateral</span> <span class="pre">*</span> <span class="pre">(burnedTokens</span> <span class="pre">/</span> <span class="pre">(issued</span> <span class="pre">+</span> <span class="pre">toBeIssued)</span></code> in its free balance.</p></li>
+<li><p>At most <code class="docutils literal notranslate"><span class="pre">liquidationVault.issued</span> <span class="pre">-</span> <span class="pre">liquidationVault.toBeRedeemed</span></code> tokens can be burned.</p></li>
+</ul>
+<p>Vault liquidation affects Vault interactions is the following ways:</p>
+<ul class="simple">
+<li><p>Operations that increase <code class="docutils literal notranslate"><span class="pre">toBeIssued</span></code> or <code class="docutils literal notranslate"><span class="pre">toBeRedeemed</span></code> are disallowed. This means that no new issue/redeem/replace request can be made.</p></li>
+<li><p>Any operation that would decrease <code class="docutils literal notranslate"><span class="pre">toBeIssued</span></code> or change <code class="docutils literal notranslate"><span class="pre">issued</span></code> on a user Vault instead changes it on the Liquidation Vault</p></li>
+<li><p>Any operation that would decrease <code class="docutils literal notranslate"><span class="pre">toBeRedeemed</span></code> tokens on a user Vault <em>additionally</em> decreases it on the Liquidation Vault</p></li>
+</ul>
+<div class="section" id="issue">
+<h3>Issue<a class="headerlink" href="#issue" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">requestIssue</span></code></dt><dd><ul>
+<li><p>disallowed</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">executeIssue</span></code></dt><dd><ul>
+<li><p>Overpayment protection is disabled; if a user transfers too many BTC, the user loses it.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">cancelIssue</span></code></dt><dd><ul>
+<li><p>User’s griefing collateral is released back to the user, rather than slashed to the Vault.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="redeem">
+<h3>Redeem<a class="headerlink" href="#redeem" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">requestRedeem</span></code></dt><dd><ul>
+<li><p>disallowed</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">executeRedeem</span></code></dt><dd><ul>
+<li><p>Part of the Vault’s collateral is released. Amount: <code class="docutils literal notranslate"><span class="pre">Vault.backingCollateral</span> <span class="pre">*</span> <span class="pre">(redeem.amount</span> <span class="pre">/</span> <span class="pre">Vault.toBeRedeemed)</span></code>, where <code class="docutils literal notranslate"><span class="pre">toBeRedeemed</span></code> is read before it is decreased</p></li>
+<li><p>The premium, if any, is not transferred to the user.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">cancelRedeem</span></code></dt><dd><ul>
+<li><p>Calculates <code class="docutils literal notranslate"><span class="pre">slashedCollateral</span> <span class="pre">=</span> <span class="pre">Vault.backingCollateral</span> <span class="pre">*</span> <span class="pre">(redeem.amount</span> <span class="pre">/</span> <span class="pre">Vault.toBeRedeemed)</span></code>,  where <code class="docutils literal notranslate"><span class="pre">toBeRedeemed</span></code> is read <em>before</em> it is decreased, and then:</p></li>
+<li><dl class="simple">
+<dt>If reimburse:</dt><dd><ul>
+<li><p>transfers <code class="docutils literal notranslate"><span class="pre">slashedCollateral</span></code> to user.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Else if not reimburse:</dt><dd><ul>
+<li><p>transfers <code class="docutils literal notranslate"><span class="pre">slashedCollateral</span></code> to Liquidation Vault.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>Fee pool does not receive anything.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="replace">
+<h3>Replace<a class="headerlink" href="#replace" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">requestReplace</span></code>, <code class="docutils literal notranslate"><span class="pre">acceptReplace</span></code>, <code class="docutils literal notranslate"><span class="pre">withdrawReplace</span></code></dt><dd><ul>
+<li><p>disallowed</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">executeReplace</span></code></dt><dd><ul>
+<li><dl class="simple">
+<dt>if <code class="docutils literal notranslate"><span class="pre">oldVault</span></code> is liquidated</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">oldVVault</span></code>’s collateral is released as in <code class="docutils literal notranslate"><span class="pre">executeRedeem</span></code> above</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>if <code class="docutils literal notranslate"><span class="pre">newVault</span></code> is liquidated</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">newVault</span></code>’s remaining collateral is slashed as in <code class="docutils literal notranslate"><span class="pre">executeIssue</span></code> above</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">cancelReplace</span></code></dt><dd><ul>
+<li><dl class="simple">
+<dt>if <code class="docutils literal notranslate"><span class="pre">oldVault</span></code> is liquidated</dt><dd><ul>
+<li><p>collateral is slashed to Liquidation Vault, as in <code class="docutils literal notranslate"><span class="pre">cancelRedeem</span></code> above</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>if <code class="docutils literal notranslate"><span class="pre">newVault</span></code> is liquidated</dt><dd><ul>
+<li><p>griefing collateral is slashed to <code class="docutils literal notranslate"><span class="pre">newVault</span></code>’s free balance rather than to its backing collateral</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+<div class="section" id="implementation-notes">
+<h3>Implementation Notes<a class="headerlink" href="#implementation-notes" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>In <code class="docutils literal notranslate"><span class="pre">cancelIssue</span></code>, when the griefing collateral is slashed, it is forwarded to the fee pool.</p></li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">cancelReplace</span></code>, when the griefing collateral is slashed, it is forwarded to the backing collateral to the Vault. In case the Vault is liquidated, it is forwarded to the free balance of the Vault.</p></li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">premiumRedeem</span></code>, the griefing collateral is set as 0.</p></li>
+<li><p>In <code class="docutils literal notranslate"><span class="pre">executeReplace</span></code>, the <code class="docutils literal notranslate"><span class="pre">oldVault</span></code>’s griefing collateral is released, regardless of whether or not it is liquidated.</p></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="xclaim-security.html" class="btn btn-neutral float-right" title="XCLAIM Security Analysis" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../spec/btc-relay/errors.html" class="btn btn-neutral float-left" title="Error Codes" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Interlay
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

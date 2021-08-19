@@ -1,0 +1,1561 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Vault Registry &mdash; BTC Parachain Spec v3.1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Vault Liquidations" href="../security_performance/liquidations.html" />
+    <link rel="prev" title="Treasury" href="treasury.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> BTC Parachain Spec
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v3.1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/architecture.html">Architecture</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Specification</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="btc-relay.html">BTC-Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="collateral.html">Collateral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issue.html">Issue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redeem.html">Redeem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="refund.html">Refund</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="sla.html">SLA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="staked-relayers.html">Staked Relayers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="treasury.html">Treasury</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Vault Registry</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-model">Data Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#constants">Constants</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#granularity">GRANULARITY</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scalars">Scalars</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#minimumcollateralvault">MinimumCollateralVault</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#punishmentfee">PunishmentFee</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#punishmentdelay">PunishmentDelay</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#redeempremiumfee">RedeemPremiumFee</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#securecollateralthreshold">SecureCollateralThreshold</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#premiumredeemthreshold">PremiumRedeemThreshold</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#liquidationcollateralthreshold">LiquidationCollateralThreshold</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#liquidationvault">LiquidationVault</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#maps">Maps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#vaults">Vaults</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#registerrequests-optional">RegisterRequests (Optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#structs">Structs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#vault">Vault</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#registerrequest-optional">RegisterRequest (Optional)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#registervault">registerVault</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specification">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#preconditions">Preconditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#function-sequence">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#provevalidbtcaddress-optional">proveValidBTCAddress (Optional)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">Preconditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#registeraddress">registerAddress</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#updatepublickey">updatePublicKey</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id10">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#lockadditionalcollateral">lockAdditionalCollateral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id13">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#precondition">Precondition</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#withdrawcollateral">withdrawCollateral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id16">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id17">Preconditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id18">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#increasetobeissuedtokens">increaseToBeIssuedTokens</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id20">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id21">Preconditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id22">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#decreasetobeissuedtokens">decreaseToBeIssuedTokens</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id24">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id25">Preconditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id26">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#issuetokens">issueTokens</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id28">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id29">Preconditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id30">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#increasetoberedeemedtokens">increaseToBeRedeemedTokens</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id32">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id33">Preconditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id34">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#decreasetoberedeemedtokens">decreaseToBeRedeemedTokens</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id36">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id37">Preconditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id38">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#decreasetokens">decreaseTokens</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id40">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id41">Preconditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id42">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#redeemtokens">redeemTokens</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id44">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id45">Preconditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id46">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#redeemtokenspremium">redeemTokensPremium</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id48">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id49">Preconditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id50">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#redeemtokensliquidation">redeemTokensLiquidation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id52">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id53">Preconditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id54">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#replacetokens">replaceTokens</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id56">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id57">Preconditions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id58">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#liquidatevault">liquidateVault</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id61">Specification</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id62">Function Sequence</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#events">Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id63">RegisterVault</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#event-provevalidbtcaddress">ProveValidBTCAddress</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#event-lockadditionalcollateral">LockAdditionalCollateral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id66">WithdrawCollateral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id67">IncreaseToBeIssuedTokens</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id68">DecreaseToBeIssuedTokens</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id69">IssueTokens</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id70">IncreaseToBeRedeemedTokens</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id71">DecreaseToBeRedeemedTokens</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id72">DecreaseTokens</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id73">RedeemTokens</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id74">RedeemTokensPremium</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id75">RedeemTokensLiquidation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id76">ReplaceTokens</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id77">LiquidateVault</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-codes">Error Codes</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/liquidations.html">Vault Liquidations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/security-analysis.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../economics/incentives.html">Economic Incentives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../economics/fees.html">Fee Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../economics/SLA.html">Service Level Agreements</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">BTC Parachain Spec</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Vault Registry</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/spec/vaultregistry.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="vault-registry">
+<span id="id1"></span><h1>Vault Registry<a class="headerlink" href="#vault-registry" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The vault registry is the central place to manage vaults. Vaults can register themselves here, update their collateral, or can be liquidated.
+Similarly, the issue, redeem, refund, and replace protocols call this module to assign vaults during issue, redeem, refund, and replace procedures.
+Morever, vaults use the registry to register public key for the <a class="reference internal" href="../security_performance/security-analysis.html#okd"><span class="std std-ref">On-Chain Key Derivation Scheme</span></a> and register addresses for the <a class="reference internal" href="../security_performance/security-analysis.html#op-return"><span class="std std-ref">OP_RETURN</span></a> scheme.</p>
+</div>
+<div class="section" id="data-model">
+<h2>Data Model<a class="headerlink" href="#data-model" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="constants">
+<h3>Constants<a class="headerlink" href="#constants" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="granularity">
+<h4>GRANULARITY<a class="headerlink" href="#granularity" title="Permalink to this headline">¶</a></h4>
+<p>The granularity of the <code class="docutils literal notranslate"><span class="pre">SecureCollateralThreshold</span></code>, <code class="docutils literal notranslate"><span class="pre">LiquidationCollateralThreshold</span></code>, and <code class="docutils literal notranslate"><span class="pre">PunishmentFee</span></code>.</p>
+</div>
+</div>
+<div class="section" id="scalars">
+<h3>Scalars<a class="headerlink" href="#scalars" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="minimumcollateralvault">
+<h4>MinimumCollateralVault<a class="headerlink" href="#minimumcollateralvault" title="Permalink to this headline">¶</a></h4>
+<p>The minimum collateral (DOT) a vault needs to provide to participate in the issue process.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is a protection against spamming the protocol with very small collateral amounts.</p>
+</div>
+</div>
+<div class="section" id="punishmentfee">
+<h4>PunishmentFee<a class="headerlink" href="#punishmentfee" title="Permalink to this headline">¶</a></h4>
+<p>If a vault misbehaves in either the redeem or replace protocol by failing to prove that it sent the correct amount of BTC to the correct address within the time limit, a vault is punished.
+The punishment is the equivalent value of BTC in DOT (valued at the current exchange rate via <a class="reference internal" href="oracle.html#getexchangerate"><span class="std std-ref">getExchangeRate</span></a>) plus a fixed <code class="docutils literal notranslate"><span class="pre">PunishmentFee</span></code> that is added as a percentage on top to compensate the damaged party for its loss.
+For example, if the <code class="docutils literal notranslate"><span class="pre">PunishmentFee</span></code> is set to 50000, it is equivalent to 50%.</p>
+</div>
+<div class="section" id="punishmentdelay">
+<h4>PunishmentDelay<a class="headerlink" href="#punishmentdelay" title="Permalink to this headline">¶</a></h4>
+<p>If a vault fails to execute a correct redeem or replace, it is <em>temporarily</em> banned from further issue, redeem or replace requests.</p>
+</div>
+<div class="section" id="redeempremiumfee">
+<h4>RedeemPremiumFee<a class="headerlink" href="#redeempremiumfee" title="Permalink to this headline">¶</a></h4>
+<p>If a vault is running low on collateral and falls below <code class="docutils literal notranslate"><span class="pre">PremiumRedeemThreshold</span></code>, users are allocated a premium in DOT when redeeming with the vault - as defined by this parameter.
+For example, if the <code class="docutils literal notranslate"><span class="pre">RedeemPremiumFee</span></code> is set to 5000, it is equivalent to 5%.</p>
+</div>
+<div class="section" id="securecollateralthreshold">
+<h4>SecureCollateralThreshold<a class="headerlink" href="#securecollateralthreshold" title="Permalink to this headline">¶</a></h4>
+<p>Determines the over-collareralization rate for DOT collateral locked by Vaults, necessary for issuing PolkaBTC.
+Must to be strictly greater than <code class="docutils literal notranslate"><span class="pre">100000</span></code> and <code class="docutils literal notranslate"><span class="pre">LiquidationCollateralThreshold</span></code>.</p>
+<p>The vault can take on issue requests depending on the collateral it provides and under consideration of the <code class="docutils literal notranslate"><span class="pre">SecureCollateralThreshold</span></code>.
+The maximum amount of PolkaBTC a vault is able to support during the issue process is based on the following equation:
+<span class="math notranslate nohighlight">\(\text{max(PolkaBTC)} = \text{collateral} * \text{ExchangeRate} / \text{SecureCollateralThreshold}\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As an example, assume we use <code class="docutils literal notranslate"><span class="pre">DOT</span></code> as collateral, we issue <code class="docutils literal notranslate"><span class="pre">PolkaBTC</span></code> and lock <code class="docutils literal notranslate"><span class="pre">BTC</span></code> on the Bitcoin side. Let’s assume the <code class="docutils literal notranslate"><span class="pre">BTC</span></code>/<code class="docutils literal notranslate"><span class="pre">DOT</span></code> exchange rate is <code class="docutils literal notranslate"><span class="pre">80</span></code>, i.e. one has to pay 80 <code class="docutils literal notranslate"><span class="pre">DOT</span></code> to receive 1 <code class="docutils literal notranslate"><span class="pre">BTC</span></code>. Further, the <code class="docutils literal notranslate"><span class="pre">SecureCollateralThreshold</span></code> is 200%, i.e. a vault has to provide two-times the amount of collateral to back an issue request. Now let’s say the vault deposits 400 <code class="docutils literal notranslate"><span class="pre">DOT</span></code> as collateral. Then this vault can back at most 2.5 PolkaBTC as: <span class="math notranslate nohighlight">\(400 * (1/80) / 2 = 2.5\)</span>.</p>
+</div>
+</div>
+<div class="section" id="premiumredeemthreshold">
+<h4>PremiumRedeemThreshold<a class="headerlink" href="#premiumredeemthreshold" title="Permalink to this headline">¶</a></h4>
+<p>Determines the rate for the collateral rate of Vaults, at which users receive a premium in DOT, allocated from the Vault’s collateral, when performing a <a class="reference internal" href="redeem.html#redeem-protocol"><span class="std std-ref">Redeem</span></a> with this Vault.
+Must to be strictly greater than <code class="docutils literal notranslate"><span class="pre">100000</span></code> and <code class="docutils literal notranslate"><span class="pre">LiquidationCollateralThreshold</span></code>.</p>
+</div>
+<div class="section" id="liquidationcollateralthreshold">
+<h4>LiquidationCollateralThreshold<a class="headerlink" href="#liquidationcollateralthreshold" title="Permalink to this headline">¶</a></h4>
+<p>Determines the lower bound for the collateral rate in PolkaBTC. Must be strictly greater than <code class="docutils literal notranslate"><span class="pre">100000</span></code>. If a Vault’s collateral rate drops below this, automatic liquidation (forced Redeem) is triggered.</p>
+</div>
+<div class="section" id="liquidationvault">
+<h4>LiquidationVault<a class="headerlink" href="#liquidationvault" title="Permalink to this headline">¶</a></h4>
+<p>Account identifier of an artificial vault maintained by the VaultRegistry to handle polkaBTC balances and DOT collateral of liquidated Vaults. That is, when a vault is liquidated, its balances are transferred to <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code> and claims are later handled via the <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A Vault’s token balances and DOT collateral are transferred to the <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code> as a result of automated liquidations and <a class="reference internal" href="staked-relayers.html#reportvaulttheft"><span class="std std-ref">reportVaultTheft</span></a>.</p>
+</div>
+</div>
+</div>
+<div class="section" id="maps">
+<h3>Maps<a class="headerlink" href="#maps" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="vaults">
+<h4>Vaults<a class="headerlink" href="#vaults" title="Permalink to this headline">¶</a></h4>
+<p>Mapping from accounts of Vaults to their struct. <code class="docutils literal notranslate"><span class="pre">&lt;Account,</span> <span class="pre">Vault&gt;</span></code>.</p>
+</div>
+<div class="section" id="registerrequests-optional">
+<h4>RegisterRequests (Optional)<a class="headerlink" href="#registerrequests-optional" title="Permalink to this headline">¶</a></h4>
+<p>Mapping from registerIDs of RegisterRequest to their structs. <code class="docutils literal notranslate"><span class="pre">&lt;U256,</span> <span class="pre">RegisterRequest&gt;</span></code>.</p>
+</div>
+</div>
+<div class="section" id="structs">
+<h3>Structs<a class="headerlink" href="#structs" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="vault">
+<h4>Vault<a class="headerlink" href="#vault" title="Permalink to this headline">¶</a></h4>
+<p>Stores the information of a Vault.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 9%" />
+<col style="width: 79%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">toBeIssuedTokens</span></code></p></td>
+<td><p>PolkaBTC</p></td>
+<td><p>Number of PolkaBTC tokens currently requested as part of an uncompleted issue request.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code></p></td>
+<td><p>PolkaBTC</p></td>
+<td><p>Number of PolkaBTC tokens actively issued by this Vault.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">toBeRedeemedTokens</span></code></p></td>
+<td><p>PolkaBTC</p></td>
+<td><p>Number of PolkaBTC tokens reserved by pending redeem and replace requests.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">collateral</span></code></p></td>
+<td><p>DOT</p></td>
+<td><p>Total amount of collateral provided by this vault (note: “free” collateral is calculated on the fly and updated each time new exchange rate data is received).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">btcAddress</span></code></p></td>
+<td><p>Wallet&lt;BtcAddress&gt;</p></td>
+<td><p>A set of Bitcoin address(es) of this vault, to be used for issuing of PolkaBTC tokens.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">bannedUntil</span></code></p></td>
+<td><p>u256</p></td>
+<td><p>Block height until which this vault is banned from being used for Issue, Redeem (except during automatic liquidation) and Replace .</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">status</span></code></p></td>
+<td><p>VaultStatus</p></td>
+<td><p>Current status of the vault (Active, Liquidated, CommittedTheft)</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This specification currently assumes for simplicity that a vault will reuse the same BTC address, even after multiple redeem requests. <strong>[Future Extension]</strong>: For better security, Vaults may desire to generate new BTC addresses each time they execute a redeem request. This can be handled by pre-generating multiple BTC addresses and storing these in a list for each Vault. Caution is necessary for users which execute issue requests with “old” vault addresses - these BTC must be moved to the latest address by Vaults.</p>
+</div>
+</div>
+<div class="section" id="registerrequest-optional">
+<h4>RegisterRequest (Optional)<a class="headerlink" href="#registerrequest-optional" title="Permalink to this headline">¶</a></h4>
+<p>Optional struct storing data used in the (optional) validity check of the BTC address provided by a vault upon registration.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 6%" />
+<col style="width: 80%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">registerId</span></code></p></td>
+<td><p>H256</p></td>
+<td><p>Identifier used to link a Bitcoin transaction inclusion proof to this registration request (included in OP_RETURN).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">vault</span></code></p></td>
+<td><p>Account</p></td>
+<td><p>Parachain account identifier of the registered Vault</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">timeout</span></code></p></td>
+<td><p>DateTime</p></td>
+<td><p>Optional maximum delay before the vault must submit a valid tranasction inclusion proof.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="registervault">
+<span id="id2"></span><h3>registerVault<a class="headerlink" href="#registervault" title="Permalink to this headline">¶</a></h3>
+<p>Initiates the registration procedure for a new Vault. The vault provides its BTC address and locks up DOT collateral, which is to be used to the issuing process.</p>
+<p><strong>[Optional]: check valid BTC address</strong>: The new vault provides its BTC address and it’s DOT collateral, creating a <code class="docutils literal notranslate"><span class="pre">RegistrationRequest</span></code>, and receives in return a <code class="docutils literal notranslate"><span class="pre">registerID</span></code>, which it must include in the OP_RETURN field of a transaction signed by the public key corresponding to the provided BTC address. The proof is checked by the BTC-Relay component, and if successful, the vault is registered.
+Note: Collateral can be required to prevent griefing / spamming.</p>
+<div class="section" id="specification">
+<h4>Specification<a class="headerlink" href="#specification" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">requestRegistration(vault,</span> <span class="pre">collateral,</span> <span class="pre">btcAddress)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The account of the vault to be registered.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">collateral</span></code>: to-be-locked collateral in DOT.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RegisterVault(Vault,</span> <span class="pre">collateral)</span></code>: emit an event stating that a new vault (<code class="docutils literal notranslate"><span class="pre">vault</span></code>) was registered and provide information on the Vault’s collateral (<code class="docutils literal notranslate"><span class="pre">collateral</span></code>).</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_MIN_AMOUNT</span></code>: The provided collateral was insufficient - it must be above <code class="docutils literal notranslate"><span class="pre">MinimumCollateralVault</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="preconditions">
+<h4>Preconditions<a class="headerlink" href="#preconditions" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must be set to <code class="docutils literal notranslate"><span class="pre">RUNNING:0</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="function-sequence">
+<h4>Function Sequence<a class="headerlink" href="#function-sequence" title="Permalink to this headline">¶</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">registerVault</span></code> function takes as input a Parachain AccountID, a Bitcoin address and DOT collateral, and registers a new vault in the system.</p>
+<ol class="arabic simple">
+<li><p>Check that <code class="docutils literal notranslate"><span class="pre">collateral</span> <span class="pre">&gt;</span> <span class="pre">MinimumCollateralVault</span></code> holds, i.e., the vault provided sufficient collateral (above the spam protection threshold).</p></li>
+</ol>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Raise <code class="docutils literal notranslate"><span class="pre">ERR_MIN_AMOUNT</span></code> error if this check fails.</p></li>
+</ol>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>Store the provided data as a new <code class="docutils literal notranslate"><span class="pre">Vault</span></code>.</p></li>
+<li><p><strong>[Optional]</strong>: generate a <code class="docutils literal notranslate"><span class="pre">registrationID</span></code> which the vault must be include in the OP_RETURN of a new BTC transaction spending BTC from the specified <code class="docutils literal notranslate"><span class="pre">btcAddress</span></code>. This can be stored in a <code class="docutils literal notranslate"><span class="pre">RegisterRequest</span></code> struct, alongside the AccoundID (<code class="docutils literal notranslate"><span class="pre">vault</span></code>) and a timelimit in seconds.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="provevalidbtcaddress-optional">
+<span id="provevalidbtcaddress"></span><h3>proveValidBTCAddress (Optional)<a class="headerlink" href="#provevalidbtcaddress-optional" title="Permalink to this headline">¶</a></h3>
+<p>A vault optionally may be required to prove that the BTC address is provided during registration is indeed valid, by providing a transaction inclusion proof, showing BTC can be spent from the address.</p>
+<div class="section" id="id3">
+<h4>Specification<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">proveValidBTCAddress(registrationID,</span> <span class="pre">merkleProof,</span> <span class="pre">rawTx)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">registrationID</span></code>: identifier of the RegisterRequest</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">merkleProof</span></code>: Merkle tree path (concatenated LE SHA256 hashes).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rawTx</span></code>: Raw Bitcoin transaction including the transaction inputs and outputs.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ProveValidBTCAddress(vault,</span> <span class="pre">btcAddress)</span></code>: emit an event stating that a vault (<code class="docutils literal notranslate"><span class="pre">vault</span></code>) submitted a proof that its BTC address is valid.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INVALID_BTC_ADDRESS</span></code>: Not a valid BTC address.</p></li>
+<li><p>see <code class="docutils literal notranslate"><span class="pre">verifyTransactionInclusion</span></code> in BTC-Relay.</p></li>
+</ul>
+</div>
+<div class="section" id="id4">
+<h4>Preconditions<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must be set to <code class="docutils literal notranslate"><span class="pre">RUNNING:0</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="id5">
+<h4>Function Sequence<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Retrieve the <code class="docutils literal notranslate"><span class="pre">RegisterRequest</span></code> with the given <code class="docutils literal notranslate"><span class="pre">registerID</span></code> from <code class="docutils literal notranslate"><span class="pre">RegisterRequests</span></code>.</p></li>
+</ol>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Throw <code class="docutils literal notranslate"><span class="pre">ERR_INVALID_REGISTER_ID</span></code> error if no active RegisterRequest <code class="docutils literal notranslate"><span class="pre">registerID</span></code> can be found in <code class="docutils literal notranslate"><span class="pre">RegisterRequests</span></code>.</p></li>
+</ol>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>Call <code class="docutils literal notranslate"><span class="pre">verifyTransactionInclusion(txId,</span> <span class="pre">merkleProof)</span></code>. If this call returns an error, abort and return the error.</p></li>
+<li><p>Call <code class="docutils literal notranslate"><span class="pre">validateTransactionInclusion</span></code> providing the <code class="docutils literal notranslate"><span class="pre">rawTx</span></code>, <code class="docutils literal notranslate"><span class="pre">registerID</span></code> and the vault’s Bitcoin address as parameters. If this call returns an error, abort and return the error.</p></li>
+<li><p>Remove the <code class="docutils literal notranslate"><span class="pre">RegisterRequest</span></code> with the <code class="docutils literal notranslate"><span class="pre">registerID</span></code> from <code class="docutils literal notranslate"><span class="pre">RegisterRequests</span></code>.</p></li>
+<li><p>Emit a <code class="docutils literal notranslate"><span class="pre">ProveValidBTCAddress</span></code> event, setting the <code class="docutils literal notranslate"><span class="pre">vault</span></code> account identifier and the vault’s Bitcoin address (<code class="docutils literal notranslate"><span class="pre">Vault.btcAddress</span></code>) as parameters.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="registeraddress">
+<span id="id6"></span><h3>registerAddress<a class="headerlink" href="#registeraddress" title="Permalink to this headline">¶</a></h3>
+<p>Add a new BTC address to the vault’s wallet.</p>
+<div class="section" id="id7">
+<h4>Specification<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">registerAddress(vaultId:</span> <span class="pre">AccountId,</span> <span class="pre">address:</span> <span class="pre">BtcAddress)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vaultId</span></code>: the account of the vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">address</span></code>: a valid BTC address.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RegisterAddress(vaultId,</span> <span class="pre">address)</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="id8">
+<h4>Function Sequence<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Add a new BTC address to the vault’s wallet.</p></li>
+<li><p>Set the new BTC address to the primary (default) address.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="updatepublickey">
+<span id="id9"></span><h3>updatePublicKey<a class="headerlink" href="#updatepublickey" title="Permalink to this headline">¶</a></h3>
+<p>The vault adds a new public key as a basis for the <a class="reference internal" href="../security_performance/security-analysis.html#okd"><span class="std std-ref">On-Chain Key Derivation Scheme</span></a>.</p>
+<div class="section" id="id10">
+<h4>Specification<a class="headerlink" href="#id10" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">updatePublicKey(vaultId:</span> <span class="pre">AccountId,</span> <span class="pre">publicKey:</span> <span class="pre">BtcPublicKey)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vaultId</span></code>: the account of the vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">publicKey</span></code>: the BTC public key of the vault to update.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">UpdatePublicKey(vaultId,</span> <span class="pre">publicKey)</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="id11">
+<h4>Function Sequence<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Add a new BTC address to the vault’s wallet.</p></li>
+<li><p>Set the new BTC address to the primary (default) address.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="lockadditionalcollateral">
+<span id="id12"></span><h3>lockAdditionalCollateral<a class="headerlink" href="#lockadditionalcollateral" title="Permalink to this headline">¶</a></h3>
+<p>The vault locks additional collateral as a security against stealing the Bitcoin locked with it.</p>
+<div class="section" id="id13">
+<h4>Specification<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">lockCollateral(Vault,</span> <span class="pre">collateral)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Vault</span></code>: The account of the vault locking collateral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">collateral</span></code>: to-be-locked collateral in DOT.</p></li>
+</ul>
+<p>: If the locking has completed successfully.</p>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LockAdditionalCollateral(Vault,</span> <span class="pre">newCollateral,</span> <span class="pre">totalCollateral,</span> <span class="pre">freeCollateral)</span></code>: emit an event stating how much new (<code class="docutils literal notranslate"><span class="pre">newCollateral</span></code>), total collateral (<code class="docutils literal notranslate"><span class="pre">totalCollateral</span></code>) and freely available collateral (<code class="docutils literal notranslate"><span class="pre">freeCollateral</span></code>) the vault calling this function has locked.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_VAULT_NOT_FOUND</span></code>: The specified vault does not exist.</p></li>
+</ul>
+</div>
+<div class="section" id="precondition">
+<h4>Precondition<a class="headerlink" href="#precondition" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must not be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:</span> <span class="pre">2</span></code>.</p></li>
+<li><p>If the BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component is set to <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">1</span></code>, it must not include the error code <code class="docutils literal notranslate"><span class="pre">ORACLE_OFFLINE:</span> <span class="pre">3</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="id14">
+<h4>Function Sequence<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Retrieve the <code class="docutils literal notranslate"><span class="pre">Vault</span></code> from <code class="docutils literal notranslate"><span class="pre">Vaults</span></code> with the specified AccountId (<code class="docutils literal notranslate"><span class="pre">vault</span></code>).</p></li>
+</ol>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Raise <code class="docutils literal notranslate"><span class="pre">ERR_VAULT_NOT_FOUND</span></code> error if no such <code class="docutils literal notranslate"><span class="pre">vault</span></code> entry exists in <code class="docutils literal notranslate"><span class="pre">Vaults</span></code>.</p></li>
+</ol>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>Increase the <code class="docutils literal notranslate"><span class="pre">collateral</span></code> of the <code class="docutils literal notranslate"><span class="pre">Vault</span></code>.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="withdrawcollateral">
+<span id="id15"></span><h3>withdrawCollateral<a class="headerlink" href="#withdrawcollateral" title="Permalink to this headline">¶</a></h3>
+<p>A vault can withdraw its <em>free</em> collateral at any time, as long as there remains more collateral (<em>free or used in backing issued PolkaBTC</em>) than <code class="docutils literal notranslate"><span class="pre">MinimumCollateralVault</span></code> and above the <code class="docutils literal notranslate"><span class="pre">SecureCollateralThreshold</span></code>. Collateral that is currently being used to back issued PolkaBTC remains locked until the vault is used for a redeem request (full release can take multiple redeem requests).</p>
+<div class="section" id="id16">
+<h4>Specification<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">withdrawCollateral(vault,</span> <span class="pre">withdrawAmount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The account of the vault withdrawing collateral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">withdrawAmount</span></code>: To-be-withdrawn collateral in DOT.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">WithdrawCollateral(Vault,</span> <span class="pre">withdrawAmount,</span> <span class="pre">totalCollateral)</span></code>: emit emit an event stating how much collateral was withdrawn by the vault and total collateral a vault has left.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_VAULT_NOT_FOUND</span> <span class="pre">=</span> <span class="pre">&quot;There</span> <span class="pre">exists</span> <span class="pre">no</span> <span class="pre">vault</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">given</span> <span class="pre">account</span> <span class="pre">id&quot;</span></code>: The specified vault does not exist.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_FREE_COLLATERAL</span></code>: The vault is trying to withdraw more collateral than is currently free.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_MIN_AMOUNT</span></code>: The amount of locked collateral (free + used) needs to be above <code class="docutils literal notranslate"><span class="pre">MinimumCollateralVault</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_UNAUTHORIZED</span></code>: The caller of the withdrawal is not the specified vault, and hence not authorized to withdraw funds.</p></li>
+</ul>
+</div>
+<div class="section" id="id17">
+<h4>Preconditions<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must be set to <code class="docutils literal notranslate"><span class="pre">RUNNING:0</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="id18">
+<h4>Function Sequence<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Retrieve the <code class="docutils literal notranslate"><span class="pre">Vault</span></code> from <code class="docutils literal notranslate"><span class="pre">Vaults</span></code> with the specified AccountId (<code class="docutils literal notranslate"><span class="pre">vault</span></code>).</p></li>
+</ol>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Raise <code class="docutils literal notranslate"><span class="pre">ERR_VAULT_NOT_FOUND</span></code> error if no such <code class="docutils literal notranslate"><span class="pre">vault</span></code> entry exists in <code class="docutils literal notranslate"><span class="pre">Vaults</span></code>.</p></li>
+</ol>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>Check that the caller of this function is indeed the specified <code class="docutils literal notranslate"><span class="pre">Vault</span></code> (AccountId <code class="docutils literal notranslate"><span class="pre">vault</span></code>).</p></li>
+</ol>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Raise <code class="docutils literal notranslate"><span class="pre">ERR_UNAUTHORIZED</span></code> error is the caller of this function is not the vault specified for withdrawal.</p></li>
+</ol>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>Check that <code class="docutils literal notranslate"><span class="pre">Vault</span></code> has sufficient free collateral: <code class="docutils literal notranslate"><span class="pre">withdrawAmount</span> <span class="pre">&lt;=</span> <span class="pre">(Vault.collateral</span> <span class="pre">-</span> <span class="pre">Vault.issuedTokens</span> <span class="pre">*</span> <span class="pre">SecureCollateralThreshold)</span></code></p></li>
+</ol>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Raise <code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_FREE_COLLATERAL</span></code> error if this check fails.</p></li>
+</ol>
+</div></blockquote>
+<ol class="arabic simple" start="4">
+<li><p>Check that the remaining <strong>total</strong> (<code class="docutils literal notranslate"><span class="pre">free</span></code> + used) collateral is greater than <code class="docutils literal notranslate"><span class="pre">MinimumCollateralVault</span></code> (<code class="docutils literal notranslate"><span class="pre">Vault.collateral</span> <span class="pre">-</span> <span class="pre">withdrawAmount</span> <span class="pre">&gt;=</span> <span class="pre">MinimumCollateralVault</span></code>).</p></li>
+</ol>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Raise <code class="docutils literal notranslate"><span class="pre">ERR_MIN_AMOUNT</span></code> if this check fails. The vault must close its account if it wishes to withdraw collateral below the <code class="docutils literal notranslate"><span class="pre">MinimumCollateralVault</span></code> threshold, or request a Replace if some of the collateral is already used for issued PolkaBTC.</p></li>
+</ol>
+</div></blockquote>
+<ol class="arabic simple" start="5">
+<li><p>Call the <a class="reference internal" href="collateral.html#releasecollateral"><span class="std std-ref">releaseCollateral</span></a> function to release the requested <code class="docutils literal notranslate"><span class="pre">withdrawAmount</span></code> of DOT collateral to the specified Vault’s account (<code class="docutils literal notranslate"><span class="pre">vault</span></code> AccountId) and deduct the collateral tracked for the vault in <code class="docutils literal notranslate"><span class="pre">Vaults</span></code>: <code class="docutils literal notranslate"><span class="pre">Vault.collateral</span> <span class="pre">-</span> <span class="pre">withdrawAmount</span></code>.</p></li>
+<li><p>Emit <code class="docutils literal notranslate"><span class="pre">WithdrawCollateral</span></code> event</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="increasetobeissuedtokens">
+<span id="id19"></span><h3>increaseToBeIssuedTokens<a class="headerlink" href="#increasetobeissuedtokens" title="Permalink to this headline">¶</a></h3>
+<p>During an issue request function (<a class="reference internal" href="issue.html#requestissue"><span class="std std-ref">requestIssue</span></a>), a user must be able to assign a vault to the issue request. As a vault can be assigned to multiple issue requests, race conditions may occur. To prevent race conditions, a Vault’s collateral is <em>reserved</em> when an <code class="docutils literal notranslate"><span class="pre">IssueRequest</span></code> is created - <code class="docutils literal notranslate"><span class="pre">toBeIssuedTokens</span></code> specifies how much PolkaBTC is to be issued (and the reserved collateral is then calculated based on <a class="reference internal" href="oracle.html#getexchangerate"><span class="std std-ref">getExchangeRate</span></a>).
+This function further calculates the amount of collateral that will be assigned to the issue request.</p>
+<div class="section" id="id20">
+<h4>Specification<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">increaseToBeIssuedTokens(vault,</span> <span class="pre">tokens)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC to be locked.</p></li>
+</ul>
+<p><em>Returns</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">btcAddress</span></code>: The Bitcoin address of the vault.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">IncreaseToBeIssuedTokens(vaultId,</span> <span class="pre">tokens)</span></code></p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_EXCEEDING_VAULT_LIMIT</span></code>: The selected vault has not provided enough collateral to issue the requested amount.</p></li>
+</ul>
+</div>
+<div class="section" id="id21">
+<h4>Preconditions<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must be set to <code class="docutils literal notranslate"><span class="pre">RUNNING:0</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="id22">
+<h4>Function Sequence<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Checks if the selected vault has locked enough collateral to cover the amount of PolkaBTC <code class="docutils literal notranslate"><span class="pre">tokens</span></code> to be issued. Return <code class="docutils literal notranslate"><span class="pre">ERR_EXCEEDING_VAULT_LIMIT</span></code> error if this checks fails. Otherwise, assign the tokens to the vault.</p>
+<ul class="simple">
+<li><p>Select the <code class="docutils literal notranslate"><span class="pre">vault</span></code> from the registry and get the <code class="docutils literal notranslate"><span class="pre">vault.toBeIssuedTokens</span></code>, <code class="docutils literal notranslate"><span class="pre">vault.issuedTokens</span></code> and <code class="docutils literal notranslate"><span class="pre">vault.collateral</span></code>.</p></li>
+<li><p>Calculate how many tokens can be issued by multiplying the <code class="docutils literal notranslate"><span class="pre">vault.collateral</span></code> with the <code class="docutils literal notranslate"><span class="pre">ExchangeRate</span></code> (from the <a class="reference internal" href="oracle.html#oracle"><span class="std std-ref">Exchange Rate Oracle</span></a>) and the <code class="docutils literal notranslate"><span class="pre">SecureCollateralThreshold</span></code> considering the <code class="docutils literal notranslate"><span class="pre">GRANULARITY</span></code> and subtract the <code class="docutils literal notranslate"><span class="pre">vault.issuedTokens</span></code> and the <code class="docutils literal notranslate"><span class="pre">vault.toBeIssuedTokens</span></code>. Memorize the result as <code class="docutils literal notranslate"><span class="pre">available_tokens</span></code>.</p></li>
+<li><p>Check if the <code class="docutils literal notranslate"><span class="pre">available_tokens</span></code> is equal or greater than <code class="docutils literal notranslate"><span class="pre">tokens</span></code>. If not enough <code class="docutils literal notranslate"><span class="pre">available_tokens</span></code> is free, throw <code class="docutils literal notranslate"><span class="pre">ERR_EXCEEDING_VAULT_LIMIT</span></code>. Else, add <code class="docutils literal notranslate"><span class="pre">tokens</span></code> to <code class="docutils literal notranslate"><span class="pre">vault.toBeIssuedTokens</span></code>.</p></li>
+</ul>
+</li>
+<li><p>Get the Bitcoin address of the vault as <code class="docutils literal notranslate"><span class="pre">btcAddress</span></code>.</p></li>
+<li><p>Return the <code class="docutils literal notranslate"><span class="pre">btcAddress</span></code>.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="decreasetobeissuedtokens">
+<span id="id23"></span><h3>decreaseToBeIssuedTokens<a class="headerlink" href="#decreasetobeissuedtokens" title="Permalink to this headline">¶</a></h3>
+<p>A Vault’s committed tokens are unreserved when an issue request (<a class="reference internal" href="issue.html#cancelissue"><span class="std std-ref">cancelIssue</span></a>) is cancelled due to a timeout (failure!).</p>
+<div class="section" id="id24">
+<h4>Specification<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">decreaseToBeIssuedTokens(vault,</span> <span class="pre">tokens)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC to be unreserved.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DecreaseToBeIssuedTokens(vault,</span> <span class="pre">tokens)</span></code></p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>: The requested amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> exceeds the <code class="docutils literal notranslate"><span class="pre">toBeIssuedTokens</span></code> by this vault.</p></li>
+</ul>
+</div>
+<div class="section" id="id25">
+<h4>Preconditions<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must not be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:</span> <span class="pre">2</span></code>.</p></li>
+<li><p>If the BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component is set to <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">1</span></code>, it must not include the error codes <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY:</span> <span class="pre">2</span></code>, <code class="docutils literal notranslate"><span class="pre">ORACLE_OFFLINE:</span> <span class="pre">3</span></code>, or <code class="docutils literal notranslate"><span class="pre">LIQUIDATION:</span> <span class="pre">4</span></code>.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We allow to cancel pending requests. If the BTC Parachain is in status <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">1</span></code> with <code class="docutils literal notranslate"><span class="pre">NO_DATA_BTC_RELAY:</span> <span class="pre">1</span></code> and the required BTC transaction is in a block not yet included in the BTC-Relay, the request will not be able to complete. In this case, this function will get called to cancel the request.</p>
+</div>
+</div>
+<div class="section" id="id26">
+<h4>Function Sequence<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Checks if the amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> to be released is less or equal to the amount of <code class="docutils literal notranslate"><span class="pre">vault.toBeIssuedTokens</span></code>. If not, throws <code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>.</p></li>
+<li><p>Subtracts <code class="docutils literal notranslate"><span class="pre">tokens</span></code> from <code class="docutils literal notranslate"><span class="pre">vault.toBeIssuedTokens</span></code>.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="issuetokens">
+<span id="id27"></span><h3>issueTokens<a class="headerlink" href="#issuetokens" title="Permalink to this headline">¶</a></h3>
+<p>The issue process completes when a user calls the <a class="reference internal" href="issue.html#executeissue"><span class="std std-ref">executeIssue</span></a> function and provides a valid proof for sending BTC to the vault. At this point, the <code class="docutils literal notranslate"><span class="pre">toBeIssuedTokens</span></code> assigned to a vault are decreased and the <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> balance is increased by the <code class="docutils literal notranslate"><span class="pre">amount</span></code> of issued tokens.</p>
+<div class="section" id="id28">
+<h4>Specification<a class="headerlink" href="#id28" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">issueTokens(vault,</span> <span class="pre">amount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC that were just issued.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">IssueTokens(vault,</span> <span class="pre">tokens)</span></code>: Emit an event when an issue request is executed.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>: Return if the requested amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> exceeds the <code class="docutils literal notranslate"><span class="pre">toBeIssuedTokens</span></code> by this vault.</p></li>
+</ul>
+</div>
+<div class="section" id="id29">
+<h4>Preconditions<a class="headerlink" href="#id29" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must not be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:</span> <span class="pre">2</span></code>.</p></li>
+<li><p>If the BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component is set to <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">1</span></code>, it must not include the error codes <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY:</span> <span class="pre">2</span></code>, <code class="docutils literal notranslate"><span class="pre">ORACLE_OFFLINE:</span> <span class="pre">3</span></code>, or <code class="docutils literal notranslate"><span class="pre">LIQUIDATION:</span> <span class="pre">4</span></code>.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>We allow to complete pending requests. If the BTC Parachain is in status <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">1</span></code> with <code class="docutils literal notranslate"><span class="pre">NO_DATA_BTC_RELAY:</span> <span class="pre">1</span></code> and the required BTC transaction is in a block that is included before the affected block height in the BTC-Relay, the request will be able to complete. In this case, this function will get called to complete the request.</p>
+</div>
+</div>
+<div class="section" id="id30">
+<h4>Function Sequence<a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Checks if the amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> to be released is less or equal to the amount of <code class="docutils literal notranslate"><span class="pre">vault.toBeIssuedTokens</span></code>. If not, throws <code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>.</p></li>
+<li><p>Subtracts <code class="docutils literal notranslate"><span class="pre">tokens</span></code> from <code class="docutils literal notranslate"><span class="pre">vault.toBeIssuedTokens</span></code>.</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">tokens</span></code> to <code class="docutils literal notranslate"><span class="pre">vault.issuedTokens</span></code>.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="increasetoberedeemedtokens">
+<span id="id31"></span><h3>increaseToBeRedeemedTokens<a class="headerlink" href="#increasetoberedeemedtokens" title="Permalink to this headline">¶</a></h3>
+<p>Add an amount tokens to the <code class="docutils literal notranslate"><span class="pre">toBeRedeemedTokens</span></code> balance of a vault. This function serves as a prevention against race conditions in the redeem and replace procedures.
+If, for example, a vault would receive two redeem requests at the same time that have a higher amount of tokens to be issued than his <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> balance, one of the two redeem requests should be rejected.</p>
+<div class="section" id="id32">
+<h4>Specification<a class="headerlink" href="#id32" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">increaseToBeRedeemedTokens(vault,</span> <span class="pre">tokens)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC to be redeemed.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">IncreaseToBeRedeemedTokens(vault,</span> <span class="pre">tokens)</span></code>: Emit an event when a redeem request is requested.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>: The requested amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> exceeds the <code class="docutils literal notranslate"><span class="pre">IssuedTokens</span></code> by this vault.</p></li>
+</ul>
+</div>
+<div class="section" id="id33">
+<h4>Preconditions<a class="headerlink" href="#id33" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must not be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:</span> <span class="pre">2</span></code>.</p></li>
+<li><p>If the BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component is set to <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">1</span></code>, it must not include the error codes <code class="docutils literal notranslate"><span class="pre">NO_DATA_BTC_RELAY:</span> <span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY:</span> <span class="pre">2</span></code>, or <code class="docutils literal notranslate"><span class="pre">ORACLE_OFFLINE:</span> <span class="pre">3</span></code>.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function must still be available in case of liquidation of vaults.</p>
+</div>
+</div>
+<div class="section" id="id34">
+<h4>Function Sequence<a class="headerlink" href="#id34" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Checks if the amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> to be redeemed is less or equal to the amount of <code class="docutils literal notranslate"><span class="pre">vault.IssuedTokens</span></code> minus the <code class="docutils literal notranslate"><span class="pre">vault.toBeRedeemedTokens</span></code>. If not, throws <code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>.</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">tokens</span></code> to <code class="docutils literal notranslate"><span class="pre">vault.toBeRedeemedTokens</span></code>.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="decreasetoberedeemedtokens">
+<span id="id35"></span><h3>decreaseToBeRedeemedTokens<a class="headerlink" href="#decreasetoberedeemedtokens" title="Permalink to this headline">¶</a></h3>
+<p>Subtract an amount tokens from the <code class="docutils literal notranslate"><span class="pre">toBeRedeemedTokens</span></code> balance of a vault.</p>
+<div class="section" id="id36">
+<h4>Specification<a class="headerlink" href="#id36" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">decreaseToBeRedeemedTokens(vault,</span> <span class="pre">tokens)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC not to be replaced.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DecreaseToBeRedeemedTokens(vault,</span> <span class="pre">tokens)</span></code>: Emit an event when a replace request cannot be completed because the vault has too little tokens committed.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>: The requested amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> exceeds the <code class="docutils literal notranslate"><span class="pre">toBeRedeemedTokens</span></code> by this vault.</p></li>
+</ul>
+</div>
+<div class="section" id="id37">
+<h4>Preconditions<a class="headerlink" href="#id37" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must not be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:</span> <span class="pre">2</span></code>.</p></li>
+<li><p>If the BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component is set to <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">1</span></code>, it must not include the error codes <code class="docutils literal notranslate"><span class="pre">ORACLE_OFFLINE:</span> <span class="pre">3</span></code> or <code class="docutils literal notranslate"><span class="pre">LIQUIDATION:</span> <span class="pre">4</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="id38">
+<h4>Function Sequence<a class="headerlink" href="#id38" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Checks if the amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> less or equal to the amount of <code class="docutils literal notranslate"><span class="pre">vault.toBeRedeemedTokens</span></code> tokens. If not, throws <code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>.</p></li>
+<li><p>Subtract <code class="docutils literal notranslate"><span class="pre">tokens</span></code> from <code class="docutils literal notranslate"><span class="pre">vault.toBeRedeemedTokens</span></code>.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="decreasetokens">
+<span id="id39"></span><h3>decreaseTokens<a class="headerlink" href="#decreasetokens" title="Permalink to this headline">¶</a></h3>
+<p>If a redeem request is not fulfilled, the amount of tokens assigned to the <code class="docutils literal notranslate"><span class="pre">toBeRedeemedTokens</span></code> must be removed. Also, we consider the tokens lost at this point and hence remove the <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> from this vault and punish the vault for not redeeming the tokens.</p>
+<div class="section" id="id40">
+<h4>Specification<a class="headerlink" href="#id40" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">decreaseTokens(vault,</span> <span class="pre">user,</span> <span class="pre">tokens,</span> <span class="pre">collateral)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">user</span></code>: The BTC Parachain address of the user that made the redeem request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC that were not redeemed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">collateral</span></code>: The amount of collateral assigned to this request.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">DecreaseTokens(vault,</span> <span class="pre">user,</span> <span class="pre">tokens,</span> <span class="pre">collateral)</span></code>: Emit an event if a redeem request cannot be fulfilled.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>: The requested amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> exceeds the <code class="docutils literal notranslate"><span class="pre">toBeRedeemedTokens</span></code> by this vault.</p></li>
+</ul>
+</div>
+<div class="section" id="id41">
+<h4>Preconditions<a class="headerlink" href="#id41" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must not be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:</span> <span class="pre">2</span></code>.</p></li>
+<li><p>If the BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component is set to <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">1</span></code>, it must not include the error codes <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY:</span> <span class="pre">2</span></code> or <code class="docutils literal notranslate"><span class="pre">ORACLE_OFFLINE:</span> <span class="pre">3</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="id42">
+<h4>Function Sequence<a class="headerlink" href="#id42" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic">
+<li><p>Checks if the amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> is less or equal to the amount of <code class="docutils literal notranslate"><span class="pre">vault.toBeRedeemedTokens</span></code>. If not, throws <code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>.</p></li>
+<li><p>Subtract <code class="docutils literal notranslate"><span class="pre">tokens</span></code> from <code class="docutils literal notranslate"><span class="pre">vault.toBeRedeemedTokens</span></code>.</p></li>
+<li><p>Subtract <code class="docutils literal notranslate"><span class="pre">tokens</span></code> from <code class="docutils literal notranslate"><span class="pre">vault.issuedTokens</span></code>.</p></li>
+<li><p>Punish the vault for not fulfilling the request to redeem tokens.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Call the <a class="reference internal" href="oracle.html#getexchangerate"><span class="std std-ref">getExchangeRate</span></a> function to obtain the current exchange rate.</p></li>
+<li><p>Calculate the current value of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> in collateral with the exchange rate.</p></li>
+<li><p>Add a punishment percentage on top of the <code class="docutils literal notranslate"><span class="pre">token</span></code> value expressed as collateral from the <code class="docutils literal notranslate"><span class="pre">PunishmentFee</span></code> and store the punishment payment as <code class="docutils literal notranslate"><span class="pre">payment</span></code>.</p></li>
+<li><p>Check if the vault is above the <code class="docutils literal notranslate"><span class="pre">SecureCollateralThreshold</span></code> when we remove <code class="docutils literal notranslate"><span class="pre">payment</span></code> from <code class="docutils literal notranslate"><span class="pre">vault.collateral</span></code>. If the vault falls under the <code class="docutils literal notranslate"><span class="pre">SecureCollateralThreshold</span></code>, reduce the <code class="docutils literal notranslate"><span class="pre">payment</span></code> so that the vault is exactly on the <code class="docutils literal notranslate"><span class="pre">SecureCollateralThreshold</span></code>.</p></li>
+<li><p>Call the <a class="reference internal" href="collateral.html#slashcollateral"><span class="std std-ref">slashCollateral</span></a> function with the <code class="docutils literal notranslate"><span class="pre">vault</span></code> as <code class="docutils literal notranslate"><span class="pre">sender</span></code>, <code class="docutils literal notranslate"><span class="pre">user</span></code> as <code class="docutils literal notranslate"><span class="pre">receiver</span></code>, and <code class="docutils literal notranslate"><span class="pre">payment</span></code> as <code class="docutils literal notranslate"><span class="pre">amount</span></code>.</p></li>
+<li><p>Reduce the <code class="docutils literal notranslate"><span class="pre">vault.collateral</span></code> by <code class="docutils literal notranslate"><span class="pre">payment</span></code>.</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="redeemtokens">
+<span id="id43"></span><h3>redeemTokens<a class="headerlink" href="#redeemtokens" title="Permalink to this headline">¶</a></h3>
+<p>When a redeem request successfully completes, the <code class="docutils literal notranslate"><span class="pre">toBeRedeemedToken</span></code> and the <code class="docutils literal notranslate"><span class="pre">issuedToken</span></code> balance must be reduced to reflect that removal of PolkaBTC.</p>
+<div class="section" id="id44">
+<h4>Specification<a class="headerlink" href="#id44" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">redeemTokens(vault,</span> <span class="pre">tokens)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC redeemed.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RedeemTokens(vault,</span> <span class="pre">tokens)</span></code>: Emit an event when a redeem request successfully completes.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>: Return if the requested amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> exceeds the <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> or <code class="docutils literal notranslate"><span class="pre">toBeRedeemedTokens</span></code> by this vault.</p></li>
+</ul>
+</div>
+<div class="section" id="id45">
+<h4>Preconditions<a class="headerlink" href="#id45" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must not be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:</span> <span class="pre">2</span></code>.</p></li>
+<li><p>If the BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component is set to <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">1</span></code>, it must not include the error codes <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY:</span> <span class="pre">2</span></code> or <code class="docutils literal notranslate"><span class="pre">ORACLE_OFFLINE:</span> <span class="pre">3</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="id46">
+<h4>Function Sequence<a class="headerlink" href="#id46" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Checks if the amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> to be redeemed is less or equal to the amount of <code class="docutils literal notranslate"><span class="pre">vault.issuedTokens</span></code> and the <code class="docutils literal notranslate"><span class="pre">vault.toBeRedeemedTokens</span></code>. If not, throws <code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>.</p></li>
+<li><p>Subtract <code class="docutils literal notranslate"><span class="pre">tokens</span></code> from <code class="docutils literal notranslate"><span class="pre">vault.toBeRedeemedTokens</span></code>.</p></li>
+<li><p>Subtract <code class="docutils literal notranslate"><span class="pre">tokens</span></code> from <code class="docutils literal notranslate"><span class="pre">vault.issuedTokens</span></code>.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="redeemtokenspremium">
+<span id="id47"></span><h3>redeemTokensPremium<a class="headerlink" href="#redeemtokenspremium" title="Permalink to this headline">¶</a></h3>
+<p>Handles a redeem request, where a user is paid a premium in DOT. Calls <a class="reference internal" href="#redeemtokens"><span class="std std-ref">redeemTokens</span></a> and then allocates the corresponding amount of DOT to the <code class="docutils literal notranslate"><span class="pre">redeemer</span></code> using the Vault’s free collateral.</p>
+<div class="section" id="id48">
+<h4>Specification<a class="headerlink" href="#id48" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">redeemTokensPremium(vault,</span> <span class="pre">tokens,</span> <span class="pre">premiumDOT,</span> <span class="pre">redeemer)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC redeemed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">premiumDOT</span></code>: The amount of DOT to be paid to the user as a premium using the Vault’s released collateral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemer</span></code>: The user that redeems at a premium.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RedeemTokensPremium(vault,</span> <span class="pre">tokens,</span> <span class="pre">premiumDOT,</span> <span class="pre">redeemer)</span></code>: Emit an event when a user is executing a redeem request that includes a premium.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>: Return if the requested amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> exceeds the <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> or <code class="docutils literal notranslate"><span class="pre">toBeRedeemedTokens</span></code> by this vault.</p></li>
+</ul>
+</div>
+<div class="section" id="id49">
+<h4>Preconditions<a class="headerlink" href="#id49" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must not be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:</span> <span class="pre">2</span></code>.</p></li>
+<li><p>If the BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component is set to <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">1</span></code>, it must not include the error codes <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY:</span> <span class="pre">2</span></code> or <code class="docutils literal notranslate"><span class="pre">ORACLE_OFFLINE:</span> <span class="pre">3</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="id50">
+<h4>Function Sequence<a class="headerlink" href="#id50" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Call <a class="reference internal" href="#redeemtokens"><span class="std std-ref">redeemTokens</span></a> passing <code class="docutils literal notranslate"><span class="pre">vault</span></code> and <code class="docutils literal notranslate"><span class="pre">tokens</span></code> as parameters.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">premiumDOT</span> <span class="pre">&gt;</span> <span class="pre">0</span></code>:</p>
+<ol class="loweralpha simple">
+<li><p>Transfer the corresponding amount of Vault’s collateral to <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code> by calling <a class="reference internal" href="collateral.html#slashcollateral"><span class="std std-ref">slashCollateral</span></a> and passing <code class="docutils literal notranslate"><span class="pre">vault</span></code> and <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code> as parameters.</p></li>
+<li><p>Emit <code class="docutils literal notranslate"><span class="pre">RedeemTokensPremium(vault,</span> <span class="pre">tokens,</span> <span class="pre">premiumDOT,</span> <span class="pre">redeemer)</span></code> event.</p></li>
+</ol>
+</li>
+</ol>
+</div>
+</div>
+<div class="section" id="redeemtokensliquidation">
+<span id="id51"></span><h3>redeemTokensLiquidation<a class="headerlink" href="#redeemtokensliquidation" title="Permalink to this headline">¶</a></h3>
+<p>Handles redeem requests which are executed during a <code class="docutils literal notranslate"><span class="pre">LIQUIDATION</span></code> recover (see <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a>).
+Reduces the <code class="docutils literal notranslate"><span class="pre">issuedToken</span></code> of the <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code> and “slashes” the corresponding amount of DOT collateral.
+Once <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code> has not more <code class="docutils literal notranslate"><span class="pre">issuedToken</span></code> left, removes the <code class="docutils literal notranslate"><span class="pre">LIQUIDATION</span></code> error from the BTC Parachain status.</p>
+<div class="section" id="id52">
+<h4>Specification<a class="headerlink" href="#id52" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">redeemTokensLiquidation(redeemer,</span> <span class="pre">redeemDOTinBTC)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemer</span></code> : The account of the user redeeming polkaBTC.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemDOTinBTC</span></code>: The amount of PolkaBTC to be redeemed in DOT with the <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code>, denominated in BTC.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RedeemTokensLiquidation(redeemer,</span> <span class="pre">redeemDOTinBTC)</span></code>: Emit an event when a redeem is executed under the <code class="docutils literal notranslate"><span class="pre">LIQUIDATION</span></code> status..</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>: Return if the requested amount of <code class="docutils literal notranslate"><span class="pre">redeemDOTinBTC</span></code> exceeds the <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> or by this vault.</p></li>
+</ul>
+</div>
+<div class="section" id="id53">
+<h4>Preconditions<a class="headerlink" href="#id53" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must not be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:</span> <span class="pre">2</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="id54">
+<h4>Function Sequence<a class="headerlink" href="#id54" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Check if <code class="docutils literal notranslate"><span class="pre">LiquidationVault.issuedTokens</span> <span class="pre">&gt;=</span> <span class="pre">redeemDOTinBTC</span></code>. Return <code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code> if this check fails.</p></li>
+<li><p>Subtract <code class="docutils literal notranslate"><span class="pre">redeemDOTinBTC</span></code> from <code class="docutils literal notranslate"><span class="pre">vault.issuedTokens</span></code>.</p></li>
+<li><p>Transfer the <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code>’s DOT collateral to the <code class="docutils literal notranslate"><span class="pre">redeemer</span></code> by calling <a class="reference internal" href="collateral.html#slashcollateral"><span class="std std-ref">slashCollateral</span></a> and passing <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code>, <code class="docutils literal notranslate"><span class="pre">redeemer</span></code> and <code class="docutils literal notranslate"><span class="pre">redeemDOTinBTC</span> <span class="pre">*</span></code> <a class="reference internal" href="oracle.html#getexchangerate"><span class="std std-ref">getExchangeRate</span></a> as parameters.</p></li>
+</ol>
+<ol class="arabic simple" start="5">
+<li><p>Emit <code class="docutils literal notranslate"><span class="pre">RedeemTokensLiquidation(redeemer,</span> <span class="pre">redeemDOTinBTC)</span></code> event.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="replacetokens">
+<span id="id55"></span><h3>replaceTokens<a class="headerlink" href="#replacetokens" title="Permalink to this headline">¶</a></h3>
+<p>When a replace request successfully completes, the <code class="docutils literal notranslate"><span class="pre">toBeRedeemedTokens</span></code> and the <code class="docutils literal notranslate"><span class="pre">issuedToken</span></code> balance must be reduced to reflect that removal of PolkaBTC from the <code class="docutils literal notranslate"><span class="pre">oldVault</span></code>.Consequently, the <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> of the <code class="docutils literal notranslate"><span class="pre">newVault</span></code> need to be increased by the same amount.</p>
+<div class="section" id="id56">
+<h4>Specification<a class="headerlink" href="#id56" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">replaceTokens(oldVault,</span> <span class="pre">newVault,</span> <span class="pre">tokens,</span> <span class="pre">collateral)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">oldVault</span></code>: Account identifier of the vault to be replaced.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">newVault</span></code>: Account identifier of the vault accepting the replace request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC replaced.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">collateral</span></code>: The collateral provided by the new vault.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ReplaceTokens(oldVault,</span> <span class="pre">newVault,</span> <span class="pre">tokens,</span> <span class="pre">collateral)</span></code>: Emit an event when a replace requests is successfully executed.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>: The requested amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> exceeds the <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> or <code class="docutils literal notranslate"><span class="pre">toBeReplaceedTokens</span></code> by this vault.</p></li>
+</ul>
+</div>
+<div class="section" id="id57">
+<h4>Preconditions<a class="headerlink" href="#id57" title="Permalink to this headline">¶</a></h4>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component must not be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:</span> <span class="pre">2</span></code>.</p></li>
+<li><p>If the BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component is set to <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">1</span></code>, it must not include the error codes <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY:</span> <span class="pre">2</span></code> or <code class="docutils literal notranslate"><span class="pre">ORACLE_OFFLINE:</span> <span class="pre">3</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="id58">
+<h4>Function Sequence<a class="headerlink" href="#id58" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Checks if the amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> to be replaced is less or equal to the amount of <code class="docutils literal notranslate"><span class="pre">oldVault.issuedTokens</span></code> and the <code class="docutils literal notranslate"><span class="pre">oldVault.toBeReplaceedTokens</span></code>. If not, throws <code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>.</p></li>
+<li><p>Subtract <code class="docutils literal notranslate"><span class="pre">tokens</span></code> from <code class="docutils literal notranslate"><span class="pre">oldVault.toBeReplaceedTokens</span></code>.</p></li>
+<li><p>Subtract <code class="docutils literal notranslate"><span class="pre">tokens</span></code> from <code class="docutils literal notranslate"><span class="pre">oldVault.issuedTokens</span></code>.</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">tokens</span></code> to <code class="docutils literal notranslate"><span class="pre">newVault.issuedTokens</span></code>.</p></li>
+<li><p>Add <code class="docutils literal notranslate"><span class="pre">collateral</span></code> to the <code class="docutils literal notranslate"><span class="pre">newVault.collateral</span></code>.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="liquidatevault">
+<span id="id59"></span><h3>liquidateVault<a class="headerlink" href="#liquidatevault" title="Permalink to this headline">¶</a></h3>
+<p>Liquidates a vault, transferring all of its token balances to the <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code>, as well as the DOT collateral.</p>
+<div class="section" id="id61">
+<h4>Specification<a class="headerlink" href="#id61" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">liquidateVault(vault)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: Account identifier of the vault to be liquidated.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">LiquidateVault(vault)</span></code>: Emit an event indicating that the vault with <code class="docutils literal notranslate"><span class="pre">vault</span></code> account identifier has been liquidated.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code>: The requested amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> exceeds the <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> or <code class="docutils literal notranslate"><span class="pre">toBeReplaceedTokens</span></code> by this vault.</p></li>
+</ul>
+</div>
+<div class="section" id="id62">
+<h4>Function Sequence<a class="headerlink" href="#id62" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">LiquidationVault.toBeIssuedTokens</span> <span class="pre">=</span> <span class="pre">vault.toBeIssuedTokens</span></code></p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">LiquidationVault.issuedTokens</span> <span class="pre">=</span> <span class="pre">vault.issuedTokens</span></code></p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">LiquidationVault.toBeRedeemedToken=</span> <span class="pre">vault.toBeRedeemedToken</span></code></p></li>
+<li><p>Transfer the liquidated Vault’s collateral to <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code> by calling <a class="reference internal" href="collateral.html#slashcollateral"><span class="std std-ref">slashCollateral</span></a> and passing <code class="docutils literal notranslate"><span class="pre">vault</span></code> and <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code> as parameters.</p></li>
+<li><p>Remove <code class="docutils literal notranslate"><span class="pre">vault</span></code> from <code class="docutils literal notranslate"><span class="pre">Vaults</span></code></p></li>
+<li><p>Emit <code class="docutils literal notranslate"><span class="pre">LiquidateVault(vault)</span></code> event.</p></li>
+</ol>
+</div>
+</div>
+</div>
+<div class="section" id="events">
+<h2>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id63">
+<h3>RegisterVault<a class="headerlink" href="#id63" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event stating that a new vault (<code class="docutils literal notranslate"><span class="pre">vault</span></code>) was registered and provide information on the Vault’s collateral (<code class="docutils literal notranslate"><span class="pre">collateral</span></code>).</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">RegisterVault(vault,</span> <span class="pre">collateral)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The account of the vault to be registered.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">collateral</span></code>: to-be-locked collateral in DOT.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#registervault"><span class="std std-ref">registerVault</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="event-provevalidbtcaddress">
+<span id="id64"></span><h3>ProveValidBTCAddress<a class="headerlink" href="#event-provevalidbtcaddress" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event stating that a vault (<code class="docutils literal notranslate"><span class="pre">vault</span></code>) submitted a proof that its BTC address is valid.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">ProveValidBTCAddress(vault,</span> <span class="pre">btcAddress)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The account of the vault to be registered.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">btcAddress</span></code>: The BTC address of the vault.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#provevalidbtcaddress"><span class="std std-ref">proveValidBTCAddress (Optional)</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="event-lockadditionalcollateral">
+<span id="id65"></span><h3>LockAdditionalCollateral<a class="headerlink" href="#event-lockadditionalcollateral" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event stating how much new (<code class="docutils literal notranslate"><span class="pre">newCollateral</span></code>), total collateral (<code class="docutils literal notranslate"><span class="pre">totalCollateral</span></code>) and freely available collateral (<code class="docutils literal notranslate"><span class="pre">freeCollateral</span></code>) the vault calling this function has locked.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">LockAdditionalCollateral(Vault,</span> <span class="pre">newCollateral,</span> <span class="pre">totalCollateral,</span> <span class="pre">freeCollateral)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Vault</span></code>: The account of the vault locking collateral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">newCollateral</span></code>: to-be-locked collateral in DOT.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">totalCollateral</span></code>: total collateral in DOT.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">freeCollateral</span></code>: collateral not “occupied” with PolkaBTC in DOT.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#lockadditionalcollateral"><span class="std std-ref">lockAdditionalCollateral</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="id66">
+<h3>WithdrawCollateral<a class="headerlink" href="#id66" title="Permalink to this headline">¶</a></h3>
+<p>Emit emit an event stating how much collateral was withdrawn by the vault and total collateral a vault has left.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">WithdrawCollateral(Vault,</span> <span class="pre">withdrawAmount,</span> <span class="pre">totalCollateral)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Vault</span></code>: The account of the vault locking collateral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">withdrawAmount</span></code>: To-be-withdrawn collateral in DOT.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">totalCollateral</span></code>: total collateral in DOT.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<cite>withdrawCollateral</cite></p></li>
+</ul>
+</div>
+<div class="section" id="id67">
+<h3>IncreaseToBeIssuedTokens<a class="headerlink" href="#id67" title="Permalink to this headline">¶</a></h3>
+<p>Emit</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">IncreaseToBeIssuedTokens(vaultId,</span> <span class="pre">tokens)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC to be locked.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<code class="docutils literal notranslate"><span class="pre">increaseToBeIssuedTokens</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="id68">
+<h3>DecreaseToBeIssuedTokens<a class="headerlink" href="#id68" title="Permalink to this headline">¶</a></h3>
+<p>Emit</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">DecreaseToBeIssuedTokens(vaultId,</span> <span class="pre">tokens)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC to be unreserved.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<code class="docutils literal notranslate"><span class="pre">decreaseToBeIssuedTokens</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="id69">
+<h3>IssueTokens<a class="headerlink" href="#id69" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event when an issue request is executed.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">IssueTokens(vault,</span> <span class="pre">tokens)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC that were just issued.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<code class="docutils literal notranslate"><span class="pre">issueTokens</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="id70">
+<h3>IncreaseToBeRedeemedTokens<a class="headerlink" href="#id70" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event when a redeem request is requested.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">IncreaseToBeRedeemedTokens(vault,</span> <span class="pre">tokens)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC to be redeemed.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<code class="docutils literal notranslate"><span class="pre">increaseToBeRedeemedTokens</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="id71">
+<h3>DecreaseToBeRedeemedTokens<a class="headerlink" href="#id71" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event when a replace request cannot be completed because the vault has too little tokens committed.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">DecreaseToBeRedeemedTokens(vault,</span> <span class="pre">tokens)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC not to be replaced.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<code class="docutils literal notranslate"><span class="pre">decreaseToBeRedeemedTokens</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="id72">
+<h3>DecreaseTokens<a class="headerlink" href="#id72" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event if a redeem request cannot be fulfilled.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">DecreaseTokens(vault,</span> <span class="pre">user,</span> <span class="pre">tokens,</span> <span class="pre">collateral)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">user</span></code>: The BTC Parachain address of the user that made the redeem request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC that were not redeemed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">collateral</span></code>: The amount of collateral assigned to this request.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<code class="docutils literal notranslate"><span class="pre">decreaseTokens</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="id73">
+<h3>RedeemTokens<a class="headerlink" href="#id73" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event when a redeem request successfully completes.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">RedeemTokens(vault,</span> <span class="pre">tokens)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC redeemed.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<code class="docutils literal notranslate"><span class="pre">redeemTokens</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="id74">
+<h3>RedeemTokensPremium<a class="headerlink" href="#id74" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event when a user is executing a redeem request that includes a premium.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">RedeemTokensPremium(vault,</span> <span class="pre">tokens,</span> <span class="pre">premiumDOT,</span> <span class="pre">redeemer)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: The BTC Parachain address of the Vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC redeemed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">premiumDOT</span></code>: The amount of DOT to be paid to the user as a premium using the Vault’s released collateral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemer</span></code>: The user that redeems at a premium.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<code class="docutils literal notranslate"><span class="pre">redeemTokensPremium</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="id75">
+<h3>RedeemTokensLiquidation<a class="headerlink" href="#id75" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event when a redeem is executed under the <code class="docutils literal notranslate"><span class="pre">LIQUIDATION</span></code> status.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">RedeemTokensLiquidation(redeemer,</span> <span class="pre">redeemDOTinBTC)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemer</span></code> : The account of the user redeeming polkaBTC.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemDOTinBTC</span></code>: The amount of PolkaBTC to be redeemed in DOT with the <code class="docutils literal notranslate"><span class="pre">LiquidationVault</span></code>, denominated in BTC.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<code class="docutils literal notranslate"><span class="pre">redeemTokensLiquidation</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="id76">
+<h3>ReplaceTokens<a class="headerlink" href="#id76" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event when a replace requests is successfully executed.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">ReplaceTokens(oldVault,</span> <span class="pre">newVault,</span> <span class="pre">tokens,</span> <span class="pre">collateral)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">oldVault</span></code>: Account identifier of the vault to be replaced.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">newVault</span></code>: Account identifier of the vault accepting the replace request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokens</span></code>: The amount of PolkaBTC replaced.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">collateral</span></code>: The collateral provided by the new vault.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<code class="docutils literal notranslate"><span class="pre">replaceTokens</span></code></p></li>
+</ul>
+</div>
+<div class="section" id="id77">
+<h3>LiquidateVault<a class="headerlink" href="#id77" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event indicating that the vault with <code class="docutils literal notranslate"><span class="pre">vault</span></code> account identifier has been liquidated.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">LiquidateVault(vault)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: Account identifier of the vault to be liquidated.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<code class="docutils literal notranslate"><span class="pre">liquidateVault</span></code></p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="error-codes">
+<h2>Error Codes<a class="headerlink" href="#error-codes" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_MIN_AMOUNT</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “The provided collateral was insufficient - it must be above <code class="docutils literal notranslate"><span class="pre">MinimumCollateralVault</span></code>.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#registervault"><span class="std std-ref">registerVault</span></a> | <a class="reference internal" href="#withdrawcollateral"><span class="std std-ref">withdrawCollateral</span></a></p></li>
+<li><p><strong>Cause</strong>: The vault provided too little collateral, i.e. below the MinimumCollateralVault limit.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_INVALID_BTC_ADDRESS</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “Not a valid BTC address.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#provevalidbtcaddress"><span class="std std-ref">proveValidBTCAddress (Optional)</span></a></p></li>
+<li><p><strong>Cause</strong>: BTC-Relay failed to verify the BTC address. See <code class="docutils literal notranslate"><span class="pre">verifyTransactionInclusion</span></code> in BTC-Relay.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_VAULT_NOT_FOUND</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “The specified vault does not exist. .”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#lockadditionalcollateral"><span class="std std-ref">lockAdditionalCollateral</span></a></p></li>
+<li><p><strong>Cause</strong>: vault could not be found in <code class="docutils literal notranslate"><span class="pre">Vaults</span></code> mapping.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_FREE_COLLATERAL</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “Not enough free collateral available.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#withdrawcollateral"><span class="std std-ref">withdrawCollateral</span></a></p></li>
+<li><p><strong>Cause</strong>: The vault is trying to withdraw more collateral than is currently free.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_UNAUTHORIZED</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “Origin of the call mismatches authorization.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#withdrawcollateral"><span class="std std-ref">withdrawCollateral</span></a></p></li>
+<li><p><strong>Cause</strong>: The caller of the withdrawal is not the specified vault, and hence not authorized to withdraw funds.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_EXCEEDING_VAULT_LIMIT</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “Issue request exceeds vault collateral limit.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#increasetobeissuedtokens"><span class="std std-ref">increaseToBeIssuedTokens</span></a></p></li>
+<li><p><strong>Cause</strong>: The collateral provided by the vault combined with the exchange rate forms an upper limit on how much PolkaBTC can be issued. The requested amount exceeds this limit.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_TOKENS_COMMITTED</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “The requested amount of <code class="docutils literal notranslate"><span class="pre">tokens</span></code> exceeds the amount by this vault.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#decreasetobeissuedtokens"><span class="std std-ref">decreaseToBeIssuedTokens</span></a> | <a class="reference internal" href="#issuetokens"><span class="std std-ref">issueTokens</span></a> | <a class="reference internal" href="#increasetoberedeemedtokens"><span class="std std-ref">increaseToBeRedeemedTokens</span></a> | <a class="reference internal" href="#decreasetoberedeemedtokens"><span class="std std-ref">decreaseToBeRedeemedTokens</span></a> | <a class="reference internal" href="#decreasetokens"><span class="std std-ref">decreaseTokens</span></a> | <a class="reference internal" href="#redeemtokens"><span class="std std-ref">redeemTokens</span></a> | <a class="reference internal" href="#redeemtokensliquidation"><span class="std std-ref">redeemTokensLiquidation</span></a> | <a class="reference internal" href="#replacetokens"><span class="std std-ref">replaceTokens</span></a> | <a class="reference internal" href="#liquidatevault"><span class="std std-ref">liquidateVault</span></a></p></li>
+<li><p><strong>Cause</strong>: A user tries to cancel/execute an issue request or create a replace request for a vault that has less than the reserved tokens committed.</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../security_performance/liquidations.html" class="btn btn-neutral float-right" title="Vault Liquidations" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="treasury.html" class="btn btn-neutral float-left" title="Treasury" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Interlay.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

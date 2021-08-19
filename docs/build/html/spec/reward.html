@@ -1,0 +1,575 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Reward &mdash; interBTC Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Staking" href="staking.html" />
+    <link rel="prev" title="Vault Nomination" href="nomination.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> interBTC Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v5.5.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/xclaim-architecture.html">XCLAIM Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/btcrelay-architecture.html">BTC-Relay Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/accepted-format.html">Accepted Bitcoin Transaction Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">How to Read This Specification</a></li>
+</ul>
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="collateral.html">Collateral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issue.html">Issue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="refund.html">Refund</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redeem.html">Redeem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relay.html">Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="treasury.html">Treasury</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vault-registry.html">Vault Registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Reward</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#invariants">Invariants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#data-model">Data Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#maps">Maps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#totalstake">TotalStake</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#totalrewards">TotalRewards</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rewardpertoken">RewardPerToken</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#stake">Stake</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#rewardtally">RewardTally</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gettotalrewards">getTotalRewards</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specification">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#depositstake">depositStake</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#distributereward">distributeReward</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#computereward">computeReward</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#withdrawstake">withdrawStake</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id6">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#withdrawreward">withdrawReward</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id8">Specification</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#events">Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#depositstakeevent">DepositStake</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#withdrawstakeevent">WithdrawStake</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#distributerewardevent">DistributeReward</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#withdrawrewardevent">WithdrawReward</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="staking.html">Staking</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/liquidations.html">Vault Liquidations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/xclaim-security.html">XCLAIM Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/btcrelay-security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../economics/incentives.html">Economic Incentives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../economics/fees.html">Fee Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">interBTC Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Reward</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/spec/reward.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="reward">
+<span id="rewards"></span><h1>Reward<a class="headerlink" href="#reward" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>This pallet provides a way distribute rewards to any number of accounts, proportionally to their stake. It does so using the <a class="reference external" href="https://solmaz.io/2019/02/24/scalable-reward-changing/">Scalable Reward Distribution</a> algorithm. It does not directly transfer any rewards - rather, the stakeholders have to actively withdraw their accumulated rewards, which they can do at any time. Stakeholders can also change their stake at any time, without impacting the rewards gained in the past.</p>
+</div>
+<div class="section" id="invariants">
+<h2>Invariants<a class="headerlink" href="#invariants" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>For each <code class="docutils literal notranslate"><span class="pre">currencyId</span></code>,</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">TotalStake[currencyId]</span></code> MUST be equal to the sum of <code class="docutils literal notranslate"><span class="pre">Stake[currencyId,</span> <span class="pre">accountId]</span></code> over all accounts.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TotalReward[currencyId]</span></code> MUST be equal to the sum of <code class="docutils literal notranslate"><span class="pre">Stake[currencyId,</span> <span class="pre">accountId]</span> <span class="pre">*</span> <span class="pre">RewardPerToken[currencyId]</span> <span class="pre">-</span> <span class="pre">RewardTally[currencyId,</span> <span class="pre">accountId]</span></code> over all accounts.</p></li>
+<li><p>For each <code class="docutils literal notranslate"><span class="pre">accountId</span></code>,</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">RewardTally[currencyId,</span> <span class="pre">accountId]</span></code> MUST be smaller than or equal to <code class="docutils literal notranslate"><span class="pre">Stake[currencyId,</span> <span class="pre">accountId]</span> <span class="pre">*</span> <span class="pre">RewardPerToken[currencyId]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Stake[currencyId,</span> <span class="pre">accountId]</span></code> MUST NOT be negative</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RewardTally[currencyId,</span> <span class="pre">accountId]</span></code> MUST NOT be negative</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="data-model">
+<h2>Data Model<a class="headerlink" href="#data-model" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="maps">
+<h3>Maps<a class="headerlink" href="#maps" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="totalstake">
+<h4>TotalStake<a class="headerlink" href="#totalstake" title="Permalink to this headline">¶</a></h4>
+<p>The total stake deposited to the reward with the given currency.</p>
+</div>
+<div class="section" id="totalrewards">
+<h4>TotalRewards<a class="headerlink" href="#totalrewards" title="Permalink to this headline">¶</a></h4>
+<p>The total unclaimed rewards in the given currency distributed to this reward pool. This value is currently only used for testing purposes.</p>
+</div>
+<div class="section" id="rewardpertoken">
+<h4>RewardPerToken<a class="headerlink" href="#rewardpertoken" title="Permalink to this headline">¶</a></h4>
+<p>The amount of reward the stakeholders get for the given currency per unit of stake.</p>
+</div>
+<div class="section" id="stake">
+<h4>Stake<a class="headerlink" href="#stake" title="Permalink to this headline">¶</a></h4>
+<p>The stake in the given currency for the given account.</p>
+</div>
+<div class="section" id="rewardtally">
+<h4>RewardTally<a class="headerlink" href="#rewardtally" title="Permalink to this headline">¶</a></h4>
+<p>The amount of rewards in the given currency a given account has already withdrawn, plus a compensation that is added on stake changes.</p>
+</div>
+</div>
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="gettotalrewards">
+<span id="id1"></span><h3>getTotalRewards<a class="headerlink" href="#gettotalrewards" title="Permalink to this headline">¶</a></h3>
+<p>This function gets the total amount of rewards distributed in the pool with the given currencyId.</p>
+<div class="section" id="specification">
+<h4>Specification<a class="headerlink" href="#specification" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">getTotalRewards(currencyId)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">currencyId</span></code>: Determines of which currency the amount is returned.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul class="simple">
+<li><p>The function MUST return the total amount of rewards that have been distributed in the given currency.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="depositstake">
+<span id="reward-depositstake"></span><h3>depositStake<a class="headerlink" href="#depositstake" title="Permalink to this headline">¶</a></h3>
+<p>Adds a stake for the given account and currency in the reward pool.</p>
+<div class="section" id="id2">
+<h4>Specification<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">depositStake(currencyId,</span> <span class="pre">accountId,</span> <span class="pre">amount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">currencyId</span></code>: The currency for which to add the stake</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">accountId</span></code>: The account for which to add the stake</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: The amount by which the stake is to increase</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#depositstakeevent"><span class="std std-ref">DepositStake</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<p><em>Postconditions</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Stake[currencyId,</span> <span class="pre">accountId]</span></code> MUST increase by <code class="docutils literal notranslate"><span class="pre">amount</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TotalStake[currencyId]</span></code> MUST increase by <code class="docutils literal notranslate"><span class="pre">amount</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RewardTally[currencyId,</span> <span class="pre">accountId]</span></code> MUST increase by <code class="docutils literal notranslate"><span class="pre">RewardPerToken[currencyId]</span> <span class="pre">*</span> <span class="pre">amount</span></code>. This ensures the amount of rewards the given accountId can withdraw remains unchanged.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="distributereward">
+<span id="reward-distributereward"></span><h3>distributeReward<a class="headerlink" href="#distributereward" title="Permalink to this headline">¶</a></h3>
+<p>Distributes rewards to the stakeholders.</p>
+<div class="section" id="id3">
+<h4>Specification<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">distributeReward(currencyId,</span> <span class="pre">reward)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">currencyId</span></code>: The currency being distributed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reward</span></code>: The amount being distributed</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#distributerewardevent"><span class="std std-ref">DistributeReward</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TotalStake[currencyId]</span></code> MUST NOT be zero.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RewardPerToken[currencyId]</span></code> MUST increase by <code class="docutils literal notranslate"><span class="pre">reward</span> <span class="pre">/</span> <span class="pre">TotalStake[currencyId]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TotalRewards[currencyId]</span></code> MUST increase by <code class="docutils literal notranslate"><span class="pre">reward</span></code></p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="computereward">
+<span id="id4"></span><h3>computeReward<a class="headerlink" href="#computereward" title="Permalink to this headline">¶</a></h3>
+<p>Computes the amount a given account can withdraw in the given currency.</p>
+<div class="section" id="id5">
+<h4>Specification<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">computeReward(currencyId,</span> <span class="pre">accountId)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">currencyId</span></code>: The currency for which the rewards are being calculated</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">accountId</span></code>: Account for which the rewards are being calculated.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul class="simple">
+<li><p>The function MUST return <code class="docutils literal notranslate"><span class="pre">Stake[currencyId,</span> <span class="pre">accountId]</span> <span class="pre">*</span> <span class="pre">RewardPerToken[currencyId]</span> <span class="pre">-</span> <span class="pre">RewardTally[currencyId,</span> <span class="pre">accountId]</span></code>.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="withdrawstake">
+<span id="reward-withdrawstake"></span><h3>withdrawStake<a class="headerlink" href="#withdrawstake" title="Permalink to this headline">¶</a></h3>
+<p>Decreases a stake for the given account and currency in the reward pool.</p>
+<div class="section" id="id6">
+<h4>Specification<a class="headerlink" href="#id6" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">withdrawStake(currencyId,</span> <span class="pre">accountId,</span> <span class="pre">amount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">currencyId</span></code>: The currency for which to decrease the stake</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">accountId</span></code>: The account for which to decrease the stake</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: The amount by which the stake is to decrease</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#withdrawstakeevent"><span class="std std-ref">WithdrawStake</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code> MUST NOT be greater than <code class="docutils literal notranslate"><span class="pre">Stake[currencyId,</span> <span class="pre">accountId]</span></code></p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Stake[currencyId,</span> <span class="pre">accountId]</span></code> MUST decrease by <code class="docutils literal notranslate"><span class="pre">amount</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">TotalStake[currencyId]</span></code> MUST decrease by <code class="docutils literal notranslate"><span class="pre">amount</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RewardTally[currencyId,</span> <span class="pre">accountId]</span></code> MUST decrease by <code class="docutils literal notranslate"><span class="pre">RewardPerToken[currencyId]</span> <span class="pre">*</span> <span class="pre">amount</span></code>. This ensures the amount of rewards the given accountId can withdraw remains unchanged.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="withdrawreward">
+<span id="id7"></span><h3>withdrawReward<a class="headerlink" href="#withdrawreward" title="Permalink to this headline">¶</a></h3>
+<p>Withdraw all available rewards of a given account and currency</p>
+<div class="section" id="id8">
+<h4>Specification<a class="headerlink" href="#id8" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">withdrawReward(currencyId,</span> <span class="pre">reward)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">currencyId</span></code>: The currency being withdrawn</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">accountId</span></code>: The account for which to withdraw the rewards</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#withdrawrewardevent"><span class="std std-ref">WithdrawReward</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TotalStake[currencyId]</span></code> MUST NOT be zero.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<p>Let <code class="docutils literal notranslate"><span class="pre">reward</span></code> be the result <a class="reference internal" href="#computereward"><span class="std std-ref">computeReward</span></a> when it is called with <code class="docutils literal notranslate"><span class="pre">currencyId</span></code> and <code class="docutils literal notranslate"><span class="pre">accountId</span></code> as arguments. Then:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">TotalRewards[currencyId]</span></code> MUST decrease by <code class="docutils literal notranslate"><span class="pre">reward</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RewardPerToken[currencyId]</span></code> MUST be set to <code class="docutils literal notranslate"><span class="pre">RewardPerToken[currencyId]</span> <span class="pre">*</span> <span class="pre">Stake[currencyId,</span> <span class="pre">accountId]</span></code></p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="events">
+<h2>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="depositstakeevent">
+<span id="id9"></span><h3>DepositStake<a class="headerlink" href="#depositstakeevent" title="Permalink to this headline">¶</a></h3>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">DepositStake(currencyId,</span> <span class="pre">accountId,</span> <span class="pre">amount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">currencyId</span></code>: the currency for which the stake has been changed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">accountId</span></code>: the account for which the stake has been changed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: the increase in stake</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#reward-depositstake"><span class="std std-ref">depositStake</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="withdrawstakeevent">
+<span id="id10"></span><h3>WithdrawStake<a class="headerlink" href="#withdrawstakeevent" title="Permalink to this headline">¶</a></h3>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">WithdrawStake(currencyId,</span> <span class="pre">accountId,</span> <span class="pre">amount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">currencyId</span></code>: the currency for which the stake has been changed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">accountId</span></code>: the account for which the stake has been changed</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: the decrease in stake</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#reward-withdrawstake"><span class="std std-ref">withdrawStake</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="distributerewardevent">
+<span id="id11"></span><h3>DistributeReward<a class="headerlink" href="#distributerewardevent" title="Permalink to this headline">¶</a></h3>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">DistributeReward(currencyId,</span> <span class="pre">accountId,</span> <span class="pre">amount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">currencyId</span></code>: the currency for which the reward has been withdrawn</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: the distributed amount</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#reward-distributereward"><span class="std std-ref">distributeReward</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="withdrawrewardevent">
+<span id="id12"></span><h3>WithdrawReward<a class="headerlink" href="#withdrawrewardevent" title="Permalink to this headline">¶</a></h3>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">WithdrawReward(currencyId,</span> <span class="pre">accountId,</span> <span class="pre">amount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">currencyId</span></code>: the currency for which the reward has been withdrawn</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">accountId</span></code>: the account for which the reward has been withdrawn</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: the withdrawn amount</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#withdrawreward"><span class="std std-ref">withdrawReward</span></a></p></li>
+</ul>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="staking.html" class="btn btn-neutral float-right" title="Staking" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="nomination.html" class="btn btn-neutral float-left" title="Vault Nomination" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Interlay
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

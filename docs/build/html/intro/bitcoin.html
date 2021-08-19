@@ -1,0 +1,534 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Bitcoin Data Model &mdash; interBTC Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Accepted Bitcoin Transaction Format" href="accepted-format.html" />
+    <link rel="prev" title="BTC-Relay Architecture" href="btcrelay-architecture.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> interBTC Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v5.5.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xclaim-architecture.html">XCLAIM Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btcrelay-architecture.html">BTC-Relay Architecture</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Bitcoin Data Model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#block-headers">Block Headers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#transactions">Transactions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#inputs">Inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#outputs">Outputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#witness">Witness</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#witness-stack-item">Witness Stack Item</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="accepted-format.html">Accepted Bitcoin Transaction Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/introduction.html">How to Read This Specification</a></li>
+</ul>
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/collateral.html">Collateral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/issue.html">Issue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/refund.html">Refund</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/redeem.html">Redeem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/relay.html">Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/treasury.html">Treasury</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/vault-registry.html">Vault Registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/reward.html">Reward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/staking.html">Staking</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/liquidations.html">Vault Liquidations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/xclaim-security.html">XCLAIM Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/btcrelay-security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../economics/incentives.html">Economic Incentives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../economics/fees.html">Fee Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">interBTC Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Bitcoin Data Model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/intro/bitcoin.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="bitcoin-data-model">
+<span id="id1"></span><h1>Bitcoin Data Model<a class="headerlink" href="#bitcoin-data-model" title="Permalink to this headline">¶</a></h1>
+<p>This is a high-level overview of Bitcoin’s data model. For the full details, refer to <a class="reference external" href="https://bitcoin.org/en/developer-reference">https://bitcoin.org/en/developer-reference</a>. While the serialized versions of these structs are used in the bridge’s API, they are parsed by the chain into a more convenient internal representation. See <a class="reference internal" href="../spec/btc-relay/data-model.html#data-model"><span class="std std-ref">Data Model</span></a>.</p>
+<div class="section" id="block-headers">
+<span id="bitcoinblockheader"></span><h2>Block Headers<a class="headerlink" href="#block-headers" title="Permalink to this headline">¶</a></h2>
+<p>The <a class="reference external" href="https://en.bitcoin.it/wiki/Protocol_documentation#Block_Headers">80 bytes block header</a> encodes the following information:</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>as per <a class="reference external" href="https://github.com/bitcoin/bips/blob/master/bip-0065.mediawiki#spv-clients">bip64</a>, blocks with a version number of less than 4 are rejected. As a consequence, blocks that were mined before December 2015 will not successfully parse in the bridge. This is acceptable, because the bridge is not expected to be initialized with such an old block as genesis.</p>
+</div>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 3%" />
+<col style="width: 13%" />
+<col style="width: 5%" />
+<col style="width: 78%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Bytes</p></th>
+<th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
+<td><p>i32</p></td>
+<td><p>The block version to follow.</p></td>
+</tr>
+<tr class="row-odd"><td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">hashPrevBlock</span></code></p></td>
+<td><p>char[32]</p></td>
+<td><p>The double sha256 hash of the previous block header.</p></td>
+</tr>
+<tr class="row-even"><td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">merkleRoot</span></code></p></td>
+<td><p>char[32]</p></td>
+<td><p>The double sha256 hash of the Merkle root of all transaction hashes in this block.</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">timestamp</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>The block timestamp included by the miner.</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nBits</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>The target difficulty threshold, see also the <a class="reference external" href="https://bitcoin.org/en/developer-reference#target-nbits">Bitcoin documentation</a>.</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">nonce</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>The nonce chosen by the miner to meet the target difficulty threshold.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="transactions">
+<h2>Transactions<a class="headerlink" href="#transactions" title="Permalink to this headline">¶</a></h2>
+<p>A transaction is broadcasted in a serialized byte format (also called raw format). It consists of a variable size of bytes and has the following <a class="reference external" href="https://en.bitcoin.it/wiki/Protocol_documentation#tx">format</a>. Both ‘normal’ transaction and transactions <a class="reference external" href="https://github.com/bitcoin/bips/blob/master/bip-0141.mediawiki">segregated witness data</a> are supported.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 18%" />
+<col style="width: 15%" />
+<col style="width: 62%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Bytes</p></th>
+<th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">version</span></code></p></td>
+<td><p>i32</p></td>
+<td><p>Transaction version number.</p></td>
+</tr>
+<tr class="row-odd"><td><p>0/2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">flags</span></code></p></td>
+<td><p>Option&lt;u8[2]&gt;</p></td>
+<td><p>If present, always 0001, and indicates the presence of witness data</p></td>
+</tr>
+<tr class="row-even"><td><p>var</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tx_in</span> <span class="pre">count</span></code></p></td>
+<td><p>uint</p></td>
+<td><p>Number of transaction inputs.</p></td>
+</tr>
+<tr class="row-odd"><td><p>var</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tx_in</span></code></p></td>
+<td><p><a class="reference internal" href="#txin"><span class="std std-ref">Inputs</span></a></p></td>
+<td><p>List of transaction inputs.</p></td>
+</tr>
+<tr class="row-even"><td><p>var</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tx_out</span> <span class="pre">count</span></code></p></td>
+<td><p>uint</p></td>
+<td><p>The number of transaction outputs.</p></td>
+</tr>
+<tr class="row-odd"><td><p>var</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tx_out</span></code></p></td>
+<td><p><a class="reference internal" href="#txout"><span class="std std-ref">Outputs</span></a></p></td>
+<td><p>List of transaction outputs.</p></td>
+</tr>
+<tr class="row-even"><td><p>var</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tx_witnesses</span></code></p></td>
+<td><p><a class="reference internal" href="#txwitness"><span class="std std-ref">Witness</span></a></p></td>
+<td><p>A list of witnesses, one for each input; omitted if flag is omitted above.</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">lock_time</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>A Unix timestamp OR block number.</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Bitcoin uses the term “CompactSize Unsigned Integers” to refer to variable-length integers, which are used to indicate the number of bytes representing transaction inputs and outputs. See the <a class="reference external" href="https://bitcoin.org/en/developer-reference#compactsize-unsigned-integers">Developer Reference</a> for more details.</p>
+</div>
+</div>
+<div class="section" id="inputs">
+<span id="txin"></span><h2>Inputs<a class="headerlink" href="#inputs" title="Permalink to this headline">¶</a></h2>
+<p>Bitcoin’s UTXO model requires a new transaction to spend at least one existing and unspent transaction output as a transaction input. The <code class="docutils literal notranslate"><span class="pre">txIn</span></code> type consists of the following bytes. See the <a class="reference external" href="https://bitcoin.org/en/developer-reference#txin">reference</a> for further details.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 4%" />
+<col style="width: 16%" />
+<col style="width: 7%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Bytes</p></th>
+<th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>36</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">previous_output</span></code></p></td>
+<td><p>outpoint</p></td>
+<td><p>The output to be spent consisting of the transaction hash (32 bytes) and the output index (4 bytes).</p></td>
+</tr>
+<tr class="row-odd"><td><p>var</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">script</span> <span class="pre">bytes</span></code></p></td>
+<td><p>uint</p></td>
+<td><p>Number of bytes in the signature script (max 10,000 bytes).</p></td>
+</tr>
+<tr class="row-even"><td><p>var</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">signature</span> <span class="pre">script</span></code></p></td>
+<td><p>char[]</p></td>
+<td><p>The script satisfying the output’s script.</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sequence</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>Sequence number (default <code class="docutils literal notranslate"><span class="pre">0xffffffff</span></code>).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="outputs">
+<span id="txout"></span><h2>Outputs<a class="headerlink" href="#outputs" title="Permalink to this headline">¶</a></h2>
+<p>The transaction output has the following format according to the <a class="reference external" href="https://bitcoin.org/en/developer-reference#txout">reference</a>.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 31%" />
+<col style="width: 13%" />
+<col style="width: 49%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Bytes</p></th>
+<th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">value</span></code></p></td>
+<td><p>i64</p></td>
+<td><p>Number of satoshis to be spent.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1+</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pk_script</span> <span class="pre">bytes</span></code></p></td>
+<td><p>uint</p></td>
+<td><p>Number of bytes in the script.</p></td>
+</tr>
+<tr class="row-even"><td><p>var</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pk_script</span></code></p></td>
+<td><p>char[]</p></td>
+<td><p>Spending condition as script.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="witness">
+<span id="txwitness"></span><h2>Witness<a class="headerlink" href="#witness" title="Permalink to this headline">¶</a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 21%" />
+<col style="width: 22%" />
+<col style="width: 52%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Bytes</p></th>
+<th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>var</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">count</span></code></p></td>
+<td><p>uint</p></td>
+<td><p>The number of witness stack items in this tx_witness.</p></td>
+</tr>
+<tr class="row-odd"><td><p>var</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">witness_stack</span></code></p></td>
+<td><p><a class="reference internal" href="#witnessstackitem"><span class="std std-ref">Witness Stack Item</span></a></p></td>
+<td><p>List of witness stack items making up this tx_witness.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="witness-stack-item">
+<span id="witnessstackitem"></span><h2>Witness Stack Item<a class="headerlink" href="#witness-stack-item" title="Permalink to this headline">¶</a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 23%" />
+<col style="width: 21%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Bytes</p></th>
+<th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>var</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">count</span></code></p></td>
+<td><p>uint</p></td>
+<td><p>The number of bytes in this witness stack item.</p></td>
+</tr>
+<tr class="row-odd"><td><p>var</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">witness_stack</span></code></p></td>
+<td><p>u8[]</p></td>
+<td><p>The bytes making up the witness stack item.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="accepted-format.html" class="btn btn-neutral float-right" title="Accepted Bitcoin Transaction Format" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="btcrelay-architecture.html" class="btn btn-neutral float-left" title="BTC-Relay Architecture" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Interlay
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

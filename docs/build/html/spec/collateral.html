@@ -1,0 +1,505 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Collateral &mdash; interBTC Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Fee" href="fee.html" />
+    <link rel="prev" title="How to Read This Specification" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> interBTC Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v5.5.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/xclaim-architecture.html">XCLAIM Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/btcrelay-architecture.html">BTC-Relay Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/accepted-format.html">Accepted Bitcoin Transaction Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">How to Read This Specification</a></li>
+</ul>
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Collateral</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-by-step">Step-by-Step</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data-model">Data Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#maps">Maps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#accounts">Accounts</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#structs">Structs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#account">Account</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#lockcollateral">lockCollateral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specification">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#releasecollateral">releaseCollateral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id3">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#slashcollateral">slashCollateral</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Specification</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#events">Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#lockcollateralevent">LockCollateral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#releasecollateralevent">ReleaseCollateral</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#slashcollateralevent">SlashCollateral</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#errors">Errors</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issue.html">Issue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="refund.html">Refund</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redeem.html">Redeem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relay.html">Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="treasury.html">Treasury</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vault-registry.html">Vault Registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reward.html">Reward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="staking.html">Staking</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/liquidations.html">Vault Liquidations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/xclaim-security.html">XCLAIM Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/btcrelay-security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../economics/incentives.html">Economic Incentives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../economics/fees.html">Fee Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">interBTC Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Collateral</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/spec/collateral.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="collateral">
+<span id="collateral-module"></span><h1>Collateral<a class="headerlink" href="#collateral" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The Collateral module is the central storage for collateral provided by users and vaults of the system.
+It allows to (i) lock, (ii) release, and (iii) slash collateral of either users or vaults.
+It can only be accessed by other modules and not directly through external transactions.</p>
+<div class="section" id="step-by-step">
+<h3>Step-by-Step<a class="headerlink" href="#step-by-step" title="Permalink to this headline">¶</a></h3>
+<p>The protocol has three different “sub-protocols”.</p>
+<ul class="simple">
+<li><p><strong>Lock</strong>: Store a certain amount of collateral from a single entity (user or vault).</p></li>
+<li><p><strong>Release</strong>: Transfer a certain amount of collateral back to the entity that paid it.</p></li>
+<li><p><strong>Slash</strong>: Transfer a certain amount of collateral to a party that was damaged by the actions of another party.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="data-model">
+<h2>Data Model<a class="headerlink" href="#data-model" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="maps">
+<h3>Maps<a class="headerlink" href="#maps" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="accounts">
+<h4>Accounts<a class="headerlink" href="#accounts" title="Permalink to this headline">¶</a></h4>
+<p>Mapping from accounts to the <code class="docutils literal notranslate"><span class="pre">Account</span></code> struct.</p>
+</div>
+</div>
+<div class="section" id="structs">
+<h3>Structs<a class="headerlink" href="#structs" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="account">
+<h4>Account<a class="headerlink" href="#account" title="Permalink to this headline">¶</a></h4>
+<p>Stores the balances of a single account.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 11%" />
+<col style="width: 63%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">free</span></code></p></td>
+<td><p>Balance</p></td>
+<td><p>Free and may be transferred without restriction.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">reserved</span></code></p></td>
+<td><p>Balance</p></td>
+<td><p>Reserved and may not be used by holder until unlocked.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="lockcollateral">
+<span id="id1"></span><h3>lockCollateral<a class="headerlink" href="#lockcollateral" title="Permalink to this headline">¶</a></h3>
+<p>A user or a vault locks some amount of collateral.</p>
+<div class="section" id="specification">
+<h4>Specification<a class="headerlink" href="#specification" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">lockCollateral(account,</span> <span class="pre">amount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">account</span></code>: The account locking collateral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: The amount of collateral.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#lockcollateralevent"><span class="std std-ref">LockCollateral</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p>The account MUST have sufficient free balance.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul class="simple">
+<li><p>The account’s free balance MUST decrease by <code class="docutils literal notranslate"><span class="pre">amount</span></code>.</p></li>
+<li><p>The account’s reserved balance MUST increase by <code class="docutils literal notranslate"><span class="pre">amount</span></code>.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="releasecollateral">
+<span id="id2"></span><h3>releaseCollateral<a class="headerlink" href="#releasecollateral" title="Permalink to this headline">¶</a></h3>
+<p>When a protocol has completed successfully, we unlock the account’s collateral.</p>
+<div class="section" id="id3">
+<h4>Specification<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">releaseCollateral(account,</span> <span class="pre">amount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">account</span></code>: The account unlocking collateral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: The amount of collateral.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#releasecollateralevent"><span class="std std-ref">ReleaseCollateral</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p>The account MUST have sufficient reserved balance.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul class="simple">
+<li><p>The account’s reserved balance MUST decrease by <code class="docutils literal notranslate"><span class="pre">amount</span></code>.</p></li>
+<li><p>The account’s free balance MUST increase by <code class="docutils literal notranslate"><span class="pre">amount</span></code>.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="slashcollateral">
+<span id="id4"></span><h3>slashCollateral<a class="headerlink" href="#slashcollateral" title="Permalink to this headline">¶</a></h3>
+<p>When a protocol has not completed successfully, the origin account (<code class="docutils literal notranslate"><span class="pre">sender</span></code>) is slashed and the collateral is transferred to another party (<code class="docutils literal notranslate"><span class="pre">receiver</span></code>).</p>
+<div class="section" id="id5">
+<h4>Specification<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">slashCollateral(sender,</span> <span class="pre">receiver,</span> <span class="pre">amount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sender</span></code>: The sender that to slash.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">receiver</span></code>: The receiver of the collateral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: The amount of collateral.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#slashcollateralevent"><span class="std std-ref">SlashCollateral</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p>The sender MUST have sufficient reserved balance.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul class="simple">
+<li><p>The sender’s reserved balance MUST decrease by <code class="docutils literal notranslate"><span class="pre">amount</span></code>.</p></li>
+<li><p>The receiver’s free balance MUST increase by <code class="docutils literal notranslate"><span class="pre">amount</span></code>.</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="events">
+<h2>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="lockcollateralevent">
+<span id="id6"></span><h3>LockCollateral<a class="headerlink" href="#lockcollateralevent" title="Permalink to this headline">¶</a></h3>
+<p>Emit a <code class="docutils literal notranslate"><span class="pre">LockCollateral</span></code> event when a sender locks collateral.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">LockCollateral(sender,</span> <span class="pre">amount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sender</span></code>: The sender that provides the collateral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: The amount of collateral.</p></li>
+</ul>
+<p><em>Function</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#lockcollateral"><span class="std std-ref">lockCollateral</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="releasecollateralevent">
+<span id="id7"></span><h3>ReleaseCollateral<a class="headerlink" href="#releasecollateralevent" title="Permalink to this headline">¶</a></h3>
+<p>Emit a <code class="docutils literal notranslate"><span class="pre">ReleaseCollateral</span></code> event when a sender releases collateral.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">ReleaseCollateral(sender,</span> <span class="pre">amount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sender</span></code>: The sender that initially provided the collateral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: The amount of collateral.</p></li>
+</ul>
+<p><em>Function</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#releasecollateral"><span class="std std-ref">releaseCollateral</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="slashcollateralevent">
+<span id="id8"></span><h3>SlashCollateral<a class="headerlink" href="#slashcollateralevent" title="Permalink to this headline">¶</a></h3>
+<p>Emit a <code class="docutils literal notranslate"><span class="pre">SlashCollateral</span></code> event when a sender’s collateral is slashed and transferred to the receiver.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">SlashCollateral(sender,</span> <span class="pre">receiver,</span> <span class="pre">amount)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">sender</span></code>: The sender that initially provided the collateral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">receiver</span></code>: The receiver of the collateral.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amount</span></code>: The amount of collateral.</p></li>
+</ul>
+<p><em>Function</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#slashcollateral"><span class="std std-ref">slashCollateral</span></a></p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="errors">
+<h2>Errors<a class="headerlink" href="#errors" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_BALANCE`</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “The sender’s balance is below the requested amount.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#lockcollateral"><span class="std std-ref">lockCollateral</span></a> | <a class="reference internal" href="#releasecollateral"><span class="std std-ref">releaseCollateral</span></a> | <a class="reference internal" href="#slashcollateral"><span class="std std-ref">slashCollateral</span></a></p></li>
+<li><p><strong>Cause</strong>: the <code class="docutils literal notranslate"><span class="pre">sender</span></code> has less collateral stored than the requested <code class="docutils literal notranslate"><span class="pre">amount</span></code>.</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="fee.html" class="btn btn-neutral float-right" title="Fee" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="introduction.html" class="btn btn-neutral float-left" title="How to Read This Specification" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Interlay
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

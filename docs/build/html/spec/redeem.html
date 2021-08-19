@@ -1,0 +1,876 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Redeem &mdash; interBTC Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Replace" href="replace.html" />
+    <link rel="prev" title="Refund" href="refund.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> interBTC Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v5.5.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/xclaim-architecture.html">XCLAIM Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/btcrelay-architecture.html">BTC-Relay Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/accepted-format.html">Accepted Bitcoin Transaction Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">How to Read This Specification</a></li>
+</ul>
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="collateral.html">Collateral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="issue.html">Issue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="refund.html">Refund</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Redeem</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-by-step">Step-by-step</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#security">Security</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#vault-registry">Vault Registry</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fee-model">Fee Model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#data-model">Data Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scalars">Scalars</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#redeemperiod">RedeemPeriod</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#redeemtransactionsize">RedeemTransactionSize</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#redeembtcdustvalue">RedeemBtcDustValue</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#maps">Maps</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#redeemrequests">RedeemRequests</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#structs">Structs</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id4">Redeem</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#requestredeem">requestRedeem</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#specification">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#liquidationredeem">liquidationRedeem</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#executeredeem">executeRedeem</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id9">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cancelredeem">cancelRedeem</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id11">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#minttokensforreimbursedredeem">mintTokensForReimbursedRedeem</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id13">Specification</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#events">Events</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#requestredeemevent">RequestRedeem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#liquidationredeemevent">LiquidationRedeem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#executeredeemevent">ExecuteRedeem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cancelredeemevent">CancelRedeem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#minttokensforreimbursedredeemevent">MintTokensForReimbursedRedeem</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#error-codes">Error Codes</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="relay.html">Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="treasury.html">Treasury</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vault-registry.html">Vault Registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reward.html">Reward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="staking.html">Staking</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="btc-relay/errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/liquidations.html">Vault Liquidations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/xclaim-security.html">XCLAIM Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/btcrelay-security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../economics/incentives.html">Economic Incentives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../economics/fees.html">Fee Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">interBTC Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Redeem</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/spec/redeem.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="redeem">
+<span id="redeem-protocol"></span><h1>Redeem<a class="headerlink" href="#redeem" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<p>The redeem module allows a user to receive BTC on the Bitcoin chain in return for destroying an equivalent amount of interBTC on the BTC Parachain. The process is initiated by a user requesting a redeem with a vault. The vault then needs to send BTC to the user within a given time limit. Next, the vault has to finalize the process by providing a proof to the BTC Parachain that he has send the right amount of BTC to the user. If the vault fails to deliver a valid proof within the time limit, the user can claim an equivalent amount of DOT from the vault’s locked collateral to reimburse him for his loss in BTC.</p>
+<p>Moreover, as part of the liquidation procedure, users are able to directly exchange interBTC for DOT. To this end, a user is able to execute a special liquidation redeem if one or multiple vaults have been liquidated.</p>
+<div class="section" id="step-by-step">
+<h3>Step-by-step<a class="headerlink" href="#step-by-step" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Precondition: A user owns interBTC.</p></li>
+<li><p>A user locks an amount of interBTC by calling the <a class="reference internal" href="#requestredeem"><span class="std std-ref">requestRedeem</span></a> function. In this function call, the user selects a vault to execute the redeem request from the list of vaults. The function creates a redeem request with a unique hash.</p></li>
+<li><p>The selected vault listens for the <code class="docutils literal notranslate"><span class="pre">RequestRedeem</span></code> event emitted by the user. The vault then proceeds to transfer BTC to the address specified by the user in the <a class="reference internal" href="#requestredeem"><span class="std std-ref">requestRedeem</span></a> function including a unique hash in the <code class="docutils literal notranslate"><span class="pre">OP_RETURN</span></code> of one output.</p></li>
+<li><p>The vault executes the <a class="reference internal" href="#executeredeem"><span class="std std-ref">executeRedeem</span></a> function by providing the Bitcoin transaction from step 3 together with the redeem request identifier within the time limit. If the function completes successfully, the locked interBTC are destroyed and the user received its BTC.</p></li>
+<li><p>Optional: If the user could not receive BTC within the given time (as required in step 4), the user calls <a class="reference internal" href="#cancelredeem"><span class="std std-ref">cancelRedeem</span></a> after the redeem time limit. The user can choose either to reimburse, or to retry. In case of reimbursement, the user transfer ownership of the tokens to the vault, but receives collateral in exchange. In case of retry, the user gets back its tokens. In either case, the user is given some part of the vault’s collateral as compensation for the inconvenience.</p>
+<ol class="loweralpha simple">
+<li><p>Optional: If during a <a class="reference internal" href="#cancelredeem"><span class="std std-ref">cancelRedeem</span></a> the user selects reimbursement, and as a result the vault becomes undercollateralized, then vault does not receive the user’s tokens - they are burned, and the vault’s <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> decreases. When, at some later point, it gets sufficient colalteral, it can call <a class="reference internal" href="#minttokensforreimbursedredeem"><span class="std std-ref">mintTokensForReimbursedRedeem</span></a> to get the tokens.</p></li>
+</ol>
+</li>
+</ol>
+</div>
+<div class="section" id="security">
+<h3>Security<a class="headerlink" href="#security" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>Unique identification of Bitcoin payments: <a class="reference internal" href="../security_performance/xclaim-security.html#op-return"><span class="std std-ref">OP_RETURN</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="vault-registry">
+<h3>Vault Registry<a class="headerlink" href="#vault-registry" title="Permalink to this headline">¶</a></h3>
+<p>The data access and state changes to the vault registry are documented in <a class="reference internal" href="#fig-vault-registry-redeem"><span class="std std-numref">Fig. 10</span></a> below.</p>
+<div class="figure align-default" id="id19">
+<span id="fig-vault-registry-redeem"></span><img alt="vault-registry-redeem" src="../_images/VaultRegistry-Redeem.png" />
+<p class="caption"><span class="caption-number">Fig. 10 </span><span class="caption-text">The redeem module interacts through three different functions with the vault registry. The green arrow indicate an increase, the red arrows a decrease.</span><a class="headerlink" href="#id19" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="fee-model">
+<h3>Fee Model<a class="headerlink" href="#fee-model" title="Permalink to this headline">¶</a></h3>
+<p>When the user makes a redeem request for a certain amount, it will actually not receive that amount of BTC. This is because there are two types of fees subtracted. First, in order to be able to pay the bitcoin transaction cost, the vault is given a budget to spend on on the bitcoin inclusion fee, based on <a class="reference internal" href="#redeemtransactionsize"><span class="std std-ref">RedeemTransactionSize</span></a> and the inclusion fee estimates reported by the oracle. The actual amount spent on the inclusion fee is not checked. If the vault does not spend the whole budget, it can keep the surplus, although it will not be able to spend it without being liquidated for theft. It may at some point want to withdraw all of its collateral and then to move its bitcoin into a new account. The second fee that the user pays for is the parachain fee that goes to the fee pool to incentivize the various participants in the system.</p>
+<p>The main accounting changes of a successful redeem is summarized below. See the individual functions for more details.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.amountBTC</span></code> bitcoin is transferred to the user.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.amountBTC</span> <span class="pre">+</span> <span class="pre">redeem.fee</span> <span class="pre">+</span> <span class="pre">redeem.transferFeeBTC</span></code> is burned from the user.</p></li>
+<li><p>The vault’s <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> decreases by <code class="docutils literal notranslate"><span class="pre">redeem.amountBTC</span> <span class="pre">+</span> <span class="pre">redeem.transferFeeBTC</span></code>.</p></li>
+<li><p>The fee pool content increases by <code class="docutils literal notranslate"><span class="pre">redeem.fee</span></code> (if non-zero).</p></li>
+<li><p>If the vault self-redeems (the redeemer is the vault ID) no fee is paid.</p></li>
+</ul>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="data-model">
+<h2>Data Model<a class="headerlink" href="#data-model" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="scalars">
+<h3>Scalars<a class="headerlink" href="#scalars" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="redeemperiod">
+<span id="id1"></span><h4>RedeemPeriod<a class="headerlink" href="#redeemperiod" title="Permalink to this headline">¶</a></h4>
+<p>The time difference between when an redeem request is created and required completion time by a vault. Concretely, this period is the amount by which <a class="reference internal" href="security.html#activeblockcount"><span class="std std-ref">ActiveBlockCount</span></a> is allowed to increase before the redeem is considered to be expired. The period has an upper limit to ensure the user gets his BTC in time and to potentially punish a vault for inactivity or stealing BTC. Each redeem request records the value of this field upon creation, and when checking the expiry, the maximum of the current RedeemPeriod and the value as recorded in the RedeemRequest is used. This way, users are not negatively impacted by a change in the value.</p>
+</div>
+<div class="section" id="redeemtransactionsize">
+<span id="id2"></span><h4>RedeemTransactionSize<a class="headerlink" href="#redeemtransactionsize" title="Permalink to this headline">¶</a></h4>
+<p>The expected size in bytes of a redeem. This is used to set the bitcoin inclusion fee budget.</p>
+</div>
+<div class="section" id="redeembtcdustvalue">
+<span id="id3"></span><h4>RedeemBtcDustValue<a class="headerlink" href="#redeembtcdustvalue" title="Permalink to this headline">¶</a></h4>
+<p>The minimal amount in BTC a vault can be asked to transfer to the user. Note that this is not equal to the amount requests, since an inclusion fee is deducted from that amount.</p>
+</div>
+</div>
+<div class="section" id="maps">
+<h3>Maps<a class="headerlink" href="#maps" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="redeemrequests">
+<h4>RedeemRequests<a class="headerlink" href="#redeemrequests" title="Permalink to this headline">¶</a></h4>
+<p>Users create redeem requests to receive BTC in return for interBTC. This mapping provides access from a unique hash <code class="docutils literal notranslate"><span class="pre">redeemId</span></code> to a <code class="docutils literal notranslate"><span class="pre">Redeem</span></code> struct. <code class="docutils literal notranslate"><span class="pre">&lt;redeemId,</span> <span class="pre">Redeem&gt;</span></code>.</p>
+</div>
+</div>
+<div class="section" id="structs">
+<h3>Structs<a class="headerlink" href="#structs" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id4">
+<h4>Redeem<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h4>
+<p>Stores the status and information about a single redeem request.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 4%" />
+<col style="width: 89%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Parameter</p></th>
+<th class="head"><p>Type</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">vault</span></code></p></td>
+<td><p>Account</p></td>
+<td><p>The BTC Parachain address of the vault responsible for this redeem request.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">opentime</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>The <a class="reference internal" href="security.html#activeblockcount"><span class="std std-ref">ActiveBlockCount</span></a> when the redeem request was made. Serves as start for the countdown until when the vault must transfer the BTC.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">period</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>Value of <a class="reference internal" href="#redeemperiod"><span class="std std-ref">RedeemPeriod</span></a> when the redeem request was made, in case that value changes while this redeem is pending.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">amountBTC</span></code></p></td>
+<td><p>BTC</p></td>
+<td><p>Amount of BTC to be sent to the user.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">transferFeeBTC</span></code></p></td>
+<td><p>BTC</p></td>
+<td><p>Budget for the vault to spend in bitcoin inclusion fees.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">fee</span></code></p></td>
+<td><p>interBTC</p></td>
+<td><p>Parachain fee: amount to be transferred from the user to the fee pool upon completion of the redeem.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">premium</span></code></p></td>
+<td><p>DOT</p></td>
+<td><p>Amount of DOT to be paid as a premium to this user (if the Vault’s collateral rate was below <code class="docutils literal notranslate"><span class="pre">PremiumRedeemThreshold</span></code> at the time of redeeming).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">redeemer</span></code></p></td>
+<td><p>Account</p></td>
+<td><p>The BTC Parachain address of the user requesting the redeem.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">btcAddress</span></code></p></td>
+<td><p>bytes[20]</p></td>
+<td><p>Base58 encoded Bitcoin public key of the User.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">btcHeight</span></code></p></td>
+<td><p>u32</p></td>
+<td><p>Height of newest bitcoin block in the relay at the time the request is accepted. This is used by the clients upon startup, to determine how many blocks of the bitcoin chain they need to inspect to know if a payment has been made already.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">status</span></code></p></td>
+<td><p>enum</p></td>
+<td><p>The status of the redeem: <code class="docutils literal notranslate"><span class="pre">Pending</span></code>, <code class="docutils literal notranslate"><span class="pre">Completed</span></code>, <code class="docutils literal notranslate"><span class="pre">Retried</span></code> or <code class="docutils literal notranslate"><span class="pre">Reimbursed(bool)</span></code>, where bool=true indicates that the vault minted tokens for the amount that the redeemer burned</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="requestredeem">
+<span id="id5"></span><h3>requestRedeem<a class="headerlink" href="#requestredeem" title="Permalink to this headline">¶</a></h3>
+<p>A user requests to start the redeem procedure.
+This function checks the BTC Parachain status in <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> and decides how the redeem process is to be executed.
+The following modes are possible:</p>
+<ul class="simple">
+<li><p><strong>Normal Redeem</strong> - no errors detected, full BTC value is to be Redeemed.</p></li>
+<li><p><strong>Premium Redeem</strong> - the selected Vault’s collateral rate has fallen below <code class="docutils literal notranslate"><span class="pre">PremiumRedeemThreshold</span></code>. Full BTC value is to be redeemed, but the user is allocated a premium in DOT (<code class="docutils literal notranslate"><span class="pre">RedeemPremiumFee</span></code>), taken from the Vault’s to-be-released collateral.</p></li>
+</ul>
+<div class="section" id="specification">
+<h4>Specification<a class="headerlink" href="#specification" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">requestRedeem(redeemer,</span> <span class="pre">amountWrapped,</span> <span class="pre">btcAddress,</span> <span class="pre">vault)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemer</span></code>: address of the user triggering the redeem.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code>: the amount of interBTC to destroy and BTC to receive.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">btcAddress</span></code>: the address to receive BTC.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: the vault selected for the redeem request.</p></li>
+</ul>
+<p><em>Returns</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemId</span></code>: A unique hash identifying the redeem request.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#requestredeemevent"><span class="std std-ref">RequestRedeem</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<p>Let <code class="docutils literal notranslate"><span class="pre">burnedTokens</span></code> be <code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code> minus the result of the multiplication of <a class="reference internal" href="fee.html#redeemfee"><span class="std std-ref">RedeemFee</span></a> and <code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code>. Then:</p>
+<ul class="simple">
+<li><p>The function call MUST be signed by <em>redeemer</em>.</p></li>
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component MUST be set to <code class="docutils literal notranslate"><span class="pre">RUNNING:0</span></code>.</p></li>
+<li><p>The selected vault MUST NOT be banned.</p></li>
+<li><p>The selected vault MUST NOT be liquidated.</p></li>
+<li><p>The redeemer MUST have at least <code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code> free tokens.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">burnedTokens</span></code> minus the inclusion fee MUST be above the <a class="reference internal" href="#redeembtcdustvalue"><span class="std std-ref">RedeemBtcDustValue</span></a>, where the inclusion fee is the multiplication of <a class="reference internal" href="#redeemtransactionsize"><span class="std std-ref">RedeemTransactionSize</span></a> and the fee rate estimate reported by the oracle.</p></li>
+<li><p>The vault’s <code class="docutils literal notranslate"><span class="pre">issuedTokens</span></code> MUST be at least <code class="docutils literal notranslate"><span class="pre">vault.toBeRedeemedTokens</span> <span class="pre">+</span> <span class="pre">burnedTokens</span></code>.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<p>Let <code class="docutils literal notranslate"><span class="pre">burnedTokens</span></code> be <code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code> minus the result of the multiplication of <a class="reference internal" href="fee.html#redeemfee"><span class="std std-ref">RedeemFee</span></a> and <code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code>. Then:</p>
+<ul class="simple">
+<li><p>The vault’s <code class="docutils literal notranslate"><span class="pre">toBeRedeemedTokens</span></code> MUST increase by <code class="docutils literal notranslate"><span class="pre">burnedTokens</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code> of the redeemer’s tokens MUST be locked by this transaction.</p></li>
+<li><p><a class="reference internal" href="vault-registry.html#decreasetobereplacedtokens"><span class="std std-ref">decreaseToBeReplacedTokens</span></a> MUST be called, supplying <code class="docutils literal notranslate"><span class="pre">vault</span></code> and <code class="docutils literal notranslate"><span class="pre">burnedTokens</span></code>. The returned <code class="docutils literal notranslate"><span class="pre">replaceCollateral</span></code> MUST be released by this function.</p></li>
+<li><dl class="simple">
+<dt>A new <code class="docutils literal notranslate"><span class="pre">RedeemRequest</span></code> MUST be added to the <code class="docutils literal notranslate"><span class="pre">RedeemRequests</span></code> map, with the following value:</dt><dd><ul>
+<li></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.vault</span></code> MUST be the requested <code class="docutils literal notranslate"><span class="pre">vault</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.opentime</span></code> MUST be the current <a class="reference internal" href="security.html#activeblockcount"><span class="std std-ref">ActiveBlockCount</span></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.fee</span></code> MUST be <a class="reference internal" href="fee.html#redeemfee"><span class="std std-ref">RedeemFee</span></a> multiplied by <code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code> if <code class="docutils literal notranslate"><span class="pre">redeemer</span> <span class="pre">!=</span> <span class="pre">vault</span></code>, otherwise this should be zero.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.transferFeeBtc</span></code> MUST be the inclusion fee, which is the multiplication of <a class="reference internal" href="#redeemtransactionsize"><span class="std std-ref">RedeemTransactionSize</span></a> and the fee rate estimate reported by the oracle,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.amountBtc</span></code> MUST be <code class="docutils literal notranslate"><span class="pre">amountWrapped</span> <span class="pre">-</span> <span class="pre">redeem.fee</span> <span class="pre">-</span> <span class="pre">redeem.transferFeeBtc</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.period</span></code> MUST be the current value of the <a class="reference internal" href="#redeemperiod"><span class="std std-ref">RedeemPeriod</span></a>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.redeemer</span></code> MUST be the <code class="docutils literal notranslate"><span class="pre">redeemer</span></code> argument,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.btcAddress</span></code> MUST be the <code class="docutils literal notranslate"><span class="pre">btcAddress</span></code> argument,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.btcHeight</span></code> MUST be the current height of the btc relay,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.status</span></code> MUST be <code class="docutils literal notranslate"><span class="pre">Pending</span></code>,</p></li>
+<li><p>If the vault’s collateralization rate is above the <a class="reference internal" href="vault-registry.html#premiumcollateralthreshold"><span class="std std-ref">PremiumRedeemThreshold</span></a>, then <code class="docutils literal notranslate"><span class="pre">redeem.premium</span></code> MUST be <code class="docutils literal notranslate"><span class="pre">0</span></code>,</p></li>
+<li><p>If the vault’s collateralization rate is below the <a class="reference internal" href="vault-registry.html#premiumcollateralthreshold"><span class="std std-ref">PremiumRedeemThreshold</span></a>, then <code class="docutils literal notranslate"><span class="pre">redeem.premium</span></code> MUST be <a class="reference internal" href="fee.html#premiumredeemfee"><span class="std std-ref">PremiumRedeemFee</span></a> multiplied by the worth of <code class="docutils literal notranslate"><span class="pre">redeem.amountBtc</span></code>,</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="liquidationredeem">
+<span id="id6"></span><h3>liquidationRedeem<a class="headerlink" href="#liquidationredeem" title="Permalink to this headline">¶</a></h3>
+<p>A user executes a liquidation redeem that exchanges interBTC for DOT from the <cite>LiquidationVault</cite>. The 1:1 backing is being recovered, hence this function burns interBTC without releasing any BTC.</p>
+<div class="section" id="id7">
+<h4>Specification<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">liquidationRedeem(redeemer,</span> <span class="pre">amountWrapped)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemer</span></code>: address of the user triggering the redeem.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code>: the amount of interBTC to destroy.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#liquidationredeemevent"><span class="std std-ref">LiquidationRedeem</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component MUST NOT be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:2</span></code>.</p></li>
+<li><p>The function call MUST be signed.</p></li>
+<li><p>The redeemer MUST have at least <code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code> free tokens.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code> tokens MUST be burned from the user.</p></li>
+<li><p><a class="reference internal" href="vault-registry.html#redeemtokensliquidation"><span class="std std-ref">redeemTokensLiquidation</span></a> MUST be called with <code class="docutils literal notranslate"><span class="pre">redeemer</span></code> and <code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code> as arguments.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="executeredeem">
+<span id="id8"></span><h3>executeRedeem<a class="headerlink" href="#executeredeem" title="Permalink to this headline">¶</a></h3>
+<p>A vault calls this function after receiving an <code class="docutils literal notranslate"><span class="pre">RequestRedeem</span></code> event with his public key. Before calling the function, the vault transfers the specific amount of BTC to the BTC address given in the original redeem request. The vault completes the redeem with this function.</p>
+<div class="section" id="id9">
+<h4>Specification<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">executeRedeem(vault,</span> <span class="pre">redeemId,</span> <span class="pre">merkleProof,</span> <span class="pre">rawTx)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: the vault responsible for executing this redeem request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemId</span></code>: the unique hash created during the <code class="docutils literal notranslate"><span class="pre">requestRedeem</span></code> function.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">merkleProof</span></code>: Merkle tree path (concatenated LE SHA256 hashes).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rawTx</span></code>: Raw Bitcoin transaction including the transaction inputs and outputs.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#executeredeemevent"><span class="std std-ref">ExecuteRedeem</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p>The function call MUST be signed be <em>someone</em>, i.e. not necessarily the <em>redeemer</em>.</p></li>
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component MUST NOT be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:2</span></code>.</p></li>
+<li><p>A <em>pending</em> <code class="docutils literal notranslate"><span class="pre">RedeemRequest</span></code> MUST exist with an id equal to <code class="docutils literal notranslate"><span class="pre">redeemId</span></code>.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">rawTx</span></code> MUST decode to a valid transaction that transfers exactly the amount specified in the <code class="docutils literal notranslate"><span class="pre">RedeemRequest</span></code> struct. It MUST be a transaction to the correct address, and provide the expected OP_RETURN, based on the <code class="docutils literal notranslate"><span class="pre">RedeemRequest</span></code>.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">merkleProof</span></code> MUST contain a valid proof of of <code class="docutils literal notranslate"><span class="pre">rawTX</span></code>.</p></li>
+<li><p>The bitcoin payment MUST have been submitted to the relay chain, and MUST have sufficient confirmations.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemRequest.amountBtc</span> <span class="pre">-</span> <span class="pre">redeemRequest.transferFeeBtc</span></code> of the tokens in the redeemer’s account MUST be burned.</p></li>
+<li><p>The user’s <cite>lockedTokens</cite> MUST decrease by <cite>redeemRequest.amountBtc + redeemRequest.transferFeeBtc</cite>.</p></li>
+<li><p>The vault’s <cite>toBeRedeemedTokens</cite> MUST decrease by <cite>redeemRequest.amountBtc + redeemRequest.transferFeeBtc</cite>.</p></li>
+<li><p>The vault’s <cite>issuedTokens</cite> MUST decrease by <cite>redeemRequest.amountBtc + redeemRequest.transferFeeBtc</cite>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemRequest.fee</span></code> MUST be unlocked and transferred from the redeemer’s account to the fee pool.</p></li>
+<li><p><a class="reference internal" href="vault-registry.html#redeemtokens"><span class="std std-ref">redeemTokens</span></a> MUST be called, supplying <code class="docutils literal notranslate"><span class="pre">redeemRequest.vault</span></code>, <code class="docutils literal notranslate"><span class="pre">redeemRequest.amountBtc</span> <span class="pre">+</span> <span class="pre">redeemRequest.transferFeeBtc</span></code>, <code class="docutils literal notranslate"><span class="pre">redeemRequest.premium</span></code> and <code class="docutils literal notranslate"><span class="pre">redeemRequest.redeemer</span></code> as arguments.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemRequest.status</span></code> MUST be set to <code class="docutils literal notranslate"><span class="pre">Completed</span></code>.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="cancelredeem">
+<span id="id10"></span><h3>cancelRedeem<a class="headerlink" href="#cancelredeem" title="Permalink to this headline">¶</a></h3>
+<p>If a redeem request is not completed on time, the redeem request can be cancelled.
+The user that initially requested the redeem process calls this function to obtain the Vault’s collateral as compensation for not refunding the BTC back to his address.</p>
+<p>The failed vault is banned from further issue, redeem and replace requests for a pre-defined time period (<a class="reference internal" href="vault-registry.html#punishmentdelay"><span class="std std-ref">PunishmentDelay</span></a> as defined in <a class="reference internal" href="vault-registry.html#vault-registry"><span class="std std-ref">Vault Registry</span></a>).</p>
+<p>The user is able to choose between reimbursement and retrying. If the user chooses the retry, it gets back the tokens, and a punishment fee is transferred from the vault to the user. If the user chooses reimbursement, then he receives the equivalent worth of the tokens in collateral, plus a punishment fee. In this case, the tokens are transferred from the user to the vault. In either case, the vault may also be slashed an additional punishment that goes to the fee pool.</p>
+<p>The punishment fee paid to the user stays constant (i.e., the user always receives the punishment fee of e.g. 10%).</p>
+<div class="section" id="id11">
+<h4>Specification<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">cancelRedeem(redeemId,</span> <span class="pre">reimburse)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemId</span></code>: the unique hash of the redeem request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reimburse</span></code>: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the vault, or wishes to keep the interBTC (and retry to redeem with another Vault).</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#cancelredeemevent"><span class="std std-ref">CancelRedeem</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component MUST be set to <code class="docutils literal notranslate"><span class="pre">RUNNING:0</span></code>.</p></li>
+<li><p>A <em>pending</em> <code class="docutils literal notranslate"><span class="pre">RedeemRequest</span></code> MUST exist with an id equal to <code class="docutils literal notranslate"><span class="pre">redeemId</span></code>.</p></li>
+<li><p>The function call MUST be signed by <code class="docutils literal notranslate"><span class="pre">redeemRequest.redeemer</span></code>, i.e. this function can only be called by the account who made the redeem request.</p></li>
+<li><p>The request MUST be expired.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<p>Let <code class="docutils literal notranslate"><span class="pre">amountIncludingParachainFee</span></code> be equal to the worth in collateral of <code class="docutils literal notranslate"><span class="pre">redeem.amountBtc</span> <span class="pre">+</span> <span class="pre">redeem.transferFeeBtc</span></code>.
+Let <code class="docutils literal notranslate"><span class="pre">confiscatedCollateral</span></code> be equal to <code class="docutils literal notranslate"><span class="pre">vault.backingCollateral</span> <span class="pre">*</span> <span class="pre">(amountIncludingParachainFee</span> <span class="pre">/</span> <span class="pre">vault.toBeRedeemedTokens)</span></code>.
+Then:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>If the vault is liquidated:</dt><dd><ul>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">reimburse</span></code> is true, an amount of <code class="docutils literal notranslate"><span class="pre">confiscatedCollateral</span></code> MUST be transferred from the vault to the redeemer.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">reimburse</span></code> is false, an amount of <code class="docutils literal notranslate"><span class="pre">confiscatedCollateral</span></code> MUST be transferred from the vault to the liquidation vault.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>If the vault is <em>not</em> liquidated, the following collateral changes are made:</dt><dd><ul>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">reimburse</span></code> is true, the user SHOULD be reimbursed the worth of <code class="docutils literal notranslate"><span class="pre">amountIncludingParachainFee</span></code> in collateral. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount <em>is</em> available.</p></li>
+<li><p>A punishment fee MUST be tranferred from the vault’s backing collateral to the redeemer: <a class="reference internal" href="fee.html#punishmentfee"><span class="std std-ref">PunishmentFee</span></a>. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount <em>is</em> available.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>If <code class="docutils literal notranslate"><span class="pre">reimburse</span></code> is true:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.fee</span></code> MUST be transferred from the vault to the fee pool if non-zero.</p></li>
+<li><dl class="simple">
+<dt>If after the loss of collateral the vault is below the <a class="reference internal" href="vault-registry.html#securecollateralthreshold"><span class="std std-ref">SecureCollateralThreshold</span></a>:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">amountIncludingParachainFee</span></code> of the user’s tokens are <em>burned</em>.</p></li>
+<li><p><a class="reference internal" href="vault-registry.html#decreasetokens"><span class="std std-ref">decreaseTokens</span></a> MUST be called, supplying the vault, the user, and <code class="docutils literal notranslate"><span class="pre">amountIncludingParachainFee</span></code> as arguments.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">redeem.status</span></code> is set to <code class="docutils literal notranslate"><span class="pre">Reimbursed(false)</span></code>, where the <code class="docutils literal notranslate"><span class="pre">false</span></code> indicates that the vault has not yet received the tokens.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>If after the loss of collateral the vault remains above the <a class="reference internal" href="vault-registry.html#securecollateralthreshold"><span class="std std-ref">SecureCollateralThreshold</span></a>:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">amountIncludingParachainFee</span></code> of the user’s tokens MUST be unlocked and transferred to the vault.</p></li>
+<li><p><a class="reference internal" href="vault-registry.html#decreasetoberedeemedtokens"><span class="std std-ref">decreaseToBeRedeemedTokens</span></a> MUST be called, supplying the vault and <code class="docutils literal notranslate"><span class="pre">amountIncludingParachainFee</span></code> as arguments.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">redeem.status</span></code> is set to <code class="docutils literal notranslate"><span class="pre">Reimbursed(true)</span></code>, where the <code class="docutils literal notranslate"><span class="pre">true</span></code> indicates that the vault has received the tokens.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>If <code class="docutils literal notranslate"><span class="pre">reimburse</span></code> is false:</dt><dd><ul>
+<li><p>All the user’s tokens that were locked in <a class="reference internal" href="#requestredeem"><span class="std std-ref">requestRedeem</span></a> MUST be unlocked, i.e. an amount of <code class="docutils literal notranslate"><span class="pre">redeem.amountBtc</span> <span class="pre">+</span> <span class="pre">redeem.fee</span> <span class="pre">+</span> <span class="pre">redeem.transferFeeBtc</span></code>.</p></li>
+<li><p>The vault’s <code class="docutils literal notranslate"><span class="pre">toBeRedeemedTokens</span></code> MUST decrease by <code class="docutils literal notranslate"><span class="pre">amountIncludingParachainFee</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><p>The vault MUST be banned.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="minttokensforreimbursedredeem">
+<span id="id12"></span><h3>mintTokensForReimbursedRedeem<a class="headerlink" href="#minttokensforreimbursedredeem" title="Permalink to this headline">¶</a></h3>
+<p>If a redeemrequest has the status <code class="docutils literal notranslate"><span class="pre">Reimbursed(false)</span></code>, the vault was unable to back the to be received tokens at the time of the <code class="docutils literal notranslate"><span class="pre">cancelRedeem</span></code>. After gaining sufficient collateral, the vault can call this function to finally get its tokens.</p>
+<div class="section" id="id13">
+<h4>Specification<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h4>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">mintTokensForReimbursedRedeem(vault,</span> <span class="pre">redeemId)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemId</span></code>: the unique hash of the redeem request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">reimburse</span></code>: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the vault, or wishes to keep the interBTC (and retry to redeem with another Vault).</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#minttokensforreimbursedredeemevent"><span class="std std-ref">MintTokensForReimbursedRedeem</span></a></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p>The BTC Parachain status in the <a class="reference internal" href="security.html#security"><span class="std std-ref">Security</span></a> component MUST be set to <code class="docutils literal notranslate"><span class="pre">RUNNING:0</span></code>.</p></li>
+<li><p>A <code class="docutils literal notranslate"><span class="pre">RedeemRequest</span></code> MUST exist with an id equal to <code class="docutils literal notranslate"><span class="pre">redeemId</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.status</span></code> MUST be <code class="docutils literal notranslate"><span class="pre">Reimbursed(false)</span></code>.</p></li>
+<li><p>The vault MUST have sufficient collateral to remain above the <a class="reference internal" href="vault-registry.html#securecollateralthreshold"><span class="std std-ref">SecureCollateralThreshold</span></a> after issuing <code class="docutils literal notranslate"><span class="pre">redeem.amountBtc</span> <span class="pre">+</span> <span class="pre">redeem.transferFeeBtc</span></code> tokens.</p></li>
+<li><p>The vault MUST NOT be banned.</p></li>
+<li><p>The function call MUST be signed by <code class="docutils literal notranslate"><span class="pre">redeem.vault</span></code>, i.e. this function can only be called by the vault.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul class="simple">
+<li><p><a class="reference internal" href="vault-registry.html#tryincreasetobeissuedtokens"><span class="std std-ref">tryIncreaseToBeIssuedTokens</span></a> and <a class="reference internal" href="vault-registry.html#issuetokens"><span class="std std-ref">issueTokens</span></a> MUST be called, both with the vault and <code class="docutils literal notranslate"><span class="pre">redeem.amountBtc</span> <span class="pre">+</span> <span class="pre">redeem.transferFeeBtc</span></code> as arguments.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeem.amountBtc</span> <span class="pre">+</span> <span class="pre">redeem.transferFeeBtc</span></code> tokens MUST be minted to the vault.</p></li>
+</ul>
+</div>
+</div>
+</div>
+<div class="section" id="events">
+<h2>Events<a class="headerlink" href="#events" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="requestredeemevent">
+<span id="id14"></span><h3>RequestRedeem<a class="headerlink" href="#requestredeemevent" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event when a redeem request is created. This event needs to be monitored by the vault to start the redeem request.</p>
+<p><em>Event Signature</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">RequestRedeem(redeemID,</span> <span class="pre">redeemer,</span> <span class="pre">amountWrapped,</span> <span class="pre">feeWrapped,</span> <span class="pre">premium,</span> <span class="pre">vaultId,</span> <span class="pre">userBtcAddress,</span> <span class="pre">transferFeeBtc)</span></code></p></li>
+</ul>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemID</span></code>: the unique identifier of this redeem request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemer</span></code>: address of the user triggering the redeem.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code>: the amount to be received by the user.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">feeWrapped</span></code>: the fee to be paid to the reward pool.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">premium</span></code>: the premium to be given to the user, if any.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vaultId</span></code>: the vault selected for the redeem request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">userBtcAddress</span></code>: the address the vault is to transfer the funds to.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">transferFeeBtc</span></code>: the budget the vault has to spend on bitcoin inclusion fees, paid for by the user.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<cite>requestRedeem</cite></p></li>
+</ul>
+</div>
+<div class="section" id="liquidationredeemevent">
+<span id="id15"></span><h3>LiquidationRedeem<a class="headerlink" href="#liquidationredeemevent" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event when a user does a liquidation redeem.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">LiquidationRedeem(redeemer,</span> <span class="pre">amountWrapped)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemer</span></code>: address of the user triggering the redeem.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code>: the amount of interBTC to burned.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<cite>liquidationRedeem</cite></p></li>
+</ul>
+</div>
+<div class="section" id="executeredeemevent">
+<span id="id16"></span><h3>ExecuteRedeem<a class="headerlink" href="#executeredeemevent" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event when a redeem request is successfully executed by a vault.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">ExecuteRedeem(redeemId,</span> <span class="pre">redeemer,</span> <span class="pre">amountWrapped,</span> <span class="pre">feeWrapped,</span> <span class="pre">vault,</span> <span class="pre">transferFeeBtc)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemId</span></code>: the unique hash created during the <code class="docutils literal notranslate"><span class="pre">requestRedeem</span></code> function.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemer</span></code>: address of the user triggering the redeem.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amountWrapped</span></code>: the amount of interBTC to destroy and BTC to receive.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">feeWrapped</span></code>: the amount of interBTC taken for fees.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: the vault responsible for executing this redeem request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">transferFeeBtc</span></code>: the budget for the bitcoin inclusion fees, paid for by the user.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<cite>executeRedeem</cite></p></li>
+</ul>
+</div>
+<div class="section" id="cancelredeemevent">
+<span id="id17"></span><h3>CancelRedeem<a class="headerlink" href="#cancelredeemevent" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event when a user cancels a redeem request that has not been fulfilled after the <code class="docutils literal notranslate"><span class="pre">RedeemPeriod</span></code> has passed.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">CancelRedeem(redeemId,</span> <span class="pre">redeemer,</span> <span class="pre">vault,</span> <span class="pre">amountSlashed,</span> <span class="pre">status)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemId</span></code>: the unique hash of the redeem request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemer</span></code>: The redeemer starting the redeem process.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: the vault who failed to execute the redeem.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amountSlashed</span></code>: the amount that was slashed from the vault.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">status</span></code>: the status of the redeem request.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<cite>cancelRedeem</cite></p></li>
+</ul>
+</div>
+<div class="section" id="minttokensforreimbursedredeemevent">
+<span id="id18"></span><h3>MintTokensForReimbursedRedeem<a class="headerlink" href="#minttokensforreimbursedredeemevent" title="Permalink to this headline">¶</a></h3>
+<p>Emit an event when a vault minted the tokens corresponding the a cancelled redeem that was reimbursed to the user, when the vault did not have sufficient collateral at the time of the cancellation to back the tokens.</p>
+<p><em>Event Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">MintTokensForReimbursedRedeem(vaultId,</span> <span class="pre">redeemId,</span> <span class="pre">amountMinted)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">vault</span></code>: if of the vault that now mints the tokens.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">redeemId</span></code>: the unique hash of the redeem request.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">amountMinted</span></code>: the amount that the vault just minted.</p></li>
+</ul>
+<p><em>Functions</em></p>
+<ul class="simple">
+<li><p>ref:<cite>mintTokensForReimbursedRedeem</cite></p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="error-codes">
+<h2>Error Codes<a class="headerlink" href="#error-codes" title="Permalink to this headline">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_VAULT_NOT_FOUND</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “There exists no vault with the given account id.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#requestredeem"><span class="std std-ref">requestRedeem</span></a>, <a class="reference internal" href="#liquidationredeem"><span class="std std-ref">liquidationRedeem</span></a></p></li>
+<li><p><strong>Cause</strong>: The specified vault does not exist.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_AMOUNT_EXCEEDS_USER_BALANCE</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “The requested amount exceeds the user’s balance.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#requestredeem"><span class="std std-ref">requestRedeem</span></a>, <a class="reference internal" href="#liquidationredeem"><span class="std std-ref">liquidationRedeem</span></a></p></li>
+<li><p><strong>Cause</strong>: If the user is trying to redeem more BTC than his interBTC balance.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_VAULT_BANNED</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “The selected vault has been temporarily banned.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#requestredeem"><span class="std std-ref">requestRedeem</span></a></p></li>
+<li><p><strong>Cause</strong>:  Redeem requests are not possible with temporarily banned Vaults</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_AMOUNT_EXCEEDS_VAULT_BALANCE</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “The requested amount exceeds the vault’s balance.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#requestredeem"><span class="std std-ref">requestRedeem</span></a>, <a class="reference internal" href="#liquidationredeem"><span class="std std-ref">liquidationRedeem</span></a></p></li>
+<li><p><strong>Cause</strong>: If the user is trying to redeem from a vault that has less BTC locked than requested for redeem.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_REDEEM_ID_NOT_FOUND</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “The <code class="docutils literal notranslate"><span class="pre">redeemId</span></code> cannot be found.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#executeredeem"><span class="std std-ref">executeRedeem</span></a></p></li>
+<li><p><strong>Cause</strong>: The <code class="docutils literal notranslate"><span class="pre">redeemId</span></code> in the <code class="docutils literal notranslate"><span class="pre">RedeemRequests</span></code> mapping returned <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_REDEEM_PERIOD_EXPIRED</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “The redeem period expired.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#executeredeem"><span class="std std-ref">executeRedeem</span></a></p></li>
+<li><p><strong>Cause</strong>: The time limit as defined by the <code class="docutils literal notranslate"><span class="pre">RedeemPeriod</span></code> is not met.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_UNAUTHORIZED</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “Caller is not authorized to call this function.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#cancelredeem"><span class="std std-ref">cancelRedeem</span></a> | <a class="reference internal" href="#minttokensforreimbursedredeem"><span class="std std-ref">mintTokensForReimbursedRedeem</span></a></p></li>
+<li><p><strong>Cause</strong>: Only the user can call <a class="reference internal" href="#cancelredeem"><span class="std std-ref">cancelRedeem</span></a>, and only the vault can call <a class="reference internal" href="#minttokensforreimbursedredeem"><span class="std std-ref">mintTokensForReimbursedRedeem</span></a>.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_REDEEM_PERIOD_NOT_EXPIRED</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “The period to complete the redeem request is not yet expired.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#cancelredeem"><span class="std std-ref">cancelRedeem</span></a></p></li>
+<li><p><strong>Cause</strong>:  Raises an error if the time limit to call <code class="docutils literal notranslate"><span class="pre">executeRedeem</span></code> has not yet passed.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_REDEEM_CANCELLED</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “The redeem is in an unexpected cancelled state.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#cancelredeem"><span class="std std-ref">cancelRedeem</span></a> | <a class="reference internal" href="#minttokensforreimbursedredeem"><span class="std std-ref">mintTokensForReimbursedRedeem</span></a> | <a class="reference internal" href="#executeredeem"><span class="std std-ref">executeRedeem</span></a></p></li>
+<li><p><strong>Cause</strong>:  The status of the redeem is not as required for this call.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ERR_REDEEM_COMPLETED</span></code></p>
+<ul class="simple">
+<li><p><strong>Message</strong>: “The redeem is already completed.”</p></li>
+<li><p><strong>Function</strong>: <a class="reference internal" href="#cancelredeem"><span class="std std-ref">cancelRedeem</span></a> | <a class="reference internal" href="#executeredeem"><span class="std std-ref">executeRedeem</span></a></p></li>
+<li><p><strong>Cause</strong>:  The status of the redeem is not as expected for this call.</p></li>
+</ul>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="replace.html" class="btn btn-neutral float-right" title="Replace" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="refund.html" class="btn btn-neutral float-left" title="Refund" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Interlay
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

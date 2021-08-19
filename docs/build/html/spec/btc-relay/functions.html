@@ -1,0 +1,817 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Functions: Storage and Verification &mdash; interBTC Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Functions: Parser" href="parser.html" />
+    <link rel="prev" title="Data Model" href="data-model.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> interBTC Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v5.5.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/xclaim-architecture.html">XCLAIM Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/btcrelay-architecture.html">BTC-Relay Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../intro/accepted-format.html">Accepted Bitcoin Transaction Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">How to Read This Specification</a></li>
+</ul>
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../collateral.html">Collateral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../issue.html">Issue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../refund.html">Refund</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redeem.html">Redeem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../relay.html">Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../treasury.html">Treasury</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vault-registry.html">Vault Registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reward.html">Reward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../staking.html">Staking</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="data-model.html">Data Model</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Functions: Storage and Verification</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#initialize">initialize</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#specification">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#storeblockheader">storeBlockHeader</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#swapmainblockchain">swapMainBlockchain</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id5">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#verifyblockheader">verifyBlockHeader</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id7">Specification</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#verifytransactioninclusion">verifyTransactionInclusion</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id9">Specification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#preconditions">Preconditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#function-sequence">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#validatetransaction">validateTransaction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id11">Specification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id12">Preconditions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id13">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#verifyandvalidatetransaction">verifyAndValidateTransaction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id15">Specification</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id16">Function Sequence</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#flagblockerror">flagBlockError</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id18">Specification</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id19">Function Sequence</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#clearblockerror">clearBlockError</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id21">Specification</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id22">Function Sequence</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../security_performance/liquidations.html">Vault Liquidations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../security_performance/xclaim-security.html">XCLAIM Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../security_performance/btcrelay-security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../security_performance/performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../economics/incentives.html">Economic Incentives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../economics/fees.html">Fee Model</a></li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">interBTC Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Functions: Storage and Verification</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/spec/btc-relay/functions.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="functions-storage-and-verification">
+<span id="storage-verification"></span><h1>Functions: Storage and Verification<a class="headerlink" href="#functions-storage-and-verification" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="initialize">
+<span id="id1"></span><h2>initialize<a class="headerlink" href="#initialize" title="Permalink to this headline">¶</a></h2>
+<p>Initializes BTC-Relay with the first Bitcoin block to be tracked and initializes all data structures (see <a class="reference internal" href="data-model.html#data-model"><span class="std std-ref">Data Model</span></a>).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>BTC-Relay <strong>does not</strong> have to be initialized with Bitcoin’s genesis block! The first block to be tracked can be selected freely.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Caution when setting the first block in BTC-Relay: only succeeding blocks can be submitted and <strong>predecessors and blocks from other chains will be rejected</strong>! Similarly, caution is required with the initial block height argument, since if an incorrect value is used, all subsequently reported block heights will be incorrect.</p>
+</div>
+<div class="section" id="specification">
+<h3>Specification<a class="headerlink" href="#specification" title="Permalink to this headline">¶</a></h3>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">initialize(relayer,</span> <span class="pre">rawBlockHeader,</span> <span class="pre">blockHeight)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">relayer</span></code>: the account submitting the block</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rawBlockHeader</span></code>: 80 byte raw Bitcoin block header, see <a class="reference internal" href="data-model.html#rawblockheader"><span class="std std-ref">RawBlockHeader</span></a>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">blockHeight</span></code>: integer Bitcoin block height of the submitted block header</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Initialized(blockHeight,</span> <span class="pre">blockHash,</span> <span class="pre">relayer)</span></code>: if the first block header was stored successfully, emit an event with the stored block’s height (<code class="docutils literal notranslate"><span class="pre">blockHeight</span></code>) and the (PoW) block hash (<code class="docutils literal notranslate"><span class="pre">blockHash</span></code>).</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_ALREADY_INITIALIZED</span> <span class="pre">=</span> <span class="pre">&quot;Already</span> <span class="pre">initialized&quot;</span></code>: return error if this function is called after BTC-Relay has already been initialized.</p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p>This is the first time this function is called, i.e., when BTC-Relay is being deployed.</p></li>
+<li><p>The blockheader MUST be parsable.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">blockHeight</span></code> MUST match the height on the bitcoin chain. Note that the parachain can not check this - it’s the caller’s responsability!</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rawBlockHeader</span></code> MUST match a block on the bitcoin main chain. Note that the parachain can not check this - it’s the caller’s responsability!</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rawBlockHeader</span></code> MUST be a block mined after December 2015 - see <a class="reference internal" href="../../intro/bitcoin.html#bitcoinblockheader"><span class="std std-ref">Block Headers</span></a>. This is NOT checked by the parachain - it’s the caller’s responsibility!</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<p>Let <code class="docutils literal notranslate"><span class="pre">blockHeader</span></code> be the parsed <code class="docutils literal notranslate"><span class="pre">rawBlockHeader</span></code>. Then:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ChainsIndex[0]</span></code> MUST be set to a new <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> value, where <code class="docutils literal notranslate"><span class="pre">BlockChain.chainId</span> <span class="pre">=</span> <span class="pre">0</span></code> and``BlockChain.startHeight = BlockChain.maxHeight = blockHeight``</p></li>
+<li><p>A value <code class="docutils literal notranslate"><span class="pre">block</span></code> of type <code class="docutils literal notranslate"><span class="pre">RichBlockHeader</span></code> MUST be added to <code class="docutils literal notranslate"><span class="pre">BlockHeaders</span></code>, where:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">block.basic_block_header</span> <span class="pre">=</span> <span class="pre">blockHeader</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">block.chainRef</span> <span class="pre">=</span> <span class="pre">0</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">block.paraHeight</span></code> is the current activeBlockCount (see the Security module)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">block.blockHeight</span> <span class="pre">=</span> <span class="pre">blockHeight</span></code></p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BestBlockHeight</span></code> MUST be <code class="docutils literal notranslate"><span class="pre">ChainsIndex[0].maxHeight</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BestBlock</span></code> MUST be <code class="docutils literal notranslate"><span class="pre">blockHeader.hash</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">StartBlockHeight</span></code> MUST be set to <code class="docutils literal notranslate"><span class="pre">blockHeight</span></code></p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="storeblockheader">
+<span id="id2"></span><h2>storeBlockHeader<a class="headerlink" href="#storeblockheader" title="Permalink to this headline">¶</a></h2>
+<p>Method to submit block headers to the BTC-Relay. This function calls <a class="reference internal" href="#verifyblockheader"><span class="std std-ref">verifyBlockHeader</span></a> to check that the block header is valid. If so, from the block header and stores the hash, height and Merkle tree root of the given block header in <code class="docutils literal notranslate"><span class="pre">BlockHeaders</span></code>.
+If the block header extends an existing <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> entry in <code class="docutils literal notranslate"><span class="pre">Chains</span></code>, it appends the block hash to the <code class="docutils literal notranslate"><span class="pre">chains</span></code> mapping and increments the <code class="docutils literal notranslate"><span class="pre">maxHeight</span></code>. Otherwise, a new <code class="docutils literal notranslate"><span class="pre">Blockchain</span></code> entry is created.</p>
+<div class="section" id="id3">
+<h3>Specification<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">storeBlockHeader(relayer,</span> <span class="pre">rawBlockHeader)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">relayer</span></code>: the account submitting the block</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rawBlockHeader</span></code>: 80 byte raw Bitcoin block header, see <a class="reference internal" href="data-model.html#rawblockheader"><span class="std std-ref">RawBlockHeader</span></a>.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">StoreMainChainHeader(blockHeight,</span> <span class="pre">blockHash,</span> <span class="pre">relayer)</span></code>: if the block header was successful appended to the currently longest chain (<em>main chain</em>) emit an event with the stored block’s height (<code class="docutils literal notranslate"><span class="pre">blockHeight</span></code>) and the (PoW) block hash (<code class="docutils literal notranslate"><span class="pre">blockHash</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">StoreForkHeader(forkId,</span> <span class="pre">blockHeight,</span> <span class="pre">blockHash,</span> <span class="pre">relayer)</span></code>: if the block header was successful appended to a new or existing fork, emit an event with the block height (<code class="docutils literal notranslate"><span class="pre">blockHeight</span></code>) and the (PoW) block hash (<code class="docutils literal notranslate"><span class="pre">blockHash</span></code>).</p></li>
+</ul>
+<p><em>Invariants</em></p>
+<ul class="simple">
+<li><p>The values in <code class="docutils literal notranslate"><span class="pre">Chains</span></code> MUST be such that for each <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;</span> <span class="pre">i</span> <span class="pre">&lt;</span> <span class="pre">j</span></code>, <code class="docutils literal notranslate"><span class="pre">ChainsIndex[Chains[i]].maxHeight</span> <span class="pre">&gt;=</span> <span class="pre">ChainsIndex[Chains[j]].maxHeight</span></code>.</p></li>
+<li><p>The keys in <code class="docutils literal notranslate"><span class="pre">Chains</span></code> MUST be consecutive, i.e. for each <code class="docutils literal notranslate"><span class="pre">i</span></code>, if <code class="docutils literal notranslate"><span class="pre">Chains[i]</span></code> does not exist, <code class="docutils literal notranslate"><span class="pre">Chains[i+1]</span></code> MUST NOT exist either.</p></li>
+<li><p>The keys in <code class="docutils literal notranslate"><span class="pre">ChainsIndex</span></code> MUST be consecutive, i.e. for each <code class="docutils literal notranslate"><span class="pre">i</span></code>, if <code class="docutils literal notranslate"><span class="pre">ChainsIndex[i]</span></code> does not exist, <code class="docutils literal notranslate"><span class="pre">ChainsIndex[i+1]</span></code> MUST NOT exist either.</p></li>
+<li><p>For all <code class="docutils literal notranslate"><span class="pre">i</span> <span class="pre">&gt;</span> <span class="pre">0</span></code> the following MUST hold: <cite>ChainsIndex[i].maxHeight &lt; ChainsIndex[0].maxHeight + STABLE_BITCOIN_CONFIRMATIONS</cite>.</p></li>
+<li><p>For all <code class="docutils literal notranslate"><span class="pre">i</span></code>, the following MUST hold: <code class="docutils literal notranslate"><span class="pre">ChainsIndex[i].chainRef</span> <span class="pre">==</span> <span class="pre">i</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BestBlock.chainRef</span></code> MUST be 0</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BestBlock.blockHeight</span></code> MUST be <code class="docutils literal notranslate"><span class="pre">ChainsIndex[0].maxHeight</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BestBlockHeight</span></code> MUST be <code class="docutils literal notranslate"><span class="pre">ChainsIndex[0].maxHeight</span></code></p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p>The BTC Parachain status MUST NOT be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:</span> <span class="pre">3</span></code>.</p></li>
+<li><p>The given <code class="docutils literal notranslate"><span class="pre">rawBlockHeader</span></code> MUST parse be parsable into <code class="docutils literal notranslate"><span class="pre">blockHeader</span></code>.</p></li>
+<li><p>There MUST be a block header <code class="docutils literal notranslate"><span class="pre">prevHeader</span></code> stored in <code class="docutils literal notranslate"><span class="pre">BlockHeaders</span></code> with a hash equal to <code class="docutils literal notranslate"><span class="pre">blockHeader.hashPrevBlock</span></code>.</p></li>
+<li><p>A block chain <code class="docutils literal notranslate"><span class="pre">prevBlockchain</span></code> MUST be stored in <code class="docutils literal notranslate"><span class="pre">ChainsIndex[prevHeader.chainRef]</span></code>.</p></li>
+<li><p><a class="reference internal" href="#verifyblockheader"><span class="std std-ref">verifyBlockHeader</span></a> MUST return <code class="docutils literal notranslate"><span class="pre">Ok</span></code> when called with <code class="docutils literal notranslate"><span class="pre">blockHeader</span></code>, <code class="docutils literal notranslate"><span class="pre">prevHeader.blockHeight</span> <span class="pre">+</span> <span class="pre">1</span></code> and <code class="docutils literal notranslate"><span class="pre">prevHeader</span></code>.</p></li>
+<li><dl class="simple">
+<dt>If <code class="docutils literal notranslate"><span class="pre">prevHeader</span></code> is the last element a chain (i.e. <code class="docutils literal notranslate"><span class="pre">blockHeader</span></code> does not create a new fork), then:</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">prevBlockChain</span></code> MUST NOT already contain a block of height <code class="docutils literal notranslate"><span class="pre">prevHeader.blockHeight</span> <span class="pre">+</span> <span class="pre">1</span></code>.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">prevBlockChain.chain_id</span></code> is _not_ zero (i.e. the block is being added to a fork rather than the main chain), and the fork is <code class="docutils literal notranslate"><span class="pre">STABLE_BITCOIN_CONFIRMATIONS</span></code> blocks ahead of the main chain, then calling <a class="reference internal" href="#swapmainblockchain"><span class="std std-ref">swapMainBlockchain</span></a> with this fork MUST return <code class="docutils literal notranslate"><span class="pre">Ok</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul class="simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">prevHeader</span></code> is the last element a chain (i.e. <code class="docutils literal notranslate"><span class="pre">blockHeader</span></code> does not create a new fork), then:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">ChainsHashes[prevBlockChain.chain_id,</span> <span class="pre">prevHeader.blockHeight</span> <span class="pre">+</span> <span class="pre">1]</span></code> MUST be set to <code class="docutils literal notranslate"><span class="pre">blockHeader.hash</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ChainsIndex[prevBlockChain.chain_id].max_height</span></code> MUST be increased by 1.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">prevBlockChain.chain_id</span></code> is zero (i.e. the a block is being added to the main chain), then:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">BestBlock</span></code> MUST be set to <code class="docutils literal notranslate"><span class="pre">blockHeader.hash</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BestBlockHeight</span></code> MUST be set to <code class="docutils literal notranslate"><span class="pre">prevHeader.blockHeight</span> <span class="pre">+</span> <span class="pre">1</span></code></p></li>
+</ul>
+</li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">prevBlockChain.chain_id</span></code> is _not_ zero (i.e. the block is being added to a fork rather than the main chain), then:</p>
+<ul>
+<li><p>If the fork is <code class="docutils literal notranslate"><span class="pre">STABLE_BITCOIN_CONFIRMATIONS</span></code> blocks ahead of the main chain, i.e. <code class="docutils literal notranslate"><span class="pre">prevHeader.blockHeight</span> <span class="pre">+</span> <span class="pre">1</span> <span class="pre">&gt;=</span> <span class="pre">BestBlockHeight</span> <span class="pre">+</span> <span class="pre">STABLE_BITCOIN_CONFIRMATIONS</span></code>, then the fork is moved to the mainchain. That is, <a class="reference internal" href="#swapmainblockchain"><span class="std std-ref">swapMainBlockchain</span></a> MUST be called with the fork as argument.</p></li>
+</ul>
+</li>
+<li><p>A new <code class="docutils literal notranslate"><span class="pre">RichBlockHeader</span></code> MUST be stored in <code class="docutils literal notranslate"><span class="pre">BlockHeaders</span></code> that is constructed as follows:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">RichBlockHeader.blockHeader</span> <span class="pre">=</span> <span class="pre">blockHeader</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RichBlockHeader.blockHeight</span> <span class="pre">=</span> <span class="pre">prevBlock.blockHeight</span> <span class="pre">+</span> <span class="pre">1</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RichBlockHeader.chainRef</span> <span class="pre">=</span> <span class="pre">prevBlockChain.chainId</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RichBlockHeader.paraHeight</span></code> is set to the current active block count - see the security module for details</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">prevHeader</span></code> is <em>not</em> the last element a chain (i.e. <code class="docutils literal notranslate"><span class="pre">blockHeader</span></code> creates a <em>new</em> fork), then:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">ChainCounter</span></code> MUST be incremented. Let <code class="docutils literal notranslate"><span class="pre">newChainCounter</span></code> be the incremented value, then</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ChainsHashes[newChainCounter,</span> <span class="pre">prevHeader.blockHeight</span> <span class="pre">+</span> <span class="pre">1]</span></code> MUST be set  to <code class="docutils literal notranslate"><span class="pre">blockHeader.hash</span></code>.</p></li>
+<li><p>A new blockchain MUST be inserted into <code class="docutils literal notranslate"><span class="pre">ChainsIndex</span></code>. Let <code class="docutils literal notranslate"><span class="pre">newChain</span></code> be the newly inserted chain. Then <code class="docutils literal notranslate"><span class="pre">newChain</span></code> MUST have the following values:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">newChain.chainId</span> <span class="pre">=</span> <span class="pre">newChainCounter</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">newChain.startHeight</span> <span class="pre">=</span> <span class="pre">prevHeader.blockHeight</span> <span class="pre">+</span> <span class="pre">1</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">newChain.maxHeight</span> <span class="pre">=</span> <span class="pre">prevHeader.blockHeight</span> <span class="pre">+</span> <span class="pre">1</span></code>,</p></li>
+</ul>
+</li>
+<li><p>A new value MUST be added to <code class="docutils literal notranslate"><span class="pre">Chains</span></code> that is equal to <code class="docutils literal notranslate"><span class="pre">newChainCounter</span></code> in a way that maintains the invariants specified above.</p></li>
+<li><p>A new <code class="docutils literal notranslate"><span class="pre">RichBlockHeader</span></code> MUST be stored in <code class="docutils literal notranslate"><span class="pre">BlockHeaders</span></code> that is constructed as follows:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">RichBlockHeader.blockHeader</span> <span class="pre">=</span> <span class="pre">blockHeader</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RichBlockHeader.blockHeight</span> <span class="pre">=</span> <span class="pre">newChain.blockHeight</span> <span class="pre">+</span> <span class="pre">1</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RichBlockHeader.chainRef</span> <span class="pre">=</span> <span class="pre">prevBlockChain.chainId</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">RichBlockHeader.paraHeight</span></code> is set to the current active block count - see the security module for details</p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BestBlockHeight</span></code> MUST be set to <code class="docutils literal notranslate"><span class="pre">Chains[0].max_height</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">BestBlock</span></code> MUST be set to <code class="docutils literal notranslate"><span class="pre">ChainsHashes[0,</span> <span class="pre">Chains[0].max_height</span></code></p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The BTC-Relay does not necessarily have the same view of the Bitcoin blockchain as the user’s local Bitcoin client. This can happen if (i) the BTC-Relay is under attack, (ii) the BTC-Relay is out of sync, or, similarly, (iii) if the user’s local Bitcoin client is under attack or out of sync (see <a class="reference internal" href="../security.html#security"><span class="std std-ref">Security</span></a>).</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The 80 bytes block header can be retrieved from the <a class="reference external" href="https://en.bitcoin.it/wiki/Original_Bitcoin_client/API_calls_list">bitcoin-rpc client</a> by calling the <a class="reference external" href="https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/getblock/">getBlock</a> and setting verbosity to <code class="docutils literal notranslate"><span class="pre">0</span></code> (<code class="docutils literal notranslate"><span class="pre">getBlock</span> <span class="pre">&lt;blockHash&gt;</span> <span class="pre">0</span></code>).</p>
+</div>
+</div>
+</div>
+<div class="section" id="swapmainblockchain">
+<span id="id4"></span><h2>swapMainBlockchain<a class="headerlink" href="#swapmainblockchain" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id5">
+<h3>Specification<a class="headerlink" href="#id5" title="Permalink to this headline">¶</a></h3>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">swapMainBlockchain(fork)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">&amp;fork</span></code>: pointer to a <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> entry in <code class="docutils literal notranslate"><span class="pre">Chains</span></code>.</p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">fork</span></code> is <code class="docutils literal notranslate"><span class="pre">STABLE_BITCOIN_CONFIRMATIONS</span></code> blocks ahead of the main chain, i.e. <code class="docutils literal notranslate"><span class="pre">fork.maxHeight</span> <span class="pre">&gt;=</span> <span class="pre">BestBlockHeight</span> <span class="pre">+</span> <span class="pre">STABLE_BITCOIN_CONFIRMATIONS</span></code></p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<p>Let <code class="docutils literal notranslate"><span class="pre">lastBlock</span></code> be the last rich block header in <code class="docutils literal notranslate"><span class="pre">fork</span></code>, i.e. the blockheader for which <code class="docutils literal notranslate"><span class="pre">lastBlock.blockHeight</span> <span class="pre">==</span> <span class="pre">fork.maxHeight</span></code> and <code class="docutils literal notranslate"><span class="pre">lastBlock.chainRef</span> <span class="pre">==</span> <span class="pre">fork.chainId</span></code> holds. Then:</p>
+<ul class="simple">
+<li><p>Each ancestor <code class="docutils literal notranslate"><span class="pre">a</span></code> of <code class="docutils literal notranslate"><span class="pre">lastBlock</span></code> MUST move to the main chain, i.e. <code class="docutils literal notranslate"><span class="pre">a.chainRef</span></code> MUST be set to <code class="docutils literal notranslate"><span class="pre">MAIN_CHAIN_ID</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ChainsIndex[MAIN_CHAIN_ID].maxHeight</span></code> MUST be set to <code class="docutils literal notranslate"><span class="pre">lastBlock.blockHeight</span></code>.</p></li>
+<li><p>Each fork <code class="docutils literal notranslate"><span class="pre">fork</span></code> except the main chain that contains an ancestor of <code class="docutils literal notranslate"><span class="pre">lastBlock</span></code> MUST set <code class="docutils literal notranslate"><span class="pre">fork.startHeight</span></code> to the lowest <code class="docutils literal notranslate"><span class="pre">blockHeight</span></code> in the fork that is not an ancestor of <code class="docutils literal notranslate"><span class="pre">lastBlock</span></code>.</p></li>
+<li><p>Each block <code class="docutils literal notranslate"><span class="pre">b</span></code> in the mainchain that is not an acestor of <code class="docutils literal notranslate"><span class="pre">lastBlock</span></code> MUST move to <code class="docutils literal notranslate"><span class="pre">prevBlockChain</span></code>, i.e. <code class="docutils literal notranslate"><span class="pre">b.chainRef</span> <span class="pre">=</span> <span class="pre">prevBlockChain.chainId</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prevBlockChain.startHeight</span></code> MUST be set to the lowest <code class="docutils literal notranslate"><span class="pre">blockHeight</span></code> of all blocks <code class="docutils literal notranslate"><span class="pre">b</span></code> that have <code class="docutils literal notranslate"><span class="pre">b.chainRef</span> <span class="pre">==</span> <span class="pre">prevBlockChain.chainId</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prevBlockChain.maxHeight</span></code> MUST be set to the highest <code class="docutils literal notranslate"><span class="pre">blockHeight</span></code> of all blocks <code class="docutils literal notranslate"><span class="pre">b</span></code> that have <code class="docutils literal notranslate"><span class="pre">b.chainRef</span> <span class="pre">==</span> <span class="pre">prevBlockChain.chainId</span></code>.</p></li>
+</ul>
+<p>The figure below ilustrates an example execution of this function.</p>
+<div class="figure align-default" id="id23">
+<img alt="Example of swapMainBlockchain" src="../../_images/swap_main_blockchain.png" />
+<p class="caption"><span class="caption-number">Fig. 15 </span><span class="caption-text">On the left is an example of the state of <code class="docutils literal notranslate"><span class="pre">ChainsIndex</span></code> prior to calling <code class="docutils literal notranslate"><span class="pre">swapMainBlockchain</span></code>, and on the right is the corresponding state after the function returns.</span><a class="headerlink" href="#id23" title="Permalink to this image">¶</a></p>
+</div>
+<p>In contrast the the figure about, when looking up the chains through the <code class="docutils literal notranslate"><span class="pre">Chains</span></code> map, the chains are sorted by <code class="docutils literal notranslate"><span class="pre">maxHeight</span></code>, and the same execution would look as follows:</p>
+<div class="figure align-default" id="id24">
+<img alt="Example of swapMainBlockchain viewed through Chains" src="../../_images/[chains]swap_main_blockchain.png" />
+<p class="caption"><span class="caption-number">Fig. 16 </span><span class="caption-text">On the left is an example of the state of <code class="docutils literal notranslate"><span class="pre">Chains</span></code> prior to calling <code class="docutils literal notranslate"><span class="pre">swapMainBlockchain</span></code>, and on the right is the corresponding state after the function returns.</span><a class="headerlink" href="#id24" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="verifyblockheader">
+<span id="id6"></span><h2>verifyBlockHeader<a class="headerlink" href="#verifyblockheader" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">verifyBlockHeader</span></code> function verifies Bitcoin block headers. It returns <code class="docutils literal notranslate"><span class="pre">Ok</span></code> if the blockheader is valid, otherwise an error.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function does not check whether the submitted block header extends the main chain or a fork. This check is performed in <a class="reference internal" href="#storeblockheader"><span class="std std-ref">storeBlockHeader</span></a>.</p>
+</div>
+<div class="section" id="id7">
+<h3>Specification<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">verifyBlockHeader(blockHeader,</span> <span class="pre">blockHeight,</span> <span class="pre">prevBlockHeader)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">blockHeader</span></code>: the <a class="reference internal" href="data-model.html#blockheader"><span class="std std-ref">BlockHeader</span></a> to check.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">blockHeight</span></code>: height of the block.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prevBlockHeader</span></code>: the <a class="reference internal" href="data-model.html#richblockheader"><span class="std std-ref">RichBlockHeader</span></a> that is the block header’s predecessor.</p></li>
+</ul>
+<p><em>Returns</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Ok(())</span></code> if all checks pass successfully, otherwise an error.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_DUPLICATE_BLOCK</span> <span class="pre">=</span> <span class="pre">&quot;Block</span> <span class="pre">already</span> <span class="pre">stored&quot;</span></code>: return error if the submitted block header is already stored in BTC-Relay (duplicate PoW <code class="docutils literal notranslate"><span class="pre">blockHash</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_LOW_DIFF</span> <span class="pre">=</span> <span class="pre">&quot;PoW</span> <span class="pre">hash</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">meet</span> <span class="pre">difficulty</span> <span class="pre">target</span> <span class="pre">of</span> <span class="pre">header&quot;</span></code>: return error when the header’s <code class="docutils literal notranslate"><span class="pre">blockHash</span></code> does not meet the <code class="docutils literal notranslate"><span class="pre">target</span></code> specified in the block header.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_DIFF_TARGET_HEADER</span> <span class="pre">=</span> <span class="pre">&quot;Incorrect</span> <span class="pre">difficulty</span> <span class="pre">target</span> <span class="pre">specified</span> <span class="pre">in</span> <span class="pre">block</span> <span class="pre">header&quot;</span></code>: return error if the <code class="docutils literal notranslate"><span class="pre">target</span></code> specified in the block header is incorrect for its block height (difficulty re-target not executed).</p></li>
+</ul>
+<p><em>Preconditions</em></p>
+<ul class="simple">
+<li><p>A block with the <code class="docutils literal notranslate"><span class="pre">blockHeader.hash</span></code> MUST NOT already have been stored.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">blockHeader.hash</span></code> MUST be be below <code class="docutils literal notranslate"><span class="pre">BlockHeader.target</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">blockHeader.target</span></code> MUST match the expected target, which is calculated based on previous targets and timestamps. See <a class="reference external" href="https://en.bitcoin.it/wiki/Difficulty">the Bitcoin Wiki</a> for more information.</p></li>
+</ul>
+<p><em>Postconditions</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Ok(())</span></code> MUST be returned.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="verifytransactioninclusion">
+<span id="id8"></span><h2>verifyTransactionInclusion<a class="headerlink" href="#verifytransactioninclusion" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">verifyTransactionInclusion</span></code> function is one of the core components of the BTC-Relay: this function checks if a given transaction was indeed included in a given block (as stored in <code class="docutils literal notranslate"><span class="pre">BlockHeaders</span></code> and tracked by <code class="docutils literal notranslate"><span class="pre">Chains</span></code>), by reconstructing the Merkle tree root (given a Merkle proof). Also checks if sufficient confirmations have passed since the inclusion of the transaction (considering the current state of the BTC-Relay <code class="docutils literal notranslate"><span class="pre">Chains</span></code>).</p>
+<div class="section" id="id9">
+<h3>Specification<a class="headerlink" href="#id9" title="Permalink to this headline">¶</a></h3>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">verifyTransactionInclusion(txId,</span> <span class="pre">merkleProof,</span> <span class="pre">confirmations,</span> <span class="pre">insecure)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">txId</span></code>: 32 byte hash identifier of the transaction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">merkleProof</span></code>: Merkle tree path (concatenated LE sha256 hashes, dynamic sized).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">confirmations</span></code>: integer number of confirmation required.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The Merkle proof for a Bitcoin transaction can be retrieved using the <code class="docutils literal notranslate"><span class="pre">bitcoin-rpc</span></code> <a class="reference external" href="https://bitcoin-rpc.github.io/en/doc/0.17.99/rpc/blockchain/gettxoutproof/">gettxoutproof</a> method and dropping the first 170 characters. The Merkle proof thereby consists of a list of SHA256 hashes, as well as an indicator in which order the hash concatenation is to be applied (left or right).</p>
+</div>
+<p><em>Returns</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: if the given <code class="docutils literal notranslate"><span class="pre">txId</span></code> appears in at the position specified by <code class="docutils literal notranslate"><span class="pre">txIndex</span></code> in the transaction Merkle tree of the block at height <code class="docutils literal notranslate"><span class="pre">blockHeight</span></code> and sufficient confirmations have passed since inclusion.</p></li>
+<li><p>Error otherwise.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">VerifyTransaction(txId,</span> <span class="pre">txBlockHeight,</span> <span class="pre">confirmations)</span></code>: if verification was successful, emit an event specifying the <code class="docutils literal notranslate"><span class="pre">txId</span></code>, the <code class="docutils literal notranslate"><span class="pre">blockHeight</span></code> and the requested number of <code class="docutils literal notranslate"><span class="pre">confirmations</span></code>.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_SHUTDOWN</span> <span class="pre">=</span> <span class="pre">&quot;BTC</span> <span class="pre">Parachain</span> <span class="pre">has</span> <span class="pre">shut</span> <span class="pre">down&quot;</span></code>: the BTC Parachain has been shutdown by a manual intervention of the Governance Mechanism.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_MALFORMED_TXID</span> <span class="pre">=</span> <span class="pre">&quot;Malformed</span> <span class="pre">transaction</span> <span class="pre">identifier&quot;</span></code>: return error if the transaction identifier (<code class="docutils literal notranslate"><span class="pre">txId</span></code>) is malformed.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_CONFIRMATIONS</span> <span class="pre">=</span> <span class="pre">&quot;Transaction</span> <span class="pre">has</span> <span class="pre">less</span> <span class="pre">confirmations</span> <span class="pre">than</span> <span class="pre">requested&quot;</span></code>: return error if the block in which the transaction specified by <code class="docutils literal notranslate"><span class="pre">txId</span></code> was included has less confirmations than requested.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INVALID_MERKLE_PROOF</span> <span class="pre">=</span> <span class="pre">&quot;Invalid</span> <span class="pre">Merkle</span> <span class="pre">Proof&quot;</span></code>: return error if the Merkle proof is malformed or fails verification (does not hash to Merkle root).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_ONGOING_FORK</span> <span class="pre">=</span> <span class="pre">&quot;Verification</span> <span class="pre">disabled</span> <span class="pre">due</span> <span class="pre">to</span> <span class="pre">ongoing</span> <span class="pre">fork&quot;</span></code>: return error if the <code class="docutils literal notranslate"><span class="pre">mainChain</span></code> is not at least <code class="docutils literal notranslate"><span class="pre">STABLE_BITCOIN_CONFIRMATIONS</span></code> ahead of the next best fork.</p></li>
+</ul>
+</div>
+<div class="section" id="preconditions">
+<h3>Preconditions<a class="headerlink" href="#preconditions" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>The BTC Parachain status must not be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:</span> <span class="pre">3</span></code>. If <code class="docutils literal notranslate"><span class="pre">SHUTDOWN</span></code> is set, all transaction verification is disabled.</p></li>
+</ul>
+</div>
+<div class="section" id="function-sequence">
+<h3>Function Sequence<a class="headerlink" href="#function-sequence" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Check that <code class="docutils literal notranslate"><span class="pre">txId</span></code> is 32 bytes long. Return <code class="docutils literal notranslate"><span class="pre">ERR_MALFORMED_TXID</span></code> error if this check fails.</p></li>
+<li><p>Check that the current <code class="docutils literal notranslate"><span class="pre">BestBlockHeight</span></code> exceeds <code class="docutils literal notranslate"><span class="pre">txBlockHeight</span></code> by the requested confirmations.  Return <code class="docutils literal notranslate"><span class="pre">ERR_CONFIRMATIONS</span></code> if this check fails.</p></li>
+</ol>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">insecure</span> <span class="pre">==</span> <span class="pre">True</span></code>, check against user-defined <code class="docutils literal notranslate"><span class="pre">confirmations</span></code> only</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">insecure</span> <span class="pre">==</span> <span class="pre">True</span></code>, check against <code class="docutils literal notranslate"><span class="pre">max(confirmations,</span> <span class="pre">STABLE_BITCOIN_CONFIRMATIONS)</span></code>.</p></li>
+</ol>
+</div></blockquote>
+<ol class="arabic simple" start="3">
+<li><p>Check if the Bitcoin block was stored for a sufficient number of blocks (on the parachain) to ensure that staked relayers had the time to flag the block as potentially invalid. Check performed against <code class="docutils literal notranslate"><span class="pre">STABLE_PARACHAIN_CONFIRMATIONS</span></code>.</p></li>
+<li><p>Extract the block header from <code class="docutils literal notranslate"><span class="pre">BlockHeaders</span></code> using the <code class="docutils literal notranslate"><span class="pre">blockHash</span></code> tracked in <code class="docutils literal notranslate"><span class="pre">Chains</span></code> at the passed <code class="docutils literal notranslate"><span class="pre">txBlockHeight</span></code>.</p></li>
+<li><p>Check that the first 32 bytes of <code class="docutils literal notranslate"><span class="pre">merkleProof</span></code> are equal to the <code class="docutils literal notranslate"><span class="pre">txId</span></code> and the last 32 bytes are equal to the <code class="docutils literal notranslate"><span class="pre">merkleRoot</span></code> of the specified block header. Also check that the <code class="docutils literal notranslate"><span class="pre">merkleProof</span></code> size is either exactly 32 bytes, or is 64 bytes or more and a power of 2. Return <code class="docutils literal notranslate"><span class="pre">ERR_INVALID_MERKLE_PROOF</span></code> if one of these checks fails.</p></li>
+<li><p>Call <a class="reference internal" href="helpers.html#computemerkle"><span class="std std-ref">computeMerkle</span></a> passing <code class="docutils literal notranslate"><span class="pre">txId</span></code>, <code class="docutils literal notranslate"><span class="pre">txIndex</span></code> and <code class="docutils literal notranslate"><span class="pre">merkleProof</span></code> as parameters.</p></li>
+</ol>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>If this call returns the <code class="docutils literal notranslate"><span class="pre">merkleRoot</span></code>, emit a <code class="docutils literal notranslate"><span class="pre">VerifyTransaction(txId,</span> <span class="pre">txBlockHeight,</span> <span class="pre">confirmations)</span></code> event and return <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p>Otherwise return <code class="docutils literal notranslate"><span class="pre">ERR_INVALID_MERKLE_PROOF</span></code>.</p></li>
+</ol>
+</div></blockquote>
+<div class="figure align-default" id="id25">
+<img alt="verifyTransactionInclusion sequence diagram" src="../../_images/verifyTransaction-sequence.png" />
+<p class="caption"><span class="caption-number">Fig. 17 </span><span class="caption-text">The steps to verify a transaction in the <a class="reference internal" href="#verifytransactioninclusion"><span class="std std-ref">verifyTransactionInclusion</span></a> function.</span><a class="headerlink" href="#id25" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+</div>
+<div class="section" id="validatetransaction">
+<span id="id10"></span><h2>validateTransaction<a class="headerlink" href="#validatetransaction" title="Permalink to this headline">¶</a></h2>
+<p>Given a raw Bitcoin transaction, this function</p>
+<ol class="arabic simple">
+<li><p>Parses and extracts</p>
+<ol class="loweralpha simple">
+<li><p>the value and recipient address of the <em>Payment UTXO</em>,</p></li>
+<li><p>[Optionally] the OP_RETURN value of the <em>Data UTXO</em>.</p></li>
+</ol>
+</li>
+<li><p>Validates the extracted values against the function parameters.</p></li>
+</ol>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>See <a class="reference internal" href="../../intro/bitcoin.html#bitcoin-data-model"><span class="std std-ref">Bitcoin Data Model</span></a> for more details on the transaction structure, and <a class="reference internal" href="../../intro/accepted-format.html#accepted-tx-format"><span class="std std-ref">Accepted Bitcoin Transaction Format</span></a> for the transaction format of Bitcoin transactions validated in this function.</p>
+</div>
+<div class="section" id="id11">
+<h3>Specification<a class="headerlink" href="#id11" title="Permalink to this headline">¶</a></h3>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">validateTransaction(rawTx,</span> <span class="pre">paymentValue,</span> <span class="pre">recipientBtcAddress,</span> <span class="pre">opReturnId)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">rawTx</span></code>:  raw Bitcoin transaction including the transaction inputs and outputs.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">paymentValue</span></code>: integer value of BTC sent in the (first) <em>Payment UTXO</em> of transaction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">recipientBtcAddress</span></code>: 20 byte Bitcoin address of recipient of the BTC in the (first) <em>Payment UTXO</em>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">opReturnId</span></code>: [Optional] 32 byte hash identifier expected in OP_RETURN (see <a class="reference internal" href="../../security_performance/btcrelay-security.html#replace-attacks"><span class="std std-ref">Replay Attacks</span></a>).</p></li>
+</ul>
+<p><em>Returns</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: if the transaction was successfully parsed and validation of the passed values was correct.</p></li>
+<li><p>Error otherwise.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ValidateTransaction(txId,</span> <span class="pre">paymentValue,</span> <span class="pre">recipientBtcAddress,</span> <span class="pre">opReturnId)</span></code>: if parsing and validation was successful, emit an event specifying the <code class="docutils literal notranslate"><span class="pre">txId</span></code>, the <code class="docutils literal notranslate"><span class="pre">paymentValue</span></code>, the <code class="docutils literal notranslate"><span class="pre">recipientBtcAddress</span></code> and the <code class="docutils literal notranslate"><span class="pre">opReturnId</span></code>.</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_VALUE</span> <span class="pre">=</span> <span class="pre">&quot;Value</span> <span class="pre">of</span> <span class="pre">payment</span> <span class="pre">below</span> <span class="pre">requested</span> <span class="pre">amount&quot;</span></code>: return error the value of the (first) <em>Payment UTXO</em> is lower than <code class="docutils literal notranslate"><span class="pre">paymentValue</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_TX_FORMAT</span> <span class="pre">=</span> <span class="pre">&quot;Transaction</span> <span class="pre">has</span> <span class="pre">incorrect</span> <span class="pre">format&quot;</span></code>: return error if the transaction has an incorrect format (see <a class="reference internal" href="../../intro/accepted-format.html#accepted-tx-format"><span class="std std-ref">Accepted Bitcoin Transaction Format</span></a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_WRONG_RECIPIENT</span> <span class="pre">=</span> <span class="pre">&quot;Incorrect</span> <span class="pre">recipient</span> <span class="pre">Bitcoin</span> <span class="pre">address&quot;</span></code>: return error if the recipient specified in the (first) <em>Payment UTXO</em> does not match the given <code class="docutils literal notranslate"><span class="pre">recipientBtcAddress</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_INVALID_OPRETURN</span> <span class="pre">=</span> <span class="pre">&quot;Incorrect</span> <span class="pre">identifier</span> <span class="pre">in</span> <span class="pre">OP_RETURN</span> <span class="pre">field&quot;</span></code>: return error if the OP_RETURN field of the (second) <em>Data UTXO</em> does not match the given <code class="docutils literal notranslate"><span class="pre">opReturnId</span></code>.</p></li>
+</ul>
+</div>
+<div class="section" id="id12">
+<h3>Preconditions<a class="headerlink" href="#id12" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li><p>The BTC Parachain status must not be set to <code class="docutils literal notranslate"><span class="pre">SHUTDOWN:</span> <span class="pre">3</span></code>. If <code class="docutils literal notranslate"><span class="pre">SHUTDOWN</span></code> is set, all transaction validation is disabled.</p></li>
+</ul>
+</div>
+<div class="section" id="id13">
+<h3>Function Sequence<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<p>See the <a class="reference external" href="https://bitcoin.org/en/developer-reference#raw-transaction-format">raw Transaction Format section in the Bitcoin Developer Reference</a> for a full specification of Bitcoin’s transaction format (and how to extract inputs, outputs etc. from the raw transaction format).</p>
+<ol class="arabic simple">
+<li><p>Extract the <code class="docutils literal notranslate"><span class="pre">outputs</span></code> from <code class="docutils literal notranslate"><span class="pre">rawTx</span></code> using <a class="reference internal" href="parser.html#extractoutputs"><span class="std std-ref">extractOutputs</span></a>.</p></li>
+</ol>
+<blockquote>
+<div><ol class="loweralpha simple">
+<li><p>Check that the transaction (<code class="docutils literal notranslate"><span class="pre">rawTx</span></code>) has at least 2 outputs. One output (<em>Payment UTXO</em>) must be a <a class="reference external" href="https://en.bitcoinwiki.org/wiki/Pay-to-Pubkey_Hash">P2PKH</a> or <a class="reference external" href="https://github.com/libbitcoin/libbitcoin-system/wiki/P2WPKH-Transactions">P2WPKH</a> output. Another output (<em>Data UTXO</em>) must be an <a class="reference external" href="https://bitcoin.org/en/transactions-guide#term-null-data">OP_RETURN</a> output. Raise <code class="docutils literal notranslate"><span class="pre">ERR_TX_FORMAT</span></code> if this check fails.</p></li>
+</ol>
+</div></blockquote>
+<ol class="arabic simple" start="2">
+<li><p>Extract the value of the <em>Payment UTXO</em> using <a class="reference internal" href="parser.html#extractoutputvalue"><span class="std std-ref">extractOutputValue</span></a> and check that it is equal (or greater) than <code class="docutils literal notranslate"><span class="pre">paymentValue</span></code>. Return <code class="docutils literal notranslate"><span class="pre">ERR_INSUFFICIENT_VALUE</span></code> if this check fails.</p></li>
+<li><p>Extract the Bitcoin address specified as recipient in the <em>Payment UTXO</em> using <a class="reference internal" href="parser.html#extractoutputaddress"><span class="std std-ref">extractOutputAddress</span></a> and check that it matches <code class="docutils literal notranslate"><span class="pre">recipientBtcAddress</span></code>. Return <code class="docutils literal notranslate"><span class="pre">ERR_WRONG_RECIPIENT</span></code> if this check fails, or the error returned by <a class="reference internal" href="parser.html#extractoutputaddress"><span class="std std-ref">extractOutputAddress</span></a> (if the output was malformed).</p></li>
+<li><p>Extract the OP_RETURN value from the <em>Data UTXO</em> using <a class="reference internal" href="parser.html#extractopreturn"><span class="std std-ref">extractOPRETURN</span></a> and check that it matches <code class="docutils literal notranslate"><span class="pre">opReturnId</span></code>. Return <code class="docutils literal notranslate"><span class="pre">ERR_INVALID_OPRETURN</span></code> error if this check fails, or the error returned by <a class="reference internal" href="parser.html#extractopreturn"><span class="std std-ref">extractOPRETURN</span></a> (if the output was malformed).</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="verifyandvalidatetransaction">
+<span id="id14"></span><h2>verifyAndValidateTransaction<a class="headerlink" href="#verifyandvalidatetransaction" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">verifyAndValidateTransaction</span></code> function is a wrapper around the <a class="reference internal" href="#verifytransactioninclusion"><span class="std std-ref">verifyTransactionInclusion</span></a> and the <a class="reference internal" href="#validatetransaction"><span class="std std-ref">validateTransaction</span></a> functions. It adds an additional check to verify that the validated transaction is the one included in the specified block.</p>
+<div class="section" id="id15">
+<h3>Specification<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">verifyAndValidateTransaction(merkleProof,</span> <span class="pre">confirmations,</span> <span class="pre">rawTx,</span> <span class="pre">paymentValue,</span> <span class="pre">recipientBtcAddress,</span> <span class="pre">opReturnId)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">txId</span></code>: 32 byte hash identifier of the transaction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">merkleProof</span></code>: Merkle tree path (concatenated LE sha256 hashes, dynamic sized).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">confirmations</span></code>: integer number of confirmation required.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">rawTx</span></code>:  raw Bitcoin transaction including the transaction inputs and outputs.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">paymentValue</span></code>: integer value of BTC sent in the (first) <em>Payment UTXO</em> of transaction.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">recipientBtcAddress</span></code>: 20 byte Bitcoin address of recipient of the BTC in the (first) <em>Payment UTXO</em>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">opReturnId</span></code>: [Optional] 32 byte hash identifier expected in OP_RETURN (see <a class="reference internal" href="../../security_performance/btcrelay-security.html#replace-attacks"><span class="std std-ref">Replay Attacks</span></a>).</p></li>
+</ul>
+<p><em>Returns</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code>: If the same transaction has been verified and validated.</p></li>
+<li><p>Error otherwise.</p></li>
+</ul>
+</div>
+<div class="section" id="id16">
+<h3>Function Sequence<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li><p>Parse the <code class="docutils literal notranslate"><span class="pre">rawTx</span></code> to get the tx id.</p></li>
+<li><p>Call <a class="reference internal" href="#verifytransactioninclusion"><span class="std std-ref">verifyTransactionInclusion</span></a> with the applicable parameters.</p></li>
+<li><p>Call <a class="reference internal" href="#validatetransaction"><span class="std std-ref">validateTransaction</span></a> with the applicable parameters.</p></li>
+</ol>
+</div>
+</div>
+<div class="section" id="flagblockerror">
+<span id="id17"></span><h2>flagBlockError<a class="headerlink" href="#flagblockerror" title="Permalink to this headline">¶</a></h2>
+<p>Flags tracked Bitcoin block headers when Staked Relayers report and agree on a <code class="docutils literal notranslate"><span class="pre">NO_DATA_BTC_RELAY</span></code> or <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY</span></code> failure.</p>
+<div class="admonition attention">
+<p class="admonition-title">Attention</p>
+<p>This function <strong>does not</strong> validate the Staked Relayers accusation. Instead, it is put up to a majority vote among all Staked Relayers in the form of a</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function can only be called from the <em>Security</em> module of interBTC, after Staked Relayers have achieved a majority vote on a BTC Parachain status update indicating a BTC-Relay failure.</p>
+</div>
+<div class="section" id="id18">
+<h3>Specification<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">flagBlockError(blockHash,</span> <span class="pre">errors)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">blockHash</span></code>: SHA256 block hash of the block containing the error.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">errors</span></code>: list of <code class="docutils literal notranslate"><span class="pre">ErrorCode</span></code> entries which are to be flagged for the block with the given blockHash. Can be “NO_DATA_BTC_RELAY” or “INVALID_BTC_RELAY”.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">FlagBTCBlockError(blockHash,</span> <span class="pre">chainId,</span> <span class="pre">errors)</span></code> - emits an event indicating that a Bitcoin block hash (identified <code class="docutils literal notranslate"><span class="pre">blockHash</span></code>) in a <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> entry (<code class="docutils literal notranslate"><span class="pre">chainId</span></code>) was flagged with errors (<code class="docutils literal notranslate"><span class="pre">errors</span></code> list of <code class="docutils literal notranslate"><span class="pre">ErrorCode</span></code> entries).</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_UNKNOWN_ERRORCODE</span> <span class="pre">=</span> <span class="pre">&quot;The</span> <span class="pre">reported</span> <span class="pre">error</span> <span class="pre">code</span> <span class="pre">is</span> <span class="pre">unknown&quot;</span></code>: The reported <code class="docutils literal notranslate"><span class="pre">ErrorCode</span></code> can only be <code class="docutils literal notranslate"><span class="pre">NO_DATA_BTC_RELAY</span></code> or <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_BLOCK_NOT_FOUND</span>&#160; <span class="pre">=</span> <span class="pre">&quot;No</span> <span class="pre">Bitcoin</span> <span class="pre">block</span> <span class="pre">header</span> <span class="pre">found</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">given</span> <span class="pre">block</span> <span class="pre">hash&quot;</span></code>: No <code class="docutils literal notranslate"><span class="pre">RichBlockHeader</span></code> entry exists with the given block hash.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_ALREADY_REPORTED</span> <span class="pre">=</span> <span class="pre">&quot;This</span> <span class="pre">error</span> <span class="pre">has</span> <span class="pre">already</span> <span class="pre">been</span> <span class="pre">reported</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">given</span> <span class="pre">block</span> <span class="pre">hash</span> <span class="pre">and</span> <span class="pre">is</span> <span class="pre">pending</span> <span class="pre">confirmation&quot;</span></code>: The error reported for the given block hash is currently pending a vote by Staked Relayers.</p></li>
+</ul>
+<div class="section" id="id19">
+<h4>Function Sequence<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Check if <code class="docutils literal notranslate"><span class="pre">errors</span></code> contains  <code class="docutils literal notranslate"><span class="pre">NO_DATA_BTC_RELAY</span></code> or <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY</span></code>. If neither match, return <code class="docutils literal notranslate"><span class="pre">ERR_UNKNOWN_ERRORCODE</span></code>.</p></li>
+<li><p>Retrieve the <code class="docutils literal notranslate"><span class="pre">RichBlockHeader</span></code> entry from <code class="docutils literal notranslate"><span class="pre">BlockHeaders</span></code> using <code class="docutils literal notranslate"><span class="pre">blockHash</span></code>. Return <code class="docutils literal notranslate"><span class="pre">ERR_BLOCK_NOT_FOUND</span></code> if no block header can be found.</p></li>
+<li><p>Retrieve the <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> entry for the given <code class="docutils literal notranslate"><span class="pre">RichBlockHeader</span></code> using <code class="docutils literal notranslate"><span class="pre">ChainsIndex</span></code> for lookup with the block header’s <code class="docutils literal notranslate"><span class="pre">chainRef</span></code> as key.</p></li>
+<li><p>Flag errors in the <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> entry:</p>
+<ol class="loweralpha simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">errors</span></code> contains <code class="docutils literal notranslate"><span class="pre">NO_DATA_BTC_RELAY</span></code>, append the <code class="docutils literal notranslate"><span class="pre">RichBlockHeader.blockHeight</span></code> to <code class="docutils literal notranslate"><span class="pre">BlockChain.noData</span></code></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">errors</span></code> contains <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY</span></code>,  append the <code class="docutils literal notranslate"><span class="pre">RichBlockHeader.blockHeight</span></code> to <code class="docutils literal notranslate"><span class="pre">BlockChain.invalid</span></code> .</p></li>
+</ol>
+</li>
+<li><p>Emit <code class="docutils literal notranslate"><span class="pre">FlagBTCBlockError(blockHash,</span> <span class="pre">chainId,</span> <span class="pre">errors)</span></code> event, with the given <code class="docutils literal notranslate"><span class="pre">blockHash</span></code>, the <code class="docutils literal notranslate"><span class="pre">chainId</span></code> of the flagged <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> entry and the given <code class="docutils literal notranslate"><span class="pre">errors</span></code> as parameters.</p></li>
+<li><p>Return</p></li>
+</ol>
+</div>
+</div>
+</div>
+<div class="section" id="clearblockerror">
+<span id="id20"></span><h2>clearBlockError<a class="headerlink" href="#clearblockerror" title="Permalink to this headline">¶</a></h2>
+<p>Clears <code class="docutils literal notranslate"><span class="pre">ErrorCode</span></code> entries given as parameters from the status of a <code class="docutils literal notranslate"><span class="pre">RichBlockHeader</span></code>.  Can be <code class="docutils literal notranslate"><span class="pre">NO_DATA_BTC_RELAY</span></code> or <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY</span></code> failure.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function can only be called from the <em>Security</em> module of interBTC, after Staked Relayers have achieved a majority vote on a BTC Parachain status update indicating that a <code class="docutils literal notranslate"><span class="pre">RichBlockHeader</span></code> entry no longer has the specified errors.</p>
+</div>
+<div class="section" id="id21">
+<h3>Specification<a class="headerlink" href="#id21" title="Permalink to this headline">¶</a></h3>
+<p><em>Function Signature</em></p>
+<p><code class="docutils literal notranslate"><span class="pre">flagBlockError(blockHash,</span> <span class="pre">errors)</span></code></p>
+<p><em>Parameters</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">blockHash</span></code>: SHA256 block hash of the block containing the error.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">errors</span></code>: list of <code class="docutils literal notranslate"><span class="pre">ErrorCode</span></code> entries which are to be <strong>cleared</strong> from the block with the given blockHash. Can be <code class="docutils literal notranslate"><span class="pre">NO_DATA_BTC_RELAY</span></code> or <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY</span></code>.</p></li>
+</ul>
+<p><em>Events</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ClearBlockError(blockHash,</span> <span class="pre">chainId,</span> <span class="pre">errors)</span></code> - emits an event indicating that a Bitcoin block hash (identified <code class="docutils literal notranslate"><span class="pre">blockHash</span></code>) in a <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> entry (<code class="docutils literal notranslate"><span class="pre">chainId</span></code>) was cleared from the given errors (<code class="docutils literal notranslate"><span class="pre">errors</span></code> list of <code class="docutils literal notranslate"><span class="pre">ErrorCode</span></code> entries).</p></li>
+</ul>
+<p><em>Errors</em></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_UNKNOWN_ERRORCODE</span> <span class="pre">=</span> <span class="pre">&quot;The</span> <span class="pre">reported</span> <span class="pre">error</span> <span class="pre">code</span> <span class="pre">is</span> <span class="pre">unknown&quot;</span></code>: The reported <code class="docutils literal notranslate"><span class="pre">ErrorCode</span></code> can only be <code class="docutils literal notranslate"><span class="pre">NO_DATA_BTC_RELAY</span></code> or <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_BLOCK_NOT_FOUND</span>&#160; <span class="pre">=</span> <span class="pre">&quot;No</span> <span class="pre">Bitcoin</span> <span class="pre">block</span> <span class="pre">header</span> <span class="pre">found</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">given</span> <span class="pre">block</span> <span class="pre">hash&quot;</span></code>: No <code class="docutils literal notranslate"><span class="pre">RichBlockHeader</span></code> entry exists with the given block hash.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ERR_ALREADY_REPORTED</span> <span class="pre">=</span> <span class="pre">&quot;This</span> <span class="pre">error</span> <span class="pre">has</span> <span class="pre">already</span> <span class="pre">been</span> <span class="pre">reported</span> <span class="pre">for</span> <span class="pre">the</span> <span class="pre">given</span> <span class="pre">block</span> <span class="pre">hash</span> <span class="pre">and</span> <span class="pre">is</span> <span class="pre">pending</span> <span class="pre">confirmation&quot;</span></code>: The error reported for the given block hash is currently pending a vote by Staked Relayers.</p></li>
+</ul>
+<div class="section" id="id22">
+<h4>Function Sequence<a class="headerlink" href="#id22" title="Permalink to this headline">¶</a></h4>
+<ol class="arabic simple">
+<li><p>Check if <code class="docutils literal notranslate"><span class="pre">errors</span></code> contains  <code class="docutils literal notranslate"><span class="pre">NO_DATA_BTC_RELAY</span></code> or <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY</span></code>. If neither match, return <code class="docutils literal notranslate"><span class="pre">ERR_UNKNOWN_ERRORCODE</span></code>.</p></li>
+<li><p>Retrieve the <code class="docutils literal notranslate"><span class="pre">RichBlockHeader</span></code> entry from <code class="docutils literal notranslate"><span class="pre">BlockHeaders</span></code> using <code class="docutils literal notranslate"><span class="pre">blockHash</span></code>. Return <code class="docutils literal notranslate"><span class="pre">ERR_BLOCK_NOT_FOUND</span></code> if no block header can be found.</p></li>
+<li><p>Retrieve the <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> entry for the given <code class="docutils literal notranslate"><span class="pre">RichBlockHeader</span></code> using <code class="docutils literal notranslate"><span class="pre">ChainsIndex</span></code> for lookup with the block header’s <code class="docutils literal notranslate"><span class="pre">chainRef</span></code> as key.</p></li>
+<li><p>Un-flag error codes in the <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> entry.</p>
+<ol class="loweralpha simple">
+<li><p>If <code class="docutils literal notranslate"><span class="pre">errors</span></code> contains <code class="docutils literal notranslate"><span class="pre">NO_DATA_BTC_RELAY</span></code>: remove <code class="docutils literal notranslate"><span class="pre">RichBlockHeader.blockHeight</span></code> from <code class="docutils literal notranslate"><span class="pre">BlockChain.noData</span></code></p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">errors</span></code> contains <code class="docutils literal notranslate"><span class="pre">INVALID_BTC_RELAY</span></code>: remove <code class="docutils literal notranslate"><span class="pre">RichBlockHeader.blockHeight</span></code> from <code class="docutils literal notranslate"><span class="pre">BlockChain.invalid</span></code></p></li>
+</ol>
+</li>
+<li><p>Emit <code class="docutils literal notranslate"><span class="pre">ClearBlockError(blockHash,</span> <span class="pre">chainId,</span> <span class="pre">errors)</span></code> event, with the given <code class="docutils literal notranslate"><span class="pre">blockHash</span></code>, the <code class="docutils literal notranslate"><span class="pre">chainId</span></code> of the flagged <code class="docutils literal notranslate"><span class="pre">BlockChain</span></code> entry and the given <code class="docutils literal notranslate"><span class="pre">errors</span></code> as parameters.</p></li>
+<li><p>Return</p></li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="parser.html" class="btn btn-neutral float-right" title="Functions: Parser" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="data-model.html" class="btn btn-neutral float-left" title="Data Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Interlay
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,474 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Fee Model &mdash; interBTC Specification  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="License" href="../other/license.html" />
+    <link rel="prev" title="Economic Incentives" href="incentives.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search"  style="background: grey" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> interBTC Specification
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v5.5.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Introduction</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../intro/at-a-glance.html">BTC Parachain at a Glance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/CbA.html">Cryptocurrency-backed Assets</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/polkadot.html">Polkadot</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/xclaim-architecture.html">XCLAIM Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/btcrelay-architecture.html">BTC-Relay Architecture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/bitcoin.html">Bitcoin Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../intro/accepted-format.html">Accepted Bitcoin Transaction Format</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/introduction.html">How to Read This Specification</a></li>
+</ul>
+<p class="caption"><span class="caption-text">XCLAIM Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/collateral.html">Collateral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/fee.html">Fee</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/oracle.html">Exchange Rate Oracle</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/issue.html">Issue</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/refund.html">Refund</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/redeem.html">Redeem</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/replace.html">Replace</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/security.html">Security</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/relay.html">Relay</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/treasury.html">Treasury</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/vault-registry.html">Vault Registry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/nomination.html">Vault Nomination</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/reward.html">Reward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/staking.html">Staking</a></li>
+</ul>
+<p class="caption"><span class="caption-text">BTC-Relay Specification</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/data-model.html">Data Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/functions.html">Functions: Storage and Verification</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/parser.html">Functions: Parser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/helpers.html">Functions: Utils</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/events.html">Events</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../spec/btc-relay/errors.html">Error Codes</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Security and Performance</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/liquidations.html">Vault Liquidations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/xclaim-security.html">XCLAIM Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/btcrelay-security.html">Security Analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../security_performance/performance.html">Performance Analysis</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Economics</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="incentives.html">Economic Incentives</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Fee Model</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#payment-flows">Payment Flows</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#interbtc-fee-model">interBTC Fee Model</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#issue-and-redeem-fee-distribution">Issue and Redeem Fee Distribution</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#stake-updates">Stake Updates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#fee-payouts">Fee Payouts</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#griefing-fees">Griefing Fees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#premium-redeem-fee">Premium Redeem Fee</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#punishment-fees">Punishment Fees</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#theft-fee">Theft Fee</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#arbitrage">Arbitrage</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#excursion-scalable-reward-distribution">Excursion: Scalable Reward Distribution</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#transaction-fee-model">Transaction Fee Model</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption"><span class="caption-text">All the rest</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../other/license.html">License</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../other/interlay.html">Interlay</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">interBTC Specification</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Fee Model</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/economics/fees.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="fee-model">
+<span id="id1"></span><h1>Fee Model<a class="headerlink" href="#fee-model" title="Permalink to this headline">¶</a></h1>
+<p>The interBTC bridge uses conceptually two different and independent fee models:</p>
+<ol class="arabic simple">
+<li><p><strong>interBTC Fee Model</strong>. The internal interBTC bridge fee model covers any payments made through the operation of the bridge, e.g., the issue, redeem, or replace processes. This process concerns Users, Vaults (and its Nominators), and Relayers.</p></li>
+<li><p><strong>Transaction Fee Model</strong>. The transaction fees are essentially the <cite>DOT</cite> fees paid on every transaction to the Collators.</p></li>
+</ol>
+<div class="section" id="payment-flows">
+<h2>Payment Flows<a class="headerlink" href="#payment-flows" title="Permalink to this headline">¶</a></h2>
+<p>We detail the payment flows for both models in the figure below:</p>
+<div class="figure align-default" id="id2">
+<img alt="Payment flows" src="../_images/fee-payment-flows.png" />
+<p class="caption"><span class="caption-number">Fig. 20 </span><span class="caption-text">Detailed overview of fee accrual in the interBTC bridge, showing interBTC Fee Model and Transaction Fee Model payment flows, as well as opportunity costs.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
+</div>
+</div>
+<div class="section" id="interbtc-fee-model">
+<h2>interBTC Fee Model<a class="headerlink" href="#interbtc-fee-model" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="issue-and-redeem-fee-distribution">
+<h3>Issue and Redeem Fee Distribution<a class="headerlink" href="#issue-and-redeem-fee-distribution" title="Permalink to this headline">¶</a></h3>
+<p>The primary fees in interBTC are paid by users during <a class="reference internal" href="../spec/issue.html#issue-protocol"><span class="std std-ref">Issue</span></a> and <a class="reference internal" href="../spec/redeem.html#redeem-protocol"><span class="std std-ref">Redeem</span></a> as a relative fee on the issued or redeemed interBTC.</p>
+<p>Vaults earn fees based on their currently backed interBTC (i.e., <code class="docutils literal notranslate"><span class="pre">vault.issuedTokens</span></code>). To reduce variance of payouts, the interBTC bridge implements a pooled fee model. This means that Vaults earn a share of each fee based on their share of issued interBTC in the bridge.</p>
+<p>If the Vault does not back interBTC then it does not have a stake in the system and it will not receive any rewards, i.e., its stake is 0. Conversely, if the Vault has any issued interBTC, the Vault will earn rewards. Thus, only Vaults directly locking Bitcoin in the system will earn rewards from users.</p>
+<p>Each time a user issues or redeems interBTC, they pay the following fees to a global fee pool:</p>
+<ul class="simple">
+<li><p><strong>Issue Fee</strong>: A relative fee paid based on the requested interBTC paid in <cite>interBTC</cite>, for the current parameterization see <a class="reference internal" href="../spec/fee.html#issuefee"><span class="std std-ref">IssueFee</span></a></p></li>
+<li><p><strong>Redeem Fee</strong>: A relative fee paid based on the request BTC paid in <cite>interBTC</cite>, for the current parameterization see <a class="reference internal" href="../spec/fee.html#redeemfee"><span class="std std-ref">RedeemFee</span></a></p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Since redeem fees are backed by the Vault, they must use the Replace protocol to exit the system. To solve this issue, we allow self-redeems based on the Vault’s account ID which sets the redeem fee to zero.</p>
+</div>
+<p>From this fee pool 100% is distributed among all active Vaults.</p>
+<p>Each Vault is receiving a fair share of this fee pool by considering its stake in the system. The stake in the system is just the amount of BTC a vault is currently insuring with collateral. Calculating the rewards for a Vault is equivalent to this formula:</p>
+<div class="math notranslate nohighlight">
+\[\text{rewards} = \text{stake} (\text{total_rewards} / \text{total_stake})\]</div>
+<p><em>Eq. 1: Vault reward distribution.</em></p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>As an example, if we had 1 interBTC to distribute among all Vaults and our Vault having 50% of the “stake”, the individual Vault’s share could be calculated by: 100 * (1 interBTC / 200) = 0.5 interBTC</p>
+</div>
+<p>To be exact, the stake is expressed as the interBTC issued by a Vault. The issued interBTC are the interBTC currently being backed by the Vault. This shows how much a Vault’s collateral is “occupied” by users:</p>
+<div class="math notranslate nohighlight">
+\[\text{stake} = \text{interBTC_issued}\]</div>
+<p><em>Eq. 2: Parameterized stake updates.</em></p>
+<div class="section" id="stake-updates">
+<h4>Stake Updates<a class="headerlink" href="#stake-updates" title="Permalink to this headline">¶</a></h4>
+<p>Whenever a Vault is increasing or decreasing the number of issued interBTC (i.e., the actually locked BTC) it is backing, we MUST update their stake in the reward pool accordingly. These updates are achieved through the issue, redeem, and replace operations.</p>
+</div>
+<div class="section" id="fee-payouts">
+<h4>Fee Payouts<a class="headerlink" href="#fee-payouts" title="Permalink to this headline">¶</a></h4>
+<p>The Vault fee is paid each time an Issue or Redeem request is executed. Naively speaking, the bridge behaves as if on each issue and redeem, the bridge would loop through all Vaults to determine their share of stake, i.e., <code class="docutils literal notranslate"><span class="pre">vault.issuedTokens</span> <span class="pre">/</span> <span class="pre">totalSupply</span></code>, and distribute a percentage of the paid fees to the Vault.</p>
+<p>Since a naive implementation would result in unbounded iteration, the fee payout is implemented in a different way.
+However, the outcome it is equivalent to the naive approach.
+The payouts are based on the pull-based <a class="reference external" href="https://solmaz.io/2019/02/24/scalable-reward-changing/">Scalable Reward Distribution with Changing Stake Sizes</a>.
+This scheme allows rewards to be drawn by each Vault (and Nominator) individually and at any time without the interBTC bridge having to loop over all Vaults each time rewards are paid out.
+Read the <a class="reference internal" href="#scalablerewarddistribution"><span class="std std-ref">Excursion: Scalable Reward Distribution</span></a> section if you would like to understand how the payout system works under the hood.</p>
+</div>
+</div>
+<div class="section" id="griefing-fees">
+<h3>Griefing Fees<a class="headerlink" href="#griefing-fees" title="Permalink to this headline">¶</a></h3>
+<p>Griefing collateral is locked on <a class="reference internal" href="../spec/issue.html#requestissue"><span class="std std-ref">requestIssue</span></a> and <a class="reference internal" href="../spec/replace.html#requestreplace"><span class="std std-ref">requestReplace</span></a> to prevent <a class="reference internal" href="../security_performance/xclaim-security.html#griefing"><span class="std std-ref">Griefing</span></a>.
+If the requests are indeed cancelled, the griefing collateral is paid to the Vault that locked collateral in vain. On successful execute, the griefing collateral is refunded to the party making the request.
+Griefing collateral uses the currency of the transaction fees, i.e., <cite>DOT</cite>.</p>
+<ul class="simple">
+<li><p><strong>Issue Griefing Collateral</strong>: A relative collateral locked based on the requested interBTC paid in <cite>DOT</cite>, for the current parameterization see <a class="reference internal" href="../spec/fee.html#issuegriefingcollateral"><span class="std std-ref">IssueGriefingCollateral</span></a></p></li>
+<li><p><strong>Replace Griefing Collateral</strong>: A relative collateral locked based on the request interBTC paid in <cite>DOT</cite>, for the current parameterization see <a class="reference internal" href="../spec/fee.html#replacegriefingcollateral"><span class="std std-ref">ReplaceGriefingCollateral</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="premium-redeem-fee">
+<h3>Premium Redeem Fee<a class="headerlink" href="#premium-redeem-fee" title="Permalink to this headline">¶</a></h3>
+<p>When Vaults are below the <a class="reference internal" href="../spec/vault-registry.html#premiumcollateralthreshold"><span class="std std-ref">PremiumRedeemThreshold</span></a>, users are able to redeem with the Vault and receive an extra “bonus” slashed fromt he Vault’s collateral. This mechanism is to ensure that (1) Vaults have a higher incentive to stay above the <a class="reference internal" href="../spec/vault-registry.html#premiumcollateralthreshold"><span class="std std-ref">PremiumRedeemThreshold</span></a> and (2) users have an additional incentive to redeem with Vaults that are close to the <a class="reference internal" href="../spec/vault-registry.html#liquidationthreshold"><span class="std std-ref">LiquidationThreshold</span></a>.</p>
+<ul class="simple">
+<li><p><strong>Premium Redeem Fee</strong>: A relative fee slashed from the Vault’s collateral paid to the user in <cite>COL</cite> if a Vault is below the <a class="reference internal" href="../spec/vault-registry.html#premiumcollateralthreshold"><span class="std std-ref">PremiumRedeemThreshold</span></a>, for the current parameterization see <a class="reference internal" href="../spec/fee.html#premiumredeemfee"><span class="std std-ref">PremiumRedeemFee</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="punishment-fees">
+<h3>Punishment Fees<a class="headerlink" href="#punishment-fees" title="Permalink to this headline">¶</a></h3>
+<p>Punishment fees are slashed from the Vault’s collateral on failed redeems. A user can choose to either retry with another Vault or reimburse the <cite>interBTC</cite> amount. In both cases, the a punishment fee is deducted from the Vault’s collateral to ensure that Vault’s are punished in both cases.</p>
+<ul class="simple">
+<li><p><strong>Punishment Fee</strong>: A relative fee slashed from the Vault’s collateral paid to the user in <cite>COL</cite> if a Vault failed to execute a redeem request, for the current parameterization see <a class="reference internal" href="../spec/fee.html#punishmentfee"><span class="std std-ref">PunishmentFee</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="theft-fee">
+<h3>Theft Fee<a class="headerlink" href="#theft-fee" title="Permalink to this headline">¶</a></h3>
+<p>Relayers receive a reward for reporting Vaults for committing theft (see <a class="reference internal" href="../spec/relay.html#reportvaulttheft"><span class="std std-ref">reportVaultTheft</span></a> and <a class="reference internal" href="../spec/relay.html#reportvaultdoublepayment"><span class="std std-ref">reportVaultDoublePayment</span></a>).</p>
+<ul class="simple">
+<li><p><strong>Theft Fee</strong>: A relative fee slashed form the Vault’s collateral paid to the Relayer in <cite>COL</cite> if a Vault commits theft, for the current parameterization see <a class="reference internal" href="../spec/fee.html#theftfee"><span class="std std-ref">TheftFee</span></a></p></li>
+</ul>
+</div>
+<div class="section" id="arbitrage">
+<h3>Arbitrage<a class="headerlink" href="#arbitrage" title="Permalink to this headline">¶</a></h3>
+<p>Arbitrage trades are executed by anyone that exchanges <cite>interBTC</cite> for <cite>COL</cite> against the LiquidationVault. The LiquidationVault is essentially an AMM with two balances:</p>
+<ul class="simple">
+<li><p><em>issuedTokens</em>: amount of <cite>interBTC</cite> that have been liquidated through safety failures, see <a class="reference internal" href="../security_performance/liquidations.html#liquidations"><span class="std std-ref">Vault Liquidations</span></a></p></li>
+<li><p><em>lockedCollateral</em>: amount of <cite>COL</cite> that have been confiscated through safety failures, see <a class="reference internal" href="../security_performance/liquidations.html#liquidations"><span class="std std-ref">Vault Liquidations</span></a></p></li>
+</ul>
+<p>Anyone can now burn <cite>interBTC</cite> for <cite>COL</cite> at the exchange rate of the <code class="docutils literal notranslate"><span class="pre">issuedTokens/lockedCollateral</span></code> from the LiquidationVault.
+As the <a class="reference internal" href="../spec/vault-registry.html#liquidationthreshold"><span class="std std-ref">LiquidationThreshold</span></a> is strictly above the current exchange rate of the <cite>BTC/COL</cite> pair at the time of liquidation, this <em>should</em> represent an arbitrage opportunity: the value of burned <cite>interBTC</cite> should be lower than the value of received <cite>COL</cite>.</p>
+<p>However, in practice, the arbitrage process might not work as intended.
+See <a class="reference internal" href="incentives.html#externaleconomicrisks"><span class="std std-ref">External Economic Risks</span></a> for a discussion of related problems.
+Note that there are no fees being collected to execute trades against the LiquidationVault.</p>
+</div>
+<div class="section" id="excursion-scalable-reward-distribution">
+<span id="scalablerewarddistribution"></span><h3>Excursion: Scalable Reward Distribution<a class="headerlink" href="#excursion-scalable-reward-distribution" title="Permalink to this headline">¶</a></h3>
+<p>We recommend reading first the <a class="reference external" href="http://batog.info/papers/scalable-reward-distribution.pdf">Scalable Reward Distribution paper</a> and then the <a class="reference external" href="https://solmaz.io/2019/02/24/scalable-reward-changing/">extension for changing rewards</a>. Note that this scheme is “just” an efficient equivalent of the Vault distribution outlined above.
+Last, we extend this scheme to account for <a class="reference internal" href="../spec/nomination.html#vault-nomination"><span class="std std-ref">Vault Nomination</span></a> and <a class="reference internal" href="../security_performance/liquidations.html#liquidations"><span class="std std-ref">Vault Liquidations</span></a>. The adopted scheme is described in the <a class="reference external" href="https://github.com/interlay/interbtc/tree/master/crates/staking">README of the implementation</a>.</p>
+<p>Notable changes to the Scalable Reward Distribution with Changing Rewards are:</p>
+<ul class="simple">
+<li><p><strong>Staking Pools</strong> Fees are forwarded to a <em>Reward Pool</em> and then distributed to a <em>Staking Pool</em>. There is one Staking Pool for each Vault and all of its Nominators.</p></li>
+<li><p><strong>Slashing</strong> On liquidation of Vaults, no more fees are forwarded to the Staking Pool of that Vault.</p></li>
+</ul>
+<p>See the figure below for an indication how the Staking Pools are used.</p>
+<div class="figure align-default" id="id3">
+<img alt="Staking pools" src="../_images/fee-staking-pool.png" />
+<p class="caption"><span class="caption-number">Fig. 21 </span><span class="caption-text">Distribution of fees according to Staking Pools. Each Vault and all its Nominators are represented by a Staking Pool. This allows to distribute the applicable fees based on the global share of issued interBTC based on the stake of the Staking Pool as well as an individual distribution of fees between the Vault and its Nominators based on their share in the pool.</span><a class="headerlink" href="#id3" title="Permalink to this image">¶</a></p>
+</div>
+<p>In the scalable reward distribution, a single source of truth is used to calculate rewards: the “stake”.
+The “stake” can be any numeric representation.
+In interBTC, stake is defined as: <em>the current amount of issued interBTC</em>.
+A Vault’s stake is adjusted based on the change in issued interBTC - for instance we increase the issued interBTC on successful issues and decrease this on executed redeems.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For example, if a Vault executes issue requests amounting to 2,456,000 interSatoshi (smallest denomination) being added to the system, its stake would increase by 2,456,000. If the Vault then executes redeem requests, its rewards are reduced. So if the Vault redeems all 2,456,000 interSatoshi, its stake is 0 again. On a liquidation, this is again set to zero since the Vault no longer backs these tokens.</p>
+</div>
+<p>Now, each Vault’s rewards are calculated according to the following formula (equivalent to Eq. 1):</p>
+<div class="math notranslate nohighlight">
+\[\text{deposit}(\text{stake_delta}):
+  \text{reward_tally} += \text{reward_per_token} \cdot \text{stake_delta}\]</div>
+<div class="math notranslate nohighlight">
+\[\text{stake} += \text{stake_delta}\]</div>
+<div class="math notranslate nohighlight">
+\[\text{total_stake} += \text{stake_delta}\]</div>
+<div class="math notranslate nohighlight">
+\[\text{distribute_reward}(\text{reward}):
+  \text{reward_per_token} += \text{reward} / \text{total_stake}\]</div>
+<div class="math notranslate nohighlight">
+\[\text{compute_reward}():
+  \text{return stake} \cdot \text{reward_per_token} - \text{reward_tally}\]</div>
+<p><em>Eq. 3: Vault reward distribution using the SRD.</em></p>
+<p><strong>Definitions</strong></p>
+<ul class="simple">
+<li><p><strong>stake:</strong> the amount of interBTC issued by this Vault.</p></li>
+<li><p><strong>reward_tally</strong>: the Vault’s accumulated rewards (can be negative or positive).</p></li>
+<li><p><strong>stake_delta</strong>: the stake impact based on issuing or redeeming interBTC.</p></li>
+<li><p><strong>total_stake</strong>: the total amount of interBTC issued by all Vaults.</p></li>
+<li><p><strong>reward_per_token</strong>: the current reward per current stake (the total_stake).</p></li>
+<li><p><strong>reward</strong>: the rewards paid from issue and redeem requests.</p></li>
+</ul>
+<p>The reward is influenced by the total of all stakes. So the share of rewards paid to a Vault is determined by how many other Vaults are in the system and their individual stake.</p>
+<p><strong>Example Without Nomination</strong></p>
+<p><em>Current stake</em></p>
+<p>Note: stake is always non-zero.</p>
+<ul class="simple">
+<li><p>Vault Alice has a stake of 250</p></li>
+<li><p>Vault Bob has a stake of 30</p></li>
+<li><p>Vault Charlie has a stake of 100</p></li>
+</ul>
+<p>The total stake is therefore <code class="docutils literal notranslate"><span class="pre">380</span></code>.</p>
+<p><em>Reward claims</em></p>
+<p>Let’s assume there is a total of 1 interBTC in the reward pool based on the accumulated issue and redeem request. Then the <code class="docutils literal notranslate"><span class="pre">reward_per_token</span></code> = <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">interBTC</span> <span class="pre">/</span> <span class="pre">380</span></code>.</p>
+<ul class="simple">
+<li><p>Vault Alice has a claim of <code class="docutils literal notranslate"><span class="pre">250</span> <span class="pre">*</span> <span class="pre">1</span> <span class="pre">interBTC/380</span> <span class="pre">=</span> <span class="pre">0.6578947368421052</span> <span class="pre">interBTC</span></code></p></li>
+<li><p>Vault Bob has a claim of <code class="docutils literal notranslate"><span class="pre">30</span> <span class="pre">*</span> <span class="pre">1</span> <span class="pre">interBTC/380</span> <span class="pre">=</span> <span class="pre">0.07894736842105263</span> <span class="pre">interBTC</span></code></p></li>
+<li><p>Vault Charlie has a claim of <code class="docutils literal notranslate"><span class="pre">100</span> <span class="pre">*</span> <span class="pre">1</span> <span class="pre">interBTC/380</span> <span class="pre">=</span> <span class="pre">0.2631578947368421</span> <span class="pre">interBTC</span></code></p></li>
+</ul>
+<p><strong>Example With Nomination</strong></p>
+<p><em>Current stake</em></p>
+<p>Note: stake is always non-zero.</p>
+<ul class="simple">
+<li><p>Vault Alice and her Nominators have a stake of 250. Alice is fully nominated such that Alice is backing 200 and her Nominators are backing 50.</p></li>
+<li><p>Vault Bob has a stake of 30</p></li>
+<li><p>Vault Charlie has a stake of 100</p></li>
+</ul>
+<p>The total stake is therefore <code class="docutils literal notranslate"><span class="pre">380</span></code>.</p>
+<p><em>Reward claims</em></p>
+<p>Let’s assume there is a total of 1 interBTC in the reward pool based on the accumulated issue and redeem request. Then the <code class="docutils literal notranslate"><span class="pre">reward_per_token</span></code> = <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">interBTC</span> <span class="pre">/</span> <span class="pre">380</span></code>.</p>
+<ul class="simple">
+<li><p>Vault Alice has a claim of <code class="docutils literal notranslate"><span class="pre">200</span> <span class="pre">*</span> <span class="pre">1</span> <span class="pre">interBTC/380</span> <span class="pre">=</span> <span class="pre">0.526315789</span> <span class="pre">interBTC</span></code></p></li>
+<li><p>Alice’s Nominators have a claim of <code class="docutils literal notranslate"><span class="pre">50</span> <span class="pre">*</span> <span class="pre">1</span> <span class="pre">interBTC/380</span> <span class="pre">=</span> <span class="pre">0.131578947</span> <span class="pre">interBTC</span></code></p></li>
+<li><p>Vault Bob has a claim of <code class="docutils literal notranslate"><span class="pre">30</span> <span class="pre">*</span> <span class="pre">1</span> <span class="pre">interBTC/380</span> <span class="pre">=</span> <span class="pre">0.07894736842105263</span> <span class="pre">interBTC</span></code></p></li>
+<li><p>Vault Charlie has a claim of <code class="docutils literal notranslate"><span class="pre">100</span> <span class="pre">*</span> <span class="pre">1</span> <span class="pre">interBTC/380</span> <span class="pre">=</span> <span class="pre">0.2631578947368421</span> <span class="pre">interBTC</span></code></p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="transaction-fee-model">
+<h2>Transaction Fee Model<a class="headerlink" href="#transaction-fee-model" title="Permalink to this headline">¶</a></h2>
+<p>The interBTC bridge chain adopts the Polkadot relay chain model with <cite>DOT</cite> as the native currency for paying transaction fees.
+In this model, collators receive 100% of the transaction fees paid by Users, Vaults, and Relayers.
+We refer to the official <a class="reference external" href="https://wiki.polkadot.network/docs/learn-transaction-fees#fee-calculation">Polkadot documentation</a> for full details.</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../other/license.html" class="btn btn-neutral float-right" title="License" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="incentives.html" class="btn btn-neutral float-left" title="Economic Incentives" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2021, Interlay
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
