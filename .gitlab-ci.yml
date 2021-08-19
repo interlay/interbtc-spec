@@ -25,9 +25,9 @@ interbtc:
     stage: test
     extends: .before_script_template
     script:
-    - cd docs; make html
-    - sphinx-build -b latex source build/latex
-    - make -C build/latex 
+    - make html
+    - sphinx-build -b latex docs build/latex
+    - make -C build/latex
     only:
     - branches
     except:
@@ -37,16 +37,15 @@ pages:
     stage: deploy
     extends: .before_script_template
     script:
-    - cd docs
-    - sphinx-build -b latex source build/latex
+    - sphinx-build -b latex docs build/latex
     - make -C build/latex
-    - mv build/latex/interbtc.pdf ../public/interbtc-spec.pdf
+    - mv build/latex/interbtc.pdf public/interbtc-spec.pdf
     artifacts:
         paths:
         - public
     only:
     - master
-    
+
 release-github:
     stage: deploy
     image: registry.gitlab.com/interlay/containers/github-publisher:master

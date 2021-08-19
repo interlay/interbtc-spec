@@ -2,5 +2,5 @@
 */.vscode/*
 venv/*
 *.pyc
-docs/build/*
-docs/source/_build/*
+build/*
+docs/_build/*
