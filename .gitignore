@@ -2,14 +2,5 @@
 */.vscode/*
 venv/*
 *.pyc
-*/docs/build/latex/*.aux
-*/docs/build/latex/*.fdb_latexmk
-*/docs/build/latex/*.fls
-*/docs/build/latex/*.idx
-*/docs/build/latex/*.ilg
-*/docs/build/latex/*.ind
-*/docs/build/latex/*.log
-*/docs/build/latex/*.out
-*/docs/build/latex/*.toc
-*/docs/build/*
-*/docs/source/_build/*
+docs/build/*
+docs/source/_build/*
