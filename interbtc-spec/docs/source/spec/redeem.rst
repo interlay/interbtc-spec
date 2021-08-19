@@ -161,7 +161,7 @@ Let ``burnedTokens`` be ``amountWrapped`` minus the result of the multiplication
 * The selected vault MUST NOT be banned.
 * The selected vault MUST NOT be liquidated.
 * The redeemer MUST have at least ``amountWrapped`` free tokens.
-* ``burnedTokens`` minus the inclusion fee MUST be above the :ref:`RedeemBtcDustValue`, where the inclusion fee is the multiplication of :ref:`RedeemTransactionSize` and the fee rate estimate reported by the oracle.
+* ``burnedTokens`` minus the inclusion fee MUST be above or equal to the :ref:`RedeemBtcDustValue`, where the inclusion fee is the multiplication of :ref:`RedeemTransactionSize` and the fee rate estimate reported by the oracle.
 * The vault's ``issuedTokens`` MUST be at least ``vault.toBeRedeemedTokens + burnedTokens``.
 
 *Postconditions*
@@ -172,7 +172,7 @@ Let ``burnedTokens`` be ``amountWrapped`` minus the result of the multiplication
 * ``amountWrapped`` of the redeemer's tokens MUST be locked by this transaction.
 * :ref:`decreaseToBeReplacedTokens` MUST be called, supplying ``vault`` and ``burnedTokens``. The returned ``replaceCollateral`` MUST be released by this function.
 * A new ``RedeemRequest`` MUST be added to the ``RedeemRequests`` map, with the following value:
-   * 
+
    * ``redeem.vault`` MUST be the requested ``vault``
    * ``redeem.opentime`` MUST be the current :ref:`activeBlockCount`
    * ``redeem.fee`` MUST be :ref:`redeemFee` multiplied by ``amountWrapped`` if ``redeemer != vault``, otherwise this should be zero.
@@ -226,20 +226,19 @@ Specification
 executeRedeem
 -------------
 
-A vault calls this function after receiving an ``RequestRedeem`` event with his public key. Before calling the function, the vault transfers the specific amount of BTC to the BTC address given in the original redeem request. The vault completes the redeem with this function.
+A vault calls this function after receiving an ``RequestRedeem`` event with their public key. Before calling the function, the vault transfers the specific amount of BTC to the BTC address given in the original redeem request. The vault completes the redeem with this function.
 
 Specification
 .............
 
 *Function Signature*
 
-``executeRedeem(vault, redeemId, merkleProof, rawTx)``
+``executeRedeem(redeemId, rawMerkleProof, rawTx)``
 
 *Parameters*
 
-* ``vault``: the vault responsible for executing this redeem request.
 * ``redeemId``: the unique hash created during the ``requestRedeem`` function.
-* ``merkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
+* ``rawMerkleProof``: Merkle tree path (concatenated LE SHA256 hashes).
 * ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
 
@@ -249,16 +248,16 @@ Specification
 
 *Preconditions*
 
-* The function call MUST be signed be *someone*, i.e. not necessarily the *redeemer*.
+* The function call MUST be signed by *someone*, i.e. not necessarily the *vault*.
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN:2``.
 * A *pending* ``RedeemRequest`` MUST exist with an id equal to ``redeemId``.
 * The ``rawTx`` MUST decode to a valid transaction that transfers exactly the amount specified in the ``RedeemRequest`` struct. It MUST be a transaction to the correct address, and provide the expected OP_RETURN, based on the ``RedeemRequest``.
-* The ``merkleProof`` MUST contain a valid proof of of ``rawTX``.
+* The ``rawMerkleProof`` MUST contain a valid proof of of ``rawTX``.
 * The bitcoin payment MUST have been submitted to the relay chain, and MUST have sufficient confirmations.
 
 *Postconditions*
 
-* ``redeemRequest.amountBtc - redeemRequest.transferFeeBtc`` of the tokens in the redeemer's account MUST be burned.
+* ``redeemRequest.amountBtc + redeemRequest.transferFeeBtc`` of the tokens in the redeemer's account MUST be burned.
 * The user's `lockedTokens` MUST decrease by `redeemRequest.amountBtc + redeemRequest.transferFeeBtc`.
 * The vault’s `toBeRedeemedTokens` MUST decrease by `redeemRequest.amountBtc + redeemRequest.transferFeeBtc`.
 * The vault’s `issuedTokens` MUST decrease by `redeemRequest.amountBtc + redeemRequest.transferFeeBtc`.
@@ -287,12 +286,13 @@ Specification
 
 *Function Signature*
 
-``cancelRedeem(redeemId, reimburse)``
+``cancelRedeem(redeemer, redeemId, reimburse)``
 
 *Parameters*
 
+* ``redeemer``: account cancelling this redeem request.
 * ``redeemId``: the unique hash of the redeem request.
-* ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the vault, or wishes to keep the interBTC (and retry to redeem with another Vault).
+* ``reimburse``: if true, user is reimbursed in collateral (slashed from the vault), else interBTC is returned (to retry with another vault).
 
 
 *Events*
@@ -301,9 +301,10 @@ Specification
 
 *Preconditions*
 
+* The function call MUST be signed by ``redeemer``.
 * The BTC Parachain status in the :ref:`security` component MUST be set to ``RUNNING:0``.
 * A *pending* ``RedeemRequest`` MUST exist with an id equal to ``redeemId``.
-* The function call MUST be signed by ``redeemRequest.redeemer``, i.e. this function can only be called by the account who made the redeem request.
+* The ``redeemer`` MUST equal ``redeemRequest.redeemer``.
 * The request MUST be expired.
 
 *Postconditions*
@@ -313,24 +314,35 @@ Let ``confiscatedCollateral`` be equal to ``vault.backingCollateral * (amountInc
 Then:
 
 * If the vault is liquidated:
+
    * If ``reimburse`` is true, an amount of ``confiscatedCollateral`` MUST be transferred from the vault to the redeemer.
    * If ``reimburse`` is false, an amount of ``confiscatedCollateral`` MUST be transferred from the vault to the liquidation vault.
+
 * If the vault is *not* liquidated, the following collateral changes are made:
+
    * If ``reimburse`` is true, the user SHOULD be reimbursed the worth of ``amountIncludingParachainFee`` in collateral. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
    * A punishment fee MUST be tranferred from the vault's backing collateral to the redeemer: :ref:`punishmentFee`. The transfer MUST be saturating, i.e. if the amount is not available, it should transfer whatever amount *is* available.
-* If ``reimburse`` is true: 
+
+* If ``reimburse`` is true:
+
    * ``redeem.fee`` MUST be transferred from the vault to the fee pool if non-zero.
    * If after the loss of collateral the vault is below the :ref:`SecureCollateralThreshold`:
+
       *  ``amountIncludingParachainFee`` of the user's tokens are *burned*. 
       * :ref:`decreaseTokens` MUST be called, supplying the vault, the user, and ``amountIncludingParachainFee`` as arguments. 
       *  The ``redeem.status`` is set to ``Reimbursed(false)``, where the ``false`` indicates that the vault has not yet received the tokens.
+
    * If after the loss of collateral the vault remains above the :ref:`SecureCollateralThreshold`:
+
       * ``amountIncludingParachainFee`` of the user's tokens MUST be unlocked and transferred to the vault. 
       * :ref:`decreaseToBeRedeemedTokens` MUST be called, supplying the vault and ``amountIncludingParachainFee`` as arguments. 
       * The ``redeem.status`` is set to ``Reimbursed(true)``, where the ``true`` indicates that the vault has received the tokens.
+
 * If ``reimburse`` is false:
+
    * All the user's tokens that were locked in :ref:`requestRedeem` MUST be unlocked, i.e. an amount of ``redeem.amountBtc + redeem.fee + redeem.transferFeeBtc``.
    * The vault's ``toBeRedeemedTokens`` MUST decrease by ``amountIncludingParachainFee``.
+
 * The vault MUST be banned.
 
 
@@ -351,8 +363,8 @@ Specification
 
 *Parameters*
 
+* ``vault``: the vault that was unable to back the tokens.
 * ``redeemId``: the unique hash of the redeem request.
-* ``reimburse``: boolean flag, specifying if the user wishes to be reimbursed in DOT and slash the vault, or wishes to keep the interBTC (and retry to redeem with another Vault).
 
 *Events*
 
@@ -363,6 +375,7 @@ Specification
 * The BTC Parachain status in the :ref:`security` component MUST be set to ``RUNNING:0``.
 * A ``RedeemRequest`` MUST exist with an id equal to ``redeemId``.
 * ``redeem.status`` MUST be ``Reimbursed(false)``.
+* The ``vault`` MUST equal ``redeemRequest.vault``.
 * The vault MUST have sufficient collateral to remain above the :ref:`SecureCollateralThreshold` after issuing ``redeem.amountBtc + redeem.transferFeeBtc`` tokens.
 * The vault MUST NOT be banned.
 * The function call MUST be signed by ``redeem.vault``, i.e. this function can only be called by the vault.
@@ -371,7 +384,7 @@ Specification
 
 * :ref:`tryIncreaseToBeIssuedTokens` and :ref:`issueTokens` MUST be called, both with the vault and ``redeem.amountBtc + redeem.transferFeeBtc`` as arguments.
 * ``redeem.amountBtc + redeem.transferFeeBtc`` tokens MUST be minted to the vault.
-
+* The ``redeem.status`` MUST be set to ``Reimbursed(true)``.
 
 Events
 ~~~~~~~
