@@ -133,6 +133,7 @@ Specification
 * The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
 * The :ref:`btc-relay` MUST be initialized.
 * The Vault MUST be registered and active.
+* The Vault MUST NOT be banned.
 * The ``amount`` MUST be greater than or equal to :ref:`issueBtcDustValue`.
 * The ``griefingCollateral`` MUST exceed or equal the value of request ``amount`` at the current exchange-rate, multiplied by :ref:`issueGriefingCollateral`.
 * The ``griefingCollateral`` MUST be equal or less than the requester's free balance.
@@ -185,7 +186,7 @@ Specification
 *Events*
 
 * :ref:`executeIssueEvent`
-* :ref:`issueAmountChangeEvent`
+* If the amount transferred IS not equal to the ``issue.amount + issue.fee``, the :ref:`issueAmountChangeEvent` MUST be emitted
 
 *Preconditions*
 
