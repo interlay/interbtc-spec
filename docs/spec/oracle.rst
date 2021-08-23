@@ -28,23 +28,8 @@ Key to indicate a specific value.
 Discriminant                             Description
 =======================================  ========================================================================
 ``ExchangeRate(CurrencyId)``             Exchange rate against Bitcoin, in e.g. planck per satoshi.
-``FeeEstimation(BitcoinInclusionTime)``  Estimate of the bitcoin inclusion fee.
+``FeeEstimation``                        Estimate of the Bitcoin inclusion fee, in satoshis per byte.
 =======================================  ========================================================================
-
-BitcoinInclusionTime
-....................
-
-Indicates the time period for bitcoin inclusion fee estimates.
-
-.. tabularcolumns:: |l|L|
-
-======================  ========================================================================
-Discriminant            Description
-======================  ========================================================================
-``fast``                Inclusion estimate for 1 block (~10 min) inclusion.
-``half``                Inclusion estimate for 3 block (~30 min) inclusion.
-``hour``                Inclusion estimate for 6 block (~60 min) inclusion.
-======================  ========================================================================
 
 
 Scalars
@@ -138,7 +123,7 @@ For each ``(oracleKey, value)`` pair,
 .. _getPrice:
 
 getPrice
----------------
+--------
 
 Returns the latest medianized value for the given key, as calculated from the received external data sources.
 
@@ -165,7 +150,7 @@ Specification
 .. _oracle_onInitialize:
 
 onInitialize
----------------
+------------
 
 This function is called at the start of every block. When new values have been submitted, or when old values expire, this function update the aggregate value.
 
