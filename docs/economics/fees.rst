@@ -3,10 +3,11 @@
 Fee Model
 =========
 
-The interBTC bridge uses conceptually two different and independent fee models:
+The interBTC bridge uses conceptually three different and independent fee models:
 
 1. **interBTC Fee Model**. The internal interBTC bridge fee model covers any payments made through the operation of the bridge, e.g., the issue, redeem, or replace processes. This process concerns Users, Vaults (and its Nominators), and Relayers.
-2. **Transaction Fee Model**. The transaction fees are essentially the `DOT` fees paid on every transaction to the Collators.
+2. **Griefing Fee Model**. These are `DOT` fees paid to the Vault on a failed issue or replace.
+3. **Transaction Fee Model**. The transaction fees are essentially the `DOT` fees paid on every transaction to the Collators.
 
 Payment Flows
 ~~~~~~~~~~~~~
