@@ -59,7 +59,7 @@ To be exact, the stake is expressed as the interBTC issued by a Vault. The issue
 Stake Updates
 .............
 
-Whenever a Vault is increasing or decreasing the number of issued interBTC (i.e., the actually locked BTC) it is backing, we MUST update their stake in the reward pool accordingly. These updates are achieved through the issue, redeem, and replace operations.
+Whenever a Vault is increasing or decreasing the number of issued interBTC it is backing, we MUST update their stake in the reward pool accordingly. These updates are achieved through the issue, redeem, and replace operations.
 
 Fee Payouts
 ...........
