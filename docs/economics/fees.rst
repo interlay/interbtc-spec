@@ -48,7 +48,7 @@ Each Vault is receiving a fair share of this fee pool by considering its stake i
 *Eq. 1: Vault reward distribution.*
 
 
-.. note:: As an example, if we had 1 interBTC to distribute among all Vaults and our Vault having 50% of the “stake”, the individual Vault’s share could be calculated by: 100 * (1 interBTC / 200) = 0.5 interBTC
+.. note:: As an example, if we had 1 interBTC to distribute among all Vaults with total stake 200 and assuming the individual Vault has stake 100, the reward share could be calculated by: 100 * (1 interBTC / 200) = 0.5 interBTC
 
 To be exact, the stake is expressed as the interBTC issued by a Vault. The issued interBTC are the interBTC currently being backed by the Vault. This shows how much a Vault’s collateral is “occupied” by users:
 
