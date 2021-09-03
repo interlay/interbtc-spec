@@ -34,7 +34,7 @@ If the Vault does not back interBTC then it does not have a stake in the system 
 Each time a user issues or redeems interBTC, they pay the following fees to a global fee pool:
 
 - **Issue Fee**: A relative fee paid based on the requested interBTC paid in `interBTC`, for the current parameterization see :ref:`issueFee`
-- **Redeem Fee**: A relative fee paid based on the request BTC paid in `interBTC`, for the current parameterization see :ref:`redeemFee`
+- **Redeem Fee**: A relative fee paid based on the requested BTC paid in `interBTC`, for the current parameterization see :ref:`redeemFee`
 
 .. note:: Since redeem fees are backed by the Vault, they must use the Replace protocol to exit the system. To solve this issue, we allow self-redeems based on the Vault’s account ID which sets the redeem fee to zero.
 
