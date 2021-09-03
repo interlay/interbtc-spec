@@ -107,7 +107,7 @@ requestIssue
 ------------
 
 A user opens an issue request to create a specific amount of interBTC. 
-When calling this function, a user provides their parachain account identifier, the to be issued amount of interBTC, and the Vault she wants to use in this process (parachain account identifier). Further, she provides some (small) amount of DOT collateral (``griefingCollateral``) to prevent griefing.
+When calling this function, a user provides their parachain account identifier, the to be issued amount of interBTC, and the Vault to use in this process (account identifier). Further, they provide some (small) amount of DOT collateral (``griefingCollateral``) to prevent griefing.
 
 Specification
 .............

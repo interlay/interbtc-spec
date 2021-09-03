@@ -6,7 +6,7 @@ Redeem
 Overview
 ~~~~~~~~
 
-The redeem module allows a user to receive BTC on the Bitcoin chain in return for destroying an equivalent amount of interBTC on the BTC Parachain. The process is initiated by a user requesting a redeem with a vault. The vault then needs to send BTC to the user within a given time limit. Next, the vault has to finalize the process by providing a proof to the BTC Parachain that he has send the right amount of BTC to the user. If the vault fails to deliver a valid proof within the time limit, the user can claim an equivalent amount of DOT from the vault's locked collateral to reimburse him for his loss in BTC.
+The redeem module allows a user to receive BTC on the Bitcoin chain in return for destroying an equivalent amount of interBTC on the BTC Parachain. The process is initiated by a user requesting a redeem with a vault. The vault then needs to send BTC to the user within a given time limit. Next, the vault has to finalize the process by providing a proof to the BTC Parachain that they have send the right amount of BTC to the user. If the vault fails to deliver a valid proof within the time limit, the user can claim an equivalent amount of DOT from the vault's locked collateral to reimburse him for his loss in BTC.
 
 Moreover, as part of the liquidation procedure, users are able to directly exchange interBTC for DOT. To this end, a user is able to execute a special liquidation redeem if one or multiple vaults have been liquidated.
 
@@ -276,7 +276,7 @@ The user that initially requested the redeem process calls this function to obta
 
 The failed vault is banned from further issue, redeem and replace requests for a pre-defined time period (:ref:`punishmentDelay` as defined in :ref:`vault-registry`).
 
-The user is able to choose between reimbursement and retrying. If the user chooses the retry, it gets back the tokens, and a punishment fee is transferred from the vault to the user. If the user chooses reimbursement, then he receives the equivalent worth of the tokens in collateral, plus a punishment fee. In this case, the tokens are transferred from the user to the vault. In either case, the vault may also be slashed an additional punishment that goes to the fee pool.
+The user is able to choose between reimbursement and retrying. If the user chooses the retry, it gets back the tokens, and a punishment fee is transferred from the vault to the user. If the user chooses reimbursement, then they receive the equivalent worth of the tokens in collateral, plus a punishment fee. In this case, the tokens are transferred from the user to the vault. In either case, the vault may also be slashed an additional punishment that goes to the fee pool.
 
 The punishment fee paid to the user stays constant (i.e., the user always receives the punishment fee of e.g. 10%).
 
