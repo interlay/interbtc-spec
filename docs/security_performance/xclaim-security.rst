@@ -158,7 +158,7 @@ We need to ensure that concurrent issue, redeem, and replace requests are handle
 Concurrent redeem
 -----------------
 
-We need to make sure that a vault cannot be used in multiple redeem requests in parallel if that would exceed his amount of locked BTC. **Example**: If the vault has 5 BTC locked and receives two redeem requests for 5 interBTC/BTC, he can only fulfil one and would lose his collateral with the other.
+We need to make sure that a vault cannot be used in multiple redeem requests in parallel if that would exceed his amount of locked BTC. **Example**: If the vault has 5 BTC locked and receives two redeem requests for 5 interBTC/BTC, they can only fulfil one and would lose his collateral with the other.
 
 Concurrent issue and redeem
 ---------------------------

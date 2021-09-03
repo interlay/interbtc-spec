@@ -86,7 +86,7 @@ Griefing collateral uses the currency of the transaction fees, i.e., `DOT`.
 Premium Redeem Fee
 ------------------
 
-When Vaults are below the :ref:`premiumCollateralThreshold`, users are able to redeem with the Vault and receive an extra "bonus" slashed fromt he Vault's collateral. This mechanism is to ensure that (1) Vaults have a higher incentive to stay above the :ref:`premiumCollateralThreshold` and (2) users have an additional incentive to redeem with Vaults that are close to the :ref:`liquidationThreshold`.
+When Vaults are below the :ref:`premiumCollateralThreshold`, users are able to redeem with the Vault and receive an extra "bonus" slashed from the Vault's collateral. This mechanism is to ensure that (1) Vaults have a higher incentive to stay above the :ref:`premiumCollateralThreshold` and (2) users have an additional incentive to redeem with Vaults that are close to the :ref:`liquidationThreshold`.
 
 - **Premium Redeem Fee**: A relative fee slashed from the Vault's collateral paid to the user in `COL` if a Vault is below the :ref:`premiumCollateralThreshold`, for the current parameterization see :ref:`premiumRedeemFee`
 
