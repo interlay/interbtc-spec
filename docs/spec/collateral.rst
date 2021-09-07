@@ -6,6 +6,10 @@ Collateral
 Overview
 ~~~~~~~~
 
+The bridge support multiple backing collaterals. Similarly to MakerDAO, each vault uses a single currency for backing the wrapped token. If vault operators want to use multiple currencies, they have to register multiple vaults. It is possible to use `key derivation <https://substrate.dev/docs/en/knowledgebase/integrate/subkey#hd-key-derivation>`_ to run multiple vaults using a single mnemonic.
+
+If a vault ``failingVault`` fails to execute a redeem or a replace, the aggrieved party receives the backing collateral that ``failingVault`` uses. Note that while each vault can choose which currency they want to use to back the tokens, griefing collateral always uses `DOT`.
+
 The Collateral module is the central storage for collateral provided by users and vaults of the system.
 It allows to (i) lock, (ii) release, and (iii) slash collateral of either users or vaults.
 It can only be accessed by other modules and not directly through external transactions.
