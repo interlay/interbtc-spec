@@ -19,10 +19,12 @@ The nominal control flow is as follows:
 4. The user or Vault acting on behalf of the user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain. The user or a Vault acting on behalf of the user executes the :ref:`executeIssue` function on the BTC Parachain. The issue function requires a reference to the issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of interBTC into his account.
 5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``IssuePeriod``), the Vault is able to call the :ref:`cancelIssue` function to cancel the issue request adn will receive the griefing collateral locked by the user.
 
-However, to accommodate for user error, we allow executions even when the user sends an incorrect amount. Specifically, we distinguish the following cases:
+User Failsafe
+.............
 
-* The user transfers the expected amount of Bitcoin. The control flow is as above.
-* The user sends less than the expected amount. The user has the option to execute the issue with this amount. However, it will lose part of its griefing collateral. If it sends e.g. 10% of the expected amount, it loses 90% of the griefing collateral. It will also receive 10% of the wrapped tokens. Because there is a cost associated with this choice, automatic execution of this issue request by vaults is disallowed. The alternative for the user is to make another Bitcoin transfer, and to execute the issue with that transaction. In this case, however, it loses the Bitcoin sent in the first transaction.
+To accommodate for user error, the bridge allows the execution of issue requests even when the user sends an incorrect BTC amount. Specifically, we distinguish the following cases:
+
+* The user sends less than the expected amount. The user has the option to execute the issue with this amount. However, it will lose part of its griefing collateral. If it sends e.g. 10% of the expected amount, it loses 90% of the griefing collateral. It will also receive 10% of the wrapped tokens. Because there is a cost associated with this choice, automatic execution of this issue request by Vaults is disallowed. The alternative for the user is to make another Bitcoin transfer, and to execute the issue with that transaction. In this case, however, it loses the Bitcoin sent in the first transaction.
 * The user sends more than the expected amount.
 
   * If the Vault has sufficient collateral to issue wrapped tokens for sent amount, the size of the issue request is automatically increased and more collateral of the Vault is reserved. The user receives the amount corresponding to the received amount of Bitcoin. The issue fee is deducted from the updated (increased) amount.
