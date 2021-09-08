@@ -21,12 +21,12 @@ The nominal control flow is as follows:
 
 However, to accommodate for user error, we allow executions even when the user sends an incorrect amount. Specifically, we distinguish the following cases:
 
-* The user transfers the expected amount of bitcoin. The control flow is as above.
-* The user sends less than the expected amount. The user has the option to execute the issue with this amount. However, it will lose part of its griefing collateral. If it sends e.g. 10% of the expected amount, it loses 90% of the griefing collateral. Of course, it will also only receive 10% of the wrapped tokens. Because there is a cost associated with this choice, automatic execution of this issue request by vaults is disallowed. The alternative for the user is to make another bitcoin transfer, and to execute the issue with that transaction. In this case, however, it loses the bitcoin sent in the first transaction.
+* The user transfers the expected amount of Bitcoin. The control flow is as above.
+* The user sends less than the expected amount. The user has the option to execute the issue with this amount. However, it will lose part of its griefing collateral. If it sends e.g. 10% of the expected amount, it loses 90% of the griefing collateral. It will also receive 10% of the wrapped tokens. Because there is a cost associated with this choice, automatic execution of this issue request by vaults is disallowed. The alternative for the user is to make another Bitcoin transfer, and to execute the issue with that transaction. In this case, however, it loses the Bitcoin sent in the first transaction.
 * The user sends more than the expected amount.
 
-  * If the vault has sufficient collateral to issue wrapped tokens for sent amount, it does so. The user receives the amount corresponding to the received amount of bitcoin. The issue fee is deducted from the amount as usual.
-  * If the vault does not have sufficient collateral to issue the additional amount, the vault issues only the amount that was originally requested. A refund request is sent to the vault to return the surplus btc (excluding a fee). Note, however, that there is no pentalty for the vault if it does not return the surplus bitcoin.
+  * If the Vault has sufficient collateral to issue wrapped tokens for sent amount, the size of the issue request is automatically increased and more collateral of the Vault is reserved. The user receives the amount corresponding to the received amount of Bitcoin. The issue fee is deducted from the updated (increased) amount.
+  * If the Vault does not have sufficient collateral to issue the additional amount, only the amount that was originally requested is issued. A refund request is sent to the Vault to return the surplus Bitcoin (excluding a fee). Note, however, that there is no penalty for the Vault if it does not return the surplus Bitcoin since this is a user fault rather than a Vault fault.
 
 Security
 --------
