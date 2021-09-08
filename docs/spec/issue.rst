@@ -11,11 +11,24 @@ The Issue module allows as user to create new interBTC tokens. The user needs to
 Step-by-step
 ------------
 
+The nominal control flow is as follows:
+
 1. Precondition: a Vault has locked collateral as described in the :ref:`Vault-registry`.
 2. A user executes the :ref:`requestIssue` function to open an issue request. The issue request includes the amount of interBTC the user wants to issue, the selected Vault, and a small collateral reserve to prevent :ref:`griefing`.
 3. A user sends the equivalent amount of BTC to issue as interBTC to the Vault on the Bitcoin blockchain. 
 4. The user or Vault acting on behalf of the user extracts a transaction inclusion proof of that locking transaction on the Bitcoin blockchain. The user or a Vault acting on behalf of the user executes the :ref:`executeIssue` function on the BTC Parachain. The issue function requires a reference to the issue request and the transaction inclusion proof of the Bitcoin locking transaction. If the function completes successfully, the user receives the requested amount of interBTC into his account.
 5. Optional: If the user is not able to complete the issue request within the predetermined time frame (``IssuePeriod``), the Vault is able to call the :ref:`cancelIssue` function to cancel the issue request adn will receive the griefing collateral locked by the user.
+
+User Failsafe
+.............
+
+To accommodate for user error, the bridge allows the execution of issue requests even when the user sends an incorrect BTC amount. Specifically, we distinguish the following cases:
+
+* The user sends less than the expected amount. The user has the option to execute the issue with this amount. However, it will lose part of its griefing collateral. If it sends e.g. 10% of the expected amount, it loses 90% of the griefing collateral. It will also receive 10% of the wrapped tokens. Because there is a cost associated with this choice, automatic execution of this issue request by Vaults is disallowed. The alternative for the user is to make another Bitcoin transfer, and to execute the issue with that transaction. In this case, however, it loses the Bitcoin sent in the first transaction.
+* The user sends more than the expected amount.
+
+  * If the Vault has sufficient collateral to issue wrapped tokens for the sent amount, the size of the issue request is automatically increased and more collateral of the Vault is reserved. The user receives the amount corresponding to the received amount of Bitcoin. The issue fee is deducted from the updated (increased) amount.
+  * If the Vault does not have sufficient collateral to issue the additional amount, only the amount that was originally requested is issued. A refund request is sent to the Vault to return the surplus Bitcoin (excluding a fee). Note, however, that there is no penalty for the Vault if it does not return the surplus Bitcoin since this is a user fault rather than a Vault fault.
 
 Security
 --------
