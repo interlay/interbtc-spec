@@ -42,10 +42,12 @@ Account identifier of an artificial vault maintained by the VaultRegistry to han
 Maps
 ----
 
+.. _LiquidationVault:
+
 LiquidationVault
 ................
 
-Mapping from ``CurrencyId`` to the account identifier of an artificial vault maintained by the VaultRegistry to handle interBTC balances and collateral of liquidated Vaults that use the given currency. That is, when a vault is liquidated, its balances are transferred to ``LiquidationVault`` and claims are later handled via the ``LiquidationVault``.
+Mapping from ``CurrencyId`` to the account identifier of an artificial vault (see :ref:`SystemVault`) maintained by the VaultRegistry to handle interBTC balances and collateral of liquidated Vaults that use the given currency. That is, when a vault is liquidated, its balances are transferred to ``LiquidationVault`` and claims are later handled via the ``LiquidationVault``.
 
 
 .. note:: A Vault's token balances and collateral are transferred to the ``LiquidationVault`` as a result of automated liquidations and :ref:`reportVaultTheft`.
@@ -129,6 +131,25 @@ Parameter                  Type                Description
 =========================  ==================  ========================================================
 
 .. note:: This specification currently assumes for simplicity that a vault will reuse the same BTC address, even after multiple redeem requests. **[Future Extension]**: For better security, Vaults may desire to generate new BTC addresses each time they execute a redeem request. This can be handled by pre-generating multiple BTC addresses and storing these in a list for each Vault. Caution is necessary for users which execute issue requests with "old" vault addresses - these BTC must be moved to the latest address by Vaults. 
+
+.. _SystemVault:
+
+SystemVault
+...........
+
+A system vault that keeps track of tokens of liquidated vaults.
+
+.. tabularcolumns:: |l|l|L|
+
+=========================  ==================  ========================================================
+Parameter                  Type                Description
+=========================  ==================  ========================================================
+``toBeIssuedtokens``       interBTC            Number of tokens pending issue
+``issuedTokens``           interBTC            Number of issued tokens
+``toBeRedeemedTokens``     interBTC            Number of tokens pending redeem
+``currencyId``             CurrencyId          the currency used for collateral
+=========================  ==================  ========================================================
+
 
 External Functions
 ~~~~~~~~~~~~~~~~~~
