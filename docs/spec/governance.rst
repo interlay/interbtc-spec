@@ -16,12 +16,23 @@ Terminology
 ~~~~~~~~~~~
 
 - **Referenda** describe system updates and are actively voted on by the community.
-- **Motions** are council-led proposals to launch external referenda OR approve / reject treasury proposals.
 - **External** referenda are approved motions awaiting launch.
+- **Motions** are council-led proposals to launch external referenda OR approve / reject treasury proposals.
 - **Public Proposals** are community-supported proposals to launch referenda.
 
 Processes
 ~~~~~~~~~
+
+Community
+---------
+
+1. Account submits public proposal with deposit (``> MinimumDeposit``)
+2. Account "seconds" proposal with additional deposit
+3. New referenda are started every ``LaunchPeriod``
+4. Community can vote on referenda for the ``VotingPeriod``
+5. Votes are tallied after ``VotingPeriod`` expires
+6. System update executed after ``EnactmentPeriod``
+7. Token voters can unlock balance after ``end + EnactmentPeriod * conviction``
 
 Elections
 ---------
@@ -41,7 +52,6 @@ Council
 5. Community can vote on referenda for the ``VotingPeriod``
 6. Votes are tallied after ``VotingPeriod`` expires
 7. System update executed after ``EnactmentPeriod``
-8. Token voters can unlock balance after ``end + EnactmentPeriod * conviction``
 
 **Cancellation**
 
