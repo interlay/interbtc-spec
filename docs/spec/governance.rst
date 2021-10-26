@@ -6,7 +6,7 @@ Governance
 Overview
 ~~~~~~~~
 
-On-chain governance is useful for controlling system parameters, authorizing trusted oracles and upgrading the core protocols. The architecture adopted by interBTC is modelled on Polkadot, which allows for a **Council** and **Technical Committee** to propose referenda which are voted on by holders of the native governance token.
+On-chain governance is useful for controlling system parameters, authorizing trusted oracles and upgrading the core protocols. The architecture adopted by interBTC is modelled on Polkadot, which allows for a **Council** and **Technical Committee** to propose referenda which are voted on by holders of the native governance token. The community can also make proposals but these require an additional deposit.
 
 .. figure:: ../figures/spec/governance.jpeg
     :alt: Governance Architecture
@@ -17,6 +17,7 @@ Terminology
 
 - **Referenda** describe system updates and are actively voted on by the community.
 - **Motions** are council-led proposals to launch external referenda OR approve / reject treasury proposals.
+- **External** referenda are approved motions awaiting launch.
 - **Public Proposals** are community-supported proposals to launch referenda.
 
 Processes
@@ -33,7 +34,7 @@ Elections
 Council
 -------
 
-1. A councillor creates a motion to trigger next external referendum
+1. A councillor creates a motion to trigger the next external referendum
 2. Council votes on motion
 3. Council closes motion on success or failure
 4. New referenda are started every ``LaunchPeriod``
@@ -42,13 +43,30 @@ Council
 7. System update executed after ``EnactmentPeriod``
 8. Token voters can unlock balance after ``end + EnactmentPeriod * conviction``
 
+**Cancellation**
+
+1. Referenda is baked as above
+2. Council may cancel ongoing referenda (``CancellationOrigin``)
+
 Technical Committee
 -------------------
 
 1. Council votes on motion as above
-2. Technical Committee may fast track before ``LaunchPeriod``
-3. The new referenda is immediately baked
+2. TC may fast track before ``LaunchPeriod``
+3. The new referenda is baked immediately
 4. Community can vote on referenda for the ``FastTrackVotingPeriod``
+
+**Veto**
+
+1. Council votes on motion as above
+2. TC may veto external before it is baked (``VetoOrigin``)
+3. TC cannot re-veto external for ``CooloffPeriod``
+
+**Cancellation**
+
+1. Community makes public proposal
+2. TC may cancel proposal before it is baked (``CancelProposalOrigin``)
+3. Deposit it slashed to the treasury
 
 Treasury
 --------
