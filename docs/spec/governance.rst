@@ -16,22 +16,30 @@ Terminology
 ~~~~~~~~~~~
 
 - **Referenda** describe system updates and are actively voted on by the community.
-- **Motions** are council-led proposals to launch external referenda.
+- **Motions** are council-led proposals to launch external referenda OR approve / reject treasury proposals.
 - **Public Proposals** are community-supported proposals to launch referenda.
 
 Processes
 ~~~~~~~~~
 
+Elections
+---------
+
+1. Account submits candidacy for council (requires ``CandidacyBond``)
+2. Token holders vote on council members (currency is locked)
+3. Election is triggered after ``TermDuration``
+4. Council is elected via the sequential Phragmén method
+
 Council
 -------
 
-1. Council motion to trigger next external referendum
+1. A councillor creates a motion to trigger next external referendum
 2. Council votes on motion
 3. Council closes motion on success or failure
 4. New referenda are started every ``LaunchPeriod``
 5. Community can vote on referenda for the ``VotingPeriod``
 6. Votes are tallied after ``VotingPeriod`` expires
-7. System update enacted after ``EnactmentPeriod``
+7. System update executed after ``EnactmentPeriod``
 8. Token voters can unlock balance after ``end + EnactmentPeriod * conviction``
 
 Technical Committee
@@ -39,13 +47,14 @@ Technical Committee
 
 1. Council votes on motion as above
 2. Technical Committee may fast track before ``LaunchPeriod``
-3. Community can vote on referenda for the ``FastTrackVotingPeriod``
+3. The new referenda is immediately baked
+4. Community can vote on referenda for the ``FastTrackVotingPeriod``
 
 Treasury
 --------
 
-1. User makes spending proposal
-2. Council votes on motion to approve or reject
+1. Account makes spending proposal
+2. Council votes on motion to approve or reject (directly - no referenda)
 3. Approved funds are transferred to recipient
 
 Parameters
@@ -135,7 +144,7 @@ The number of representatives to elect to the **Council**.
 
 **MaxMembers**
 
-The maximum number of participants allowed in the council.
+The maximum number of possible members in the council.
 
 
 
