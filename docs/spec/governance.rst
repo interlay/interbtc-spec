@@ -6,24 +6,41 @@ Governance
 Overview
 ~~~~~~~~
 
-On-chain governance is useful for controlling system parameters, authorizing trusted oracles and upgrading the core protocols. The architecture adopted by interBTC is modelled on Polkadot, which allows for a **Council** and **Technical Committee** to propose referenda which are voted on by holders of the native governance token. The community can also make proposals but these require an additional deposit.
+On-chain governance is useful for controlling system parameters, authorizing trusted oracles and upgrading the core protocols. The architecture adopted by interBTC is modelled on Polkadot with some significant changes:
+
+- **Optimistic Governance**
+    - No **Council**, only public proposals from community
+    - Community can elect a **Technical Committee** to fast-track proposals
+    - Referenda are Super-Majority Against (Negative Turnout Bias) by default
+
+- **Stake-To-Vote**
+    - Adopted from Curve's governance model
+    - Users lock the native governance token
+    - Longer lockups give more voting power
 
 .. figure:: ../figures/spec/governance.jpeg
     :alt: Governance Architecture
+    :scale: 30
+    :align: center
 
+An important distinction is the ``negative turnout bias`` (Super-Majority Against​) voting threshold. This is best summarized by the `Polkadot <https://wiki.polkadot.network/docs/learn-governance>`_ docs:
+
+    A heavy super-majority of nay votes is required to reject at low turnouts, but as turnout increases towards 100%, it becomes a simple majority-carries as below.
+
+    .. math::
+
+        \frac{ against }{ \sqrt{ electorate } } < \frac{ approve }{ \sqrt{ turnout } }
 
 Terminology
 ~~~~~~~~~~~
 
-- **Referenda** describe system updates and are actively voted on by the community.
-- **External** referenda are approved motions awaiting launch.
-- **Motions** are council-led proposals to launch external referenda OR approve / reject treasury proposals.
-- **Public Proposals** are community-supported proposals to launch referenda.
+- **Proposals** are community-supported motions to perform system-level actions.
+- **Referenda** are accepted proposals undergoing voting.
 
 Processes
 ~~~~~~~~~
 
-Community
+Proposals
 ---------
 
 1. Account submits public proposal with deposit (``> MinimumDeposit``)
@@ -34,56 +51,19 @@ Community
 6. System update executed after ``EnactmentPeriod``
 7. Token voters can unlock balance after ``end + EnactmentPeriod * conviction``
 
-Elections
----------
-
-1. Account submits candidacy for council (requires ``CandidacyBond``)
-2. Token holders vote on council members (currency is locked)
-3. Election is triggered after ``TermDuration``
-4. Council is elected via the sequential Phragmén method
-
-Council
--------
-
-1. A councillor creates a motion to trigger the next external referendum
-2. Council votes on motion
-3. Council closes motion on success or failure
-4. New referenda are started every ``LaunchPeriod``
-5. Community can vote on referenda for the ``VotingPeriod``
-6. Votes are tallied after ``VotingPeriod`` expires
-7. System update executed after ``EnactmentPeriod``
-
-**Cancellation**
-
-1. Referenda is baked as above
-2. Council may cancel ongoing referenda (``CancellationOrigin``)
-
 Technical Committee
 -------------------
 
-1. Council votes on motion as above
+1. Community creates proposal as above
 2. TC may fast track before ``LaunchPeriod``
-3. The new referenda is baked immediately
+3. The new referendum is started immediately
 4. Community can vote on referenda for the ``FastTrackVotingPeriod``
-
-**Veto**
-
-1. Council votes on motion as above
-2. TC may veto external before it is baked (``VetoOrigin``)
-3. TC cannot re-veto external for ``CooloffPeriod``
 
 **Cancellation**
 
-1. Community makes public proposal
-2. TC may cancel proposal before it is baked (``CancelProposalOrigin``)
-3. Deposit it slashed to the treasury
-
-Treasury
---------
-
-1. Account makes spending proposal
-2. Council votes on motion to approve or reject (directly - no referenda)
-3. Approved funds are transferred to recipient
+1. Community creates proposal as above
+2. TC may cancel proposal before it is started (``CancelProposalOrigin``)
+3. Deposit is slashed to the treasury
 
 Parameters
 ~~~~~~~~~~
@@ -104,31 +84,11 @@ The period to allow new votes for a referenda.
 
 **MinimumDeposit**
 
-The minimum deposit required for a public proposal.
-
-**ExternalOrigin**
-
-Used to schedule a super-majority-required external referendum.
-
-**ExternalMajorityOrigin**
-
-Used to schedule a majority-carries external referendum.
-
-**ExternalDefaultOrigin**
-
-Used to schedule a negative-turnout-bias (default-carries) external referendum.
+The minimum deposit required for a proposal.
 
 **FastTrackOrigin**
 
-Used to fast-track an external majority-carries referendum.
-
-**InstantOrigin**
-
-Used to fast-track an external majority-carries referendum.
-
-**InstantAllowed**
-
-Whether the ``InstantOrigin`` can be used to table referenda with a much shorter voting period.
+Used to fast-track a proposal before the ``LaunchPeriod``.
 
 **FastTrackVotingPeriod**
 
@@ -136,43 +96,17 @@ The period to allow new votes for a fast-tracked referendum.
 
 **CancellationOrigin**
 
-Used to cancel any active referendum. 
-
-**BlacklistOrigin**
-
-Used to permanently blacklist a proposal - preventing it from being proposed again.
-
-**CancelProposalOrigin**
-
-Used to cancel public proposals, before they are tabled.
-
-**VetoOrigin**
-
-Used to veto council proposals, before they are tabled.
-
-**CooloffPeriod**
-
-The period that a vetoed proposal may not be re-submitted.
+Used to cancel a proposal before it is launched.
 
 **MaxProposals**
 
 The maximum number of public proposals allowed in the queue.
 
-.. Election Pallet
-
-**CandidacyBond**
-
-Deposit required to submit candidacy.
-
-**DesiredMembers**
-
-The number of representatives to elect to the **Council**.
-
-.. Council Pallet
+.. Technical Committee Pallet
 
 **MaxMembers**
 
-The maximum number of possible members in the council.
+The maximum number of possible members in the TC.
 
 
 
