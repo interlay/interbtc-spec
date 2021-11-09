@@ -49,7 +49,6 @@ Proposals
 4. Community can vote on referenda for the ``VotingPeriod``
 5. Votes are tallied after ``VotingPeriod`` expires
 6. System update executed after ``EnactmentPeriod``
-7. Token voters can unlock balance after ``end + EnactmentPeriod * conviction``
 
 Technical Committee
 -------------------
@@ -58,12 +57,6 @@ Technical Committee
 2. TC may fast track before ``LaunchPeriod``
 3. The new referendum is started immediately
 4. Community can vote on referenda for the ``FastTrackVotingPeriod``
-
-**Cancellation**
-
-1. Community creates proposal as above
-2. TC may cancel proposal before it is started (``CancelProposalOrigin``)
-3. Deposit is slashed to the treasury
 
 Parameters
 ~~~~~~~~~~
