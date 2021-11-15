@@ -23,7 +23,7 @@ On-chain governance is useful for controlling system parameters, authorizing tru
     :scale: 30
     :align: center
 
-An important distinction is the ``negative turnout bias`` (Super-Majority Against​) voting threshold. This is best summarized by the `Polkadot <https://wiki.polkadot.network/docs/learn-governance>`_ docs:
+An important distinction is the ``negative turnout bias`` (Super-Majority Against) voting threshold. This is best summarized by the `Polkadot <https://wiki.polkadot.network/docs/learn-governance>`_ docs:
 
     A heavy super-majority of nay votes is required to reject at low turnouts, but as turnout increases towards 100%, it becomes a simple majority-carries as below.
 
