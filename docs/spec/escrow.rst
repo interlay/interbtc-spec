@@ -13,7 +13,7 @@ This architecture was adopted from Curve, see: `Vote-Escrowed CRV (veCRV) <https
 Step-by-step
 ------------
 
-1. A user may lock any amount of some currency up to a maximum lock period.
+1. A user may lock any amount of defined governance currency (KINT on Kintsugi, INTR on Interlay) up to a maximum lock period.
 2. Both the amount and the unlock time may be increased to improve voting power.
 3. The user may unlock their fungible asset after the lock has expired.
 
@@ -114,7 +114,7 @@ Parameter       Type          Description
 ==============  ============  ========================================================
 ``bias``        Balance       The bias for the linear function.
 ``slope``       Balance       The slope for the linear function.
-``ts``          BlockNumber   The current block height when this point was stored.
+``timestamp``   BlockNumber   The current block height when this point was stored.
 ==============  ============  ========================================================
 
 Functions
@@ -196,10 +196,10 @@ Specification
     * ``new_locked.amount``: MUST be ``old_locked.amount + amount``.
     * ``new_locked.end``: MUST be the ``old_locked.end``.
 
-.. _escrow-function-increase-unlock-height:
+.. _escrow-function-extend-unlock-height:
 
-increase_unlock_height
-----------------------
+extend_unlock_height
+--------------------
 
 Push back the expiry on a pre-existing lock to retain voting power.
 
@@ -208,7 +208,7 @@ Specification
 
 *Function Signature*
 
-``increase_unlock_height(who, unlock_height)``
+``extend_unlock_height(who, unlock_height)``
 
 *Parameters*
 
@@ -237,10 +237,10 @@ Specification
 
 .. _escrow-function-withdraw:
 
-increase_withdraw
------------------
+withdraw
+--------
 
-Remove the lock on an account.
+Remove the lock on an account to allow access to the account's funds.
 
 Specification
 .............
