@@ -10,6 +10,9 @@ The Escrow module allows users to lockup tokens in exchange for a non-fungible v
 
 This architecture was adopted from Curve, see: `Vote-Escrowed CRV (veCRV) <https://curve.readthedocs.io/dao-vecrv.html>`_.
 
+.. note::
+    This specification is still a Work-in-Progress (WIP), some information may be outdated or incomplete.
+
 Step-by-step
 ------------
 
