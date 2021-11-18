@@ -110,6 +110,10 @@ Point
 
 The ``bias``, ``slope`` and ``ts`` for our linear function.
 
+We can calculate the current voting power (``balance``) as follows:
+
+    ``balance = bias - (slope * (now - height))``
+
 .. tabularcolumns:: |l|L|
 
 ==============  ============  ========================================================	
@@ -117,7 +121,7 @@ Parameter       Type          Description
 ==============  ============  ========================================================
 ``bias``        Balance       The bias for the linear function.
 ``slope``       Balance       The slope for the linear function.
-``timestamp``   BlockNumber   The current block height when this point was stored.
+``height``      BlockNumber   The current block height when this point was stored.
 ==============  ============  ========================================================
 
 Functions
@@ -303,7 +307,7 @@ Emit an event if a user withdrew previously locked tokens.
 
 *Event Signature*
 
-``Withdraw(who, amount,)``
+``Withdraw(who, amount)``
 
 *Parameters*
 
