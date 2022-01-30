@@ -26,14 +26,14 @@ Data Model
 Constants
 ---------
 
-.. _span:
+.. _escrow_constant_span:
 
 Span
 ....
 
 The locktime is rounded to weeks to limit checkpoint iteration.
 
-.. _maxPeriod:
+.. _escrow_constant_max_period:
 
 MaxPeriod
 .........
@@ -43,7 +43,7 @@ The maximum period for lockup.
 Scalars
 -------
 
-.. _escrow-scalar-epoch:
+.. _escrow_scalar_epoch:
 
 Epoch
 .....
@@ -53,35 +53,35 @@ The current global epoch for ``PointHistory``.
 Maps
 ----
 
-.. _escrow-map-locked:
+.. _escrow_map_locked:
 
 Locked
 ......
 
 Stores the ``amount`` and ``end`` block for an account's lock.
 
-.. _escrow-map-point-history:
+.. _escrow_map_point_history:
 
 PointHistory
 ............
 
 Stores the global ``bias``, ``slope`` and ``height`` at a particular point in history.
 
-.. _escrow-map-user-point-history:
+.. _escrow_map_user_point_history:
 
 UserPointHistory
 ................
 
 Stores the ``bias``, ``slope`` and ``height`` for an account at a particular point in history.
 
-.. _escrow-map-user-point-epoch:
+.. _escrow_map_user_point_epoch:
 
 UserPointEpoch
 ..............
 
 Stores the current epoch for an account.
 
-.. _escrow-map-slope-changes:
+.. _escrow_map_slope_changes:
 
 SlopeChanges
 ............
@@ -123,7 +123,7 @@ Parameter       Type          Description
 External Functions
 ~~~~~~~~~~~~~~~~~~
 
-.. _escrow-function-create-lock:
+.. _escrow_function_create_lock:
 
 create_lock
 -----------
@@ -145,7 +145,7 @@ Specification
 
 *Events*
 
-* :ref:`escrow-event-deposit`
+* :ref:`escrow_event_deposit`
 
 *Preconditions*
 
@@ -170,9 +170,9 @@ Specification
     * ``height = now``
 
 * Function :ref:`reward_withdrawStake` MUST complete successfully using the account's total stake.
-* Function :ref:`reward_depositStake` MUST complete successfully using the current balance (:ref:`escrow-function-balance-at`).
+* Function :ref:`reward_depositStake` MUST complete successfully using the current balance (:ref:`escrow_function_balance_at`).
 
-.. _escrow-function-increase-amount:
+.. _escrow_function_increase_amount:
 
 increase_amount
 ---------------
@@ -193,7 +193,7 @@ Specification
 
 *Events*
 
-* :ref:`escrow-event-deposit`
+* :ref:`escrow_event_deposit`
 
 *Preconditions*
 
@@ -237,7 +237,7 @@ Specification
 
 *Events*
 
-* :ref:`escrow-event-deposit`
+* :ref:`escrow_event_deposit`
 
 *Preconditions*
 
@@ -262,7 +262,7 @@ Specification
     * ``bias = slope * (new_locked.end - now)``
     * ``height = now``
 
-.. _escrow-function-withdraw:
+.. _escrow_function_withdraw:
 
 withdraw
 --------
@@ -282,7 +282,7 @@ Specification
 
 *Events*
 
-* :ref:`escrow-event-withdraw`
+* :ref:`escrow_event_withdraw`
 
 *Preconditions*
 
@@ -299,7 +299,7 @@ Specification
 Internal Functions
 ~~~~~~~~~~~~~~~~~~
 
-.. _escrow-function-balance-at:
+.. _escrow_function_balance_at:
 
 balance_at
 ----------
@@ -328,7 +328,7 @@ Specification
 Events
 ~~~~~~
 
-.. _escrow-event-deposit:
+.. _escrow_event_deposit:
 
 Deposit
 -------
@@ -347,9 +347,9 @@ Emit an event if a user successfully deposited tokens or increased the lock time
 
 *Functions*
 
-* :ref:`escrow-function-create-lock`
+* :ref:`escrow_function_create_lock`
 
-.. _escrow-event-withdraw:
+.. _escrow_event_withdraw:
 
 Withdraw
 --------
@@ -367,4 +367,4 @@ Emit an event if a user withdrew previously locked tokens.
 
 *Functions*
 
-* :ref:`escrow-function-withdraw`
+* :ref:`escrow_function_withdraw`
