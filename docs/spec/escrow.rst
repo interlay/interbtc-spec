@@ -31,7 +31,7 @@ Constants
 Span
 ....
 
-Used to round heights.
+The locktime is rounded to weeks to limit checkpoint iteration.
 
 .. _maxPeriod:
 
@@ -58,21 +58,21 @@ Maps
 Locked
 ......
 
-Stores the ``amount`` and ``end`` block for the account's lock.
+Stores the ``amount`` and ``end`` block for an account's lock.
 
 .. _escrow-map-point-history:
 
 PointHistory
 ............
 
-Stores the global ``bias``, ``slope`` and ``ts`` at a particular point in history,
+Stores the global ``bias``, ``slope`` and ``height`` at a particular point in history.
 
 .. _escrow-map-user-point-history:
 
 UserPointHistory
 ................
 
-Stores the ``bias``, ``slope`` and ``ts`` for an account at a particular point in history,
+Stores the ``bias``, ``slope`` and ``height`` for an account at a particular point in history.
 
 .. _escrow-map-user-point-epoch:
 
@@ -108,11 +108,7 @@ Parameter       Type          Description
 Point
 .....
 
-The ``bias``, ``slope`` and ``ts`` for our linear function.
-
-We can calculate the current voting power (``balance``) as follows:
-
-    ``balance = bias - (slope * (now - height))``
+The ``bias``, ``slope`` and ``height`` for our linear function.
 
 .. tabularcolumns:: |l|L|
 
@@ -124,8 +120,8 @@ Parameter       Type          Description
 ``height``      BlockNumber   The current block height when this point was stored.
 ==============  ============  ========================================================
 
-Functions
-~~~~~~~~~
+External Functions
+~~~~~~~~~~~~~~~~~~
 
 .. _escrow-function-create-lock:
 
@@ -155,7 +151,7 @@ Specification
 
 * The function call MUST be signed by ``who``.
 * The ``amount`` MUST be non-zero.
-* The account ``who`` MUST NOT already have locked balance.
+* The account's ``old_locked.amount`` MUST be non-zero.
 * The ``unlock_height`` MUST be greater than ``now``.
 * The ``unlock_height`` MUST NOT be greater than ``now + MaxPeriod``.
 
@@ -165,6 +161,16 @@ Specification
 
     * ``new_locked.amount``: MUST be the ``amount``.
     * ``new_locked.end``: MUST be the ``unlock_height``.
+
+* The ``UserPointEpoch`` MUST increase by one.
+* A new ``Point`` MUST be recorded at this epoch:
+
+    * ``slope = amount / max_period``
+    * ``bias = slope * (unlock_height - now)``
+    * ``height = now``
+
+* Function :ref:`reward_withdrawStake` MUST complete successfully using the account's total stake.
+* Function :ref:`reward_depositStake` MUST complete successfully using the current balance (:ref:`escrow-function-balance-at`).
 
 .. _escrow-function-increase-amount:
 
@@ -202,6 +208,13 @@ Specification
 
     * ``new_locked.amount``: MUST be ``old_locked.amount + amount``.
     * ``new_locked.end``: MUST be the ``old_locked.end``.
+
+* The ``UserPointEpoch`` MUST increase by one.
+* A new ``Point`` MUST be recorded at this epoch:
+
+    * ``slope = new_locked.amount / max_period``
+    * ``bias = slope * (new_locked.end - now)``
+    * ``height = now``
 
 .. _escrow-function-extend-unlock-height:
 
@@ -242,6 +255,13 @@ Specification
     * ``new_locked.amount``: MUST be ``old_locked.amount``.
     * ``new_locked.end``: MUST be the ``unlock_height``.
 
+* The ``UserPointEpoch`` MUST increase by one.
+* A new ``Point`` MUST be recorded at this epoch:
+
+    * ``slope = new_locked.amount / max_period``
+    * ``bias = slope * (new_locked.end - now)``
+    * ``height = now``
+
 .. _escrow-function-withdraw:
 
 withdraw
@@ -273,6 +293,37 @@ Specification
 *Postconditions*
 
 * The account's ``LockedBalance`` MUST be removed.
+* Function :ref:`reward_withdrawStake` MUST complete successfully using the account's total stake.
+
+
+Internal Functions
+~~~~~~~~~~~~~~~~~~
+
+.. _escrow-function-balance-at:
+
+balance_at
+----------
+
+Using the ``Point``, we can calculate the current voting power (``balance``) as follows:
+
+    ``balance = point.bias - (point.slope * (height - point.height))``
+
+Specification
+.............
+
+*Function Signature*
+
+``balance_at(who, height)``
+
+*Parameters*
+
+* ``who``: The user's address.
+* ``height``: The future height.
+
+*Preconditions*
+
+* The ``height`` MUST be ``>= point.height``.
+
 
 Events
 ~~~~~~
