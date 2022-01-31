@@ -90,7 +90,7 @@ Vaults
   
     - Parachain transaction fees on every transaction with the system paid in `DOT`
     - Optional: Slashed collateral on failed redeems paid in `COL`, see :ref:`cancelRedeem`
-    - Optional: Slashed collateral on theft paid in `COL`, see :ref:`reportVaultTheft`
+    - Optional: Slashed collateral on theft paid in `COL`, see :ref:`relay_function_report_vault_theft`
     - Optional: Slashed collateral on liquidation paid in `COL`, see :ref:`liquidateVault`
   
   - **External Costs**
@@ -112,7 +112,7 @@ Relayers
   - **Income**
   
     - Primary: *None*
-    - Secondary: Slashed collateral on theft paid in `COL`, see :ref:`reportVaultTheft`
+    - Secondary: Slashed collateral on theft paid in `COL`, see :ref:`relay_function_report_vault_theft`
   
   - **Internal Cost**
   
