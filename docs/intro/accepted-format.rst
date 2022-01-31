@@ -13,9 +13,8 @@ Case 1: OP_RETURN Transactions
 
 The `OP_RETURN <https://en.bitcoin.it/wiki/OP_RETURN>`_ field can be used to store `40 bytes in a given Bitcoin transaction <https://bitcoin.stackexchange.com/questions/29554/explanation-of-what-an-op-return-transaction-looks-like>`_. The transaction output that includes the OP_RETURN is provably unspendable. We require specific information in the OP_RETURN field to prevent replay attacks in interBTC.
 
-Many Bitcoin wallets automatically order UTXOs. We require that the *Payment UTXO* and the *Data UTXO* are made within the first three indexes (index 0 - 2).
-We *do not* require any specific ordering of those outputs.
-The reason behind checking for the first three outputs is that wallets like Electrum might insert the UTXOs returning part of the spent input at index 1.
+Many Bitcoin wallets automatically order UTXOs. We require that the transaction contains at most three outputs, but we do not require any specific ordering of the *Payment UTXO* and *Data UTXO*. The reason behind checking for the first three outputs is that wallets like Electrum might insert the UTXOs returning part of the spent input at index 1.
+A merge transaction is allowed to contain any number of outputs, as long as all outputs are registered in the vault's wallet.
 
 .. note:: Please refer to the interBTC specification for more details on the *Refund*, *Redeem* and *Replace* protocols. 
 

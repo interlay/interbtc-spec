@@ -6,124 +6,100 @@ Governance
 Overview
 ~~~~~~~~
 
-On-chain governance is useful for controlling system parameters, authorizing trusted oracles and upgrading the core protocols. The architecture adopted by the interBTC parachain is modelled on Polkadot, which allows for a **Council** and **Technical Committee** to propose referenda which are voted on by INTR holders.
+On-chain governance is useful for controlling system parameters, authorizing trusted oracles and upgrading the core protocols. The architecture adopted by interBTC is modelled on Polkadot with some significant changes:
+
+- **Optimistic Governance**
+    - No **Council**, only public proposals from community
+    - Community can elect a **Technical Committee** to fast-track proposals
+    - Referenda are Super-Majority Against (Negative Turnout Bias) by default
+
+- **Stake-To-Vote**
+    - Adopted from Curve's governance model
+    - Users lock the native governance token
+    - Longer lockups give more voting power
 
 .. figure:: ../figures/spec/governance.jpeg
     :alt: Governance Architecture
+    :scale: 30
+    :align: center
 
+An important distinction is the ``negative turnout bias`` (Super-Majority Against) voting threshold. This is best summarized by the `Polkadot <https://wiki.polkadot.network/docs/learn-governance>`_ docs:
 
-Parameters (Council)
-~~~~~~~~~~~~~~~~~~~~
+A heavy super-majority of nay votes is required to reject at low turnouts, but as turnout increases towards 100%, it becomes a simple majority-carries as below.
 
+.. math:: \frac{\text{against}}{\sqrt{\text{electorate}}} < \frac{\text{approve}}{\sqrt{\text{turnout}}}
 
-MaxProposals
-------------
+Terminology
+~~~~~~~~~~~
 
-The maximum number of proposals allowed in the queue.
+- **Proposals** are community-supported motions to perform system-level actions.
+- **Referenda** are accepted proposals undergoing voting.
 
-.. note:: **Default Value**: 100
+Processes
+~~~~~~~~~
 
+Proposals
+---------
 
-MaxMembers
-----------
+1. Account submits public proposal with deposit (``> MinimumDeposit``)
+2. Account "seconds" proposal with additional deposit
+3. New referenda are started every ``LaunchPeriod``
+4. Community can vote on referenda for the ``VotingPeriod``
+5. Votes are tallied after ``VotingPeriod`` expires
+6. System update executed after ``EnactmentPeriod``
 
-The maximum number of participants allowed in the council.
+Technical Committee
+-------------------
 
-.. note:: **Default Value**: 100
+1. Community creates proposal as above
+2. TC may fast track before ``LaunchPeriod``
+3. The new referendum is started immediately
+4. Community can vote on referenda for the ``FastTrackVotingPeriod``
 
+Parameters
+~~~~~~~~~~
 
-Parameters (Voting)
-~~~~~~~~~~~~~~~~~~~
+.. Democracy Pallet
 
-
-EnactmentPeriod
----------------
+**EnactmentPeriod**
 
 The period to wait before any approved change is enforced.
 
-.. note:: **Default Value**: 1 Day
+**LaunchPeriod**
 
+The interval after which to start a new referenda from the queue.
 
-LaunchPeriod
-------------
+**VotingPeriod**
 
-The interval after which to process a new referenda from the queue.
+The period to allow new votes for a referenda.
 
-.. note:: **Default Value**: 2 Days
+**MinimumDeposit**
 
+The minimum deposit required for a proposal.
 
-VotingPeriod
-------------
+**FastTrackOrigin**
 
-The period to allow new votes for a proposal or referenda (**Council**).
+Used to fast-track a proposal before the ``LaunchPeriod``.
 
-.. note:: **Default Value**: 2 Days
+**FastTrackVotingPeriod**
 
+The period to allow new votes for a fast-tracked referendum.
 
-FastTrackVotingPeriod
----------------------
+**CancellationOrigin**
 
-The period to allow new votes for a proposal or referenda (**Technical Committee**).
+Used to cancel a proposal before it is launched.
 
-.. note:: **Default Value**: 3 Hours
+**MaxProposals**
 
+The maximum number of public proposals allowed in the queue.
 
-CooloffPeriod
--------------
+.. Technical Committee Pallet
 
-The period that a vetoed proposal may not be re-submitted.
+**MaxMembers**
 
-.. note:: **Default Value**: 7 Days
-
-
-MinimumDeposit
---------------
-
-The minimum deposit required for a public proposal.
-
-.. note:: **Default Value**: 1000 INTR
+The maximum number of possible members in the TC.
 
 
 
-Parameters (Turnout)
-~~~~~~~~~~~~~~~~~~~~
 
 
-ExternalOrigin
---------------
-
-Schedules next referendum with super-majority approval.
-
-.. note:: **Default Value**: Half Council
-
-
-ExternalMajorityOrigin
-----------------------
-
-Schedules next referendum with simple-majority approval.
-
-.. note:: **Default Value**: Half Council
-
-
-ExternalDefaultOrigin
----------------------
-
-Schedules next referendum with super-majority against.
-
-.. note:: **Default Value**: All Council
-
-
-FastTrackOrigin
----------------
-
-Schedules ExternalMajority / ExternalDefault vote.
-
-.. note:: **Default Value**: Two Thirds Technical Committee
-
-
-CancellationOrigin
-------------------
-
-Schedules cancellation of a referendum. 
-
-.. note:: **Default Value**: Two Thirds Council

@@ -25,7 +25,7 @@ Maps
 ----
 
 TheftReports
-.............
+............
 
 Mapping of Bitcoin transaction identifiers (SHA256 hashes) to account identifiers of Vaults who have been caught stealing Bitcoin.
 Per Bitcoin transaction, multiple Vaults can be accused (multiple inputs can come from multiple Vaults). 
@@ -34,10 +34,10 @@ This mapping is necessary to prevent duplicate theft reports.
 Functions
 ~~~~~~~~~
 
-.. _reportVaultTheft:
+.. _relay_function_report_vault_theft:
 
-reportVaultTheft
-----------------
+report_vault_theft
+------------------
 
 A relayer reports misbehavior by a vault, providing a fraud proof (malicious Bitcoin transaction and the corresponding transaction inclusion proof). 
 
@@ -57,19 +57,19 @@ Specification
 
 *Function Signature*
 
-``reportVaultTheft(vault, rawMerkleProof, rawTx)``
+``report_vault_theft(vault, raw_merkle_proof, raw_tx)``
 
 *Parameters*
 
 * ``vaultId``: the account of the accused Vault.
-* ``rawMerkleProof``: Raw Merkle tree path (concatenated LE SHA256 hashes).
-* ``rawTx``: Raw Bitcoin transaction including the transaction inputs and outputs.
+* ``raw_merkle_proof``: Raw Merkle tree path (concatenated LE SHA256 hashes).
+* ``raw_tx``: Raw Bitcoin transaction including the transaction inputs and outputs.
 
-The ``txId`` is obtained as the ``sha256d()`` of the ``rawTx``.
+The ``txId`` is obtained as the ``sha256d()`` of the ``raw_tx``.
 
 *Events*
 
-* :ref:`reportVaultTheftEvent`
+* :ref:`relay_event_report_vault_theft`
 
 *Preconditions*
 
@@ -85,40 +85,40 @@ The ``txId`` is obtained as the ``sha256d()`` of the ``rawTx``.
 * All token accounts (``issuedTokens``, ``toBeIssuedTokens``, etc.) MUST be added to the existing system's ``LiquidationVault``.
 * ``TheftReports`` MUST contain the reported txId.
 
-.. _reportVaultDoublePayment:
+.. _relay_function_report_vault_double_payment:
 
-reportVaultDoublePayment
-------------------------
+report_vault_double_payment
+---------------------------
 
 A relayer reports a double payment from a vault, this can destabalize the system if the vault holds less BTC than is reported by the :ref:`vault-registry`.
 
-Like in :ref:`reportVaultTheft`, if the vault actually misbehaved it is automatically liquidated.
+Like in :ref:`relay_function_report_vault_theft`, if the vault actually misbehaved it is automatically liquidated.
 
 Specification
 .............
 
 *Function Signature*
 
-``reportVaultDoublePayment(vault, rawMerkleProof1, rawTx1, rawMerkleProof2, rawTx2)``
+``report_vault_double_payment(vault, raw_merkle_proof1, raw_tx1, raw_merkle_proof2, raw_tx2)``
 
 *Parameters*
 
 * ``vaultId``: the account of the accused Vault.
-* ``rawMerkleProof1``: The first raw Merkle tree path.
-* ``rawTx1``: The first raw Bitcoin transaction.
-* ``rawMerkleProof2``: The second raw Merkle tree path.
-* ``rawTx2``: The second raw Bitcoin transaction.
+* ``raw_merkle_proof1``: The first raw Merkle tree path.
+* ``raw_tx1``: The first raw Bitcoin transaction.
+* ``raw_merkle_proof2``: The second raw Merkle tree path.
+* ``raw_tx2``: The second raw Bitcoin transaction.
 
 *Events*
 
-* :ref:`reportVaultTheftEvent`
+* :ref:`relay_event_report_vault_theft`
 
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
 * A vault with id ``vaultId`` MUST be registered.
-* ``rawMerkleProof1`` MUST NOT equal ``rawMerkleProof2``.
-* ``rawTx1`` MUST NOT equal ``rawTx2``.
+* ``raw_merkle_proof1`` MUST NOT equal ``raw_merkle_proof2``.
+* ``raw_tx1`` MUST NOT equal ``raw_tx2``.
 * The ``verifyTransactionInclusion`` function in the :ref:`btc_relay` component must return true for the derived ``txId``.
 * Both transactions MUST NOT be in ``TheftReports`` mapping.
 
@@ -132,7 +132,7 @@ Specification
 Events
 ~~~~~~~
 
-.. _reportVaultTheftEvent:
+.. _relay_event_report_vault_theft:
 
 ReportVaultTheft
 ----------------
@@ -149,38 +149,6 @@ Emits an event when a vault has been accused of theft.
 
 *Functions*
 
-* :ref:`reportVaultTheft`
-* :ref:`reportVaultDoublePayment`
+* :ref:`relay_function_report_vault_theft`
+* :ref:`relay_function_report_vault_double_payment`
 
-Errors
-~~~~~~~
-
-``ERR_ALREADY_REPORTED``
-
-* **Message**: "This txId has already been logged as a theft by the given Vault"
-* **Function**: :ref:`reportVaultTheft`
-* **Cause**: This transaction / vault combination has already been reported.
-
-``ERR_VALID_REDEEM``
-
-* **Message**: "The given transaction is a valid Redeem execution by the accused Vault"
-* **Function**: :ref:`reportVaultTheft`
-* **Cause**: The given transaction is associated with a valid :ref:`redeem-protocol`.
-
-``ERR_VALID_REPLACE``
-
-* **Message**: "The given transaction is a valid Replace execution by the accused Vault"
-* **Function**: :ref:`reportVaultTheft`
-* **Cause**: The given transaction is associated with a valid :ref:`replace-protocol`.
-
-``ERR_VALID_REFUND``
-
-* **Message**: "The given transaction is a valid Refund execution by the accused Vault"
-* **Function**: :ref:`reportVaultTheft`
-* **Cause**: The given transaction is associated with a valid :ref:`refund-protocol`.
-
-``ERR_VALID_MERGE_TRANSACTION``
-
-* **Message**: "The given transaction is a valid 'UTXO merge' transaction by the accused Vault"
-* **Function**: :ref:`reportVaultTheft`
-* **Cause**: The given transaction represents an allowed "merging" of UTXOs by the accused vault (no BTC was displaced).

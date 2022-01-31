@@ -7,7 +7,7 @@ Oracle
 
 The Oracle receives a continuous data feed from off-chain oracles, with information in exchange rates or bitcoin inclusion estimates. Multiple oracles can be authorized, in which case the 'median' of all unexpired values is used as the actual value. It is not technically the median - when an even number of oracles have submitted values, it does not average the middle two values. Instead, it arbitrarily picks one of them. This is done because this can be done in O(n) rather than in O(n log n). 
 
-In the implementation, the :ref:`feedValues` function does not directly update the aggregate - this is done in the :ref:`oracle_onInitialize` hook, in order to keep the ``feedValues`` function weight independent of the number of oracles. Furthermore, for oracle offline detection and for updating the aggregate when a value becomes outdated, the ``onInitialize`` hook was necessary anyway.
+In the implementation, the :ref:`oracle_function_feed_values` function does not directly update the aggregate - this is done in the :ref:`oracle_hook_on_initialize` hook, in order to keep the :ref:`oracle_function_feed_values` function weight independent of the number of oracles. Furthermore, for oracle offline detection and for updating the aggregate when a value becomes outdated, the :ref:`oracle_hook_on_initialize` hook was necessary anyway.
 
 The implementation of the oracle client **is not part of this specification**. InterBTC assumes the oracle operates correctly and that the received data is reliable. 
 
@@ -49,7 +49,7 @@ Maps
 Aggregate
 .........
 
-Maps ``oracleKey`` to the median of all unexpired values reported by oracles for that key.
+Maps ``oracle_key`` to the median of all unexpired values reported by oracles for that key.
 
 AuthorizedOracles
 .................
@@ -59,17 +59,17 @@ The account(s) of the oracle. Returns true if registered as an oracle.
 ValidUntil
 ..........
 
-Maps OracleKeys to a timestamp that indicates when one of the values expires, at which time a new aggregate needs to be calculated.
+Maps oracle_keys to a timestamp that indicates when one of the values expires, at which time a new aggregate needs to be calculated.
 
 RawValues
 .........
 
-Maps OracleKeys and account ids to raw timestamped values. 
+Maps oracle_keys and account ids to raw timestamped values. 
 
 RawValuesUpdated
 ................
 
-Maps OracleKey to a boolean value that indicates that a new value has been received that has not yet been included in the aggregate.
+Maps oracle_key to a boolean value that indicates that a new value has been received that has not yet been included in the aggregate.
 
 AuthorizedOracles
 .................
@@ -80,10 +80,10 @@ Maps oracle ``accountId`` to the oracle's name. The presence of an account id in
 Functions
 ~~~~~~~~~
 
-.. _feedValues:
+.. _oracle_function_feed_values:
 
-feedValues
-----------
+feed_values
+-----------
 
 The dispatchable function that oracles call to feed new price data into the system.
 
@@ -92,38 +92,38 @@ Specification
 
 *Function Signature*
 
-``feedValues(oracleId, Vec<oracleKey, value>)``
+``feed_values(oracle_id, Vec<oracle_key, value>)``
 
 *Parameters*
 
-* ``oracleId``: the oracle account calling this function.
-* ``oracleKey``: indicated which value is being set
+* ``oracle_id``: the oracle account calling this function.
+* ``oracle_key``: indicated which value is being set
 * ``value``: the value being set
 
 *Events*
 
-* :ref:`feedValuesEvent`
+* :ref:`oracle_event_feed_values`
 
 *Preconditions*
 
-* The function call MUST be signed by ``oracleId``.
+* The function call MUST be signed by ``oracle_id``.
 * The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
 * The oracle MUST be authorized.
 
 *Postconditions*
 
-For each ``(oracleKey, value)`` pair,
+For each ``(oracle_key, value)`` pair,
 
-* ``RawValuesUpdated[oracleKey]`` MUST be set to true
-* ``RawValues[oracleKey]`` MUST be set to a ``TimeStamped`` values, where,
+* ``RawValuesUpdated[oracle_key]`` MUST be set to true
+* ``RawValues[oracle_key]`` MUST be set to a ``TimeStamped`` values, where,
 
   * ``TimeStamped.timestamp`` MUST be the current time,
   * ``TimeStamped.value`` MUST be ``value``.
 
-.. _getPrice:
+.. _oracle_function_get_price:
 
-getPrice
---------
+get_price
+---------
 
 Returns the latest medianized value for the given key, as calculated from the received external data sources.
 
@@ -132,15 +132,15 @@ Specification
 
 *Function Signature*
 
-``getPrice(oracleKey)``
+``get_price(oracle_key)``
 
 *Parameters*
 
-* ``oracleKey``: the key for which the value should be returned
+* ``oracle_key``: the key for which the value should be returned
 
 *Preconditions*
 
-* ``EchangeRate[oracleKey]`` MUST NOT be ``None``. That is, sufficient oracles must have submitted unexpired values.
+* ``ExchangeRate[oracle_key]`` MUST NOT be ``None``. That is, sufficient oracles must have submitted unexpired values.
 
 *Postconditions*
 
@@ -176,10 +176,10 @@ Specification
 * MUST return ``amount`` converted to ``currencyId``.
 
 
-.. _oracle_onInitialize:
+.. _oracle_hook_on_initialize:
 
-onInitialize
-------------
+on_initialize
+-------------
 
 This function is called at the start of every block. When new values have been submitted, or when old values expire, this function update the aggregate value.
 
@@ -188,57 +188,42 @@ Specification
 
 *Function Signature*
 
-``onInitialize()``
+``on_initialize()``
 
 *Postconditions*
 
-* If ``RawValuesUpdated`` is empty, i.e., ``feedValues`` was not yet called since the initialization of the parachain, then the ``OracleOffline`` MUST be set in the :ref:`security` pallet.
-* For each ``(oracleKey, updated)`` in ``RawValuesUpdated``, if ``updated`` is true, or the current time is greater than ``ValidUntil[oracle]``,
+* If ``RawValuesUpdated`` is empty, i.e., :ref:`oracle_function_feed_values` was not yet called since the initialization of the parachain, then the ``OracleOffline`` MUST be set in the :ref:`security` pallet.
+* For each ``(oracle_key, updated)`` in ``RawValuesUpdated``, if ``updated`` is true, or the current time is greater than ``ValidUntil[oracle]``,
 
-  * ``RawValuesUpdated[oracleKey]`` MUST be set to false
-  * ``ExchangeRate[oracleKey]`` MUST be set to the middle value of the sorted list of unexpired values from ``RawValues[oracleKey]``. If there are an even number, one MAY be arbitrarily picked.
-  * ``ValidUntil[oracleKey]`` MUST be set to ``MaxDelay`` plus the minimum timestamp from the unexpired values in ``RawValues[oracleKey]``.
+  * ``RawValuesUpdated[oracle_key]`` MUST be set to false
+  * ``ExchangeRate[oracle_key]`` MUST be set to the middle value of the sorted list of unexpired values from ``RawValues[oracle_key]``. If there are an even number, one MAY be arbitrarily picked.
+  * ``ValidUntil[oracle_key]`` MUST be set to ``MaxDelay`` plus the minimum timestamp from the unexpired values in ``RawValues[oracle_key]``.
 
 .. TODO: recover_from_oracle_offline
 
 Events
 ~~~~~~
 
-.. _feedValuesEvent:
+.. _oracle_event_feed_values:
 
-feedValues
+FeedValues
 ----------
 
-setExchangeRate
+SetExchangeRate
 ---------------
 
 Emits the new exchange rate when it is updated by the oracle.
 
 *Event Signature*
 
-``FeedValues(oracleId, Vec<(oracleKey, value)>),`` 
+``FeedValues(oracle_id, Vec<(oracle_key, value)>),`` 
 
 *Parameters*
 
-* ``oracleId``: the oracle account calling this function.
-* ``oracleKey``: the key indicating which value is being set
+* ``oracle_id``: the oracle account calling this function.
+* ``oracle_key``: the key indicating which value is being set
 * ``value``: the new value
 
 *Function*
 
-* :ref:`feedValues`
-
-Error Codes
-~~~~~~~~~~~
-
-``ERR_MISSING_EXCHANGE_RATE``
-
-* **Message**: "Exchange rate not set."
-* **Function**: :ref:`getPrice` 
-* **Cause**: The last exchange rate information exceeded the maximum delay acceptable by the oracle. 
-
-``ERR_INVALID_ORACLE_SOURCE``
-
-* **Message**: "Invalid oracle account."
-* **Function**: :ref:`feedValues` 
-* **Cause**: The caller of the function was not authorized. 
+* :ref:`oracle_function_feed_values`

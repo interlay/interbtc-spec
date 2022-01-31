@@ -108,7 +108,7 @@ Punishment fees are slashed from the Vault's collateral on failed redeems. A use
 Theft Fee
 ---------
 
-Relayers receive a reward for reporting Vaults for committing theft (see :ref:`reportVaultTheft` and :ref:`reportVaultDoublePayment`).
+Relayers receive a reward for reporting Vaults for committing theft (see :ref:`relay_function_report_vault_theft` and :ref:`relay_function_report_vault_double_payment`).
 
 - **Theft Fee**: A relative fee slashed form the Vault's collateral paid to the Relayer in the vault's `COL` if a Vault commits theft, for the current parameterization see :ref:`theftFee`
 

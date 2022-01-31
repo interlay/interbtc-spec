@@ -12,6 +12,19 @@ The second type of collateral is griefing collateral. The currency used for this
 
 While collateral management is logically distinct from treasury management, they are both implemented using the same :ref:`currency` pallet. This pallet is used to (i) lock, (ii) release, and (iii) slash collateral of either users or vaults. It can only be accessed by other modules and not directly through external transactions.
 
+Multi-Collateral
+----------------
+
+The parachain supports the usage of different currencies for usage as collateral. Which currencies are allowed is determined by governance - they have to explicitly white-list currencies to be able to be used as collateral. They also have to set the various safety thresholds for each currency. 
+
+Vaults in the system are identified by a VaultId, which is essentially a (AccountId, CollateralCurrency, WrappedCurrency) tuple. Note the distinction between the AccountId and the VaultId. A vault operator can run multiple vaults using a the same AccountId but different collateral currencies (and thus VaultIds). Each vault is isolated from all others. This means that if vault operator has two running vaults using the same AccountId but different CollateralCurrencies, then if one of the vaults were to get liquidated, the other vaults remains untouched. The vault client manages all VaultIds associated with a given AccountId. Vault operators will be able to register new VaultIds through the UI, and the vault client will automatically start to manage these.
+
+When a user requests an issue, it selects a single vault to issue with (this choice may be made automatically by the UI). However, since the wrapped token is fully fungible, it may be redeemed with any vault, even if that vault is using a different collateral currency. When redeeming, the user again selects a single vault to redeem with. If a vault fails to execute a redeem request, the user is able to either get back its wrapped token, or to get reimbursed in the vault's collateral currency. If the user prefers the latter, the choice of vault becomes relevant because it determines which currency is received in case of failure.
+
+The WrappedCurrency part of the VaultId is currently always required to take the same value - in the future support for different wrapped currencies may be added.
+
+.. note:: Please note that multi-collateral is a recent addition to the code, and the spec has not been fully updated .
+
 Step-by-Step
 ------------
 
