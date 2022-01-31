@@ -6,9 +6,13 @@ Currency
 Overview
 ~~~~~~~~
 
-This currency pallet provides an interface for the other pallets to manage balances of different currencies. It is a wrapper around the the `orml-tokens <https://github.com/open-web3-stack/open-runtime-module-library>`_ pallet. As such, accounts have two balances per currency: they have a ``reserved`` amount and a ``free`` amount. Users are able to freely transfer ``free`` balances, but only the parachain pallets are able to operate on ``reserved`` amounts.
+This currency pallet provides an interface for the other pallets to manage balances of different currencies. 
+Accounts have three balances per currency: they have a ``free``, ``reserved``, and ``frozen`` amount.
+Users are able to freely transfer ``free - frozen`` balances, but only the parachain pallets are able to operate on ``reserved`` amounts.
+``Frozen`` is used to implement temptorary locks of free balances like vesting schedules.
 
-The external API for dispatchable and RPC functions use 'thin' amount types, meaning that the used currency depends on the context. For example, the currency used in :ref:`depositCollateral` depends on the vault's ``currencyId``. Sometimes, as is for example the case for :ref:`registerVault`, the function takes an additional ``currencyId`` argument to specify the currency to use. In contrast, internally in the parachain amounts are often represented by the ``Amount`` type defined in this pallet, which in addition to the amount, also contains the used currency. The benefit of this type is two-fold. First, we can guarantee that operations only work on compatible amounts. For example, it prevents adding DOT amounts to KSM amounts. Second, it allows for a more convenient api.
+The external API for dispatchable and RPC functions use 'thin' amount types, meaning that the used currency depends on the context. For example, the currency used in :ref:`vault_registry_function_deposit_collateral` depends on the vault's ``currencyId``.
+Sometimes, as is for example the case for :ref:`vault_registry_function_register_vault`, the function takes an additional ``currencyId`` argument to specify the currency to use. In contrast, internally in the parachain amounts are often represented by the ``Amount`` type defined in this pallet, which in addition to the amount, also contains the used currency. The benefit of this type is two-fold. First, we can guarantee that operations only work on compatible amounts. For example, it prevents adding DOT amounts to KSM amounts. Second, it allows for a more convenient api.
 
 Data Model
 ~~~~~~~~~~
@@ -23,21 +27,21 @@ Stores an amount and the used currency.
 
 .. tabularcolumns:: |l|l|L|
 
-======================  ==========  =======================================================	
-Parameter               Type        Description                                            
-======================  ==========  =======================================================
-``amount``              Balance     The amount.
-``currency``            CurrencyId  The used currency.
-======================  ==========  =======================================================
+============  ==========  ==================
+Parameter     Type        Description       
+============  ==========  ==================
+``balance``   Balance     The amount.
+``currency``  CurrencyId  The used currency.
+============  ==========  ==================
 
 
 Functions
 ~~~~~~~~~
 
-.. _fromSignedFixedPoint:
+.. _currency_function_from_signed_fixed_point:
 
-fromSignedFixedPoint
---------------------
+from_signed_fixed_point
+-----------------------
 
 Constructs an ``Amount`` from a signed fixed point number and a ``currencyId``. The fixed point number is truncated. E.g., a value of 2.5 would return 2. 
 
@@ -46,7 +50,7 @@ Specification
 
 *Function Signature*
 
-``fromSignedFixedPoint(amount, currencyId)``
+``from_signed_fixed_point(amount, currencyId)``
 
 *Parameters*
 
@@ -62,10 +66,10 @@ Specification
 * An ``Amount`` MUST be returned where ``Amount.amount`` is the truncated ``amount`` argument, and ``Amount.currencyId`` is the ``currencyId`` argument.
 
 
-.. _toSignedFixedPoint:
+.. _currency_function_to_signed_fixed_point:
 
-toSignedFixedPoint
-------------------
+to_signed_fixed_point
+---------------------
 
 Converts an ``Amount`` struct into a fixed-point number.
 
@@ -74,7 +78,7 @@ Specification
 
 *Function Signature*
 
-``toSignedFixedPoint(amount)``
+``to_signed_fixed_point(amount)``
 
 *Parameters*
 
@@ -89,10 +93,10 @@ Specification
 * ``amount.amount`` MUST be returned as a fixed point number.
 
 
-.. _convertTo:
+.. _currency_function_convert_to:
 
-convertTo
----------
+convert_to
+----------
 
 Converts the given ``amount`` into the given currency. 
 
@@ -101,7 +105,7 @@ Specification
 
 *Function Signature*
 
-``convertTo(amount, currencyId)``
+``convert_to(amount, currencyId)``
 
 *Parameters*
 
@@ -117,10 +121,10 @@ Specification
 * :ref:`convert` MUST be called with ``amount`` and ``currencyId`` as arguments.
 
 
-.. _checkedAdd:
+.. _currency_function_checked_add:
 
-checkedAdd
-----------
+checked_add
+-----------
 
 Adds two amounts.
 
@@ -129,7 +133,7 @@ Specification
 
 *Function Signature*
 
-``checkedAdd(amount1, amount2)``
+``checked_add(amount1, amount2)``
 
 *Parameters*
 
@@ -146,10 +150,10 @@ Specification
 
 
 
-.. _checkedSub:
+.. _currency_function_checked_sub:
 
-checkedSub
-----------
+checked_sub
+-----------
 
 Subtracts two amounts.
 
@@ -158,7 +162,7 @@ Specification
 
 *Function Signature*
 
-``checkedSub(amount1, amount2)``
+``checked_sub(amount1, amount2)``
 
 *Parameters*
 
@@ -174,10 +178,10 @@ Specification
 * MUST return ``amount1 - amount2``.
 
 
-.. _saturatingSub:
+.. _currency_function_saturating_sub:
 
-saturatingSub
--------------
+saturating_sub
+--------------
 
 Subtracts two amounts, or zero if the result would be negative.
 
@@ -186,7 +190,7 @@ Specification
 
 *Function Signature*
 
-``saturatingSub(amount1, amount2)``
+``saturating_sub(amount1, amount2)``
 
 *Parameters*
 
@@ -203,10 +207,10 @@ Specification
 * if ``amount2 > amount1``, then this function MUST return zero.
 
 
-.. _checkedFixedPointMul:
+.. _currency_function_checked_fixed_point_mul:
 
-checkedFixedPointMul
---------------------
+checked_fixed_point_mul
+-----------------------
 
 Multiplies an amount by a fixed point scalar. The result is rounded down.
 
@@ -215,7 +219,7 @@ Specification
 
 *Function Signature*
 
-``checkedFixedPointMul(amount, scalar)``
+``checked_fixed_point_mul(amount, scalar)``
 
 *Parameters*
 
@@ -231,19 +235,19 @@ Specification
 * MUST return a copy of ``amount`` that is multiplied by the scalar. The result MUST be rounded down.
 
 
-.. _checkedFixedPointMulRoundedUp:
+.. _currency_function_checked_fixed_point_mul_rounded_up:
 
-checkedFixedPointMulRoundedUp
------------------------------
+checked_fixed_point_mul_rounded_up
+----------------------------------
 
-Like :ref:`checkedFixedPointMul`, but with a rounded-up result.
+Like :ref:`currency_function_checked_fixed_point_mul`, but with a rounded-up result.
 
 Specification
 .............
 
 *Function Signature*
 
-``checkedFixedPointMulRoundedUp(amount, scalar)``
+``checked_fixed_point_mul_rounded_up(amount, scalar)``
 
 *Parameters*
 
@@ -259,19 +263,19 @@ Specification
 * MUST return a copy of ``amount`` that is multiplied by the scalar. The result MUST be rounded up.
 
 
-.. _roundedMul:
+.. _currency_function_rounded_mul:
 
-roundedMul
-----------
+rounded_mul
+-----------
 
-Like :ref:`checkedFixedPointMul`, but with a rounded result.
+Like :ref:`currency_function_checked_fixed_point_mul`, but with a rounded result.
 
 Specification
 .............
 
 *Function Signature*
 
-``roundedMul(amount, scalar)``
+``rounded_mul(amount, scalar)``
 
 *Parameters*
 
@@ -287,10 +291,10 @@ Specification
 * MUST return a copy of ``amount`` that is multiplied by the scalar. The result MUST be rounded to the nearest integer.
 
 
-.. _checkedDiv:
+.. _currency_function_checked_div:
 
-checkedDiv
-----------
+checked_div
+-----------
 
 Divides an amount by a fixed point scalar. The result is rounded down.
 
@@ -299,7 +303,7 @@ Specification
 
 *Function Signature*
 
-``checkedDiv(amount, scalar)``
+``checked_div(amount, scalar)``
 
 *Parameters*
 
@@ -315,7 +319,7 @@ Specification
 * MUST return a copy of ``amount`` that is divided by the scalar.
 
 
-.. _ratio:
+.. _currency_function_ratio:
 
 ratio
 -----
@@ -344,7 +348,7 @@ Specification
 * MUST return the ratio between the two amounts.
 
 
-.. _cmp:
+.. _currency_function_cmp:
 
 Comparisons: lt, le, eq, ge, gt
 -------------------------------
@@ -373,7 +377,7 @@ Specification
 
 
 
-.. _transfer:
+.. _currency_function_transfer:
 
 transfer
 --------
@@ -404,10 +408,10 @@ Specification
 
 
 
-.. _lockOn:
+.. _currency_function_lock_on:
 
-lockOn
-------
+lock_on
+-------
 
 Locks the amount on the given account.
 
@@ -416,7 +420,7 @@ Specification
 
 *Function Signature*
 
-``lockOn(amount, accountId)``
+``lock_on(amount, accountId)``
 
 *Parameters*
 
@@ -434,10 +438,10 @@ Specification
 
 
 
-.. _unlockOn:
+.. _currency_function_unlock_on:
 
-unlockOn
---------
+unlock_on
+---------
 
 Unlocks the amount on the given account.
 
@@ -446,7 +450,7 @@ Specification
 
 *Function Signature*
 
-``unlockOn(amount, accountId)``
+``unlock_on(amount, accountId)``
 
 *Parameters*
 
@@ -463,10 +467,10 @@ Specification
 * The free balance of ``accountId`` MUST increase by ``amount.amount`` (in the currency determined by ``amount.currencyId)``
 
 
-.. _burnFrom:
+.. _currency_function_burn_from:
 
-burnFrom
---------
+burn_from
+---------
 
 Burns the amount on the given account.
 
@@ -475,7 +479,7 @@ Specification
 
 *Function Signature*
 
-``burnFrom(amount, accountId)``
+``burn_from(amount, accountId)``
 
 *Parameters*
 
@@ -491,10 +495,10 @@ Specification
 * The locked balance of ``accountId`` MUST decrease by ``amount.amount`` (in the currency determined by ``amount.currencyId)``
 
 
-.. _mintTo:
+.. _currency_function_mint_to:
 
-mintTo
-------
+mint_to
+-------
 
 Mints the amount on the given account.
 
@@ -503,7 +507,7 @@ Specification
 
 *Function Signature*
 
-``mintTo(amount, accountId)``
+``mint_to(amount, accountId)``
 
 *Parameters*
 
@@ -512,4 +516,4 @@ Specification
 
 *Postconditions*
 
-* The unlocked balance of ``accountId`` MUST increase by ``amount.amount`` (in the currency determined by ``amount.currencyId)``
+* The ``free`` balance of ``accountId`` MUST increase by ``amount.amount`` (in the currency determined by ``amount.currencyId)``

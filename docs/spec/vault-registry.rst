@@ -10,11 +10,25 @@ The vault registry is the central place to manage vaults. Vaults can register th
 Similarly, the issue, redeem, refund, and replace protocols call this module to assign vaults during issue, redeem, refund, and replace procedures.
 Moreover, vaults use the registry to register public key for the :ref:`okd` and register addresses for the :ref:`op-return` scheme.
 
+.. _vault_registry_overview_multi_collateral:
+
+Multi-Collateral
+----------------
+
+The parachain supports the usage of different currencies for usage as collateral. Which currencies are allowed is determined by governance - they have to explicitly white-list currencies to be able to be used as collateral. They also have to set the various safety thresholds for each currency. 
+
+Vaults in the system are identified by a VaultId, which is essentially a (AccountId, CollateralCurrency, WrappedCurrency) tuple. Note the distinction between the AccountId and the VaultId. A vault operator can run multiple vaults using a the same AccountId but different collateral currencies (and thus VaultIds). Each vault is isolated from all others. This means that if vault operator has two running vaults using the same AccountId but different CollateralCurrencies, then if one of the vaults were to get liquidated, the other vaults remains untouched. The vault client manages all VaultIds associated with a given AccountId. Vault operators will be able to register new VaultIds through the UI, and the vault client will automatically start to manage these.
+
+When a user requests an issue, it selects a single vault to issue with (this choice may be made automatically by the UI). However, since the wrapped token is fully fungible, it may be redeemed with any vault, even if that vault is using a different collateral currency. When redeeming, the user again selects a single vault to redeem with. If a vault fails to execute a redeem request, the user is able to either get back its wrapped token, or to get reimbursed in the vault's collateral currency. If the user prefers the latter, the choice of vault becomes relevant because it determines which currency is received in case of failure.
+
+The WrappedCurrency part of the VaultId is currently always required to take the same value - in the future support for different wrapped currencies may be added.
+
+Moreover, the system implements a ceiling for the maximum amount of collateral than can be locked in the system per collateral and wrapped token pair. Governance is able to update the collateral ceilings.
+
+.. note:: Please note that multi-collateral is a recent addition to the code, and the spec has not been fully updated .
+
 Data Model
 ~~~~~~~~~~
-
-Constants
----------
 
 Scalars
 -------
@@ -34,11 +48,6 @@ LiquidationVaultAccountId
 
 Account identifier of an artificial vault maintained by the VaultRegistry to handle interBTC balances and DOT collateral of liquidated Vaults. That is, when a vault is liquidated, its balances are transferred to ``LiquidationVaultAccountId`` and claims are later handled via the ``LiquidationVault``.
 
-
-..note:: The LiquidationVaultAccountId is shared for liquidations of all collateral currencies used by vaults. However, token balances are kept track of per collateral currency in :ref:`LiquidationVault`.
-
-
-
 Maps
 ----
 
@@ -50,7 +59,7 @@ LiquidationVault
 Mapping from ``CurrencyId`` to the account identifier of an artificial vault (see :ref:`SystemVault`) maintained by the VaultRegistry to handle interBTC balances and collateral of liquidated Vaults that use the given currency. That is, when a vault is liquidated, its balances are transferred to ``LiquidationVault`` and claims are later handled via the ``LiquidationVault``.
 
 
-.. note:: A Vault's token balances and collateral are transferred to the ``LiquidationVault`` as a result of automated liquidations and :ref:`reportVaultTheft`.
+.. note:: A Vault's token balances and collateral are transferred to the ``LiquidationVault`` as a result of automated liquidations and :ref:`relay_function_report_vault_theft`.
 
 
 MinimumCollateralVault
@@ -96,6 +105,13 @@ LiquidationThreshold
 Mapping from ``CurrencyId`` to the lower bound for the collateral rate in issued tokens. If a Vault’s collateral rate drops below this, automatic liquidation is triggered.
 
 * The Liquidation Threshold MUST be greater than 100% for any collateral asset.
+
+.. _vault_registry_map_system_collateral_ceiling:
+
+SystemCollateralCeiling
+.......................
+
+Mapping from a collateral ``CurrencyId`` to a wrapped ``CurrencyId``. Determines the maximum amount of collateral that Vaults are able to lock for backing a wrapped asset.
 
 .. _vaults:
 
@@ -155,10 +171,10 @@ External Functions
 ~~~~~~~~~~~~~~~~~~
 
 
-.. _registerVault:
+.. _vault_registry_function_register_vault:
 
-registerVault
--------------
+register_vault
+--------------
 
 Registers a new Vault. The vault locks up some amount of collateral, and provides a public key which is used for the :ref:`okd`.
 
@@ -167,7 +183,7 @@ Specification
 
 *Function Signature*
 
-``registerVault(vault, collateral, btcPublicKey)``
+``register_vault(vault, collateral, btcPublicKey)``
 
 *Parameters*
 
@@ -278,10 +294,10 @@ Specification
 
 * The vault's public key MUST be set to ``publicKey``.
 
-.. _depositCollateral:
+.. _vault_registry_function_deposit_collateral:
 
-depositCollateral
-------------------------
+deposit_collateral
+------------------
 
 The vault locks additional collateral as a security against stealing the Bitcoin locked with it. 
 
@@ -290,7 +306,7 @@ Specification
 
 *Function Signature*
 
-``depositCollateral(vaultId, collateral)``
+``deposit_collateral(vaultId, collateral)``
 
 *Parameters*
 
@@ -940,7 +956,7 @@ Emit an event stating that a new vault (``vault``) was registered and provide in
 
 *Functions*
 
-* :ref:`registerVault`
+* :ref:`vault_registry_function_register_vault`
 
 .. _depositCollateralEvent:
 
@@ -962,7 +978,7 @@ Emit an event stating how much new (``newCollateral``), total collateral (``tota
 
 *Functions*
 
-* :ref:`depositCollateral`
+* :ref:`vault_registry_function_deposit_collateral`
 
 .. _withdrawCollateralEvent:
 
