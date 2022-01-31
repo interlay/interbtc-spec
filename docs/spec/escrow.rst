@@ -26,14 +26,14 @@ Data Model
 Constants
 ---------
 
-.. _span:
+.. _escrow_constant_span:
 
 Span
 ....
 
-Used to round heights.
+The locktime is rounded to weeks to limit checkpoint iteration.
 
-.. _maxPeriod:
+.. _escrow_constant_max_period:
 
 MaxPeriod
 .........
@@ -43,7 +43,7 @@ The maximum period for lockup.
 Scalars
 -------
 
-.. _escrow-scalar-epoch:
+.. _escrow_scalar_epoch:
 
 Epoch
 .....
@@ -53,35 +53,35 @@ The current global epoch for ``PointHistory``.
 Maps
 ----
 
-.. _escrow-map-locked:
+.. _escrow_map_locked:
 
 Locked
 ......
 
-Stores the ``amount`` and ``end`` block for the account's lock.
+Stores the ``amount`` and ``end`` block for an account's lock.
 
-.. _escrow-map-point-history:
+.. _escrow_map_point_history:
 
 PointHistory
 ............
 
-Stores the global ``bias``, ``slope`` and ``ts`` at a particular point in history,
+Stores the global ``bias``, ``slope`` and ``height`` at a particular point in history.
 
-.. _escrow-map-user-point-history:
+.. _escrow_map_user_point_history:
 
 UserPointHistory
 ................
 
-Stores the ``bias``, ``slope`` and ``ts`` for an account at a particular point in history,
+Stores the ``bias``, ``slope`` and ``height`` for an account at a particular point in history.
 
-.. _escrow-map-user-point-epoch:
+.. _escrow_map_user_point_epoch:
 
 UserPointEpoch
 ..............
 
 Stores the current epoch for an account.
 
-.. _escrow-map-slope-changes:
+.. _escrow_map_slope_changes:
 
 SlopeChanges
 ............
@@ -108,11 +108,7 @@ Parameter       Type          Description
 Point
 .....
 
-The ``bias``, ``slope`` and ``ts`` for our linear function.
-
-We can calculate the current voting power (``balance``) as follows:
-
-    ``balance = bias - (slope * (now - height))``
+The ``bias``, ``slope`` and ``height`` for our linear function.
 
 .. tabularcolumns:: |l|L|
 
@@ -124,10 +120,10 @@ Parameter       Type          Description
 ``height``      BlockNumber   The current block height when this point was stored.
 ==============  ============  ========================================================
 
-Functions
-~~~~~~~~~
+External Functions
+~~~~~~~~~~~~~~~~~~
 
-.. _escrow-function-create-lock:
+.. _escrow_function_create_lock:
 
 create_lock
 -----------
@@ -149,13 +145,13 @@ Specification
 
 *Events*
 
-* :ref:`escrow-event-deposit`
+* :ref:`escrow_event_deposit`
 
 *Preconditions*
 
 * The function call MUST be signed by ``who``.
 * The ``amount`` MUST be non-zero.
-* The account ``who`` MUST NOT already have locked balance.
+* The account's ``old_locked.amount`` MUST be non-zero.
 * The ``unlock_height`` MUST be greater than ``now``.
 * The ``unlock_height`` MUST NOT be greater than ``now + MaxPeriod``.
 
@@ -166,7 +162,17 @@ Specification
     * ``new_locked.amount``: MUST be the ``amount``.
     * ``new_locked.end``: MUST be the ``unlock_height``.
 
-.. _escrow-function-increase-amount:
+* The ``UserPointEpoch`` MUST increase by one.
+* A new ``Point`` MUST be recorded at this epoch:
+
+    * ``slope = amount / max_period``
+    * ``bias = slope * (unlock_height - now)``
+    * ``height = now``
+
+* Function :ref:`reward_withdrawStake` MUST complete successfully using the account's total stake.
+* Function :ref:`reward_depositStake` MUST complete successfully using the current balance (:ref:`escrow_function_balance_at`).
+
+.. _escrow_function_increase_amount:
 
 increase_amount
 ---------------
@@ -187,7 +193,7 @@ Specification
 
 *Events*
 
-* :ref:`escrow-event-deposit`
+* :ref:`escrow_event_deposit`
 
 *Preconditions*
 
@@ -202,6 +208,13 @@ Specification
 
     * ``new_locked.amount``: MUST be ``old_locked.amount + amount``.
     * ``new_locked.end``: MUST be the ``old_locked.end``.
+
+* The ``UserPointEpoch`` MUST increase by one.
+* A new ``Point`` MUST be recorded at this epoch:
+
+    * ``slope = new_locked.amount / max_period``
+    * ``bias = slope * (new_locked.end - now)``
+    * ``height = now``
 
 .. _escrow-function-extend-unlock-height:
 
@@ -224,7 +237,7 @@ Specification
 
 *Events*
 
-* :ref:`escrow-event-deposit`
+* :ref:`escrow_event_deposit`
 
 *Preconditions*
 
@@ -242,7 +255,14 @@ Specification
     * ``new_locked.amount``: MUST be ``old_locked.amount``.
     * ``new_locked.end``: MUST be the ``unlock_height``.
 
-.. _escrow-function-withdraw:
+* The ``UserPointEpoch`` MUST increase by one.
+* A new ``Point`` MUST be recorded at this epoch:
+
+    * ``slope = new_locked.amount / max_period``
+    * ``bias = slope * (new_locked.end - now)``
+    * ``height = now``
+
+.. _escrow_function_withdraw:
 
 withdraw
 --------
@@ -262,7 +282,7 @@ Specification
 
 *Events*
 
-* :ref:`escrow-event-withdraw`
+* :ref:`escrow_event_withdraw`
 
 *Preconditions*
 
@@ -273,11 +293,42 @@ Specification
 *Postconditions*
 
 * The account's ``LockedBalance`` MUST be removed.
+* Function :ref:`reward_withdrawStake` MUST complete successfully using the account's total stake.
+
+
+Internal Functions
+~~~~~~~~~~~~~~~~~~
+
+.. _escrow_function_balance_at:
+
+balance_at
+----------
+
+Using the ``Point``, we can calculate the current voting power (``balance``) as follows:
+
+    ``balance = point.bias - (point.slope * (height - point.height))``
+
+Specification
+.............
+
+*Function Signature*
+
+``balance_at(who, height)``
+
+*Parameters*
+
+* ``who``: The user's address.
+* ``height``: The future height.
+
+*Preconditions*
+
+* The ``height`` MUST be ``>= point.height``.
+
 
 Events
 ~~~~~~
 
-.. _escrow-event-deposit:
+.. _escrow_event_deposit:
 
 Deposit
 -------
@@ -296,9 +347,9 @@ Emit an event if a user successfully deposited tokens or increased the lock time
 
 *Functions*
 
-* :ref:`escrow-function-create-lock`
+* :ref:`escrow_function_create_lock`
 
-.. _escrow-event-withdraw:
+.. _escrow_event_withdraw:
 
 Withdraw
 --------
@@ -316,4 +367,4 @@ Emit an event if a user withdrew previously locked tokens.
 
 *Functions*
 
-* :ref:`escrow-function-withdraw`
+* :ref:`escrow_function_withdraw`
