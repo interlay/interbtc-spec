@@ -96,29 +96,29 @@ LockedBalance
 
 The ``amount`` and ``end`` height for a locked balance.
 
-.. tabularcolumns:: |l|L|
+.. tabularcolumns:: |l|l|L|
 
-==============  ============  ========================================================	
-Parameter       Type          Description                                            
-==============  ============  ========================================================
-``amount``      Balance       The amount deposited to receive vote-escrowed tokens.
-``end``         BlockNumber   The end height after which the balance can be unlocked.
-==============  ============  ========================================================
+==========  ===========  =======================================================	
+Parameter   Type         Description                                            
+==========  ===========  =======================================================
+``amount``  Balance      The amount deposited to receive vote-escrowed tokens.
+``end``     BlockNumber  The end height after which the balance can be unlocked.
+==========  ===========  =======================================================
 
 Point
 .....
 
 The ``bias``, ``slope`` and ``height`` for our linear function.
 
-.. tabularcolumns:: |l|L|
+.. tabularcolumns:: |l|l|L|
 
-==============  ============  ========================================================	
-Parameter       Type          Description                                            
-==============  ============  ========================================================
-``bias``        Balance       The bias for the linear function.
-``slope``       Balance       The slope for the linear function.
-``height``      BlockNumber   The current block height when this point was stored.
-==============  ============  ========================================================
+==========  ===========  ====================================================	
+Parameter   Type         Description                                         
+==========  ===========  ====================================================
+``bias``    Balance      The bias for the linear function.
+``slope``   Balance      The slope for the linear function.
+``height``  BlockNumber  The current block height when this point was stored.
+==========  ===========  ====================================================
 
 External Functions
 ~~~~~~~~~~~~~~~~~~

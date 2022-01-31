@@ -171,7 +171,7 @@ Specification
 
 *Parameters*
 
-* ``&fork``: pointer to a ``BlockChain`` entry in ``Chains``. 
+* ``fork``: pointer to a ``BlockChain`` entry in ``Chains``. 
 
 *Preconditions*
 
