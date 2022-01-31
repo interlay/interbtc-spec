@@ -16,6 +16,8 @@ The specification consists of two parts:
 
 ## Contributing
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+
 You can contribute to this project. The following instructions will get you started with a local development environment.
 
 ### Requirements

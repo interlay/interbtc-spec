@@ -10,21 +10,28 @@ The vault registry is the central place to manage vaults. Vaults can register th
 Similarly, the issue, redeem, refund, and replace protocols call this module to assign vaults during issue, redeem, refund, and replace procedures.
 Moreover, vaults use the registry to register public key for the :ref:`okd` and register addresses for the :ref:`op-return` scheme.
 
+.. _vault_registry_overview_multi_collateral:
+
+Multi-Collateral
+----------------
+
+The parachain supports the usage of different currencies for usage as collateral. Which currencies are allowed is determined by governance - they have to explicitly white-list currencies to be able to be used as collateral. They also have to set the various safety thresholds for each currency. 
+
+Vaults in the system are identified by a VaultId, which is essentially a (AccountId, CollateralCurrency, WrappedCurrency) tuple. Note the distinction between the AccountId and the VaultId. A vault operator can run multiple vaults using a the same AccountId but different collateral currencies (and thus VaultIds). Each vault is isolated from all others. This means that if vault operator has two running vaults using the same AccountId but different CollateralCurrencies, then if one of the vaults were to get liquidated, the other vaults remains untouched. The vault client manages all VaultIds associated with a given AccountId. Vault operators will be able to register new VaultIds through the UI, and the vault client will automatically start to manage these.
+
+When a user requests an issue, it selects a single vault to issue with (this choice may be made automatically by the UI). However, since the wrapped token is fully fungible, it may be redeemed with any vault, even if that vault is using a different collateral currency. When redeeming, the user again selects a single vault to redeem with. If a vault fails to execute a redeem request, the user is able to either get back its wrapped token, or to get reimbursed in the vault's collateral currency. If the user prefers the latter, the choice of vault becomes relevant because it determines which currency is received in case of failure.
+
+The WrappedCurrency part of the VaultId is currently always required to take the same value - in the future support for different wrapped currencies may be added.
+
+Moreover, the system implements a ceiling for the maximum amount of collateral than can be locked in the system per collateral and wrapped token pair. Governance is able to update the collateral ceilings.
+
+.. note:: Please note that multi-collateral is a recent addition to the code, and the spec has not been fully updated .
+
 Data Model
 ~~~~~~~~~~
 
-Constants
----------
-
 Scalars
 -------
-
-MinimumCollateralVault
-......................
-
-The minimum collateral a vault needs to provide to participate in the issue process. 
-
-.. note:: This is a protection against spamming the protocol with very small collateral amounts. Vaults are still able to withdraw the collateral after registration, but at least it requires an additional transaction fee, and it provides protection against accidental registration with very low amounts of collateral.
 
 .. _punishmentDelay:
 
@@ -36,12 +43,39 @@ Time period in which a Vault cannot participate in issue, redeem or replace requ
 - Measured in Parachain blocks
 - Initial value: 1 day (Parachain constant)
 
+LiquidationVaultAccountId
+.........................
+
+Account identifier of an artificial vault maintained by the VaultRegistry to handle interBTC balances and DOT collateral of liquidated Vaults. That is, when a vault is liquidated, its balances are transferred to ``LiquidationVaultAccountId`` and claims are later handled via the ``LiquidationVault``.
+
+Maps
+----
+
+.. _LiquidationVault:
+
+LiquidationVault
+................
+
+Mapping from ``CurrencyId`` to the account identifier of an artificial vault (see :ref:`SystemVault`) maintained by the VaultRegistry to handle interBTC balances and collateral of liquidated Vaults that use the given currency. That is, when a vault is liquidated, its balances are transferred to ``LiquidationVault`` and claims are later handled via the ``LiquidationVault``.
+
+
+.. note:: A Vault's token balances and collateral are transferred to the ``LiquidationVault`` as a result of automated liquidations and :ref:`relay_function_report_vault_theft`.
+
+
+MinimumCollateralVault
+......................
+
+Mapping from ``CurrencyId`` to the minimum collateral a vault needs to provide to register. 
+
+.. note:: This is a protection against spamming the protocol with very small collateral amounts. Vaults are still able to withdraw the collateral after registration, but at least it requires an additional transaction fee, and it provides protection against accidental registration with very low amounts of collateral.
+
+
 .. _SecureCollateralThreshold:
 
 SecureCollateralThreshold
 .........................
 
-Determines the over-collateralization rate for collateral locked by Vaults, necessary for issuing tokens. 
+Mapping from ``CurrencyId`` to to the over-collateralization rate for collateral locked by Vaults, necessary for issuing tokens. 
 
 The Vault can take on issue requests depending on the collateral it provides and under consideration of the ``SecureCollateralThreshold``.
 The maximum amount of interBTC a vault is able to support during the issue process is based on the following equation:
@@ -59,7 +93,7 @@ The maximum amount of interBTC a vault is able to support during the issue proce
 PremiumRedeemThreshold
 ......................
 
-Determines the rate for the collateral rate of Vaults, at which users receive a premium, allocated from the Vault's collateral, when performing a :ref:`redeem-protocol` with this Vault. 
+Mapping from ``CurrencyId`` to the the collateral rate of Vaults, at which users receive a premium, allocated from the Vault's collateral, when performing a :ref:`redeem-protocol` with this Vault. 
 
 * The Premium Redeem Threshold MUST be greater than the Liquidation Threshold.
 
@@ -68,21 +102,16 @@ Determines the rate for the collateral rate of Vaults, at which users receive a 
 LiquidationThreshold
 ....................
 
-Determines the lower bound for the collateral rate in issued tokens. If a Vault’s collateral rate drops below this, automatic liquidation is triggered.
+Mapping from ``CurrencyId`` to the lower bound for the collateral rate in issued tokens. If a Vault’s collateral rate drops below this, automatic liquidation is triggered.
 
 * The Liquidation Threshold MUST be greater than 100% for any collateral asset.
 
-LiquidationVault
-.................
+.. _vault_registry_map_system_collateral_ceiling:
 
-Account identifier of an artificial vault maintained by the VaultRegistry to handle interBTC balances and DOT collateral of liquidated Vaults. That is, when a vault is liquidated, its balances are transferred to ``LiquidationVault`` and claims are later handled via the ``LiquidationVault``.
+SystemCollateralCeiling
+.......................
 
-
-.. note:: A Vault's token balances and DOT collateral are transferred to the ``LiquidationVault`` as a result of automated liquidations and :ref:`relay_function_report_vault_theft`.
-
-
-Maps
-----
+Mapping from a collateral ``CurrencyId`` to a wrapped ``CurrencyId``. Determines the maximum amount of collateral that Vaults are able to lock for backing a wrapped asset.
 
 .. _vaults:
 
@@ -114,18 +143,38 @@ Parameter                  Type                Description
 ``toBeReplacedTokens``     interBTC            Number of interBTC tokens requested for replacement.
 ``replaceCollateral``      DOT                 Griefing collateral to be used for accepted replace requests.
 ``liquidatedCollateral``   DOT                 Any collateral that is locked for remaining to_be_redeemed on liquidation.
+``currencyId``             CurrencyId          The currency the vault uses for collateral
 =========================  ==================  ========================================================
 
 .. note:: This specification currently assumes for simplicity that a vault will reuse the same BTC address, even after multiple redeem requests. **[Future Extension]**: For better security, Vaults may desire to generate new BTC addresses each time they execute a redeem request. This can be handled by pre-generating multiple BTC addresses and storing these in a list for each Vault. Caution is necessary for users which execute issue requests with "old" vault addresses - these BTC must be moved to the latest address by Vaults. 
+
+.. _SystemVault:
+
+SystemVault
+...........
+
+A system vault that keeps track of tokens of liquidated vaults.
+
+.. tabularcolumns:: |l|l|L|
+
+=========================  ==================  ========================================================
+Parameter                  Type                Description
+=========================  ==================  ========================================================
+``toBeIssuedtokens``       interBTC            Number of tokens pending issue
+``issuedTokens``           interBTC            Number of issued tokens
+``toBeRedeemedTokens``     interBTC            Number of tokens pending redeem
+``currencyId``             CurrencyId          the currency used for collateral
+=========================  ==================  ========================================================
+
 
 External Functions
 ~~~~~~~~~~~~~~~~~~
 
 
-.. _registerVault:
+.. _vault_registry_function_register_vault:
 
-registerVault
--------------
+register_vault
+--------------
 
 Registers a new Vault. The vault locks up some amount of collateral, and provides a public key which is used for the :ref:`okd`.
 
@@ -134,13 +183,14 @@ Specification
 
 *Function Signature*
 
-``registerVault(vault, collateral, btcPublicKey)``
+``register_vault(vault, collateral, btcPublicKey)``
 
 *Parameters*
 
 * ``vault``: The account of the vault to be registered.
 * ``collateral``: to-be-locked collateral.
 * ``btcPublicKey``: public key used to derive deposit keys with the :ref:`okd`.
+* ``currencyId``: the currency that the vault will use as collateral.
 
 
 *Events*
@@ -157,8 +207,8 @@ Specification
 
 *Postconditions*
 
-* The vault's free balance MUST decrease by ``collateral``.
-* The vault's reserved balance MUST increase by ``collateral``.
+* The vault's free balance in the given currency MUST decrease by ``collateral``.
+* The vault's reserved balance MUST in the given currency increase by ``collateral``.
 * The new vault MUST be created as follows:
 
     * ``vault.wallet``: MUST be empty.
@@ -170,6 +220,7 @@ Specification
     * ``vault.toBeReplacedTokens``: MUST be zero.
     * ``vault.replaceCollateral``: MUST be zero.
     * ``vault.liquidatedCollateral``: MUST be zero.
+    * ``vault.currencyId``: MUST be the supplied ``currencyId``
 
 * The new vault MUST be inserted into :ref:`vaults` using their account identifier as key.
 
@@ -243,10 +294,10 @@ Specification
 
 * The vault's public key MUST be set to ``publicKey``.
 
-.. _depositCollateral:
+.. _vault_registry_function_deposit_collateral:
 
-depositCollateral
-------------------------
+deposit_collateral
+------------------
 
 The vault locks additional collateral as a security against stealing the Bitcoin locked with it. 
 
@@ -255,7 +306,7 @@ Specification
 
 *Function Signature*
 
-``lockCollateral(vaultId, collateral)``
+``deposit_collateral(vaultId, collateral)``
 
 *Parameters*
 
@@ -272,11 +323,12 @@ Precondition
 * The function call MUST be signed by ``vaultId``.
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
 * A vault with id ``vaultId`` MUST be registered.
-* The vault MUST have sufficient unlocked collateral to lock.
+* The vault MUST have sufficient unlocked collateral in the currency determined by ``vault.currencyId`` to lock.
 
 *Postconditions*
 
 * Function :ref:`staking_depositStake` MUST complete successfully - parameterized by ``vaultId`` and ``collateral``.
+* The vault MUST lock an amount of ``collateral`` of its collateral, using the currency set in ``vault.currencyId``.
 
 .. _withdrawCollateral:
 
@@ -313,7 +365,8 @@ Specification
 *Postconditions*
 
 * Function :ref:`staking_withdrawStake` MUST complete successfully - parameterized by ``vaultId`` and ``withdrawAmount``.
-* The vault's free balance MUST increase by ``withdrawAmount``.
+* The vault's free balance in the currency configured by ``vault.currencyID`` MUST increase by ``withdrawAmount``.
+* The vault's locked balance in the currency configured by ``vault.currencyID`` MUST decrease by ``withdrawAmount``.
 
 
 
@@ -607,7 +660,7 @@ One of:
 redeemTokensLiquidation
 ------------------------
 
-Handles redeem requests which are executed against the LiquidationVault. Reduces the issued token of the LiquidationVault and slashes the
+Handles redeem requests which are executed against the LiquidationVault in the given currency. Reduces the issued token of the LiquidationVault and slashes the
 corresponding amount of collateral.
 
 Specification
@@ -615,10 +668,11 @@ Specification
 
 *Function Signature*
 
-``redeemTokensLiquidation(redeemerId, tokens)``
+``redeemTokensLiquidation(redeemerId, tokens, currencyId)``
 
 *Parameters*
 
+* ``currencyId``: The currency of the to be received collateral.
 * ``redeemerId`` : The account of the user redeeming interBTC.
 * ``tokens``: The amount of interBTC to be burned, in exchange for collateral.
 
@@ -629,10 +683,11 @@ Specification
 *Preconditions*
 
 * The BTC Parachain status in the :ref:`security` component MUST NOT be set to ``SHUTDOWN: 2``.
-* The liquidation vault MUST have sufficient tokens, i.e. ``tokens`` MUST be less than or equal to its ``issuedTokens - toBeRedeemedTokens``.
+* The liquidation vault with the given ``currencyId`` MUST have sufficient tokens, i.e. ``tokens`` MUST be less than or equal to its ``issuedTokens - toBeRedeemedTokens``.
 
 *Postconditions*
 
+* The used liquidation vault MUST be the one with the given ``currencyId``.
 * The liquidation vault's ``issuedTokens`` MUST decrease by ``tokens``.
 * The redeemer MUST have received an amount of collateral equal to ``(tokens / liquidationVault.issuedTokens) * liquidationVault.backingCollateral``.
 
@@ -868,7 +923,7 @@ Specification
 getMaxNominationRatio
 ----------------------
 
-Returns the nomination ratio, denoting the maximum amount of collateral that can be nominated to a particular Vault.
+Returns the nomination ratio, denoting the maximum amount of collateral that can be nominated in a given currency.
 
 - ``MaxNominationRatio = (SecureCollateralThreshold / PremiumRedeemThreshold) - 1)``
 
@@ -897,11 +952,11 @@ Emit an event stating that a new vault (``vault``) was registered and provide in
 *Parameters*
 
 * ``vault``: The account of the vault to be registered.
-* ``collateral``: to-be-locked collateral in DOT.
+* ``collateral``: the amount of the to-be-locked collateral.
 
 *Functions*
 
-* :ref:`registerVault`
+* :ref:`vault_registry_function_register_vault`
 
 .. _depositCollateralEvent:
 
@@ -923,7 +978,7 @@ Emit an event stating how much new (``newCollateral``), total collateral (``tota
 
 *Functions*
 
-* :ref:`depositCollateral`
+* :ref:`vault_registry_function_deposit_collateral`
 
 .. _withdrawCollateralEvent:
 
