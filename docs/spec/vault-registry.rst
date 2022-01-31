@@ -329,7 +329,7 @@ Internal Functions
 tryIncreaseToBeIssuedTokens
 ---------------------------
 
-During an issue request function (:ref:`requestIssue`), a user must be able to assign a vault to the issue request. As a vault can be assigned to multiple issue requests, race conditions may occur. To prevent race conditions, a Vault's collateral is *reserved* when an ``IssueRequest`` is created - ``toBeIssuedTokens`` specifies how much interBTC is to be issued (and the reserved collateral is then calculated based on :ref:`getPrice`).
+During an issue request function (:ref:`requestIssue`), a user must be able to assign a vault to the issue request. As a vault can be assigned to multiple issue requests, race conditions may occur. To prevent race conditions, a Vault's collateral is *reserved* when an ``IssueRequest`` is created - ``toBeIssuedTokens`` specifies how much interBTC is to be issued (and the reserved collateral is then calculated based on :ref:`oracle_function_get_price`).
 
 Specification
 .............
