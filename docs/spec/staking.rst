@@ -73,10 +73,6 @@ Nonce
 
 Maps ``(currencyId, vaultId)`` current value of the nonce the given vault uses in the given currency. The nonce is increased every time :ref:`forceRefund` is called, i.e., when a vault opts out of nomination. Since nominators get their collateral back as a withdrawable reward, the bookkeeping must remain intact when the vault once again opts into nomination. By incrementing this nonce, effectively a new reward pool is created for the new session. All externally callable functions use the nonce stored in this map, except for the reward withdrawal function :ref:`withdrawRewardAtIndex`. 
 
-
-
-
-
 Functions
 ~~~~~~~~~
 
@@ -112,7 +108,6 @@ Specification
 * ``TotalCurrentStake[currencyId, nonce, vaultId]`` MUST increase by ``amount``
 * ``RewardTally[currencyId, nonce, vaultId, nominatorId]`` MUST increase by ``RewardPerToken[currencyId, nonce, vaultId] * amount``.
 * ``SlashTally[currencyId, nonce, vaultId, nominatorId]`` MUST increase by ``SlashPerToken[currencyId, nonce, vaultId] * amount``.
-
 
 
 .. _staking_withdrawStake:
@@ -168,8 +163,6 @@ Then:
 * ``SlashTally[nonce, currencyId, vaultId, nominatorId]`` MUST be set to ``(stake - toSlash - amount) * slashPerToken``
 * ``RewardTally[nonce, currencyId, vaultId, nominatorId]`` MUST decrease by ``rewardPerToken * amount`` 
 
-
-
 .. _slashStake:
 
 slashStake
@@ -201,8 +194,6 @@ Let ``nonce`` be ``Nonce[currencyId, vaultId]``, and ``initialTotalStake`` be ``
 * ``SlashPerToken[currencyId, nonce, vaultId]`` MUST increase by ``amount / TotalStake[currencyId, nonce, vaultId]``
 * ``TotalCurrentStake[currencyId, nonce, vaultId]`` MUST decrease by ``amount``
 * if ``initialTotalStake - amount`` is NOT zero, ``RewardPerToken[currencyId, nonce, vaultId]`` MUST increase by ``RewardPerToken[currencyId, nonce, vaultId] * amount / (initialTotalStake - amount)``
-
-
 
 .. _computeStakeAtIndex:
 
@@ -306,8 +297,6 @@ Let ``rewardTally`` be ``rewardTally[nonce, currencyId, vaultId, nominatorId]``,
 
 * The function MUST return ``max(0, stake * rewardPerToken - reward_tally)``
 
-
-
 .. _withdrawRewardAtIndex:
 
 withdrawRewardAtIndex
@@ -346,8 +335,6 @@ Let ``rewardPerToken`` be ``RewardPerToken[currencyId, nonce, vaultId]``, and
 * ``TotalRewards[currency_id, nonce, vault_id]`` MUST decrease by ``reward``
 * ``RewardTally[currencyId, nonce, vaultId, nominatorId]`` MUST be set to ``stake * rewardPerToken``
 * The function MUST return ``reward``
-
-
 
 .. _forceRefund:
 
@@ -390,8 +377,6 @@ Let ``nonce`` be ``Nonce[currencyId, vaultId]``, then:
 * ``withdrawRewardAtIndex(nonce, currencyId, vaultId, vaultId)`` MUST have been called
 * ``Nonce[currencyId, vaultId]`` MUST be increased by 1
 * ``depositStake(currencyId, vaultId, vaultId, reward)`` MUST have been called AFTER having increased the nonce
-
-
 
 .. _staking_DepositStakeEvent:
 
@@ -497,7 +482,6 @@ ForceRefund
 *Functions*
 
 * :ref:`ForceRefund`
-
 
 
 .. _increaseNonceEvent:

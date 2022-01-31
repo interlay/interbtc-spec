@@ -48,12 +48,12 @@ Stores the balances of a single account.
 
 .. tabularcolumns:: |l|l|L|
 
-======================  ==========  =======================================================	
-Parameter               Type        Description                                            
-======================  ==========  =======================================================
-``free``                Balance     Free and may be transferred without restriction.
-``reserved``            Balance     Reserved and may not be used by holder until unlocked.
-======================  ==========  =======================================================
+============  =======  ======================================================
+Parameter     Type     Description                                           
+============  =======  ======================================================
+``free``      Balance  Free and may be transferred without restriction.
+``reserved``  Balance  Reserved and may not be used by holder until unlocked.
+============  =======  ======================================================
 
 Functions
 ~~~~~~~~~
