@@ -327,7 +327,7 @@ Precondition
 
 *Postconditions*
 
-* Function :ref:`staking_depositStake` MUST complete successfully - parameterized by ``vaultId`` and ``collateral``.
+* Function :ref:`staking_function_deposit_stake` MUST complete successfully - parameterized by ``vaultId`` and ``collateral``.
 * The vault MUST lock an amount of ``collateral`` of its collateral, using the currency set in ``vault.currencyId``.
 
 .. _withdrawCollateral:
@@ -364,7 +364,7 @@ Specification
 
 *Postconditions*
 
-* Function :ref:`staking_withdrawStake` MUST complete successfully - parameterized by ``vaultId`` and ``withdrawAmount``.
+* Function :ref:`staking_function_withdraw_stake` MUST complete successfully - parameterized by ``vaultId`` and ``withdrawAmount``.
 * The vault's free balance in the currency configured by ``vault.currencyID`` MUST increase by ``withdrawAmount``.
 * The vault's locked balance in the currency configured by ``vault.currencyID`` MUST decrease by ``withdrawAmount``.
 
@@ -635,7 +635,7 @@ One of:
 * If the vault is *not* liquidated:
 
    * The vault's ``toBeRedeemedTokens`` must be greater than or equal to ``tokens``.
-   * If ``premium > 0``, then the vault's ``backingCollateral`` (as calculated via :ref:`computeStakeAtIndex`) must be greater than or equal to ``premium``.
+   * If ``premium > 0``, then the vault's ``backingCollateral`` (as calculated via :ref:`staking_function_compute_stake_at_index`) must be greater than or equal to ``premium``.
 
 * If the vault *is* liquidated, then the liquidation vault's ``toBeRedeemedTokens`` must be greater than or equal to ``tokens``
   
@@ -650,7 +650,7 @@ One of:
 
    * The amount ``toBeReleased`` is calculated as ``(vault.liquidatedCollateral * tokens) / vault.toBeRedeemedTokens``.
    * The vault's ``liquidatedCollateral`` MUST decrease by ``toBeReleased``.
-   * Function :ref:`staking_depositStake` MUST complete successfully - parameterized by ``vaultId``, ``vaultId``, and ``toBeReleased``.
+   * Function :ref:`staking_function_deposit_stake` MUST complete successfully - parameterized by ``vaultId``, ``vaultId``, and ``toBeReleased``.
 
 * The vault's ``toBeRedeemedTokens`` MUST decrease by ``tokens``.
 * The vault's ``issuedTokens`` MUST decrease by ``tokens``.
@@ -817,7 +817,7 @@ Specification
 
    * The amount ``toBeReleased`` MUST be calculated as ``(oldVault.liquidatedCollateral * tokens) / oldVault.toBeRedeemedTokens``.
    * The ``oldVault``'s ``liquidatedCollateral`` MUST decrease by ``toBeReleased``.
-   * Function :ref:`staking_depositStake` MUST complete successfully - parameterized by ``oldVault``, ``oldVault`` and ``toBeReleased``.
+   * Function :ref:`staking_function_deposit_stake` MUST complete successfully - parameterized by ``oldVault``, ``oldVault`` and ``toBeReleased``.
 
 * The ``oldVault``'s ``toBeRedeemed`` MUST decrease by ``tokens``.
 * The ``oldVault``'s ``issuedTokens`` MUST decrease by ``tokens``.
@@ -896,12 +896,12 @@ Specification
 * ``toBeLiquidated`` MUST be calculated as ``(usedCollateral * (usedTokens - toBeRedeemedTokens)) / usedTokens``.
 * ``remainingCollateral`` MUST be calculated as ``max(0, usedCollateral - toBeLiquidated)``.
 * Function :ref:`reward_withdrawStake` MUST complete successfully - parameterized by ``vault`` and ``issuedTokens``.
-* Function :ref:`staking_withdrawStake` MUST complete successfully - parameterized by ``vault`` and ``remainingCollateral``.
+* Function :ref:`staking_function_withdraw_stake` MUST complete successfully - parameterized by ``vault`` and ``remainingCollateral``.
 * ``liquidatedCollateral`` MUST be increased by ``remainingCollateral``.
 * ``toWithdraw`` MUST be calculated as ``toBeLiquidated - backingCollateral`` OR ``toBeLiquidated`` if ``backingCollateral > toBeLiquidated``.
 * ``toSlash`` MUST be calculated as the remainder of the previous calculation.
-* Function :ref:`staking_withdrawStake` MUST complete successfully - parameterized by ``vault`` and ``toWithdraw``.
-* Function :ref:`slashStake` MUST complete successfully - parameterized by ``vault`` and ``toSlash``.
+* Function :ref:`staking_function_withdraw_stake` MUST complete successfully - parameterized by ``vault`` and ``toWithdraw``.
+* Function :ref:`staking_function_slash_stake` MUST complete successfully - parameterized by ``vault`` and ``toSlash``.
 
 * The liquidation vault MUST be updated as follows:
 
