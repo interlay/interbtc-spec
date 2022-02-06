@@ -11,15 +11,15 @@ This pallet provides a way distribute rewards to any number of accounts, proport
 Invariants
 ~~~~~~~~~~
 
-* For each ``currencyId``,
+* For each ``currency_id``,
 
-  * ``TotalStake[currencyId]`` MUST be equal to the sum of ``Stake[currencyId, accountId]`` over all accounts.
-  * ``TotalReward[currencyId]`` MUST be equal to the sum of ``Stake[currencyId, accountId] * RewardPerToken[currencyId] - RewardTally[currencyId, accountId]`` over all accounts.
-  * For each ``accountId``,
+  * ``TotalStake[currency_id]`` MUST be equal to the sum of ``Stake[currency_id, account_id]`` over all accounts.
+  * ``TotalReward[currency_id]`` MUST be equal to the sum of ``Stake[currency_id, account_id] * RewardPerToken[currency_id] - RewardTally[currency_id, account_id]`` over all accounts.
+  * For each ``account_id``,
   
-    * ``RewardTally[currencyId, accountId]`` MUST be smaller than or equal to ``Stake[currencyId, accountId] * RewardPerToken[currencyId]``
-    *  ``Stake[currencyId, accountId]`` MUST NOT be negative
-    * ``RewardTally[currencyId, accountId]`` MUST NOT be negative
+    * ``RewardTally[currency_id, account_id]`` MUST be smaller than or equal to ``Stake[currency_id, account_id] * RewardPerToken[currency_id]``
+    *  ``Stake[currency_id, account_id]`` MUST NOT be negative
+    * ``RewardTally[currency_id, account_id]`` MUST NOT be negative
 
 Data Model
 ~~~~~~~~~~
@@ -57,23 +57,23 @@ Functions
 ~~~~~~~~~
 
 
-.. _getTotalRewards:
+.. _reward_function_get_total_rewards:
 
-getTotalRewards
----------------
+get_total_rewards
+-----------------
 
-This function gets the total amount of rewards distributed in the pool with the given currencyId.
+This function gets the total amount of rewards distributed in the pool with the given currency_id.
 
 Specification
 .............
 
 *Function Signature*
 
-``getTotalRewards(currencyId)``
+``get_total_rewards(currency_id)``
 
 *Parameters*
 
-* ``currencyId``: Determines of which currency the amount is returned. 
+* ``currency_id``: Determines of which currency the amount is returned. 
 
 *Postconditions*
 
@@ -81,10 +81,10 @@ Specification
 
 
 
-.. _reward_depositStake:
+.. _reward_function_deposit_stake:
 
-depositStake
-------------
+deposit_stake
+-------------
 
 Adds a stake for the given account and currency in the reward pool.
 
@@ -93,32 +93,32 @@ Specification
 
 *Function Signature*
 
-``depositStake(currencyId, accountId, amount)``
+``deposit_stake(currency_id, account_id, amount)``
 
 *Parameters*
 
-* ``currencyId``: The currency for which to add the stake
-* ``accountId``: The account for which to add the stake
+* ``currency_id``: The currency for which to add the stake
+* ``account_id``: The account for which to add the stake
 * ``amount``: The amount by which the stake is to increase
 
 *Events*
 
-* :ref:`depositStakeEvent`
+* :ref:`reward_event_deposit_stake`
 
 *Preconditions*
 
 *Postconditions*
 
-* ``Stake[currencyId, accountId]`` MUST increase by ``amount``
-* ``TotalStake[currencyId]`` MUST increase by ``amount``
-* ``RewardTally[currencyId, accountId]`` MUST increase by ``RewardPerToken[currencyId] * amount``. This ensures the amount of rewards the given accountId can withdraw remains unchanged.
+* ``Stake[currency_id, account_id]`` MUST increase by ``amount``
+* ``TotalStake[currency_id]`` MUST increase by ``amount``
+* ``RewardTally[currency_id, account_id]`` MUST increase by ``RewardPerToken[currency_id] * amount``. This ensures the amount of rewards the given account_id can withdraw remains unchanged.
 
 
 
-.. _reward_distributeReward:
+.. _reward_function_distribute_reward:
 
-distributeReward
-----------------
+distribute_reward
+-----------------
 
 Distributes rewards to the stakeholders.
 
@@ -127,33 +127,33 @@ Specification
 
 *Function Signature*
 
-``distributeReward(currencyId, reward)``
+``distribute_reward(currency_id, reward)``
 
 *Parameters*
 
-* ``currencyId``: The currency being distributed
+* ``currency_id``: The currency being distributed
 * ``reward``: The amount being distributed
 
 *Events*
 
-* :ref:`distributeRewardEvent`
+* :ref:`reward_event_distribute_reward`
 
 
 *Preconditions*
 
-* ``TotalStake[currencyId]`` MUST NOT be zero.
+* ``TotalStake[currency_id]`` MUST NOT be zero.
 
 *Postconditions*
 
-* ``RewardPerToken[currencyId]`` MUST increase by ``reward / TotalStake[currencyId]``
-* ``TotalRewards[currencyId]`` MUST increase by ``reward``
+* ``RewardPerToken[currency_id]`` MUST increase by ``reward / TotalStake[currency_id]``
+* ``TotalRewards[currency_id]`` MUST increase by ``reward``
 
 
 
-.. _computeReward:
+.. _reward_function_compute_reward:
 
-computeReward
--------------
+compute_reward
+--------------
 
 Computes the amount a given account can withdraw in the given currency.
 
@@ -162,20 +162,20 @@ Specification
 
 *Function Signature*
 
-``computeReward(currencyId, accountId)``
+``compute_reward(currency_id, account_id)``
 
 *Parameters*
 
-* ``currencyId``: The currency for which the rewards are being calculated
-* ``accountId``: Account for which the rewards are being calculated.
+* ``currency_id``: The currency for which the rewards are being calculated
+* ``account_id``: Account for which the rewards are being calculated.
 
 *Postconditions*
 
-* The function MUST return ``Stake[currencyId, accountId] * RewardPerToken[currencyId] - RewardTally[currencyId, accountId]``.
+* The function MUST return ``Stake[currency_id, account_id] * RewardPerToken[currency_id] - RewardTally[currency_id, account_id]``.
 
 
 
-.. _reward_withdrawStake:
+.. _reward_function_withdraw_stake:
 
 withdrawStake
 -------------
@@ -187,34 +187,34 @@ Specification
 
 *Function Signature*
 
-``withdrawStake(currencyId, accountId, amount)``
+``withdrawStake(currency_id, account_id, amount)``
 
 *Parameters*
 
-* ``currencyId``: The currency for which to decrease the stake
-* ``accountId``: The account for which to decrease the stake
+* ``currency_id``: The currency for which to decrease the stake
+* ``account_id``: The account for which to decrease the stake
 * ``amount``: The amount by which the stake is to decrease
 
 *Events*
 
-* :ref:`withdrawStakeEvent`
+* :ref:`reward_event_withdraw_stake`
 
 *Preconditions*
 
-* ``amount`` MUST NOT be greater than ``Stake[currencyId, accountId]``
+* ``amount`` MUST NOT be greater than ``Stake[currency_id, account_id]``
 
 *Postconditions*
 
-* ``Stake[currencyId, accountId]`` MUST decrease by ``amount``
-* ``TotalStake[currencyId]`` MUST decrease by ``amount``
-* ``RewardTally[currencyId, accountId]`` MUST decrease by ``RewardPerToken[currencyId] * amount``. This ensures the amount of rewards the given accountId can withdraw remains unchanged.
+* ``Stake[currency_id, account_id]`` MUST decrease by ``amount``
+* ``TotalStake[currency_id]`` MUST decrease by ``amount``
+* ``RewardTally[currency_id, account_id]`` MUST decrease by ``RewardPerToken[currency_id] * amount``. This ensures the amount of rewards the given account_id can withdraw remains unchanged.
 
 
 
-.. _withdrawReward:
+.. _reward_function_withdraw_reward:
 
-withdrawReward
---------------
+withdraw_reward
+---------------
 
 Withdraw all available rewards of a given account and currency 
 
@@ -223,108 +223,108 @@ Specification
 
 *Function Signature*
 
-``withdrawReward(currencyId, reward)``
+``withdraw_reward(currency_id, reward)``
 
 *Parameters*
 
-* ``currencyId``: The currency being withdrawn
-* ``accountId``: The account for which to withdraw the rewards
+* ``currency_id``: The currency being withdrawn
+* ``account_id``: The account for which to withdraw the rewards
 
 *Events*
 
-* :ref:`withdrawRewardEvent`
+* :ref:`reward_event_withdraw_reward`
 
 *Preconditions*
 
-* ``TotalStake[currencyId]`` MUST NOT be zero.
+* ``TotalStake[currency_id]`` MUST NOT be zero.
 
 *Postconditions*
 
-Let ``reward`` be the result :ref:`computeReward` when it is called with ``currencyId`` and ``accountId`` as arguments. Then:
+Let ``reward`` be the result :ref:`reward_function_compute_reward` when it is called with ``currency_id`` and ``account_id`` as arguments. Then:
 
-* ``TotalRewards[currencyId]`` MUST decrease by ``reward``
-* ``RewardPerToken[currencyId]`` MUST be set to ``RewardPerToken[currencyId] * Stake[currencyId, accountId]``
+* ``TotalRewards[currency_id]`` MUST decrease by ``reward``
+* ``RewardPerToken[currency_id]`` MUST be set to ``RewardPerToken[currency_id] * Stake[currency_id, account_id]``
 
 
 
 Events
 ~~~~~~
 
-.. _depositStakeEvent:
+.. _reward_event_deposit_stake:
 
 DepositStake
 ------------
 
 *Event Signature*
 
-``DepositStake(currencyId, accountId, amount)``
+``DepositStake(currency_id, account_id, amount)``
 
 *Parameters*
 
-* ``currencyId``: the currency for which the stake has been changed
-* ``accountId``: the account for which the stake has been changed
+* ``currency_id``: the currency for which the stake has been changed
+* ``account_id``: the account for which the stake has been changed
 * ``amount``: the increase in stake
 
 *Functions*
 
-* :ref:`reward_depositStake`
+* :ref:`reward_function_deposit_stake`
 
 
 
-.. _withdrawStakeEvent:
+.. _reward_event_withdraw_stake:
 
 WithdrawStake
 ---------------
 
 *Event Signature*
 
-``WithdrawStake(currencyId, accountId, amount)``
+``WithdrawStake(currency_id, account_id, amount)``
 
 *Parameters*
 
-* ``currencyId``: the currency for which the stake has been changed
-* ``accountId``: the account for which the stake has been changed
+* ``currency_id``: the currency for which the stake has been changed
+* ``account_id``: the account for which the stake has been changed
 * ``amount``: the decrease in stake
 
 *Functions*
 
-* :ref:`reward_withdrawStake`
+* :ref:`reward_function_withdraw_stake`
 
 
-.. _distributeRewardEvent:
+.. _reward_event_distribute_reward:
 
 DistributeReward
 ----------------
 
 *Event Signature*
 
-``DistributeReward(currencyId, accountId, amount)``
+``DistributeReward(currency_id, account_id, amount)``
 
 *Parameters*
 
-* ``currencyId``: the currency for which the reward has been withdrawn
+* ``currency_id``: the currency for which the reward has been withdrawn
 * ``amount``: the distributed amount
 
 *Functions*
 
-* :ref:`reward_distributeReward`
+* :ref:`reward_function_distribute_reward`
 
 
-.. _withdrawRewardEvent:
+.. _reward_event_withdraw_reward:
 
 WithdrawReward
 ---------------
 
 *Event Signature*
 
-``WithdrawReward(currencyId, accountId, amount)``
+``WithdrawReward(currency_id, account_id, amount)``
 
 *Parameters*
 
-* ``currencyId``: the currency for which the reward has been withdrawn
-* ``accountId``: the account for which the reward has been withdrawn
+* ``currency_id``: the currency for which the reward has been withdrawn
+* ``account_id``: the account for which the reward has been withdrawn
 * ``amount``: the withdrawn amount
 
 *Functions*
 
-* :ref:`withdrawReward`
+* :ref:`reward_function_withdraw_reward`
