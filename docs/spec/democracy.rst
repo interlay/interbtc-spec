@@ -94,6 +94,13 @@ PublicProps
 
 Stores an array of the tuple ``(index, proposal_hash, who)``.
 
+.. _democracy_scalar_referendum_count:
+
+ReferendumCount
+...............
+
+Stores the number of referendums created so far.
+
 
 Maps
 ----
@@ -222,6 +229,39 @@ Specification
 
 * The vote MUST be recorded in :ref:`democracy_map_voting_of`.
 
+.. _democracy_function_fast_track:
+
+fast_track
+----------
+
+Fast track a proposal to a referendum and begin voting.
+
+Specification
+.............
+
+*Function Signature*
+
+``fast_track(who, prop_index)``
+
+*Parameters*
+
+* ``who``: The user's address.
+* ``prop_index``: The index of the proposal.
+
+*Events*
+
+* :ref:`democracy_event_fast_track`
+
+*Preconditions*
+
+* The function call MUST be signed by ``who``.
+* The ``prop_index`` MUST exist in :ref:`democracy_scalar_public_props`.
+
+*Postconditions*
+
+* :ref:`democracy_scalar_referendum_count` MUST increase by one.
+* The referendum MUST be recorded in :ref:`democracy_map_referendum_info_of`.
+
 
 Events
 ~~~~~~
@@ -235,13 +275,32 @@ Emit an event if a new proposal was created.
 
 *Event Signature*
 
-``Proposed(proposal_index, deposit)``
+``Proposed(prop_index, deposit)``
 
 *Parameters*
 
-* ``proposal_index``: The index of a proposal in the queue.
+* ``prop_index``: The index of a proposal.
 * ``deposit``: The initial bond places for deposit.
 
 *Functions*
 
 * :ref:`democracy_function_propose`
+
+.. _democracy_event_fast_track:
+
+FastTrack
+---------
+
+Emit an event if a proposal was fast tracked.
+
+*Event Signature*
+
+``FastTrack(ref_index)``
+
+*Parameters*
+
+* ``ref_index``: The index of a referendum.
+
+*Functions*
+
+* :ref:`democracy_function_fast_track`
