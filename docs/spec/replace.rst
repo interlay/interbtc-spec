@@ -21,7 +21,7 @@ Step-by-Step
 
 2. *oldVault* submits a replace request, indicating how much BTC is to be migrated by calling the :ref:`requestReplace` function. 
 
-   * *oldVault* is required to lock some amount of DOT collateral (:ref:`replaceGriefingCollateral`) as griefing protection, to prevent *oldVault* from holding *newVault*'s DOT collateral locked in the BTC Parachain without ever finalizing the redeem protocol (transfer of BTC). 
+   * *oldVault* is required to lock some amount of DOT collateral (:ref:`fee_scalar_replace_griefing_collateral`) as griefing protection, to prevent *oldVault* from holding *newVault*'s DOT collateral locked in the BTC Parachain without ever finalizing the redeem protocol (transfer of BTC). 
 
 3. Optional: *oldVault* can withdraw the request by calling the :ref:`withdrawReplace` function with a specified amount. For example, if *oldVault* requested a replacement for 10 tokens, and 2 tokens have been accepted by some *newVault*, then it can withdraw up to 8 tokens from being replaced. 
 
@@ -146,7 +146,7 @@ Specification
 * The *oldVault* MUST NOT be banned.
 * The *oldVault* MUST NOT be nominated (if :ref:`vault_nomination` is enabled).
 * If the ``btcAmount`` is greater than the Vault's ``replacableTokens = issuedTokens - toBeRedeemTokens - toBeReplaceTokens``, set the ``btcAmount`` to the ``replaceableTokens`` amount.
-* The *oldVault* MUST provide sufficient ``griefingCollateral`` such that the ratio of all of its ``toBeReplacedTokens`` and ``replaceCollateral`` is above :ref:`replaceGriefingCollateral`.
+* The *oldVault* MUST provide sufficient ``griefingCollateral`` such that the ratio of all of its ``toBeReplacedTokens`` and ``replaceCollateral`` is above :ref:`fee_scalar_replace_griefing_collateral`.
 * The *oldVault* MUST request sufficient ``btcAmount`` to be replaced such that its total is above ``ReplaceBtcDustValue``.
 
 *Postconditions*

@@ -21,7 +21,7 @@ Data Model
 Scalars (Fees)
 --------------
 
-.. _issueFee:
+.. _fee_scalar_issue_fee:
 
 IssueFee
 ........
@@ -31,7 +31,7 @@ Issue fee share (configurable parameter, as percentage) that users need to pay u
 - Paid in ``interBTC``
 - Initial value: 0.5%
 
-.. _issueGriefingCollateral:
+.. _fee_scalar_issue_griefing_collateral:
 
 IssueGriefingCollateral
 .......................
@@ -41,7 +41,7 @@ Issue griefing collateral as a percentage of the locked collateral of a Vault a 
 - Paid in collateral
 - Initial value: 0.005%
 
-.. _refundFee:
+.. _fee_scalar_refund_fee:
 
 RefundFee
 .........
@@ -51,7 +51,7 @@ Refund fee (configurable parameter, as percentage) that users need to pay to ref
 - Paid in ``interBTC``
 - Initial value: 0.5%
 
-.. _redeemFee:
+.. _fee_scalar_redeem_fee:
 
 RedeemFee
 .........
@@ -61,7 +61,7 @@ Redeem fee share (configurable parameter, as percentage) that users need to pay 
 - Paid in ``interBTC``
 - Initial value: 0.5%
 
-.. _premiumRedeemFee:
+.. _fee_scalar_premium_redeem_fee:
 
 PremiumRedeemFee
 ................
@@ -71,7 +71,7 @@ Fee for users to premium redeem (as percentage). If users execute a redeem with 
 - Paid in collateral
 - Initial value: 5%
 
-.. _punishmentFee:
+.. _fee_scalar_punishment_fee:
 
 PunishmentFee
 .............
@@ -82,7 +82,7 @@ The fee is paid in collateral based on the ``interBTC`` amount at the current ex
 - Paid in collateral
 - Initial value: 10%
 
-.. _theftFee:
+.. _fee_scalar_theft_fee:
 
 TheftFee
 ........
@@ -93,7 +93,7 @@ The fee is paid in collateral taken from the liquidated Vault.
 - Paid in collateral
 - Initial value: 5%
 
-.. _theftFeeMax:
+.. _fee_scalar_theft_fee_max:
 
 TheftFeeMax
 ...........
@@ -103,7 +103,7 @@ This is expressed in Bitcoin to ensure consistency between assets.
 
 - Initial value: 0.1 BTC
 
-.. _replaceGriefingCollateral:
+.. _fee_scalar_replace_griefing_collateral:
 
 ReplaceGriefingCollateral
 .........................
@@ -117,8 +117,8 @@ This collateral will be slashed and allocated to the replacing Vault if the to-b
 Functions
 ~~~~~~~~~
 
-distributeRewards
------------------
+distribute_rewards
+------------------
 
 Distributes fees among incentivised network participants.
 
@@ -127,7 +127,7 @@ Specification
 
 *Function Signature*
 
-``distributeRewards(amount)``
+``distribute_rewards(amount)``
 
 *Preconditions*
 
@@ -138,10 +138,10 @@ Specification
 * If there are no registered funds, rewards MUST be sent to the treasury account.
 * Otherwise, rewards MUST be distributed according to :ref:`reward_distributeReward`. 
 
-.. _withdrawRewards:
+.. _fee_function_withdraw_rewards:
 
-withdrawRewards
----------------
+withdraw_rewards
+----------------
 
 A function that allows incentivised network participants to withdraw all earned rewards.
 
@@ -150,22 +150,22 @@ Specification
 
 *Function Signature*
 
-``withdrawRewards(accountId, vaultId)``
+``withdraw_rewards(account_id, vault_id)``
 
 *Parameters*
 
-* ``accountId``: the account withdrawing ``interBTC`` rewards.
-* ``vaultId``: the vault that generated ``interBTC`` rewards.
+* ``account_id``: the account withdrawing ``interBTC`` rewards.
+* ``vault_id``: the vault that generated ``interBTC`` rewards.
 
 *Events*
 
-* :ref:`withdrawRewardsEvent`
+* :ref:`fee_event_withdraw_rewards`
 
 *Preconditions*
 
-* The function call MUST be signed by ``accountId``.
+* The function call MUST be signed by ``account_id``.
 * The BTC Parachain status in the :ref:`security` component MUST NOT be ``SHUTDOWN:2``.
-* The ``accountId`` MUST have available rewards for ``interBTC``.
+* The ``account_id`` MUST have available rewards for ``interBTC``.
 
 *Postconditions*
 
@@ -175,7 +175,7 @@ Specification
 Events
 ~~~~~~
 
-.. _withdrawRewardsEvent:
+.. _fee_event_withdraw_rewards:
 
 WithdrawRewards
 ---------------
@@ -191,4 +191,4 @@ WithdrawRewards
 
 *Functions*
 
-* :ref:`withdrawRewards`
+* :ref:`fee_function_withdraw_rewards`
