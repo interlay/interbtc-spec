@@ -105,6 +105,20 @@ DepositOf
 
 Stores the accounts and deposits backing a proposal by ``prop_index``.
 
+.. _democracy_map_voting_of:
+
+VotingOf
+........
+
+Stores the votes for a particular account.
+
+.. _democracy_map_referendum_info_of:
+
+ReferendumInfoOf
+................
+
+Stores the status of a referendum by ``ref_index``.
+
 
 External Functions
 ~~~~~~~~~~~~~~~~~~
@@ -176,6 +190,37 @@ Specification
 *Postconditions*
 
 * The deposit MUST be recorded in :ref:`democracy_map_deposit_of`.
+
+.. _democracy_function_vote:
+
+vote
+----
+
+Approve or reject an ongoing referendum.
+
+Specification
+.............
+
+*Function Signature*
+
+``vote(who, ref_index)``
+
+*Parameters*
+
+* ``who``: The user's address.
+* ``ref_index``: The index of the referendum.
+* ``aye``: True or false.
+* ``balance``: Amount to add to the vote.
+
+*Preconditions*
+
+* The function call MUST be signed by ``who``.
+* The ``ref_index`` MUST exist in :ref:`democracy_map_referendum_info_of`.
+* The ``balance`` MUST be ``<=`` the free balance.
+
+*Postconditions*
+
+* The vote MUST be recorded in :ref:`democracy_map_voting_of`.
 
 
 Events
