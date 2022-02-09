@@ -149,6 +149,34 @@ Specification
     * ``proposal_hash`` is the hash of the proposal.
     * ``index`` is the :ref:`democracy_scalar_public_prop_count` before increment.
 
+.. _democracy_function_second:
+
+second
+------
+
+Support a proposal with an additional deposit.
+
+Specification
+.............
+
+*Function Signature*
+
+``second(who, prop_index)``
+
+*Parameters*
+
+* ``who``: The user's address.
+* ``prop_index``: The index of the proposal.
+
+*Preconditions*
+
+* The function call MUST be signed by ``who``.
+* The ``prop_index`` MUST exist in :ref:`democracy_map_deposit_of`.
+
+*Postconditions*
+
+* The deposit MUST be recorded in :ref:`democracy_map_deposit_of`.
+
 
 Events
 ~~~~~~
