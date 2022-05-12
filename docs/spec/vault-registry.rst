@@ -689,7 +689,7 @@ Specification
 
 * The used liquidation vault MUST be the one with the given ``currencyId``.
 * The liquidation vault's ``issuedTokens`` MUST decrease by ``tokens``.
-* The redeemer MUST have received an amount of collateral equal to ``(tokens / liquidationVault.issuedTokens) * liquidationVault.backingCollateral``.
+* The liquidation vault MUST have transferred collateral to redeemer: an amount of ``(tokens / (liquidationVault.issuedTokens + liquidationVault.toBeIssuedTokens - liquidationVault.toBeRedeemedTokens) * liquidationVault.backingCollateral``.
 
 .. _increaseToBeReplacedTokens:
 
