@@ -1,4 +1,4 @@
-.. _escrow-protocol:
+.. _escrow_module:
 
 Escrow
 ======
