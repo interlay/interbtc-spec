@@ -136,7 +136,7 @@ Specification
 *Postconditions*
 
 * If there are no registered funds, rewards MUST be sent to the treasury account.
-* Otherwise, rewards MUST be distributed according to :ref:`reward_distributeReward`. 
+* Otherwise, rewards MUST be distributed according to :ref:`reward_function_distribute_reward`. 
 
 .. _withdrawRewards:
 

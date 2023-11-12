@@ -483,7 +483,7 @@ Specification
 *Postconditions*
 
 * If the vault is *not* liquidated, its ``toBeIssuedTokens`` MUST be decreased by ``tokens``, while its ``issuedTokens`` MUST be increased by ``tokens``.
-* If the vault is *not* liquidated, function :ref:`reward_depositStake` MUST complete successfully - parameterized by ``vaultId`` and ``tokens``.
+* If the vault is *not* liquidated, function :ref:`reward_function_deposit_stake` MUST complete successfully - parameterized by ``vaultId`` and ``tokens``.
 * If the vault *is* liquidated, the ``toBeIssuedTokens`` of the liquidation vault MUST be decreased by ``tokens``, while its ``issuedTokens`` MUST be increased by ``tokens``.
 
 
@@ -644,7 +644,7 @@ One of:
 * If the vault *IS NOT* liquidated:
 
    * If ``premium > 0``, then ``premium`` MUST be transferred from the vault's collateral to the redeemer's free balance.
-   * Function :ref:`reward_withdrawStake` MUST complete successfully - parameterized by ``vaultId`` and ``tokens``.
+   * Function :ref:`reward_function_withdraw_stake` MUST complete successfully - parameterized by ``vaultId`` and ``tokens``.
 
 * If the vault *IS* liquidated:
 
@@ -895,7 +895,7 @@ Specification
 * ``usedTokens`` MUST be calculated as ``issuedTokens + toBeIssuedTokens``.
 * ``toBeLiquidated`` MUST be calculated as ``(usedCollateral * (usedTokens - toBeRedeemedTokens)) / usedTokens``.
 * ``remainingCollateral`` MUST be calculated as ``max(0, usedCollateral - toBeLiquidated)``.
-* Function :ref:`reward_withdrawStake` MUST complete successfully - parameterized by ``vault`` and ``issuedTokens``.
+* Function :ref:`reward_function_withdraw_stake` MUST complete successfully - parameterized by ``vault`` and ``issuedTokens``.
 * Function :ref:`staking_withdrawStake` MUST complete successfully - parameterized by ``vault`` and ``remainingCollateral``.
 * ``liquidatedCollateral`` MUST be increased by ``remainingCollateral``.
 * ``toWithdraw`` MUST be calculated as ``toBeLiquidated - backingCollateral`` OR ``toBeLiquidated`` if ``backingCollateral > toBeLiquidated``.

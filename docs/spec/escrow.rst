@@ -169,8 +169,8 @@ Specification
     * ``bias = slope * (unlock_height - now)``
     * ``height = now``
 
-* Function :ref:`reward_withdrawStake` MUST complete successfully using the account's total stake.
-* Function :ref:`reward_depositStake` MUST complete successfully using the current balance (:ref:`escrow_function_balance_at`).
+* Function :ref:`reward_function_withdraw_stake` MUST complete successfully using the account's total stake.
+* Function :ref:`reward_function_deposit_stake` MUST complete successfully using the current balance (:ref:`escrow_function_balance_at`).
 
 .. _escrow_function_increase_amount:
 
@@ -293,7 +293,7 @@ Specification
 *Postconditions*
 
 * The account's ``LockedBalance`` MUST be removed.
-* Function :ref:`reward_withdrawStake` MUST complete successfully using the account's total stake.
+* Function :ref:`reward_function_withdraw_stake` MUST complete successfully using the account's total stake.
 
 
 Internal Functions
