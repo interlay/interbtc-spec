@@ -62,7 +62,7 @@ Users
   
     - Issue and redeem fees paid in `interBTC`, see :ref:`requestIssue` and :ref:`requestRedeem`
     - Parachain transaction fees on every transaction with the system paid in `DOT`
-    - Optional: Additional BTC fees on refund paid in `BTC`, see :ref:`executeRefund`
+    - Optional: Additional BTC fees on refund paid in `BTC`, see :ref:`refund_function_execute_refund`
   
   - **External Costs**
   
@@ -84,7 +84,7 @@ Vaults
     - Primary: Issue and redeem fees paid in `interBTC`, see :ref:`requestIssue` and :ref:`requestRedeem`
     - Secondary: Slashed collateral of Users on failed issues paid in `DOT`, see :ref:`cancelIssue`
     - Secondary: Slashed collateral of Vaults on failed replace paid in `COL`, see :ref:`cancelReplace`
-    - Secondary: Additional BTC of Users on refund paid in `BTC`, see :ref:`executeRefund`
+    - Secondary: Additional BTC of Users on refund paid in `BTC`, see :ref:`refund_function_execute_refund`
   
   - **Internal Cost**
   
