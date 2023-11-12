@@ -167,7 +167,7 @@ Specification
 
     * ``refund.vault``: MUST be the ``vault``.
     * ``refund.amountWrapped``: MUST be the ``amount - fee``
-    * ``refund.fee``: MUST equal ``amount`` multiplied by :ref:`refundFee`.
+    * ``refund.fee``: MUST equal ``amount`` multiplied by :ref:`fee_scalar_refund_fee`.
     * ``refund.amountBtc``: MUST be the ``amount``.
     * ``refund.issuer``: MUST be the ``issuer``.
     * ``refund.btcAddress``: MUST be the ``btcAddress``. 

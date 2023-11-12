@@ -148,7 +148,7 @@ Specification
 * The Vault MUST be registered and active.
 * The Vault MUST NOT be banned.
 * The ``amount`` MUST be greater than or equal to :ref:`issueBtcDustValue`.
-* The ``griefingCollateral`` MUST exceed or equal the value of request ``amount`` at the current exchange-rate, multiplied by :ref:`issueGriefingCollateral`.
+* The ``griefingCollateral`` MUST exceed or equal the value of request ``amount`` at the current exchange-rate, multiplied by :ref:`fee_scalar_issue_griefing_collateral`.
 * The ``griefingCollateral`` MUST be equal or less than the requester's free balance in the :ref:`griefingCurrency`.
 * The :ref:`tryIncreaseToBeIssuedTokens` function MUST return a new BTC deposit address for the Vault ensuring that the Vault's free collateral is above the :ref:`SecureCollateralThreshold` for the requested ``amount`` and that a unique BTC address is used for depositing BTC.
 * A new unique ``issuedId`` MUST be generated via the :ref:`generateSecureId` function.
@@ -166,7 +166,7 @@ Specification
     * ``issue.period``: MUST be the current :ref:`issuePeriod`.
     * ``issue.griefingCollateral``: MUST be the ``griefingCollateral`` amount passed to the function.
     * ``issue.amount``: MUST be ``amount`` minus ``issue.fee``.
-    * ``issue.fee``: MUST equal ``amount`` multiplied by :ref:`issueFee`.
+    * ``issue.fee``: MUST equal ``amount`` multiplied by :ref:`fee_scalar_issue_fee`.
     * ``issue.requester``: MUST be the ``requester``
     * ``issue.btcAddress``: MUST be the BTC address returned from the :ref:`tryIncreaseToBeIssuedTokens`
     * ``issue.btcPublicKey``: MUST be the BTC public key returned from the :ref:`tryIncreaseToBeIssuedTokens`
@@ -218,7 +218,7 @@ Specification
     * The Vault's ``toBeIssuedTokens`` MUST decrease by the deficit (``issue.amount - amountTransferred``).
     * The Vault's free balance in the :ref:`griefingCurrency` MUST increase by the ``griefingCollateral * (1 - amountTransferred / (issue.amount + issue.fee))``.
     * The requester's free balance in the :ref:`griefingCurrency` MUST increase by the ``griefingCollateral * amountTransferred / (issue.amount + issue.fee)``.
-    * The ``issue.fee`` MUST be updated to the amount transferred multiplied by the :ref:`issueFee`.
+    * The ``issue.fee`` MUST be updated to the amount transferred multiplied by the :ref:`fee_scalar_issue_fee`.
     * The ``issue.amount`` MUST be set to the amount transferred minus the updated ``issue.fee``.
 
 * If the amount transferred IS NOT less than the expected amount:
@@ -229,7 +229,7 @@ Specification
         * If the Vault IS NOT liquidated and has sufficient collateral:
 
             * The Vault's ``toBeIssuedTokens`` MUST increase by the surplus (``amountTransferred - issue.amount``).
-            * The ``issue.fee`` MUST be updated to the amount transferred multiplied by the :ref:`issueFee`.
+            * The ``issue.fee`` MUST be updated to the amount transferred multiplied by the :ref:`fee_scalar_issue_fee`.
             * The ``issue.amount`` MUST be set to the amount transferred minus the updated ``issue.fee``.
 
         * If the Vault IS NOT liquidated and does not have sufficient collateral:
@@ -398,7 +398,7 @@ Error Codes
 
 * **Message**: "User provided collateral below limit."
 * **Function**: :ref:`requestIssue`
-* **Cause**: User provided griefingCollateral below :ref:`issueGriefingCollateral`.
+* **Cause**: User provided griefingCollateral below :ref:`fee_scalar_issue_griefing_collateral`.
 
 ``ERR_UNAUTHORIZED_USER``
 
